@@ -8,7 +8,7 @@ cbuffer ConstantBuffer : register(b0)
 struct VOut
 {
     float4 position : SV_POSITION;
-    float4 vertex_pos : POSITION;
+    float4 vertex_world_pos : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD;
     float4 color : COLOR;
@@ -19,7 +19,7 @@ VOut VShader(float4 position : POSITION, float3 normal : NORMAL, float2 uv : TEX
     VOut output;
 
     output.position = mul(model_view_projection, position);
-    output.vertex_pos = position;
+    output.vertex_world_pos = mul(model, position);
     output.normal = normal;
     output.uv = uv;
     output.color = color;
@@ -27,10 +27,8 @@ VOut VShader(float4 position : POSITION, float3 normal : NORMAL, float2 uv : TEX
     return output;
 }
 
-Texture2D lightmap;
-SamplerState lightmap_ss;
 
-float4 PShader(float4 position : SV_POSITION, float4 vertex_pos : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD, float4 color : COLOR) : SV_TARGET
+float4 PShader(float4 position : SV_POSITION, float4 vertex_world_pos : POSITION, float3 normal : NORMAL, float2 uv : TEXCOORD, float4 color : COLOR) : SV_TARGET
 {
-    return lightmap.Sample(lightmap_ss, uv);
+    return float4(color.rgb, 1);
 }
