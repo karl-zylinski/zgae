@@ -25,16 +25,3 @@ Camera camera_create_projection()
     c.rotation = quaternion_identity();
     return c;
 }
-
-Camera camera_create_uv_rendering()
-{
-    Camera c = {};
-    c.projection_matrix = {
-        -2, 0, 0, 0,
-        0, 2, 0, 0,
-        0, 0, 1, 0,
-        1, -1, 0, 1 
-    };
-    c.rotation = quaternion_identity();
-    return c;
-}

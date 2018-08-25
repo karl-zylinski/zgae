@@ -7,11 +7,9 @@ struct World
     DynamicArray<Object> objects;
 };
 
-inline World world_create(Allocator* allocator)
+inline void world_init(World* w, Allocator* allocator)
 {
-    World w = {};
-    w.objects = dynamic_array_create<Object>(allocator);
-    return w;
+    w->objects = dynamic_array_create<Object>(allocator);
 }
 
 inline void world_destroy(World* w)

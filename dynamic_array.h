@@ -10,10 +10,15 @@ struct DynamicArray
     unsigned num;
     unsigned capacity;
 
+    int maxx(int first, int second)
+    {
+        return first > second ? first : second;
+    }
+
     void grow()
     {
         T* old_data = data;
-        unsigned new_capacity = max(capacity * 2, num + 5);
+        unsigned new_capacity = maxx(capacity * 2, num + 5);
         data = (T*)allocator->alloc(new_capacity * sizeof(T));
         memcpy(data, old_data, num * sizeof(T));
         allocator->dealloc(old_data);

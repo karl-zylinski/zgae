@@ -418,11 +418,6 @@ Vector3 quaternion_transform_vector3(const Quaternion& q, const Vector3& v)
     return v + ((uv * q.w) + uuv) * 2.0f;
 }
 
-int max(int i1, int i2)
-{
-    return i1 > i2 ? i1 : i2;
-}
-
 bool almost_equal(float f1, float f2)
 {
     return fabs(f2 - f1) < SmallNumber;

@@ -7,9 +7,9 @@
 
 CapturedCallstack callstack_capture(unsigned frames_to_skip, void* p)
 {
-    const unsigned frames_to_capture = 64;
-    DWORD back_trace_hash = 0; 
-    CapturedCallstack cc;
+    const unsigned frames_to_capture = G_callstack_frames_to_capture;
+    DWORD back_trace_hash = 0; // dummy
+    CapturedCallstack cc = {};
     cc.num_frames = (unsigned char)CaptureStackBackTrace(frames_to_skip + 2, frames_to_capture, cc.frames, &back_trace_hash);
     cc.ptr = p;
     cc.used = true;

@@ -22,9 +22,14 @@ unsigned pixel_size(PixelFormat pf)
     }
 }
 
-void image_init_data(Image* i, Allocator* alloc)
+void image_init(Image* i, unsigned width, unsigned height, PixelFormat pf, Allocator* alloc)
 {
-    i->data = (unsigned char*)alloc->alloc(image_size(i->pixel_format, i->width, i->height));
+    i->data = (unsigned char*)alloc->alloc(image_size(pf, width, height));
+}
+
+void image_destroy(Image* i)
+{
+    i->alloc->dealloc(i->data);
 }
 
 unsigned image_size(PixelFormat pf, unsigned size_x, unsigned size_y)

@@ -1,9 +1,11 @@
 #pragma once
 
+static const unsigned G_callstack_frames_to_capture = 64;
+
 struct CapturedCallstack
 {
     unsigned char num_frames;
-    void* frames[64];
+    void* frames[G_callstack_frames_to_capture];
     void* ptr;
     bool used;
 };

@@ -516,15 +516,6 @@ void Renderer::draw(const Object& object, const Matrix4x4& view_matrix, const Ma
     device_context->VSSetConstantBuffers(0, 1, &constant_buffer);
     device_context->PSSetConstantBuffers(0, 1, &constant_buffer);
 
-    if (IsValidRRHandle(object.lightmap_patch_offset))
-    {
-        device_context->PSSetShaderResources(0, 1, &get_resource(object.lightmap_patch_offset).texture.view);
-    }
-    else if (IsValidRRHandle(object.lightmap_handle))
-    {
-        device_context->PSSetShaderResources(0, 1, &get_resource(object.lightmap_handle).texture.view);
-    }
-
     unsigned stride = sizeof(Vertex);
     unsigned offset = 0;
     device_context->IASetVertexBuffers(0, 1, &geometry.vertices, &stride, &offset);
@@ -647,9 +638,9 @@ void Renderer::disable_scissor()
 
     D3D11_RECT rect = {};
     rect.top = 0;
-    rect.bottom = w;
+    rect.bottom = h;
     rect.left = 0;
-    rect.right = h;
+    rect.right = w;
     device_context->RSSetScissorRects(1, &rect);
 }
 

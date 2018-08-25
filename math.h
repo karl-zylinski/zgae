@@ -87,3 +87,4 @@ Quaternion quaternion_conjugate(const Quaternion& q);
 Vector3 quaternion_transform_vector3(const Quaternion&q, const Vector3& v);
 
 bool almost_equal(float f1, float f2);
+
