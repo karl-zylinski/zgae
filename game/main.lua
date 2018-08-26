@@ -14,4 +14,5 @@ function draw()
 end
 
 function shutdown()
+    render_world.destroy(render_world_handle)
 end

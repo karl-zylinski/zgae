@@ -14,6 +14,14 @@ static int create(lua_State* L)
     return 1;
 }
 
+static int destroy(lua_State* L)
+{
+    RenderWorld* rw = (RenderWorld*) lua_touserdata(L, 1);
+    render_world_destroy(rw);
+    alloc->dealloc(rw);
+    return 0;
+}
+
 static int add(lua_State* L)
 {
     RenderWorld* rw = (RenderWorld*) lua_touserdata(L, 1);
@@ -28,6 +36,7 @@ static int add(lua_State* L)
 
 static const struct luaL_Reg lib [] = {
     {"create", create},
+    {"destroy", destroy},
     {"add", add},
     {NULL, NULL}
 };

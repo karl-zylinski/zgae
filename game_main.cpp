@@ -176,12 +176,6 @@ static Mesh create_sphere(Allocator* alloc, float radius)
     return m;
 }
 
-static int test(lua_State* L)
-{
-    printf("hello");
-    return 0;
-}
-
 static void run_lua_func(lua_State*L, const char* func)
 {
     lua_getglobal(L, func);
@@ -197,7 +191,6 @@ void game_start(Renderer* renderer)
     state.def_alloc = create_heap_allocator();
     state.camera = camera_create_projection();
     state.camera.position = Vector3{0, 0, -5};
-    Mesh m = create_sphere(&state.def_alloc, 1);
 
     lua_State* L = luaL_newstate();
     state.lua_state = L;
@@ -205,10 +198,7 @@ void game_start(Renderer* renderer)
     renderer_lua_init(L, renderer, &state.camera);
     render_world_lua_init(L, &state.def_alloc);
 
-    if (luaL_loadfile(L, "game/main.lua") != 0 )
-        Error("Failed loading 'game/main.lua'");
-    
-    if (lua_pcall(L, 0, 0, 0) != 0)
+    if (luaL_dofile(L, "game/main.lua") != 0 )
         Error("Failed running 'game/main.lua'");
 
     run_lua_func(L, "start");
@@ -228,5 +218,5 @@ void game_draw(Renderer* renderer)
 void game_shutdown(Renderer* renderer)
 {
     run_lua_func(state.lua_state, "shutdown");
-    //heap_allocator_check_clean(&state.def_alloc);
+    heap_allocator_check_clean(&state.def_alloc);
 }
