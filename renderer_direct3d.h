@@ -29,7 +29,7 @@ struct RendererD3D : public Renderer
     void unload_resource(RRHandle handle);
     void set_render_target(RenderTarget* rt);
     void set_render_targets(RenderTarget** rt, unsigned num);
-    void draw(const Object& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix);
+    void draw(const RenderObject& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix);
     void clear_depth_stencil();
     void clear_render_target(RenderTarget* sc, const Color& color);
     void present();
@@ -38,7 +38,7 @@ struct RendererD3D : public Renderer
     void pre_draw_frame();
     void set_scissor_rect(const Rect& r);
     void disable_scissor();
-    void draw_frame(const World& world, const Camera& camera, DrawLights draw_lights);
+    void draw_frame(const RenderWorld& world, const Camera& camera, DrawLights draw_lights);
     RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height);
     RenderResource& get_resource(RRHandle r);
 

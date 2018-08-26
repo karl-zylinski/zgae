@@ -1,18 +1,23 @@
 #include "game_main.h"
-#include "world.h"
+#include "render_world.h"
 #include "camera.h"
 #include "memory.h"
 #include "keyboard.h"
 #include "mouse.h"
 #include "renderer.h"
+#include "renderer_lua.h"
+#include "render_world_lua.h"
+#include "render_object.h"
 #include "mesh.h"
+#include "lua.hpp"
 #include <cmath>
 
 struct GameState
 {
-    World world;
+    RenderWorld render_world;
     Camera camera;
     Allocator def_alloc;
+    lua_State* lua_state;
 };
 
 static GameState state;
@@ -172,33 +177,63 @@ static Mesh create_sphere(Allocator* alloc, float radius)
     return m;
 }
 
+static int test(lua_State* L)
+{
+    printf("hello");
+    return 0;
+}
+
+static void run_lua_func(lua_State*L, const char* func)
+{
+    lua_getglobal(L, func);
+    //lua_pushnumber(L, x)
+    
+    if (lua_pcall(L, 0, 0, 0) != 0)
+        Error("error running function");
+}
 
 void game_start(Renderer* renderer)
 {
     memzero(&state, GameState);
     state.def_alloc = create_heap_allocator();
-    world_init(&state.world, &state.def_alloc);
+    render_world_init(&state.render_world, &state.def_alloc);
     state.camera = camera_create_projection();
     state.camera.position = Vector3{0, 0, -5};
     Mesh m = create_sphere(&state.def_alloc, 1);
-    Object sph = {};
+    RenderObject sph = {};
     sph.geometry_handle = renderer->load_mesh(&m);
     sph.world_transform = matrix4x4_identity();
-    state.world.objects.add(sph);
+    render_world_add(&state.render_world, &sph);
+
+    lua_State* L = luaL_newstate();
+    state.lua_state = L;
+    luaL_openlibs(L);
+    renderer_lua_init(L, renderer);
+    render_world_lua_init(L, &state.def_alloc);
+
+    if (luaL_loadfile(L, "game/main.lua") != 0 )
+        Error("Failed loading 'game/main.lua'");
+    
+    if (lua_pcall(L, 0, 0, 0) != 0)
+        Error("Failed running 'game/main.lua'");
+
+    run_lua_func(L, "start");
 }
 
 void game_update(Renderer* renderer)
 {
+    run_lua_func(state.lua_state, "update");
     process_input(&state.camera);
 }
 
 void game_draw(Renderer* renderer)
 {
-    renderer->draw_frame(state.world, state.camera, DrawLights::DrawLights);
+    renderer->draw_frame(state.render_world, state.camera, DrawLights::DrawLights);
 }
 
 void game_shutdown(Renderer* renderer)
 {
-    world_destroy(&state.world);
+    run_lua_func(state.lua_state, "shutdown");
+    render_world_destroy(&state.render_world);
     //heap_allocator_check_clean(&state.def_alloc);
 }

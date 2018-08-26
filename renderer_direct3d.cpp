@@ -2,7 +2,8 @@
 #include <d3d11.h>
 #include <D3Dcompiler.h>
 #include "vertex.h"
-#include "world.h"
+#include "render_world.h"
+#include "render_object.h"
 #include "config.h"
 #include "rect.h"
 #include "file.h"
@@ -497,7 +498,7 @@ void RendererD3D::set_render_targets(RenderTarget** rts, unsigned num)
     device_context->RSSetViewports(1, &viewport);
 }
 
-void RendererD3D::draw(const Object& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix)
+void RendererD3D::draw(const RenderObject& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix)
 {
     auto geometry = get_resource(object.geometry_handle).geometry;
     ConstantBuffer constant_buffer_data = {};
@@ -598,14 +599,15 @@ void RendererD3D::pre_draw_frame()
     }
 }
 
-void RendererD3D::draw_frame(const World& world, const Camera& camera, DrawLights draw_lights)
+void RendererD3D::draw_frame(const RenderWorld& world, const Camera& camera, DrawLights draw_lights)
 {
     pre_draw_frame();
     Matrix4x4 view_matrix = camera_calc_view_matrix(camera);
 
-    for (unsigned i = 0; i < world.objects.num; ++i)
+    for (unsigned i = 0; i < world.capacity; ++i)
     {
-        draw(world.objects[i], view_matrix, camera.projection_matrix);
+        if (world.objects[i].used)
+            draw(world.objects[i], view_matrix, camera.projection_matrix);
     }
 
     present();

@@ -2,9 +2,12 @@
 #include "math.h"
 #include "render_resource.h"
 
-struct Object
+struct RenderObject
 {
-    RRHandle geometry_handle;
+    bool used;
     Matrix4x4 world_transform;
+    RRHandle geometry_handle;
     bool is_light;
 };
+
+

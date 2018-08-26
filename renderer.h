@@ -3,10 +3,10 @@
 
 struct Vertex;
 struct Rect;
-struct World;
-struct Camera;
+struct RenderWorld;
 struct RenderResource;
-struct Object;
+struct RenderObject;
+struct Camera;
 struct Matrix4x4;
 struct Mesh;
 
@@ -25,7 +25,7 @@ struct Renderer
     virtual void unload_resource(RRHandle handle) = 0;
     virtual void set_render_target(RenderTarget* rt) = 0;
     virtual void set_render_targets(RenderTarget** rt, unsigned num) = 0;
-    virtual void draw(const Object& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix) = 0;
+    virtual void draw(const RenderObject& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix) = 0;
     virtual void clear_depth_stencil() = 0;
     virtual void clear_render_target(RenderTarget* sc, const Color& color) = 0;
     virtual void present() = 0;
@@ -34,7 +34,7 @@ struct Renderer
     virtual void pre_draw_frame() = 0;
     virtual void set_scissor_rect(const Rect& r) = 0;
     virtual void disable_scissor() = 0;
-    virtual void draw_frame(const World& world, const Camera& camera, DrawLights draw_lights) = 0;
+    virtual void draw_frame(const RenderWorld& world, const Camera& camera, DrawLights draw_lights) = 0;
     virtual RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height) = 0;
     virtual RenderResource& get_resource(RRHandle r) = 0;
 };

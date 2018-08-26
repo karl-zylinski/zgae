@@ -2,8 +2,6 @@
 #include "windows_window.h"
 #include "renderer_direct3d.h"
 #include "memory.h"
-#include "world.h"
-#include "camera.h"
 #include "keyboard.h"
 #include "mouse.h"
 #include "game_main.h"
