@@ -54,6 +54,7 @@ Quaternion operator*(const Quaternion& a, const Quaternion& b);
 
 bool almost_equal(const Vector2& v1, const Vector2& v2);
 bool almost_equal(const Vector3& v1, const Vector3& v2);
+bool almost_equal(const Vector4& v1, const Vector4& v2);
 
 Matrix4x4 matrix4x4_identity();
 Matrix4x4 matrix4x4_inverse(const Matrix4x4& m);

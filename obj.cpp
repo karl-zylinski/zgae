@@ -191,9 +191,9 @@ LoadedMesh obj_load(Allocator* alloc, const char* filename)
     for (unsigned i = 0; i < pd.faces.num; ++i)
     {
         const ParsedFace& f = pd.faces[i];
-        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v1], pd.normals[f.n1], pd.uvs[f.u1], {1.0f, 0, 0, 1.0f});
-        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v2], pd.normals[f.n2], pd.uvs[f.u2], {0, 1.0f, 0, 1.0f});
-        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v3], pd.normals[f.n3], pd.uvs[f.u3], {0, 0, 1.0f, 1.0f});
+        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v1], pd.normals[f.n1], pd.uvs[f.u1], {1.0f, 1.0f,1, 1.0f});
+        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v2], pd.normals[f.n2], pd.uvs[f.u2], {1, 1.0f, 1, 1.0f});
+        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v3], pd.normals[f.n3], pd.uvs[f.u3], {1, 1, 1.0f, 1.0f});
     }
 
     Mesh m = {};

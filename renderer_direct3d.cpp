@@ -316,7 +316,7 @@ RenderTarget RendererD3D::create_back_buffer()
     rt.height = td.Height;
     rt.clear = true;
     rt.clear_depth_stencil = true;
-    rt.clear_color = {0.2f, 0, 0, 1};
+    rt.clear_color = {0, 0, 0, 1};
     return rt;
 }
 

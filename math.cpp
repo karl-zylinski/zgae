@@ -152,6 +152,11 @@ bool almost_equal(const Vector3& v1, const Vector3& v2)
     return almost_equal(v1.x, v2.x) && almost_equal(v1.y, v2.y) && almost_equal(v1.z, v2.z);
 }
 
+bool almost_equal(const Vector4& v1, const Vector4& v2)
+{
+    return almost_equal(v1.x, v2.x) && almost_equal(v1.y, v2.y) && almost_equal(v1.z, v2.z) && v1.w == v2.w;
+}
+
 Matrix4x4 matrix4x4_identity()
 {
     return

@@ -4,6 +4,7 @@
 *.dll
 .vs/
 *.ilk
+*.mtl
 *.suo
 *.idb
 build/
