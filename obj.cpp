@@ -157,7 +157,7 @@ static int get_existing_vertex(const DynamicArray<Vertex>& vertices, const Verte
     return -1;
 }
 
-static void add_vertex_to_mesh(Mesh* m, const Vector3& pos, const Vector3& normal, const Vector2& uv, const Color& c)
+static void add_vertex_to_mesh(DynamicArray<Vertex>* vertices, DynamicArray<unsigned>* indices, const Vector3& pos, const Vector3& normal, const Vector2& uv, const Color& c)
 {
     Vertex v = {};
     v.position = pos;
@@ -165,16 +165,16 @@ static void add_vertex_to_mesh(Mesh* m, const Vector3& pos, const Vector3& norma
     v.uv = uv;
     v.color = c;
     
-    int i = get_existing_vertex(m->vertices, v);
+    int i = get_existing_vertex(*vertices, v);
 
     if (i != -1)
     {
-        m->indices.add(i);
+        indices->add(i);
         return;
     }
 
-    m->indices.add(m->vertices.num);
-    m->vertices.add(v);
+    indices->add(vertices->num);
+    vertices->add(v);
 }
 
 LoadedMesh obj_load(Allocator* alloc, const char* filename)
@@ -185,17 +185,21 @@ LoadedMesh obj_load(Allocator* alloc, const char* filename)
         return {false};
 
     ParsedData pd = parse(alloc, lf.file.data, lf.file.size);
-    Mesh m = {};
-    m.vertices = dynamic_array_create<Vertex>(alloc);
-    m.indices = dynamic_array_create<unsigned>(alloc);
+    DynamicArray<Vertex> vertices = dynamic_array_create<Vertex>(alloc);
+    DynamicArray<unsigned> indices = dynamic_array_create<unsigned>(alloc);
 
     for (unsigned i = 0; i < pd.faces.num; ++i)
     {
         const ParsedFace& f = pd.faces[i];
-        add_vertex_to_mesh(&m, pd.vertices[f.v1], pd.normals[f.n1], pd.uvs[f.u1], {1.0f, 0.0f, 1.0f, 1.0f});
-        add_vertex_to_mesh(&m, pd.vertices[f.v2], pd.normals[f.n2], pd.uvs[f.u2], {1.0f, 0.0f, 1.0f, 1.0f});
-        add_vertex_to_mesh(&m, pd.vertices[f.v3], pd.normals[f.n3], pd.uvs[f.u3], {1.0f, 0.0f, 1.0f, 1.0f});
+        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v1], pd.normals[f.n1], pd.uvs[f.u1], {1.0f, 0.0f, 1.0f, 1.0f});
+        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v2], pd.normals[f.n2], pd.uvs[f.u2], {1.0f, 0.0f, 1.0f, 1.0f});
+        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v3], pd.normals[f.n3], pd.uvs[f.u3], {1.0f, 0.0f, 1.0f, 1.0f});
     }
 
+    Mesh m = {};
+    m.vertices = vertices.data;
+    m.num_vertices = vertices.num;
+    m.indices = indices.data;
+    m.num_indices = indices.num;
     return {true, m};
 }

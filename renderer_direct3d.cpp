@@ -8,6 +8,7 @@
 #include "file.h"
 #include "camera.h"
 #include "memory.h"
+#include "mesh.h"
 
 struct RenderTargetResource
 {
@@ -101,16 +102,7 @@ static void check_ok(HRESULT res, ID3DBlob* error_blob)
     MessageBox(nullptr, msg, nullptr, 0);
 }
 
-Image image_from_render_target(const RenderTarget& rt)
-{
-    Image i = {};
-    i.width = rt.width;
-    i.height = rt.height;
-    i.pixel_format = rt.pixel_format;
-    return i;
-}
-
-void Renderer::init(void* wh)
+void RendererD3D::init(void* wh)
 {
     window_handle = wh;
     resources = (RenderResource*)permanent_alloc(max_resources * sizeof(RenderResource));
@@ -190,7 +182,7 @@ void Renderer::init(void* wh)
     disable_scissor();
 }
 
-void Renderer::shutdown()
+void RendererD3D::shutdown()
 {
     for (unsigned i = 0; i < max_resources; ++ i)
     {
@@ -204,7 +196,7 @@ void Renderer::shutdown()
     device_context->Release();
 }
 
-RRHandle Renderer::load_shader(const char* filename)
+RRHandle RendererD3D::load_shader(const char* filename)
 {
     unsigned handle = find_free_resource_handle();
 
@@ -284,7 +276,7 @@ RRHandle Renderer::load_shader(const char* filename)
     return {handle};
 }
 
-void Renderer::set_shader(RRHandle shader)
+void RendererD3D::set_shader(RRHandle shader)
 {
     Shader& s = get_resource(shader).shader;
     device_context->VSSetShader(s.vertex_shader, 0, 0);
@@ -297,7 +289,7 @@ void Renderer::set_shader(RRHandle shader)
     }
 }
 
-RenderTarget Renderer::create_back_buffer()
+RenderTarget RendererD3D::create_back_buffer()
 {
     unsigned handle = find_free_resource_handle();
     Assert(handle != InvalidHandle, "Couldn't create back-buffer.");
@@ -327,7 +319,7 @@ RenderTarget Renderer::create_back_buffer()
     return rt;
 }
 
-RenderTarget Renderer::create_render_texture(PixelFormat pf, unsigned width, unsigned height)
+RenderTarget RendererD3D::create_render_texture(PixelFormat pf, unsigned width, unsigned height)
 {
     unsigned handle = find_free_resource_handle();
     Assert(handle != InvalidHandle, "Couldn't create render texture.");
@@ -377,7 +369,7 @@ static void set_constant_buffers(ID3D11DeviceContext* device_context, ID3D11Buff
     device_context->Unmap(constant_buffer, 0);
 }
 
-unsigned Renderer::find_free_resource_handle() const
+unsigned RendererD3D::find_free_resource_handle() const
 {
     for (unsigned i = 1; i < max_resources; ++i)
     {
@@ -390,7 +382,7 @@ unsigned Renderer::find_free_resource_handle() const
     return InvalidHandle;
 }
 
-RRHandle Renderer::load_geometry(Vertex* vertices, unsigned num_vertices, unsigned* indices, unsigned num_indices)
+RRHandle RendererD3D::load_mesh(Mesh* m)
 {
     unsigned handle = find_free_resource_handle();
 
@@ -401,11 +393,11 @@ RRHandle Renderer::load_geometry(Vertex* vertices, unsigned num_vertices, unsign
     {
         D3D11_BUFFER_DESC bd = {};
         bd.Usage = D3D11_USAGE_DYNAMIC;
-        bd.ByteWidth = sizeof(Vertex) * num_vertices;
+        bd.ByteWidth = sizeof(Vertex) * m->num_vertices;
         bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
         bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
         D3D11_SUBRESOURCE_DATA srd = {};
-        srd.pSysMem = vertices;
+        srd.pSysMem = m->vertices;
         device->CreateBuffer(&bd, &srd, &vertex_buffer);
     }
 
@@ -413,18 +405,18 @@ RRHandle Renderer::load_geometry(Vertex* vertices, unsigned num_vertices, unsign
     {
         D3D11_BUFFER_DESC bd = {};
         bd.Usage = D3D11_USAGE_DYNAMIC;
-        bd.ByteWidth = sizeof(unsigned) * num_indices;
+        bd.ByteWidth = sizeof(unsigned) * m->num_indices;
         bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
         bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
         D3D11_SUBRESOURCE_DATA srd = {0};
-        srd.pSysMem = indices;
+        srd.pSysMem = m->indices;
         device->CreateBuffer(&bd, &srd, &index_buffer);
     }
 
     Geometry g = {};
     g.vertices = vertex_buffer;
     g.indices = index_buffer;
-    g.num_indices = num_indices;
+    g.num_indices = m->num_indices;
 
     RenderResource r;
     r.type = RenderResourceType::Geometry;
@@ -433,7 +425,7 @@ RRHandle Renderer::load_geometry(Vertex* vertices, unsigned num_vertices, unsign
     return {handle};
 }
 
-void Renderer::unload_resource(RRHandle handle)
+void RendererD3D::unload_resource(RRHandle handle)
 {
     RenderResource& res = get_resource(handle);
 
@@ -478,12 +470,12 @@ void Renderer::unload_resource(RRHandle handle)
     memset(&res, 0, sizeof(RenderResource));
 }
 
-void Renderer::set_render_target(RenderTarget* rt)
+void RendererD3D::set_render_target(RenderTarget* rt)
 {
     set_render_targets(&rt, 1);
 }
 
-void Renderer::set_render_targets(RenderTarget** rts, unsigned num)
+void RendererD3D::set_render_targets(RenderTarget** rts, unsigned num)
 {
     Assert(num > 0, "Trying to set 0 render targets.");
     ID3D11RenderTargetView* targets[4];
@@ -505,7 +497,7 @@ void Renderer::set_render_targets(RenderTarget** rts, unsigned num)
     device_context->RSSetViewports(1, &viewport);
 }
 
-void Renderer::draw(const Object& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix)
+void RendererD3D::draw(const Object& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix)
 {
     auto geometry = get_resource(object.geometry_handle).geometry;
     ConstantBuffer constant_buffer_data = {};
@@ -524,22 +516,22 @@ void Renderer::draw(const Object& object, const Matrix4x4& view_matrix, const Ma
     device_context->DrawIndexed(geometry.num_indices, 0, 0);
 }
 
-void Renderer::clear_depth_stencil()
+void RendererD3D::clear_depth_stencil()
 {
     device_context->ClearDepthStencilView(depth_stencil_view, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
-void Renderer::clear_render_target(RenderTarget* sc, const Color& color)
+void RendererD3D::clear_render_target(RenderTarget* sc, const Color& color)
 {
     device_context->ClearRenderTargetView(get_resource(sc->render_resource).render_target.view, &color.r);
 }
 
-void Renderer::present()
+void RendererD3D::present()
 {
     swap_chain->Present(0, 0);
 }
 
-MappedTexture Renderer::map_texture(const RenderTarget& rt)
+MappedTexture RendererD3D::map_texture(const RenderTarget& rt)
 {
     unsigned handle = find_free_resource_handle();
     Assert(handle != InvalidHandle, "Out of handles.");
@@ -570,14 +562,14 @@ MappedTexture Renderer::map_texture(const RenderTarget& rt)
     return m;
 }
 
-void Renderer::unmap_texture(const MappedTexture& m)
+void RendererD3D::unmap_texture(const MappedTexture& m)
 {
     ID3D11Texture2D* tex = get_resource(m.texture).texture.resource;
     device_context->Unmap(tex, 0);
     unload_resource(m.texture);
 }
 
-void Renderer::pre_draw_frame()
+void RendererD3D::pre_draw_frame()
 {
     bool clear_depth = false;
     for (unsigned i = 0; i < max_render_targets; ++i)
@@ -606,7 +598,7 @@ void Renderer::pre_draw_frame()
     }
 }
 
-void Renderer::draw_frame(const World& world, const Camera& camera, DrawLights draw_lights)
+void RendererD3D::draw_frame(const World& world, const Camera& camera, DrawLights draw_lights)
 {
     pre_draw_frame();
     Matrix4x4 view_matrix = camera_calc_view_matrix(camera);
@@ -619,7 +611,7 @@ void Renderer::draw_frame(const World& world, const Camera& camera, DrawLights d
     present();
 }
 
-void Renderer::set_scissor_rect(const Rect& r)
+void RendererD3D::set_scissor_rect(const Rect& r)
 {
     static D3D11_RECT rect = {};
     rect.top = r.top;
@@ -629,7 +621,7 @@ void Renderer::set_scissor_rect(const Rect& r)
     device_context->RSSetScissorRects(1, &rect);
 }
 
-void Renderer::disable_scissor()
+void RendererD3D::disable_scissor()
 {
     RECT window_rect = {};
     GetWindowRect((HWND)window_handle, &window_rect);
@@ -644,7 +636,7 @@ void Renderer::disable_scissor()
     device_context->RSSetScissorRects(1, &rect);
 }
 
-RRHandle Renderer::load_texture(void* data, PixelFormat pf, unsigned width, unsigned height)
+RRHandle RendererD3D::load_texture(void* data, PixelFormat pf, unsigned width, unsigned height)
 {
     unsigned handle = find_free_resource_handle();
 
@@ -689,7 +681,7 @@ RRHandle Renderer::load_texture(void* data, PixelFormat pf, unsigned width, unsi
     return {handle};
 }
 
-RenderResource& Renderer::get_resource(RRHandle r)
+RenderResource& RendererD3D::get_resource(RRHandle r)
 {
     Assert(r.h > 0 && r.h < max_resources, "Resource handle out of bounds.");
     return resources[r.h];

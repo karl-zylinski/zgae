@@ -422,3 +422,8 @@ bool almost_equal(float f1, float f2)
 {
     return fabs(f2 - f1) < SmallNumber;
 }
+
+int mini(int i1, int i2)
+{
+    return i1 < i2 ? i1 : i2;
+}

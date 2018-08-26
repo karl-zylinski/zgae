@@ -64,7 +64,7 @@ static TempMemoryStorage tms;
 
 void temp_memory_blob_init(void* start, size_t capacity)
 {
-    memset(&tms, 0, sizeof(TempMemoryStorage));
+    memzero(&tms, TempMemoryStorage);
     tms.start = (unsigned char*)start;
     tms.head = tms.start;
     tms.capacity = capacity;
@@ -201,6 +201,9 @@ static void remove_captured_callstack(CapturedCallstack* callstacks, void* p)
 
 static void ensure_captured_callstacks_unused(CapturedCallstack* callstacks)
 {
+    if (callstacks == nullptr)
+        return;
+
     for (unsigned i = 0; i < max_captured_callstacks; ++i)
     {
         if (!callstacks[i].used)

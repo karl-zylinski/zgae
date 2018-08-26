@@ -1,9 +1,9 @@
 #pragma once
 
+#include "renderer.h"
 #include "image.h"
 #include "color.h"
 #include "math.h"
-#include "render_resource.h"
 #define IsValidRRHandle(rrh) rrh.h != InvalidHandle
 
 struct ID3D11Buffer;
@@ -14,18 +14,9 @@ struct ID3D11Texture2D;
 struct ID3D11DepthStencilView;
 struct ID3D11RasterizerState;
 struct IDXGISwapChain;
-struct World;
 struct Object;
-struct Camera;
-struct Vertex;
-struct Rect;
-struct RenderResource;
 
-Image image_from_render_target(const RenderTarget& rt);
-
-enum struct DrawLights { DrawLights, DoNotDrawLights };
-
-struct Renderer
+struct RendererD3D : public Renderer
 {
     void init(void* window_handle);
     void shutdown();
@@ -34,7 +25,7 @@ struct Renderer
     RenderTarget create_back_buffer();
     RenderTarget create_render_texture(PixelFormat pf, unsigned width, unsigned height);
     unsigned find_free_resource_handle() const;
-    RRHandle load_geometry(Vertex* vertices, unsigned num_vertices, unsigned* indices, unsigned num_indices);
+    RRHandle load_mesh(Mesh* m);
     void unload_resource(RRHandle handle);
     void set_render_target(RenderTarget* rt);
     void set_render_targets(RenderTarget** rt, unsigned num);
@@ -51,6 +42,7 @@ struct Renderer
     RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height);
     RenderResource& get_resource(RRHandle r);
 
+private:
     static const unsigned max_resources = 4096;
     static const unsigned max_render_targets = 4;
     void* window_handle;

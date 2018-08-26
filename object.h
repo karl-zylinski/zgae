@@ -5,7 +5,6 @@
 struct Object
 {
     RRHandle geometry_handle;
-    unsigned id;
     Matrix4x4 world_transform;
     bool is_light;
 };

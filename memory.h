@@ -72,7 +72,7 @@ void heap_allocator_check_clean(Allocator* allocator);
 void* heap_allocator_alloc(Allocator* allocator, size_t size, unsigned align);
 void heap_allocator_dealloc(Allocator* allocator, void* ptr);
 
-#define create_heap_allocator() {heap_allocator_alloc, heap_allocator_dealloc, heap_allocator_check_clean};
+#define create_heap_allocator() {heap_allocator_alloc, heap_allocator_dealloc, nullptr};
 
 void* permanent_allocator_alloc(Allocator* allocator, size_t size, unsigned align);
 void permanent_allocator_dealloc(Allocator* allocator, void* ptr);
