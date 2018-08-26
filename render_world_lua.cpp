@@ -3,8 +3,6 @@
 #include "memory.h"
 #include "render_world.h"
 #include "render_object.h"
-#include "lauxlib.h"
-#include "lualib.h"
 
 static Allocator* alloc;
 
@@ -21,6 +19,7 @@ static int add(lua_State* L)
     RenderWorld* rw = (RenderWorld*) lua_touserdata(L, 1);
     unsigned geometry_handle = (unsigned)luaL_checkinteger(L, 2);
     RenderObject ro = {};
+    ro.world_transform = matrix4x4_identity();
     ro.geometry_handle = {geometry_handle};
     unsigned h = render_world_add(rw, &ro);
     lua_pushnumber(L, h);

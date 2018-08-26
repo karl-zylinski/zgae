@@ -34,7 +34,7 @@ struct Renderer
     virtual void pre_draw_frame() = 0;
     virtual void set_scissor_rect(const Rect& r) = 0;
     virtual void disable_scissor() = 0;
-    virtual void draw_frame(const RenderWorld& world, const Camera& camera, DrawLights draw_lights) = 0;
+    virtual void draw_world(const RenderWorld& world, const Camera& camera, DrawLights draw_lights) = 0;
     virtual RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height) = 0;
     virtual RenderResource& get_resource(RRHandle r) = 0;
 };

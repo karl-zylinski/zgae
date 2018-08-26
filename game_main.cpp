@@ -14,7 +14,6 @@
 
 struct GameState
 {
-    RenderWorld render_world;
     Camera camera;
     Allocator def_alloc;
     lua_State* lua_state;
@@ -196,19 +195,14 @@ void game_start(Renderer* renderer)
 {
     memzero(&state, GameState);
     state.def_alloc = create_heap_allocator();
-    render_world_init(&state.render_world, &state.def_alloc);
     state.camera = camera_create_projection();
     state.camera.position = Vector3{0, 0, -5};
     Mesh m = create_sphere(&state.def_alloc, 1);
-    RenderObject sph = {};
-    sph.geometry_handle = renderer->load_mesh(&m);
-    sph.world_transform = matrix4x4_identity();
-    render_world_add(&state.render_world, &sph);
 
     lua_State* L = luaL_newstate();
     state.lua_state = L;
     luaL_openlibs(L);
-    renderer_lua_init(L, renderer);
+    renderer_lua_init(L, renderer, &state.camera);
     render_world_lua_init(L, &state.def_alloc);
 
     if (luaL_loadfile(L, "game/main.lua") != 0 )
@@ -228,12 +222,11 @@ void game_update(Renderer* renderer)
 
 void game_draw(Renderer* renderer)
 {
-    renderer->draw_frame(state.render_world, state.camera, DrawLights::DrawLights);
+    run_lua_func(state.lua_state, "draw");
 }
 
 void game_shutdown(Renderer* renderer)
 {
     run_lua_func(state.lua_state, "shutdown");
-    render_world_destroy(&state.render_world);
     //heap_allocator_check_clean(&state.def_alloc);
 }

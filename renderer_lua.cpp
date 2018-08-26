@@ -5,8 +5,9 @@
 #include "renderer.h"
 
 static Renderer* renderer;
+static Camera* temp_cam;
 
-static int load_obj_geometry(lua_State* L)
+static int load_geometry_obj(lua_State* L)
 {
     const char* filename = luaL_checkstring(L, 1);
     Allocator ta = create_temp_allocator();
@@ -20,9 +21,22 @@ static int load_obj_geometry(lua_State* L)
     return 1;
 }
 
-void renderer_lua_init(lua_State* L, Renderer* r)
+static int draw_world(lua_State* L)
+{
+    RenderWorld* rw = (RenderWorld*) lua_touserdata(L, 1);
+    renderer->draw_world(*rw, *temp_cam, DrawLights::DrawLights);
+    return 0;
+}
+
+static const struct luaL_Reg lib [] = {
+    {"draw_world", draw_world},
+    {"load_geometry_obj", load_geometry_obj},
+    {NULL, NULL}
+};
+
+void renderer_lua_init(lua_State* L, Renderer* r, Camera* tc)
 {
     renderer = r;
-    lua_pushcfunction(L, load_obj_geometry);
-    lua_setglobal(L, "load_obj_geometry");
+    temp_cam = tc;
+    luaL_register(L, "renderer", lib);
 }

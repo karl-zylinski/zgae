@@ -599,7 +599,7 @@ void RendererD3D::pre_draw_frame()
     }
 }
 
-void RendererD3D::draw_frame(const RenderWorld& world, const Camera& camera, DrawLights draw_lights)
+void RendererD3D::draw_world(const RenderWorld& world, const Camera& camera, DrawLights draw_lights)
 {
     pre_draw_frame();
     Matrix4x4 view_matrix = camera_calc_view_matrix(camera);
