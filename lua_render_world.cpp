@@ -1,42 +1,9 @@
-#include "render_world_lua.h"
+#include "lua_render_world.h"
 #include "lua.hpp"
 #include "memory.h"
 #include "render_world.h"
 #include "render_object.h"
-
-struct LuaValue
-{
-    bool valid;
-    union {
-        long long int_val;
-        const char* str_val;
-        double float_val;
-        void* ptr_val;
-    };
-};
-
-static LuaValue lua_get_integer(lua_State* L, unsigned arg)
-{
-    if (!lua_isnumber(L, arg))
-    {
-        return {false};
-    }
-
-    return {true, lua_tointeger(L, arg)};
-}
-
-static LuaValue lua_get_ptr(lua_State* L, unsigned arg)
-{
-    if (!lua_isuserdata(L, arg))
-    {
-        return {false};
-    }
-
-    LuaValue lv = {};
-    lv.valid = true;
-    lv.ptr_val = lua_touserdata(L, arg);
-    return lv;
-}
+#include "lua_helpers.h"
 
 static int create(lua_State* L)
 {
@@ -81,7 +48,7 @@ static const struct luaL_Reg lib [] = {
     {NULL, NULL}
 };
 
-void render_world_lua_init(lua_State* L)
+void lua_render_world_init(lua_State* L)
 {
     luaL_register(L, "render_world", lib);
 }

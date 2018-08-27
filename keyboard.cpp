@@ -37,12 +37,12 @@ bool key_is_held(Key key)
     return keyboard_state.held[(unsigned)key];
 }
 
-bool key_is_presssed(Key key)
+bool key_was_presssed(Key key)
 {
     return keyboard_state.pressed[(unsigned)key];
 }
 
-bool key_is_released(Key key)
+bool key_was_released(Key key)
 {
     return keyboard_state.released[(unsigned)key];
 }

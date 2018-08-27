@@ -1,12 +1,12 @@
 #include "game_main.h"
 #include "render_world.h"
-#include "camera.h"
 #include "memory.h"
 #include "keyboard.h"
 #include "mouse.h"
 #include "renderer.h"
-#include "renderer_lua.h"
-#include "render_world_lua.h"
+#include "lua_renderer.h"
+#include "lua_render_world.h"
+#include "lua_keyboard.h"
 #include "render_object.h"
 #include "mesh.h"
 #include "lua.hpp"
@@ -14,47 +14,10 @@
 
 struct GameState
 {
-    Camera camera;
     lua_State* lua_state;
 };
 
 static GameState state;
-
-
-static void process_input(Camera* camera)
-{
-    Matrix4x4 move = matrix4x4_identity();
-
-    if (key_is_held(Key::W))
-    {
-        move.w.z += 0.0005f;
-    }
-    if (key_is_held(Key::S))
-    {
-        move.w.z -= 0.0005f;
-    }
-    if (key_is_held(Key::A))
-    {
-        move.w.x -= 0.0005f;
-    }
-    if (key_is_held(Key::D))
-    {
-        move.w.x += 0.0005f;
-    }
-
-    Quaternion rotation = camera->rotation;
-    Vector2i mouse_movement = mouse_movement_delta();
-    if (mouse_movement.x != 0 || mouse_movement.y != 0)
-    {
-        rotation = quaternion_rotate_y(rotation, mouse_movement.x * 0.001f);
-        rotation = quaternion_rotate_x(rotation, mouse_movement.y * 0.001f);
-    }
-
-    camera->rotation = rotation;
-    Matrix4x4 camera_test_mat = matrix4x4_from_rotation_and_translation(camera->rotation, vector3_zero);
-    Matrix4x4 movement_rotated = move * camera_test_mat;
-    camera->position += *(Vector3*)&movement_rotated.w.x;
-}
 
 static Vector3 get_spherical_coords(unsigned lat_number, unsigned long_number, unsigned latitude_bands, unsigned longitude_bands)
 {
@@ -186,17 +149,21 @@ static void run_lua_func(lua_State* L, const char* func)
 void game_start(Renderer* renderer)
 {
     memzero(&state, sizeof(GameState));
-    state.camera = camera_create_projection();
-    state.camera.position = Vector3{0, 0, -5};
-
     lua_State* L = luaL_newstate();
     state.lua_state = L;
     luaL_openlibs(L);
-    renderer_lua_init(L, renderer, &state.camera);
-    render_world_lua_init(L);
+    lua_renderer_init(L, renderer);
+    lua_render_world_init(L);
+    lua_keyboard_init(L);
+
+    if (luaL_dofile(L, "game/class.lua") != 0 )
+        Error("Failed running 'game/class.lua'");
 
     if (luaL_dofile(L, "game/main.lua") != 0 )
+    {
+        fprintf(stderr, "%s\n", lua_tostring(L, -1));
         Error("Failed running 'game/main.lua'");
+    }
 
     run_lua_func(L, "start");
 }
@@ -204,7 +171,6 @@ void game_start(Renderer* renderer)
 void game_update(Renderer* renderer)
 {
     run_lua_func(state.lua_state, "update");
-    process_input(&state.camera);
 }
 
 void game_draw(Renderer* renderer)

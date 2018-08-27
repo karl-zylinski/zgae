@@ -6,6 +6,7 @@
 #include "mouse.h"
 #include "game_main.h"
 #include "renderer_direct3d.h"
+#include <stdio.h>
 
 static void key_pressed_callback(Key key)
 {

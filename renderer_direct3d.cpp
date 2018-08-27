@@ -7,7 +7,6 @@
 #include "config.h"
 #include "rect.h"
 #include "file.h"
-#include "camera.h"
 #include "memory.h"
 #include "mesh.h"
 #include "array.h"
@@ -602,13 +601,13 @@ void RendererD3D::pre_draw_frame()
     }
 }
 
-void RendererD3D::draw_world(const RenderWorld& world, const Camera& camera, DrawLights draw_lights)
+void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos, const Matrix4x4& projection, DrawLights draw_lights)
 {
     pre_draw_frame();
-    Matrix4x4 view_matrix = camera_calc_view_matrix(camera);
+    Matrix4x4 view_matrix = matrix4x4_inverse(matrix4x4_from_rotation_and_translation(cam_rot, cam_pos));
 
     for (unsigned i = 0; i < array_num(world.active_objects); ++i)
-        draw(world.ror_lut[world.active_objects[i]].ro, view_matrix, camera.projection_matrix);
+        draw(world.ror_lut[world.active_objects[i]].ro, view_matrix, projection);
 
     present();
 }

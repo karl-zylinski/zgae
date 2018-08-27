@@ -6,12 +6,14 @@ struct Rect;
 struct RenderWorld;
 struct RenderResource;
 struct RenderObject;
-struct Camera;
+struct Quaternion;
+struct Vector3;
 struct Matrix4x4;
 struct Mesh;
 
 enum struct DrawLights { DrawLights, DoNotDrawLights };
 
+// TODO: Remove unneeded stuff in interface.
 struct Renderer
 {
     virtual void init(void* window_handle) = 0;
@@ -34,7 +36,7 @@ struct Renderer
     virtual void pre_draw_frame() = 0;
     virtual void set_scissor_rect(const Rect& r) = 0;
     virtual void disable_scissor() = 0;
-    virtual void draw_world(const RenderWorld& world, const Camera& camera, DrawLights draw_lights) = 0;
+    virtual void draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos, const Matrix4x4& projection, DrawLights draw_lights) = 0;
     virtual RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height) = 0;
     virtual RenderResource& get_resource(RRHandle r) = 0;
 };
