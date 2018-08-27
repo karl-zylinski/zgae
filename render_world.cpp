@@ -2,63 +2,60 @@
 #include "render_world.h"
 #include "render_object.h"
 #include "memory.h"
+#include "array.h"
 
-static void grow(RenderWorld* w)
-{
-    unsigned old_cap = w->capacity;
-    w->capacity = old_cap*2;
-    RenderObject* old_objs = w->objects;
-    w->objects = (RenderObject*)zalloc_zero(sizeof(RenderObject) * w->capacity);
-    memcpy(w->objects, old_objs, old_cap*sizeof(RenderObject));
-    zfree(old_objs);
-}
+static unsigned long long object_id_counter = 1;
 
-void render_world_init(RenderWorld* w)
+size_t render_world_add(RenderWorld* w, RenderObject* obj)
 {
-    w->capacity = 100;
-    w->objects = (RenderObject*)zalloc_zero(sizeof(RenderObject) * w->capacity);
-}
+    if (obj->id == 0)
+        obj->id = object_id_counter++;
 
-static unsigned find_free_idx_or_grow(RenderWorld* w)
-{
-    for (unsigned i = 0; i < w->capacity; ++i)
+    for (size_t i = 0; i < array_num(w->ror_lut); ++i)
     {
-        if (w->objects[i].used == false)
+        if (w->ror_lut[i].used == false)
+        {
+            memcpy(w->ror_lut + i, obj, sizeof(RenderObject));
+            w->ror_lut[i].used = true;
+            array_push(w->active_objects, i);
             return i;
+        }
     }
-
-    unsigned idx = w->capacity;
-    grow(w);
-    return idx;
-}
-
-unsigned render_world_add(RenderWorld* w, RenderObject* obj)
-{
-    unsigned idx = find_free_idx_or_grow(w);
-    memcpy(w->objects + idx, obj, sizeof(RenderObject));
-    (w->objects + idx)->used = true;
+    size_t idx = array_num(w->ror_lut);
+    RenderObjectResource ror = {};
+    ror.used = true;
+    ror.ro = *obj;
+    array_push(w->ror_lut, ror);
+    array_push(w->active_objects, idx);
     return idx;
 } 
 
-void render_world_remove(RenderWorld* w, unsigned idx)
+void render_world_remove(RenderWorld* w, size_t idx)
 {
-    if (idx < 0 || idx >= w->capacity)
+    if (idx < 0 || idx >= array_num(w->ror_lut))
         Error("Trying to remove non-existing render object!");
-
-    RenderObject* obj = w->objects + idx;
-
-    Assert(obj->used, "Trying to remove unused object!");
-    memzero(obj, sizeof(RenderObject));
+    RenderObjectResource* ror = w->ror_lut + idx;
+    Assert(ror->used, "Trying to remove unused object!");
+    for (size_t i = 0; i < array_num(w->active_objects); ++i)
+    {
+        if (w->active_objects[i] == idx)
+        {
+            array_remove(w->active_objects, i);
+            break;
+        }
+    }
+    memzero(ror, sizeof(RenderObjectResource));
 }
 
-RenderObject* render_world_get(RenderWorld* w, unsigned idx)
+RenderObject* render_world_get(RenderWorld* w, size_t idx)
 {
-    RenderObject* obj = w->objects + idx;
-    Assert(obj->used, "Trying to remove unused object!");
-    return w->objects + idx;
+    RenderObjectResource* ror = w->ror_lut + idx;
+    Assert(ror->used, "Trying to remove unused object!");
+    return &ror->ro;
 }
 
 void render_world_destroy(RenderWorld* w)
 {
-    zfree(w->objects);
+    array_destroy(w->ror_lut);
+    array_destroy(w->active_objects);
 }

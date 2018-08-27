@@ -40,8 +40,7 @@ static LuaValue lua_get_ptr(lua_State* L, unsigned arg)
 
 static int create(lua_State* L)
 {
-    RenderWorld* rw = (RenderWorld*)zalloc(sizeof(RenderWorld));
-    render_world_init(rw);
+    RenderWorld* rw = (RenderWorld*)zalloc_zero(sizeof(RenderWorld));
     lua_pushlightuserdata(L, rw);
     return 1;
 }
@@ -70,8 +69,8 @@ static int add(lua_State* L)
     RenderObject ro = {};
     ro.world_transform = matrix4x4_identity();
     ro.geometry_handle = {(unsigned)l_int.int_val};
-    unsigned h = render_world_add(rw, &ro);
-    lua_pushnumber(L, h);
+    size_t h = render_world_add(rw, &ro);
+    lua_pushnumber(L, (lua_Number)h);
     return 1;
 }
 

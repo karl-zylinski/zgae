@@ -5,8 +5,8 @@
 
 struct ArrayHeader
 {
-    unsigned num;
-    unsigned capacity;
+    size_t num;
+    size_t capacity;
 };
 
 #define array_header(a)\
@@ -24,12 +24,12 @@ static void array_destroy(void* a)
     zfree(array_header(a));
 }
 
-static void* array_grow(void* old_a, unsigned item_size)
+static void* array_grow(void* old_a, size_t item_size)
 {
     Assert(item_size != 0, "Trying to grow array with item_size zero.");
-    unsigned old_capacity = old_a ? array_header(old_a)->capacity : 0;
-    unsigned num = array_num(old_a);
-    unsigned new_capacity = old_capacity == 0 ? 2 : old_capacity*2;
+    size_t old_capacity = old_a ? array_header(old_a)->capacity : 0;
+    size_t num = array_num(old_a);
+    size_t new_capacity = old_capacity == 0 ? 2 : old_capacity*2;
     ArrayHeader* new_h = (ArrayHeader*)zalloc(sizeof(ArrayHeader) + new_capacity*item_size);
     void* new_a = ptr_add(new_h, sizeof(ArrayHeader));
     new_h->num = num;
@@ -40,10 +40,10 @@ static void* array_grow(void* old_a, unsigned item_size)
     return new_a;
 }
 
-static void* _array_copy_data(void* a, unsigned item_size)
+static void* _array_copy_data(void* a, size_t item_size)
 {
-    unsigned num = array_num(a);
-    unsigned data_size = num * item_size;
+    size_t num = array_num(a);
+    size_t data_size = num * item_size;
     void* copied_data = zalloc(data_size);
     memcpy(copied_data, a, data_size);
     return copied_data;
@@ -51,7 +51,7 @@ static void* _array_copy_data(void* a, unsigned item_size)
 
 #define array_copy_data(a) (_array_copy_data((a), sizeof(*(a))))
 
-static void* _array_move_data(void* a, unsigned item_size)
+static void* _array_move_data(void* a, size_t item_size)
 {
     void* copied = _array_copy_data(a, item_size);
     array_destroy(a);
@@ -60,7 +60,7 @@ static void* _array_move_data(void* a, unsigned item_size)
 
 #define array_move_data(a) (_array_move_data((a), sizeof(*(a))))
 
-static void _array_maybe_grow(void** a, unsigned item_size)
+static void _array_maybe_grow(void** a, size_t item_size)
 {
     if ((*a) != nullptr && !array_full(*a))
         return;
@@ -74,3 +74,16 @@ static void _array_maybe_grow(void** a, unsigned item_size)
     (a)[array_header(a)->num++] = item
 
 #define array_init(a) (_array_maybe_grow(&(void*)(a), sizeof(*(a))))
+
+static void _array_remove(void* a, size_t idx, size_t item_size)
+{
+    if (idx + 1 == array_num(a))
+    {
+        array_header(a)->num--;
+        return;
+    }
+
+    memmove(((char*)a) + idx*item_size, ((char*)a) + (idx + 1)*item_size, array_num(a) - idx - 1);
+}
+
+#define array_remove(a, idx) _array_remove(a, idx, sizeof(*(a)))

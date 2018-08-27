@@ -10,6 +10,7 @@
 #include "camera.h"
 #include "memory.h"
 #include "mesh.h"
+#include "array.h"
 
 struct RenderTargetResource
 {
@@ -606,11 +607,8 @@ void RendererD3D::draw_world(const RenderWorld& world, const Camera& camera, Dra
     pre_draw_frame();
     Matrix4x4 view_matrix = camera_calc_view_matrix(camera);
 
-    for (unsigned i = 0; i < world.capacity; ++i)
-    {
-        if (world.objects[i].used)
-            draw(world.objects[i], view_matrix, camera.projection_matrix);
-    }
+    for (unsigned i = 0; i < array_num(world.active_objects); ++i)
+        draw(world.ror_lut[world.active_objects[i]].ro, view_matrix, camera.projection_matrix);
 
     present();
 }

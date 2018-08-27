@@ -173,7 +173,7 @@ static void add_vertex_to_mesh(Vertex** vertices, unsigned** indices, const Vect
         return;
     }
 
-    array_push(*indices, array_num(*vertices));
+    array_push(*indices, (unsigned)array_num(*vertices));
     array_push(*vertices, v);
 }
 
@@ -203,9 +203,9 @@ LoadedMesh obj_load(const char* filename)
     array_destroy(pd.faces);
 
     Mesh m = {};
-    m.num_vertices = array_num(vertices);
+    m.num_vertices = (unsigned)array_num(vertices);
     m.vertices = (Vertex*)array_move_data(vertices);
-    m.num_indices = array_num(indices);
+    m.num_indices = (unsigned)array_num(indices);
     m.indices = (unsigned*)array_move_data(indices);
     return {true, m};
 }
