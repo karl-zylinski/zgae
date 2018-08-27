@@ -6,6 +6,40 @@
 
 static Allocator* alloc;
 
+struct LuaValue
+{
+    bool valid;
+    union {
+        long long int_val;
+        const char* str_val;
+        double float_val;
+        void* ptr_val;
+    };
+};
+
+static LuaValue lua_get_integer(lua_State* L, unsigned arg)
+{
+    if (!lua_isnumber(L, arg))
+    {
+        return {false};
+    }
+
+    return {true, lua_tointeger(L, arg)};
+}
+
+static LuaValue lua_get_ptr(lua_State* L, unsigned arg)
+{
+    if (!lua_isuserdata(L, arg))
+    {
+        return {false};
+    }
+
+    LuaValue lv = {};
+    lv.valid = true;
+    lv.ptr_val = lua_touserdata(L, arg);
+    return lv;
+}
+
 static int create(lua_State* L)
 {
     RenderWorld* rw = (RenderWorld*)alloc->alloc(sizeof(RenderWorld));
@@ -24,11 +58,20 @@ static int destroy(lua_State* L)
 
 static int add(lua_State* L)
 {
-    RenderWorld* rw = (RenderWorld*) lua_touserdata(L, 1);
-    unsigned geometry_handle = (unsigned)luaL_checkinteger(L, 2);
+    LuaValue l_rw = lua_get_ptr(L, 1);
+
+    if (!l_rw.valid)
+        Error("ERROR in render_world.add: Expected render world handle in argument 1.");
+
+    RenderWorld* rw = (RenderWorld*)l_rw.ptr_val;
+    LuaValue l_int = lua_get_integer(L,2);
+
+    if (!l_int.valid)
+        Error("ERROR in render_world.add: Expected geometry handle in argument 2.");
+
     RenderObject ro = {};
     ro.world_transform = matrix4x4_identity();
-    ro.geometry_handle = {geometry_handle};
+    ro.geometry_handle = {(unsigned)l_int.int_val};
     unsigned h = render_world_add(rw, &ro);
     lua_pushnumber(L, h);
     return 1;

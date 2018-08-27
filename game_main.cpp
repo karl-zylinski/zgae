@@ -176,10 +176,9 @@ static Mesh create_sphere(Allocator* alloc, float radius)
     return m;
 }
 
-static void run_lua_func(lua_State*L, const char* func)
+static void run_lua_func(lua_State* L, const char* func)
 {
     lua_getglobal(L, func);
-    //lua_pushnumber(L, x)
     
     if (lua_pcall(L, 0, 0, 0) != 0)
         Error("error running function");
