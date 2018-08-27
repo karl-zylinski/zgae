@@ -7,6 +7,7 @@
 #include "lua_renderer.h"
 #include "lua_render_world.h"
 #include "lua_keyboard.h"
+#include "lua_mouse.h"
 #include "render_object.h"
 #include "mesh.h"
 #include "lua.hpp"
@@ -143,7 +144,10 @@ static void run_lua_func(lua_State* L, const char* func)
     lua_getglobal(L, func);
     
     if (lua_pcall(L, 0, 0, 0) != 0)
+    {
+        fprintf(stderr, "%s\n", lua_tostring(L, -1));
         Error("error running function");
+    }
 }
 
 void game_start(Renderer* renderer)
@@ -155,6 +159,7 @@ void game_start(Renderer* renderer)
     lua_renderer_init(L, renderer);
     lua_render_world_init(L);
     lua_keyboard_init(L);
+    lua_mouse_init(L);
 
     if (luaL_dofile(L, "game/class.lua") != 0 )
         Error("Failed running 'game/class.lua'");
