@@ -4,8 +4,10 @@ function str_split(str, del)
     for i = 1, #str do
         local c = str:sub(i,i)
         if c == del then
-            table.insert(res, cur)
-            cur = ""
+            if cur ~= "" then
+                table.insert(res, cur)
+                cur = ""
+            end
         else
             cur = cur .. c
         end

@@ -40,6 +40,8 @@ static int draw_world(lua_State* L)
 
     Quaternion camera_rot = lq.quat_val;
     Vector3 camera_pos = lv3.vec3_val;
+
+    // TODO: get proj matrix from lua!!
     float near_plane = 0.01f;
     float far_plane = 1000.0f;
     float fov = 90.0f;
