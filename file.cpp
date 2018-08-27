@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "memory.h"
 
-LoadedFile file_load(Allocator* alloc, const char* filename)
+LoadedFile file_load(const char* filename)
 {
     FILE* file_handle = fopen(filename, "rb");
 
@@ -16,7 +16,7 @@ LoadedFile file_load(Allocator* alloc, const char* filename)
     if (filesize == 0)
         return {false};
 
-    unsigned char* data = (unsigned char*)alloc->alloc(unsigned(filesize));
+    unsigned char* data = (unsigned char*)zalloc(unsigned(filesize));
 
     if (data == nullptr)
         return {false};

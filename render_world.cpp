@@ -8,16 +8,15 @@ static void grow(RenderWorld* w)
     unsigned old_cap = w->capacity;
     w->capacity = old_cap*2;
     RenderObject* old_objs = w->objects;
-    w->objects = (RenderObject*)w->alloc->alloc_zero(sizeof(RenderObject) * w->capacity);
+    w->objects = (RenderObject*)zalloc_zero(sizeof(RenderObject) * w->capacity);
     memcpy(w->objects, old_objs, old_cap*sizeof(RenderObject));
-    w->alloc->dealloc(old_objs);
+    zfree(old_objs);
 }
 
-void render_world_init(RenderWorld* w, Allocator* allocator)
+void render_world_init(RenderWorld* w)
 {
     w->capacity = 100;
-    w->objects = (RenderObject*)allocator->alloc_zero(sizeof(RenderObject) * w->capacity);
-    w->alloc = allocator;
+    w->objects = (RenderObject*)zalloc_zero(sizeof(RenderObject) * w->capacity);
 }
 
 static unsigned find_free_idx_or_grow(RenderWorld* w)
@@ -61,5 +60,5 @@ RenderObject* render_world_get(RenderWorld* w, unsigned idx)
 
 void render_world_destroy(RenderWorld* w)
 {
-    w->alloc->dealloc(w->objects);
+    zfree(w->objects);
 }

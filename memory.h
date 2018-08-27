@@ -1,80 +1,65 @@
 #pragma once
 
 #include <string.h>
+#include <stdlib.h>
+#include "helpers.h"
 
 // This will eff your performance so only enable when debugging memory leaks in the heap allocator.
 #define ENABLE_MEMORY_TRACING
 
 #if defined(ENABLE_MEMORY_TRACING)
     #include "callstack_capturer.h"
+    void add_captured_callstack(const CapturedCallstack& cc);
+    void remove_captured_callstack(void* p);
+    void ensure_captured_callstacks_unused();
 #endif
 
-const unsigned DefaultMemoryAlign = 8;
+void memory_init();
+void memory_shutdown();
 
-struct Allocator
+static void* zalloc(size_t size)
 {
-    ~Allocator()
-    {
-        if (out_of_scope)
-            out_of_scope(this);
-    }
-
-    void* alloc(size_t size, unsigned align = DefaultMemoryAlign)
-    {
-        return alloc_internal(this, size, align);
-    }
-
-    void* alloc_zero(size_t size, unsigned align = DefaultMemoryAlign)
-    {
-        void* p = alloc_internal(this, size, align);
-
-        if (p != nullptr)
-            memset(p, 0, size);
-
-        return p;
-    }
-
-    void dealloc(void* ptr)
-    {
-        dealloc_internal(this, ptr);
-    }
-
-    void*(*alloc_internal)(Allocator* alloc, size_t size, unsigned align);
-    void(*dealloc_internal)(Allocator* alloc, void* ptr);
-    void(*out_of_scope)(Allocator* alloc);
-    void* last_alloc;
-    unsigned num_allocations;
-
+    void* p = malloc(size);
     #if defined(ENABLE_MEMORY_TRACING)
-        CapturedCallstack* captured_callstacks;
+        add_captured_callstack(callstack_capture(1, p));
     #endif
-};
+    return p;
+}
 
-unsigned mem_ptr_diff(const void* ptr1, const void* ptr2);
-void* mem_ptr_add(const void* ptr1, size_t offset);
-void* mem_ptr_sub(const void* ptr1, size_t offset);
-void* mem_align_forward(const void* p, unsigned align);
+static void* zalloc_zero(size_t size)
+{
+    void* p = zalloc(size);
+    memzero(p, size);
+    return p;
+}
 
-void permanent_memory_blob_init(void* start, size_t capacity);
-const size_t PermanentMemorySize = 32 * 1024 * 1024;
-void* permanent_alloc(size_t size, unsigned align = DefaultMemoryAlign);
+static void zfree(void* p)
+{
+    #if defined(ENABLE_MEMORY_TRACING)
+        remove_captured_callstack(p);
+    #endif
 
-const size_t TempMemorySize = 1024 * 1024 * 1024;
-void temp_memory_blob_init(void* start, size_t capacity);
-size_t temp_memory_used();
-void* temp_allocator_alloc(Allocator* allocator, size_t size, unsigned align);
-void temp_allocator_dealloc(Allocator* allocator, void* ptr);
-void temp_allocator_dealloc_all(Allocator* allocator);
+    free(p);
+}
 
-#define create_temp_allocator() {temp_allocator_alloc, temp_allocator_dealloc, temp_allocator_dealloc_all}
+static void heap_check_clean()
+{
+    #if defined(ENABLE_MEMORY_TRACING)
+        ensure_captured_callstacks_unused();
+    #endif
+}
 
-void heap_allocator_check_clean(Allocator* allocator);
-void* heap_allocator_alloc(Allocator* allocator, size_t size, unsigned align);
-void heap_allocator_dealloc(Allocator* allocator, void* ptr);
+static unsigned ptr_diff(const void* ptr1, const void* ptr2)
+{
+    return (unsigned)((unsigned char*)ptr2 - (unsigned char*)ptr1);
+}
 
-#define create_heap_allocator() {heap_allocator_alloc, heap_allocator_dealloc, nullptr};
+static void* ptr_add(const void* ptr1, size_t offset)
+{
+    return (void*)((unsigned char*)ptr1 + offset);
+}
 
-void* permanent_allocator_alloc(Allocator* allocator, size_t size, unsigned align);
-void permanent_allocator_dealloc(Allocator* allocator, void* ptr);
-
-#define create_permanent_allocator() {permanent_allocator_alloc, permanent_allocator_dealloc, nullptr};
+static void* ptr_sub(const void* ptr1, size_t offset)
+{
+    return (void*)((unsigned char*)ptr1 - offset);
+}

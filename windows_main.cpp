@@ -24,14 +24,7 @@ static void mouse_moved_callback(const Vector2i& delta)
 
 int main()
 {
-    void* temp_memory_block = VirtualAlloc(nullptr, TempMemorySize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
-    Assert(temp_memory_block != nullptr, "Failed allocating temp memory.");
-    temp_memory_blob_init(temp_memory_block, TempMemorySize);
-
-    void* permanent_memory_block = VirtualAlloc(nullptr, PermanentMemorySize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
-    Assert(permanent_memory_block != nullptr, "Failed allocating permanent memory.");
-    permanent_memory_blob_init(permanent_memory_block, PermanentMemorySize);
-    
+    memory_init();
     keyboard_init();
     mouse_init();
 
@@ -61,4 +54,5 @@ int main()
 
     game_shutdown(&renderer);
     renderer.shutdown();
+    memory_shutdown();
 }

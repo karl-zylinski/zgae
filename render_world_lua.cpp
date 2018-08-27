@@ -4,8 +4,6 @@
 #include "render_world.h"
 #include "render_object.h"
 
-static Allocator* alloc;
-
 struct LuaValue
 {
     bool valid;
@@ -42,8 +40,8 @@ static LuaValue lua_get_ptr(lua_State* L, unsigned arg)
 
 static int create(lua_State* L)
 {
-    RenderWorld* rw = (RenderWorld*)alloc->alloc(sizeof(RenderWorld));
-    render_world_init(rw, alloc);
+    RenderWorld* rw = (RenderWorld*)zalloc(sizeof(RenderWorld));
+    render_world_init(rw);
     lua_pushlightuserdata(L, rw);
     return 1;
 }
@@ -52,7 +50,7 @@ static int destroy(lua_State* L)
 {
     RenderWorld* rw = (RenderWorld*) lua_touserdata(L, 1);
     render_world_destroy(rw);
-    alloc->dealloc(rw);
+    zfree(rw);
     return 0;
 }
 
@@ -84,8 +82,7 @@ static const struct luaL_Reg lib [] = {
     {NULL, NULL}
 };
 
-void render_world_lua_init(lua_State* L, Allocator* a)
+void render_world_lua_init(lua_State* L)
 {
-    alloc = a;
     luaL_register(L, "render_world", lib);
 }

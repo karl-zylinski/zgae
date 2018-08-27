@@ -11,7 +11,7 @@ static Keyboard keyboard_state;
 
 void keyboard_init()
 {
-    memzero(&keyboard_state, Keyboard);
+    memzero(&keyboard_state, sizeof(Keyboard));
 }
 
 void keyboard_pressed(Key key)

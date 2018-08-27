@@ -10,13 +10,14 @@ static Camera* temp_cam;
 static int load_geometry_obj(lua_State* L)
 {
     const char* filename = luaL_checkstring(L, 1);
-    Allocator ta = create_temp_allocator();
-    LoadedMesh lm = obj_load(&ta, filename);
+    LoadedMesh lm = obj_load(filename);
 
     if (!lm.valid)
         Error("OHN OES");
 
     RRHandle h = renderer->load_mesh(&lm.mesh);
+    zfree(lm.mesh.vertices);
+    zfree(lm.mesh.indices);
     lua_pushnumber(L, h.h);
     return 1;
 }

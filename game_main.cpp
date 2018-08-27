@@ -15,7 +15,6 @@
 struct GameState
 {
     Camera camera;
-    Allocator def_alloc;
     lua_State* lua_state;
 };
 
@@ -74,15 +73,15 @@ static Vector3 get_spherical_coords(unsigned lat_number, unsigned long_number, u
     return { x, y, z };
 }
 
-static Mesh create_sphere(Allocator* alloc, float radius)
+static Mesh create_sphere(float radius)
 {
     unsigned latitude_bands = 16;
     unsigned longitude_bands = latitude_bands;
     Mesh m = {};
     m.num_vertices = (latitude_bands - 1)*longitude_bands + 2;
     m.num_indices = (latitude_bands - 2)*longitude_bands * 6 + 2*longitude_bands*3;
-    m.vertices = (Vertex*)alloc->alloc_zero(m.num_vertices * sizeof(Vertex));
-    m.indices = (unsigned*)alloc->alloc_zero(m.num_indices * sizeof(unsigned));
+    m.vertices = (Vertex*)zalloc_zero(m.num_vertices * sizeof(Vertex));
+    m.indices = (unsigned*)zalloc_zero(m.num_indices * sizeof(unsigned));
     unsigned cur_vertex = 0;
     unsigned cur_index = 0;
 
@@ -186,8 +185,7 @@ static void run_lua_func(lua_State* L, const char* func)
 
 void game_start(Renderer* renderer)
 {
-    memzero(&state, GameState);
-    state.def_alloc = create_heap_allocator();
+    memzero(&state, sizeof(GameState));
     state.camera = camera_create_projection();
     state.camera.position = Vector3{0, 0, -5};
 
@@ -195,7 +193,7 @@ void game_start(Renderer* renderer)
     state.lua_state = L;
     luaL_openlibs(L);
     renderer_lua_init(L, renderer, &state.camera);
-    render_world_lua_init(L, &state.def_alloc);
+    render_world_lua_init(L);
 
     if (luaL_dofile(L, "game/main.lua") != 0 )
         Error("Failed running 'game/main.lua'");
@@ -217,5 +215,4 @@ void game_draw(Renderer* renderer)
 void game_shutdown(Renderer* renderer)
 {
     run_lua_func(state.lua_state, "shutdown");
-    heap_allocator_check_clean(&state.def_alloc);
 }

@@ -106,7 +106,7 @@ static void check_ok(HRESULT res, ID3DBlob* error_blob)
 void RendererD3D::init(void* wh)
 {
     window_handle = wh;
-    resources = (RenderResource*)permanent_alloc(max_resources * sizeof(RenderResource));
+    resources = (RenderResource*)zalloc_zero(max_resources * sizeof(RenderResource));
     DXGI_SWAP_CHAIN_DESC scd = {};
     RECT window_rect = {};
     GetWindowRect((HWND)window_handle, &window_rect);
@@ -195,6 +195,7 @@ void RendererD3D::shutdown()
     depth_stencil_view->Release();
     device->Release();
     device_context->Release();
+    zfree(resources);
 }
 
 RRHandle RendererD3D::load_shader(const char* filename)
@@ -208,8 +209,7 @@ RRHandle RendererD3D::load_shader(const char* filename)
     ID3DBlob* ps_blob = nullptr;
     ID3DBlob* error_blob = nullptr;
 
-    Allocator ta = create_temp_allocator();
-    LoadedFile shader_file = file_load(&ta, filename);
+    LoadedFile shader_file = file_load(filename);
 
     if (!shader_file.valid)
         return {InvalidHandle};
@@ -241,6 +241,8 @@ RRHandle RendererD3D::load_shader(const char* filename)
         &ps_blob,
         &error_blob
     ), error_blob);
+
+    zfree(shader_file.file.data);
 
     Shader s = {};
     device->CreateVertexShader(vs_blob->GetBufferPointer(), vs_blob->GetBufferSize(), nullptr, &s.vertex_shader);

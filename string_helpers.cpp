@@ -2,45 +2,45 @@
 #include <string.h>
 #include "memory.h"
 
-char* str_append(Allocator* alloc, const char* original, const char* to_append)
+char* str_append(const char* original, const char* to_append)
 {
     auto org_len = strlen(original);
     auto append_len = strlen(to_append);
     auto new_string_len = org_len + append_len + 1;
-    char* new_string = (char*)alloc->alloc(new_string_len);
+    char* new_string = (char*)zalloc(new_string_len);
     strcpy(new_string, original);
     strcat(new_string, to_append);
     return new_string;
 }
 
-char* str_append(Allocator* alloc, const char* original, const char** to_append, size_t num_to_append)
+char* str_append(const char* original, const char** to_append, size_t num_to_append)
 {
     auto org_len = strlen(original);
     size_t to_append_len = 0;
     for (size_t i = 0; i < num_to_append; ++i)
         to_append_len += strlen(to_append[i]);
     auto new_string_len = org_len + to_append_len + 1;
-    char* new_string = (char*)alloc->alloc(new_string_len);
+    char* new_string = (char*)zalloc(new_string_len);
     strcpy(new_string, original);
     for (size_t i = 0; i < num_to_append; ++i)
         strcat(new_string, to_append[i]);
     return new_string;
 }
 
-char* str_copy(Allocator* alloc, const char* original)
+char* str_copy(const char* original)
 {
     auto org_len = strlen(original);
     auto new_string_len = org_len + 1;
-    char* new_string = (char*)alloc->alloc(new_string_len);
+    char* new_string = (char*)zalloc(new_string_len);
     strcpy(new_string, original);
     return new_string;
 }
 
-char* str_copy(Allocator* alloc, const char* original, size_t size)
+char* str_copy(const char* original, size_t size)
 {
     auto org_len = size;
     auto new_string_len = org_len + 1;
-    char* new_string = (char*)alloc->alloc(new_string_len);
+    char* new_string = (char*)zalloc(new_string_len);
     memcpy(new_string, original, size);
     new_string[new_string_len - 1] = 0;
     return new_string;

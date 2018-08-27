@@ -10,7 +10,7 @@ static Mouse mouse_state;
 
 void mouse_init()
 {
-    memzero(&mouse_state, Mouse);
+    memzero(&mouse_state, sizeof(Mouse));
 }
 
 void mouse_add_delta(const Vector2i& delta)

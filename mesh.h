@@ -1,5 +1,4 @@
 #pragma once
-#include "dynamic_array.h"
 #include "vertex.h"
 
 struct Mesh
