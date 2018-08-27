@@ -161,13 +161,23 @@ void game_start(Renderer* renderer)
     lua_keyboard_init(L);
     lua_mouse_init(L);
 
-    if (luaL_dofile(L, "game/class.lua") != 0 )
-        Error("Failed running 'game/class.lua'");
+    const char* files_to_run[] = {
+        "game/class.lua",
+        "game/math.lua",
+        "game/main.lua",
+        NULL
+    };
 
-    if (luaL_dofile(L, "game/main.lua") != 0 )
+    const char** to_run = files_to_run;
+    while (*to_run != NULL)
     {
-        fprintf(stderr, "%s\n", lua_tostring(L, -1));
-        Error("Failed running 'game/main.lua'");
+        if (luaL_dofile(L, *to_run) != 0)
+        {
+            fprintf(stderr, "%s\n", lua_tostring(L, -1));
+            Error("Failed running script");
+        }
+
+        ++to_run;
     }
 
     run_lua_func(L, "start");
