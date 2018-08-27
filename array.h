@@ -1,7 +1,8 @@
 #pragma once
 #include "memory.h"
 
-// Based on "strechy buffers" by Sean Barrett and Niklas Gray
+// Based on "strechy buffers" by Sean Barrett and Niklas Gray with super-ugly hacks to make it
+// work in C++ (no impicit void* cast made everthing pooooop)
 
 struct ArrayHeader
 {
@@ -77,6 +78,8 @@ static void _array_maybe_grow(void** a, size_t item_size)
 
 static void _array_remove(void* a, size_t idx, size_t item_size)
 {
+    Assert(idx >= 0 && idx < array_num(a), "Trying to remove outside of array.");
+
     if (idx + 1 == array_num(a))
     {
         array_header(a)->num--;
