@@ -41,20 +41,7 @@ static int draw_world(lua_State* L)
     Quaternion camera_rot = lq.quat_val;
     Vector3 camera_pos = lv3.vec3_val;
 
-    // TODO: get proj matrix from lua!!
-    float near_plane = 0.01f;
-    float far_plane = 1000.0f;
-    float fov = 90.0f;
-    float aspect = 1.0f;
-    float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
-    float x_scale = y_scale / aspect;
-    Matrix4x4 proj = {
-        x_scale, 0, 0, 0,
-        0, y_scale, 0, 0,
-        0, 0, far_plane/(far_plane-near_plane), 1,
-        0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0 
-    };
-    renderer->draw_world(*rw, camera_rot, camera_pos, proj, DrawLights::DrawLights);
+    renderer->draw_world(*rw, camera_rot, camera_pos, DrawLights::DrawLights);
     return 0;
 }
 

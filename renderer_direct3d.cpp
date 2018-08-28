@@ -10,6 +10,7 @@
 #include "memory.h"
 #include "mesh.h"
 #include "array.h"
+#include <cmath>
 
 struct RenderTargetResource
 {
@@ -602,13 +603,27 @@ void RendererD3D::pre_draw_frame()
     }
 }
 
-void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos, const Matrix4x4& projection, DrawLights draw_lights)
+void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos, DrawLights draw_lights)
 {
     pre_draw_frame();
     Matrix4x4 view_matrix = matrix4x4_inverse(matrix4x4_from_rotation_and_translation(cam_rot, cam_pos));
 
     array_empty(objects_to_render);
     render_world_get_objects_to_render(&world, &objects_to_render);
+
+    // TODO: Make configurable!!
+    float near_plane = 0.01f;
+    float far_plane = 1000.0f;
+    float fov = 90.0f;
+    float aspect = ((float)back_buffer.width) / ((float)back_buffer.height);
+    float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
+    float x_scale = y_scale / aspect;
+    Matrix4x4 projection = {
+        x_scale, 0, 0, 0,
+        0, y_scale, 0, 0,
+        0, 0, far_plane/(far_plane-near_plane), 1,
+        0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0 
+    };
 
     for (unsigned i = 0; i < array_num(objects_to_render); ++i)
         draw(objects_to_render[i], view_matrix, projection);

@@ -38,7 +38,7 @@ struct RendererD3D : public Renderer
     void pre_draw_frame();
     void set_scissor_rect(const Rect& r);
     void disable_scissor();
-    void draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos, const Matrix4x4& projection, DrawLights draw_lights);
+    void draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos, DrawLights draw_lights);
     RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height);
     RenderResource& get_resource(RRHandle r);
 
