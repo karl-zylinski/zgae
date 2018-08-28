@@ -1,6 +1,10 @@
 Entity = class(Entity)
 
+id_counter = 1
+
 function Entity:init(rw, position, rotation, geometry, init_func, update_func)
+    self.id = id_counter
+    id_counter = id_counter + 1
     self.position = position or Vector3(0, 0, 0)
     self.rotation = rotation or Quaternion()
     self.update_func = update_func
@@ -16,6 +20,18 @@ function Entity:init(rw, position, rotation, geometry, init_func, update_func)
     if init_func ~= nil then
         init_func(self)
     end
+    world.entities[self.id] = self
+end
+
+function Entity:destroy()
+    if self.render_object ~= nil then
+        if self.render_world ~= nil then
+            render_world.remove(self.render_world, self.render_object)
+        end
+
+        render_object.destroy(self.render_object)
+    end
+    world.entities[self.id] = nil
 end
 
 function Entity:set_geometry(geometry)
