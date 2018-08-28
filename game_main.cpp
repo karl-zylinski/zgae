@@ -8,6 +8,7 @@
 #include "lua_render_world.h"
 #include "lua_keyboard.h"
 #include "lua_mouse.h"
+#include "lua_render_object.h"
 #include "render_object.h"
 #include "mesh.h"
 #include "lua.hpp"
@@ -160,6 +161,7 @@ void game_start(Renderer* renderer)
     lua_render_world_init(L);
     lua_keyboard_init(L);
     lua_mouse_init(L);
+    lua_render_object_init(L);
     const char* files_to_run[] = {
         "game/helpers.lua",
         "game/class.lua",

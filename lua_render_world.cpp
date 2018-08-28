@@ -25,20 +25,17 @@ static int add(lua_State* L)
     LuaValue l_rw = lua_get_ptr(L, 1);
 
     if (!l_rw.valid)
-        Error("ERROR in render_world.add: Expected render world handle in argument 1.");
+        Error("ERROR in render_world.add: Expected RenderWorld pointer in argument 1.");
 
     RenderWorld* rw = (RenderWorld*)l_rw.ptr_val;
     LuaValue l_int = lua_get_integer(L,2);
 
     if (!l_int.valid)
-        Error("ERROR in render_world.add: Expected geometry handle in argument 2.");
+        Error("ERROR in render_world.add: Expected RenderObject handle in argument 2.");
 
-    RenderObject ro = {};
-    ro.world_transform = matrix4x4_identity();
-    ro.geometry_handle = {(unsigned)l_int.int_val};
-    size_t h = render_world_add(rw, &ro);
-    lua_pushnumber(L, (lua_Number)h);
-    return 1;
+    RenderObjectHandle h = {(size_t)l_int.int_val};
+    render_world_add(rw, h);
+    return 0;
 }
 
 static const struct luaL_Reg lib [] = {

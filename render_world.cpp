@@ -4,58 +4,36 @@
 #include "memory.h"
 #include "array.h"
 
-static unsigned long long object_id_counter = 1;
-
-size_t render_world_add(RenderWorld* w, RenderObject* obj)
+void render_world_add(RenderWorld* w, RenderObjectHandle h)
 {
-    if (obj->id == 0)
-        obj->id = object_id_counter++;
-
-    for (size_t i = 0; i < array_num(w->ror_lut); ++i)
-    {
-        if (w->ror_lut[i].used == false)
-        {
-            memcpy(w->ror_lut + i, obj, sizeof(RenderObject));
-            w->ror_lut[i].used = true;
-            array_push(w->active_objects, i);
-            return i;
-        }
-    }
-    size_t idx = array_num(w->ror_lut);
-    RenderObjectResource ror = {};
-    ror.used = true;
-    ror.ro = *obj;
-    array_push(w->ror_lut, ror);
-    array_push(w->active_objects, idx);
-    return idx;
+    array_push(w->D_objects, h);
 } 
 
-void render_world_remove(RenderWorld* w, size_t idx)
+void render_world_remove(RenderWorld* w, RenderObjectHandle h)
 {
-    if (idx < 0 || idx >= array_num(w->ror_lut))
-        Error("Trying to remove non-existing render object!");
-    RenderObjectResource* ror = w->ror_lut + idx;
-    Assert(ror->used, "Trying to remove unused object!");
-    for (size_t i = 0; i < array_num(w->active_objects); ++i)
+    for (size_t i = 0; i < array_num(w->D_objects); ++i)
     {
-        if (w->active_objects[i] == idx)
+        if (w->D_objects[i].h == h.h)
         {
-            array_remove(w->active_objects, i);
+            array_remove(w->D_objects, i);
             break;
         }
     }
-    memzero(ror, sizeof(RenderObjectResource));
-}
-
-RenderObject* render_world_get(RenderWorld* w, size_t idx)
-{
-    RenderObjectResource* ror = w->ror_lut + idx;
-    Assert(ror->used, "Trying to remove unused object!");
-    return &ror->ro;
 }
 
 void render_world_destroy(RenderWorld* w)
 {
-    array_destroy(w->ror_lut);
-    array_destroy(w->active_objects);
+    array_destroy(w->D_objects);
+}
+
+void render_world_get_objects_to_render(const RenderWorld* w, RenderObject* const * ros)
+{
+    RenderObjectResource* ror_lut = render_object_get_lut();
+
+    for (size_t i = 0; i < array_num(w->D_objects); ++i)
+    {
+        RenderObjectResource ror = ror_lut[w->D_objects[i].h];
+        if (ror.used && ror.ro.geometry_handle.h != 0)
+            array_push(*ros, ror.ro);
+    }
 }

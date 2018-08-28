@@ -90,3 +90,11 @@ static void _array_remove(void* a, size_t idx, size_t item_size)
 }
 
 #define array_remove(a, idx) _array_remove(a, idx, sizeof(*(a)))
+
+static void array_empty(void* a)
+{
+    if (a == nullptr)
+        return;
+    
+    array_header(a)->num = 0;
+}

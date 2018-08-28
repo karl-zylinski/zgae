@@ -56,4 +56,5 @@ private:
     RenderTarget back_buffer;
     RenderResource* resources;
     RenderTarget* render_targets[max_render_targets];
+    RenderObject* objects_to_render;
 };

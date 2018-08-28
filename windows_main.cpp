@@ -6,6 +6,7 @@
 #include "mouse.h"
 #include "game_main.h"
 #include "renderer_direct3d.h"
+#include "render_object.h"
 #include <stdio.h>
 
 static void key_pressed_callback(Key key)
@@ -55,5 +56,6 @@ int main()
 
     game_shutdown(&renderer);
     renderer.shutdown();
+    render_object_deinit_lut();
     memory_shutdown();
 }

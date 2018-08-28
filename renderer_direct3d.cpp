@@ -196,6 +196,7 @@ void RendererD3D::shutdown()
     device->Release();
     device_context->Release();
     zfree(resources);
+    array_destroy(objects_to_render);
 }
 
 RRHandle RendererD3D::load_shader(const char* filename)
@@ -606,8 +607,11 @@ void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot
     pre_draw_frame();
     Matrix4x4 view_matrix = matrix4x4_inverse(matrix4x4_from_rotation_and_translation(cam_rot, cam_pos));
 
-    for (unsigned i = 0; i < array_num(world.active_objects); ++i)
-        draw(world.ror_lut[world.active_objects[i]].ro, view_matrix, projection);
+    array_empty(objects_to_render);
+    render_world_get_objects_to_render(&world, &objects_to_render);
+
+    for (unsigned i = 0; i < array_num(objects_to_render); ++i)
+        draw(objects_to_render[i], view_matrix, projection);
 
     present();
 }
