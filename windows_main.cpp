@@ -9,6 +9,7 @@
 #include "render_object.h"
 #include <stdio.h>
 #include "time.h"
+#include <Windows.h>
 
 static void key_pressed_callback(Key key)
 {

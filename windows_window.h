@@ -1,11 +1,9 @@
 #pragma once
-#include <windows.h>
 #include "window_state.h"
 
 struct WindowsWindow
 {
-    HWND handle;
-    WNDCLASSEX window_class;
+    void* handle;
     WindowState state;
 };
 

@@ -1,5 +1,6 @@
 #include "windows_window.h"
 #include "key.h"
+#include <Windows.h>
 
 static Key key_from_windows_key_code(WPARAM key, LPARAM flags)
 {
@@ -176,11 +177,11 @@ void windows_create_window(WindowsWindow* w, const char* title, unsigned width, 
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
     wc.lpszClassName = title;
-    w->window_class = wc;
-    RegisterClassEx(&w->window_class);
+
+    RegisterClassEx(&wc);
     RECT window_rect = {0, 0, (int)width, (int)height};
     AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW, false);
-    w->handle = CreateWindowEx(
+    HWND handle = CreateWindowEx(
         0,
         title,
         title,
@@ -193,8 +194,9 @@ void windows_create_window(WindowsWindow* w, const char* title, unsigned width, 
         nullptr,
         instance_handle,
         nullptr);
-    ShowWindow(w->handle, true);
-    SetWindowLongPtr(w->handle, GWLP_USERDATA, (LONG_PTR)w);
+    w->handle = handle;
+    ShowWindow(handle, true);
+    SetWindowLongPtr(handle, GWLP_USERDATA, (LONG_PTR)w);
     RAWINPUTDEVICE rid = {};
     rid.usUsagePage = 0x01; 
     rid.usUsage = 0x02; 
