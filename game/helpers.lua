@@ -28,9 +28,3 @@ function enum(e, str_vals, offset)
     end
     return e
 end
-
-function error(str)
-    local w = debug.getinfo(2, "S")
-    local error_loc_info = w.short_src..":"..w.linedefined
-    print("ERROR (" .. error_loc_info .. "): " .. str)
-end

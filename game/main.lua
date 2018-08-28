@@ -7,7 +7,6 @@ local state = {
     camera_rot = Quaternion(),
     camera_pos = Vector3(),
     ship = nil,
-    props = {},
     avatar = nil
 }
 

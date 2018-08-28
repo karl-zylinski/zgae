@@ -10,7 +10,7 @@ function Entity:init(rw, position, rotation, geometry, init_func, update_func)
     self.update_func = update_func
     self.render_world = rw
 
-    if geometry ~= nil and rw ~= nil then
+    if geometry ~= nil and self.render_world ~= nil then
         self.render_object = render_object.create()
         render_object.set_geometry(self.render_object, geometry)
         render_object.set_position(self.render_object, self.position)

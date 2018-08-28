@@ -1,7 +1,11 @@
+klass_id_counter = 1
+
 function class(klass, super)
     if not klass then
         klass = {}
-        
+        klass.class_id = klass_id_counter
+        klass_id_counter = klass_id_counter + 1
+
         local meta = {}
         meta.__call = function(self, ...)
             local object = {}
@@ -20,4 +24,8 @@ function class(klass, super)
     klass.__index = klass
     
     return klass
+end
+
+function is_class(obj, klass)
+    return obj ~= nil and klass ~= nil and type(obj) == "table" and type(klass) == "table" and obj.class_id ~= nil and obj.class_id == klass.class_id
 end
