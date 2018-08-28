@@ -5,9 +5,6 @@
 #include "keyboard.h"
 #include "mouse.h"
 #include "game_main.h"
-#include "renderer_direct3d.h"
-#include "render_object.h"
-#include <stdio.h>
 #include "time.h"
 #include <Windows.h>
 
@@ -29,8 +26,6 @@ static void mouse_moved_callback(const Vector2i& delta)
 int main()
 {
     memory_init();
-    keyboard_init();
-    mouse_init();
 
     WindowsWindow win = {};
     windows_create_window(&win, G_program_name, G_default_window_width, G_default_window_height);
@@ -74,6 +69,5 @@ int main()
 
     game_shutdown(&renderer);
     renderer.shutdown();
-    render_object_deinit_lut();
     memory_shutdown();
 }

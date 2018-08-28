@@ -154,6 +154,8 @@ static void run_lua_func(lua_State* L, const char* func)
 
 void game_start(Renderer* renderer)
 {
+    keyboard_init();
+    mouse_init();
     memzero(&state, sizeof(GameState));
     lua_State* L = luaL_newstate();
     state.lua_state = L;
@@ -203,4 +205,5 @@ void game_draw(Renderer* renderer)
 void game_shutdown(Renderer* renderer)
 {
     run_lua_func(state.lua_state, "shutdown");
+    render_object_deinit_lut();
 }
