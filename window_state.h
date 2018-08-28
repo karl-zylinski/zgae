@@ -1,7 +1,8 @@
 #pragma once
 
 #include "key.h"
-#include "math.h"
+
+struct Vector2i;
 
 typedef void(*WindowKeyPressedCallback)(Key key);
 typedef void(*WindowKeyReleasedCallback)(Key key);

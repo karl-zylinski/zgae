@@ -1,7 +1,6 @@
 #pragma once
 #include "render_world.h"
 #include "render_object.h"
-#include "memory.h"
 #include "array.h"
 
 void render_world_add(RenderWorld* w, RenderObjectHandle h)

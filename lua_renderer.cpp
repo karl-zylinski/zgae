@@ -41,7 +41,7 @@ static int draw_world(lua_State* L)
     Quaternion camera_rot = lq.quat_val;
     Vector3 camera_pos = lv3.vec3_val;
 
-    renderer->draw_world(*rw, camera_rot, camera_pos, DrawLights::DrawLights);
+    renderer->draw_world(*rw, camera_rot, camera_pos);
     return 0;
 }
 

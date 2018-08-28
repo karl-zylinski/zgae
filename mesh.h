@@ -1,5 +1,6 @@
 #pragma once
-#include "vertex.h"
+
+struct Vertex;
 
 struct Mesh
 {

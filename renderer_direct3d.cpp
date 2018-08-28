@@ -4,7 +4,6 @@
 #include "vertex.h"
 #include "render_world.h"
 #include "render_object.h"
-#include "config.h"
 #include "rect.h"
 #include "file.h"
 #include "memory.h"
@@ -603,7 +602,7 @@ void RendererD3D::pre_draw_frame()
     }
 }
 
-void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos, DrawLights draw_lights)
+void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos)
 {
     pre_draw_frame();
     Matrix4x4 view_matrix = matrix4x4_inverse(matrix4x4_from_rotation_and_translation(cam_rot, cam_pos));

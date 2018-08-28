@@ -1,8 +1,6 @@
 #pragma once
 
-#include <string.h>
 #include <stdlib.h>
-#include "helpers.h"
 
 // This will eff your performance so only enable when debugging memory leaks in the heap allocator.
 #define ENABLE_MEMORY_TRACING

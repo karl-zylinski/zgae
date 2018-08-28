@@ -15,6 +15,8 @@ struct ID3D11DepthStencilView;
 struct ID3D11RasterizerState;
 struct IDXGISwapChain;
 struct Object;
+struct Matrix4x4;
+struct RenderObject;
 
 struct RendererD3D : public Renderer
 {
@@ -33,7 +35,7 @@ struct RendererD3D : public Renderer
     void pre_draw_frame();
     void set_scissor_rect(const Rect& r);
     void disable_scissor();
-    void draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos, DrawLights draw_lights);
+    void draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos);
     RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height);
     RenderResource& get_resource(RRHandle r);
 

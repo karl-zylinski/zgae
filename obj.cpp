@@ -1,8 +1,9 @@
 #include "obj.h"
-#include <stdlib.h>
 #include "mesh.h"
 #include "array.h"
 #include "file.h"
+#include "math.h"
+#include "vertex.h"
 
 struct ParserState
 {
