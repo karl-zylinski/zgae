@@ -614,7 +614,7 @@ void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot
     // TODO: Make configurable!!
     float near_plane = 0.01f;
     float far_plane = 1000.0f;
-    float fov = 90.0f;
+    float fov = 75.0f;
     float aspect = ((float)back_buffer.width) / ((float)back_buffer.height);
     float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
     float x_scale = y_scale / aspect;

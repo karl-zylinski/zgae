@@ -5,7 +5,8 @@ state = {
     camera_pos = Vector3(),
     ship = nil,
     props = {},
-    render_world = nil
+    render_world = nil,
+    avatar = nil
 }
 
 StaticProp = class(StaticProp)
@@ -52,6 +53,45 @@ function Ship:update()
     state.camera_pos = self.position + self.camera_anchor
 end
 
+Avatar = class(Avatar)
+
+function Avatar:init()
+    self.position = Vector3()
+    self.rotation = Quaternion()
+    self.look_dir = Quaternion()
+end
+
+function Avatar:update()
+    local movement = Vector3()
+
+    if keyboard.is_held(Key.W) then
+        movement.z = movement.z+0.0005
+    end
+
+    if keyboard.is_held(Key.S) then
+        movement.z = movement.z-0.0005
+    end
+
+    if keyboard.is_held(Key.A) then
+        movement.x = movement.x-0.0005
+    end
+
+    if keyboard.is_held(Key.D) then
+        movement.x = movement.x+0.0005
+    end
+
+    local md = mouse.get_delta()
+    local yaw = md.x
+    local pitch = md.y
+    local yawq = Quaternion.from_axis_angle(Vector3(0, yaw, 0), 0.005)
+    self.rotation = (self.rotation*yawq):normalized()
+    local pitchq = Quaternion.from_axis_angle(Vector3(pitch, 0, 0), 0.005)    
+    self.look_dir = (yawq*self.look_dir*pitchq):normalized()
+    state.camera_rot = self.look_dir
+    self.position = self.position + self.look_dir:transform_vec3(movement)
+    state.camera_pos = self.position
+end
+
 local render_world_handle
 
 function start()
@@ -62,36 +102,12 @@ function start()
     table.insert(state.props, p1)
     table.insert(state.props, p2)
     state.ship = Ship()
+    state.avatar = Avatar()
 end
 
 function update()
-    state.ship:update()
-    local movement = Vector3()
-
-    if keyboard.is_held(Key.W) then
-        movement.z = movement.z+0.0005
-    end
-
-    if keyboard.is_held(Key.A) then
-        movement.x = movement.x-0.0005
-    end
-
-    if keyboard.is_held(Key.S) then
-        movement.z = movement.z-0.0005
-    end
-
-    if keyboard.is_held(Key.D) then
-        movement.x = movement.x+0.0005
-    end
-
-    local md = mouse.get_delta()
-
-    if md.x ~= 0 or md.y ~= 0 then
-        state.camera_rot:rotate_y(md.x * 0.001)
-        state.camera_rot:rotate_x(md.y * 0.001)
-    end
-
-    state.camera_pos = state.camera_pos + state.camera_rot:transform_vec3(movement)
+    --state.ship:update()
+    state.avatar:update()
 end
 
 function draw()
