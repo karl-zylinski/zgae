@@ -9,6 +9,7 @@
 #include "lua_keyboard.h"
 #include "lua_mouse.h"
 #include "lua_render_object.h"
+#include "lua_time.h"
 #include "render_object.h"
 #include "mesh.h"
 #include "lua.hpp"
@@ -162,6 +163,7 @@ void game_start(Renderer* renderer)
     lua_keyboard_init(L);
     lua_mouse_init(L);
     lua_render_object_init(L);
+    lua_time_init(L);
     luaL_dostring(L, "package.path = \"./game\"..\"/?.lua;\"..\"./game\"..\"/?/init.lua;\"..package.path");
     luaL_dostring(L, "package.cpath = \"./game\"..\"/?.so;\"..package.cpath");
 

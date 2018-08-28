@@ -63,32 +63,33 @@ end
 
 function Avatar:update()
     local movement = Vector3()
+    local dt = time.dt()
 
     if keyboard.is_held(Key.W) then
-        movement.z = movement.z+0.0005
+        movement.z = movement.z+dt*10
     end
 
     if keyboard.is_held(Key.S) then
-        movement.z = movement.z-0.0005
+        movement.z = movement.z-dt*10
     end
 
     if keyboard.is_held(Key.A) then
-        movement.x = movement.x-0.0005
+        movement.x = movement.x-dt*10
     end
 
     if keyboard.is_held(Key.D) then
-        movement.x = movement.x+0.0005
+        movement.x = movement.x+dt*10
     end
 
     local md = mouse.get_delta()
     local yaw = md.x
     local pitch = md.y
-    local yawq = Quaternion.from_axis_angle(Vector3(0, yaw, 0), 0.005)
+    local yawq = Quaternion.from_axis_angle(Vector3(0, yaw, 0), dt*20)
     self.rotation = (self.rotation*yawq):normalized()
-    local pitchq = Quaternion.from_axis_angle(Vector3(pitch, 0, 0), 0.005)    
+    local pitchq = Quaternion.from_axis_angle(Vector3(pitch, 0, 0), dt*20)
     self.look_dir = (yawq*self.look_dir*pitchq):normalized()
     state.camera_rot = self.look_dir
-    self.position = self.position + self.look_dir:transform_vec3(movement)
+    self.position = self.position + self.rotation:transform_vec3(movement)
     state.camera_pos = self.position
 end
 
