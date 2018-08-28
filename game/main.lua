@@ -2,8 +2,18 @@ state = {
     camera_rot = Quaternion(),
     camera_pos = Vector3(),
     ship = nil,
+    props = {},
     render_world = nil
 }
+
+StaticProp = class(StaticProp)
+
+function StaticProp:init(geometry, position)
+    self.render_obj = render_object.create()
+    render_object.set_geometry(self.render_obj, geometry)
+    render_object.set_position(self.render_obj, position)
+    render_world.add(state.render_world, self.render_obj)
+end
 
 Ship = class(Ship)
 
@@ -13,29 +23,31 @@ function Ship:init()
     local box_geo = renderer.load_geometry_obj("ship.wobj")
     render_object.set_geometry(self.render_obj, box_geo)
     render_world.add(state.render_world, self.render_obj)
+    self.camera_anchor = Vector3(0, 3, -9)
 end
 
 function Ship:update()
     local movement = Vector3()
 
-    if keyboard.is_held(Key.Up) then
+    if keyboard.is_held(Key.W) then
         movement.z = movement.z+0.0005
     end
 
-    if keyboard.is_held(Key.Down) then
+    if keyboard.is_held(Key.S) then
         movement.z = movement.z-0.0005
     end
 
-    if keyboard.is_held(Key.Left) then
-        movement.x = movement.z-0.0005
+    if keyboard.is_held(Key.A) then
+        movement.x = movement.x-0.0005
     end
 
-    if keyboard.is_held(Key.Right) then
+    if keyboard.is_held(Key.D) then
         movement.x = movement.x+0.0005
     end
 
     self.position = self.position + movement
     render_object.set_position(self.render_obj, self.position)
+    state.camera_pos = self.position + self.camera_anchor
 end
 
 Key = enum(Key, "Unknown A B C D E F G H I J K L M N O P Q R S T U V W X Y Z Num0 Num1 Num2 Num3 Num4 Num5 Num6 Num7 Num8 Num9 Escape LControl LShift LAlt LSystem RControl RShift RAlt RSystem Menu LBracket RBracket SemiColon Comma Period Quote Slash BackSlash Tilde Equal Dash Space Return BackSpace Tab PageUp PageDown End Home Insert Delete Add Subtract Multiply Divide Left Right Up Down Numpad0 Numpad1 Numpad2 Numpad3 Numpad4 Numpad5 Numpad6 Numpad7 Numpad8 Numpad9 F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12 F13 F14 F15 Pause NumKeys", -1)
@@ -43,6 +55,11 @@ local render_world_handle
 
 function start()
     state.render_world = render_world.create()
+    local sph_geo = renderer.load_geometry_obj("sphere.wobj")
+    local p1 = StaticProp(sph_geo, Vector3(4, 1, 10))
+    local p2 = StaticProp(sph_geo, Vector3(-7, 0, 21))
+    table.insert(state.props, p1)
+    table.insert(state.props, p2)
     state.ship = Ship()
 end
 
