@@ -1,4 +1,4 @@
-klass_id_counter = 1
+local klass_id_counter = 1
 
 function class(klass, super)
     if not klass then

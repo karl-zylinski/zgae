@@ -1,6 +1,6 @@
 Entity = class(Entity)
 
-id_counter = 1
+local id_counter = 1
 
 function Entity:init(rw, position, rotation, geometry, init_func, update_func)
     self.id = id_counter
