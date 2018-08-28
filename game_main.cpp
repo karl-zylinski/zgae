@@ -162,6 +162,9 @@ void game_start(Renderer* renderer)
     lua_keyboard_init(L);
     lua_mouse_init(L);
     lua_render_object_init(L);
+    luaL_dostring(L, "package.path = \"./game\"..\"/?.lua;\"..\"./game\"..\"/?/init.lua;\"..package.path");
+    luaL_dostring(L, "package.cpath = \"./game\"..\"/?.so;\"..package.cpath");
+
     const char* files_to_run[] = {
         "game/helpers.lua",
         "game/class.lua",
