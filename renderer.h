@@ -20,16 +20,11 @@ struct Renderer
     virtual void shutdown() = 0;
     virtual RRHandle load_shader(const char* filename) = 0;
     virtual void set_shader(RRHandle shader) = 0;
-    virtual RenderTarget create_back_buffer() = 0;
     virtual RenderTarget create_render_texture(PixelFormat pf, unsigned width, unsigned height) = 0;
-    virtual unsigned find_free_resource_handle() const = 0;
     virtual RRHandle load_mesh(Mesh* m) = 0;
     virtual void unload_resource(RRHandle handle) = 0;
     virtual void set_render_target(RenderTarget* rt) = 0;
     virtual void set_render_targets(RenderTarget** rt, unsigned num) = 0;
-    virtual void draw(const RenderObject& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix) = 0;
-    virtual void clear_depth_stencil() = 0;
-    virtual void clear_render_target(RenderTarget* sc, const Color& color) = 0;
     virtual void present() = 0;
     virtual MappedTexture map_texture(const RenderTarget& rt) = 0;
     virtual void unmap_texture(const MappedTexture& m) = 0;

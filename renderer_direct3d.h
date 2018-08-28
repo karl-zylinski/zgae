@@ -22,16 +22,11 @@ struct RendererD3D : public Renderer
     void shutdown();
     RRHandle load_shader(const char* filename);
     void set_shader(RRHandle shader);
-    RenderTarget create_back_buffer();
     RenderTarget create_render_texture(PixelFormat pf, unsigned width, unsigned height);
-    unsigned find_free_resource_handle() const;
     RRHandle load_mesh(Mesh* m);
     void unload_resource(RRHandle handle);
     void set_render_target(RenderTarget* rt);
     void set_render_targets(RenderTarget** rt, unsigned num);
-    void draw(const RenderObject& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix);
-    void clear_depth_stencil();
-    void clear_render_target(RenderTarget* sc, const Color& color);
     void present();
     MappedTexture map_texture(const RenderTarget& rt);
     void unmap_texture(const MappedTexture& m);
@@ -43,18 +38,24 @@ struct RendererD3D : public Renderer
     RenderResource& get_resource(RRHandle r);
 
 private:
+    RenderTarget create_back_buffer();
+    unsigned find_free_resource_handle() const;
+    void draw(const RenderObject& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix);
+    void clear_depth_stencil();
+    void clear_render_target(RenderTarget* sc, const Color& color);
+    
     static const unsigned max_resources = 4096;
     static const unsigned max_render_targets = 4;
-    void* window_handle;
-    ID3D11Device* device;
-    ID3D11DeviceContext* device_context;
-    ID3D11Buffer* constant_buffer;
-    ID3D11Texture2D* depth_stencil_texture;
-    ID3D11DepthStencilView* depth_stencil_view;
-    ID3D11RasterizerState* raster_state;
-    IDXGISwapChain* swap_chain;
-    RenderTarget back_buffer;
-    RenderResource* resources;
-    RenderTarget* render_targets[max_render_targets];
-    RenderObject* objects_to_render;
+    void* _window_handle;
+    ID3D11Device* _device;
+    ID3D11DeviceContext* _device_context;
+    ID3D11Buffer* _constant_buffer;
+    ID3D11Texture2D* _depth_stencil_texture;
+    ID3D11DepthStencilView* _depth_stencil_view;
+    ID3D11RasterizerState* _raster_state;
+    IDXGISwapChain* _swap_chain;
+    RenderTarget _back_buffer;
+    RenderResource* _resources;
+    RenderTarget* _render_targets[max_render_targets];
+    RenderObject* _objects_to_render;
 };
