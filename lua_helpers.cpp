@@ -79,3 +79,16 @@ LuaValue lua_get_vec3(lua_State* L, int arg)
     lv.vec3_val = v;
     return lv;
 }
+
+LuaValue lua_get_string(lua_State* L, int arg)
+{
+    if (!lua_isstring(L, arg))
+    {
+        return {false};
+    }
+
+    const char* str = lua_tostring(L, arg);
+    LuaValue lv = {true};
+    lv.str_val = str;
+    return lv;
+}

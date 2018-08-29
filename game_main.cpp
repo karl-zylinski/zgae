@@ -7,7 +7,9 @@
 #include "lua_mouse.h"
 #include "lua_render_object.h"
 #include "lua_time.h"
+#include "lua_physics.h"
 #include "render_object.h"
+#include "physics.h"
 #include "lua.hpp"
 
 struct GameState
@@ -38,6 +40,7 @@ void game_start(Renderer* renderer)
     luaL_openlibs(L);
     lua_renderer_init(L, renderer);
     lua_render_world_init(L);
+    lua_physics_init(L);
     lua_keyboard_init(L);
     lua_mouse_init(L);
     lua_render_object_init(L);
@@ -82,4 +85,5 @@ void game_shutdown(Renderer* renderer)
 {
     run_lua_func(state.lua_state, "shutdown");
     render_object_deinit_lut();
+    physics_shutdown();
 }

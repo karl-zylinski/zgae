@@ -20,3 +20,4 @@ LuaValue lua_get_double(lua_State* L, int arg);
 LuaValue lua_get_ptr(lua_State* L, int arg);
 LuaValue lua_get_quat(lua_State* L, int arg);
 LuaValue lua_get_vec3(lua_State* L, int arg);
+LuaValue lua_get_string(lua_State* L, int arg);
