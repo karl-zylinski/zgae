@@ -8,7 +8,7 @@
 
 //TODO: needs physicsworld??
 
-struct PhysicsShape
+struct Collider
 {
     Vector3* vertices;
     Vector3* transformed_vertices;
@@ -17,124 +17,121 @@ struct PhysicsShape
     Quaternion rotation;
 };
 
-struct PhysicsShapeResource
+struct ColliderResource
 {
-    PhysicsShape ps;
+    Collider c;
     bool dirty_transform;
     bool used;
 };
 
-static PhysicsShapeResource* D_shapes = nullptr;
+static ColliderResource* D_colliders = nullptr;
 
-PhysicsShapeHandle physics_add_mesh(const Mesh& m, const Vector3& pos, const Quaternion& rot)
+void check_dirty_transform(ColliderHandle h)
 {
-    PhysicsShape ps = {};
-    size_t vsize = sizeof(Vector3) * m.num_vertices;
-    ps.vertices = (Vector3*)zalloc(vsize);
-    ps.transformed_vertices = (Vector3*)zalloc(vsize);
+    if (!D_colliders[h.h].dirty_transform)
+        return;
 
-    for (size_t i = 0; i < m.num_vertices; ++i)
-        ps.vertices[i] = m.vertices[i].position;
-
-    memcpy(ps.transformed_vertices, ps.vertices, vsize);
-    ps.num_vertices = m.num_vertices;
-    ps.position = pos;
-    ps.rotation = rot;
-
-    for (size_t i = 0; i < ps.num_vertices; ++i)
+    Collider& c = D_colliders[h.h].c;
+    memcpy(c.transformed_vertices, c.vertices, sizeof(Vector3) * c.num_vertices);
+    for (size_t i = 0; i < c.num_vertices; ++i)
     {
-        ps.transformed_vertices[i] = quaternion_transform_vector3(ps.rotation, ps.transformed_vertices[i]);
-        ps.transformed_vertices[i] += ps.position;
+        c.transformed_vertices[i] = quaternion_transform_vector3(c.rotation, c.transformed_vertices[i]);
+        c.transformed_vertices[i] += c.position;
     }
 
-    for (size_t i = 0; i < array_num(D_shapes); ++i)
+    D_colliders[h.h].dirty_transform = false;
+}
+
+static GJKShape gjk_shape_from_collider(const Collider& c)
+{
+    GJKShape s = {};
+    s.vertices = c.transformed_vertices;
+    s.num_vertices = c.num_vertices;
+    return s;
+}
+
+bool physics_intersect(ColliderHandle h1, ColliderHandle h2)
+{
+    Assert(D_colliders[h1.h].used && D_colliders[h2.h].used, "Tried to intersect one ore more invalid physics shapes");
+    check_dirty_transform(h1);
+    check_dirty_transform(h2);
+    GJKShape s1 = gjk_shape_from_collider(D_colliders[h1.h].c);
+    GJKShape s2 = gjk_shape_from_collider(D_colliders[h2.h].c);
+    return gjk_intersect(s1, s2);
+}
+
+ColliderHandle physics_create_mesh_collider(const Mesh& m)
+{
+    Collider c = {};
+    size_t vsize = sizeof(Vector3) * m.num_vertices;
+    c.vertices = (Vector3*)zalloc(vsize);
+    c.transformed_vertices = (Vector3*)zalloc(vsize);
+
+    for (size_t i = 0; i < m.num_vertices; ++i)
+        c.vertices[i] = m.vertices[i].position;
+
+    memcpy(c.transformed_vertices, c.vertices, vsize);
+    c.num_vertices = m.num_vertices;
+    c.rotation = quaternion_identity();
+
+    for (size_t i = 0; i < c.num_vertices; ++i)
     {
-        if (D_shapes[i].used == false)
+        c.transformed_vertices[i] = quaternion_transform_vector3(c.rotation, c.transformed_vertices[i]);
+        c.transformed_vertices[i] += c.position;
+    }
+
+    for (size_t i = 0; i < array_num(D_colliders); ++i)
+    {
+        if (D_colliders[i].used == false)
         {
-            D_shapes[i].ps = ps;
-            D_shapes[i].used = true;
+            D_colliders[i].c = c;
+            D_colliders[i].used = true;
             return {i};
         }
     }
 
-    size_t idx = array_num(D_shapes);
-    PhysicsShapeResource psr = {};
-    psr.used = true;
-    psr.ps = ps;
-    array_push(D_shapes, psr);
+    size_t idx = array_num(D_colliders);
+    ColliderResource cr = {};
+    cr.used = true;
+    cr.c = c;
+    array_push(D_colliders, cr);
     return {idx};
 }
 
-
-void check_dirty_transform(PhysicsShapeHandle h)
+void physics_set_collider_position(ColliderHandle h, const Vector3& pos)
 {
-    if (!D_shapes[h.h].dirty_transform)
+    Assert(D_colliders[h.h].used, "Trying to set position on unused PhyscsShape");
+    Collider& c = D_colliders[h.h].c;
+
+    if (pos == c.position)
         return;
 
-    PhysicsShape& ps = D_shapes[h.h].ps;
-    memcpy(ps.transformed_vertices, ps.vertices, sizeof(Vector3) * ps.num_vertices);
-    for (size_t i = 0; i < ps.num_vertices; ++i)
-    {
-        ps.transformed_vertices[i] = quaternion_transform_vector3(ps.rotation, ps.transformed_vertices[i]);
-        ps.transformed_vertices[i] += ps.position;
-    }
-
-    D_shapes[h.h].dirty_transform = false;
+    c.position = pos;
+    D_colliders[h.h].dirty_transform = true;
 }
 
-static GJKShape gjk_shape_from_physics_shape(const PhysicsShape& ps)
+void physics_set_collider_rotation(ColliderHandle h, const Quaternion& rot)
 {
-    GJKShape s = {};
-    s.vertices = ps.transformed_vertices;
-    s.num_vertices = ps.num_vertices;
-    return s;
-}
+    Assert(D_colliders[h.h].used, "Trying to set position on unused PhyscsShape");
+    Collider& c = D_colliders[h.h].c;
 
-bool physics_intersect(PhysicsShapeHandle h1, PhysicsShapeHandle h2)
-{
-    Assert(D_shapes[h1.h].used && D_shapes[h2.h].used, "Tried to intersect one ore more invalid physics shapes");
-    check_dirty_transform(h1);
-    check_dirty_transform(h2);
-
-    GJKShape s1 = gjk_shape_from_physics_shape(D_shapes[h1.h].ps);
-    GJKShape s2 = gjk_shape_from_physics_shape(D_shapes[h2.h].ps);
-    return gjk_intersect(s1, s2);
-}
-
-void physics_set_shape_position(PhysicsShapeHandle h, const Vector3& pos)
-{
-    Assert(D_shapes[h.h].used, "Trying to set position on unused PhyscsShape");
-    PhysicsShape& ps = D_shapes[h.h].ps;
-
-    if (pos == ps.position)
+    if (rot == c.rotation)
         return;
 
-    ps.position = pos;
-    D_shapes[h.h].dirty_transform = true;
-}
-
-void physics_set_shape_rotation(PhysicsShapeHandle h, const Quaternion& rot)
-{
-    Assert(D_shapes[h.h].used, "Trying to set position on unused PhyscsShape");
-    PhysicsShape& ps = D_shapes[h.h].ps;
-
-    if (rot == ps.rotation)
-        return;
-
-    ps.rotation = rot;
-    D_shapes[h.h].dirty_transform = true;
+    c.rotation = rot;
+    D_colliders[h.h].dirty_transform = true;
 }
 
 void physics_shutdown()
 {
-    for (size_t i = 0; i < array_num(D_shapes); ++i)
+    for (size_t i = 0; i < array_num(D_colliders); ++i)
     {
-        if (!D_shapes[i].used)
+        if (!D_colliders[i].used)
             continue;
 
-        zfree(D_shapes[i].ps.vertices);
-        zfree(D_shapes[i].ps.transformed_vertices);
+        zfree(D_colliders[i].c.vertices);
+        zfree(D_colliders[i].c.transformed_vertices);
     }
 
-    array_destroy(D_shapes);
+    array_destroy(D_colliders);
 }

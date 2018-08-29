@@ -29,3 +29,11 @@ end
 function is_class(obj, klass)
     return obj ~= nil and klass ~= nil and type(obj) == "table" and type(klass) == "table" and obj.class_id ~= nil and obj.class_id == klass.class_id
 end
+
+function is_type(obj, t)
+    if type(t) == "string" then
+        return type(obj) == t
+    end
+
+    return is_class(obj, t)
+end

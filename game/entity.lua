@@ -31,6 +31,7 @@ function Entity:destroy()
         end
 
         render_object.destroy(self.render_object)
+        physics.destroy_collider(self.collider)
     end
     world.entities[self.id] = nil
 end
@@ -60,11 +61,23 @@ function Entity:set_position(position)
     if self.render_object ~= nil then
         render_object.set_position(self.render_object, self.position)
     end
+
+    if self.collider ~= nil then
+        physics.set_collider_position(self.collider, self.position)
+    end
+end
+
+function Entity:move(delta)
+    if not is_class(delta, Vector3) then
+        error("Arg 1 nil (delta): Vector3 required")
+    end
+
+    self:set_position(self.position + delta)
 end
 
 function Entity:set_rotation(rotation)
     if rotation == nil then
-        error("Trying to set rotation to nil")
+        error("Arg 1 nil (rotation): Quaternion requried")
     end
 
     self.rotation = rotation
@@ -72,8 +85,36 @@ function Entity:set_rotation(rotation)
     if self.render_object ~= nil then
         render_object.set_rotation(self.render_object, self.rotation)
     end
+
+    if self.collider ~= nil then
+        physics.set_collider_rotation(self.collider, self.rotation)
+    end
 end
 
+function Entity:set_collider(collider)
+    if collider ~= self.collider and self.collider ~= nil then
+        physics.destroy_collider(self.collider)
+    end
+
+    self.collider = collider
+
+    if self.collider ~= nil then
+        physics.set_collider_position(self.collider, self.position)
+        physics.set_collider_rotation(self.collider, self.rotation)
+    end
+end
+
+function Entity:intersects(other)
+    if not is_class(other, Entity) then
+        error("Entity:intersects, arg 1: Entity required")
+    end
+
+    if self.collider == nil or other.collider == nil then
+        return false
+    end
+
+    return physics.intersect(self.collider, other.collider)
+end
 
 function Entity:update()
     if self.update_func == nil then
