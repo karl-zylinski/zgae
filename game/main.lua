@@ -59,7 +59,6 @@ function update()
     physics.set_shape_rotation(state.ps2, state.box2.rotation)
 
     local lax = physics.intersect(state.ps1, state.ps2)
-    print(lax == true)
     table.foreach(world.entities, function(id, e) e:update() end)
     state.camera_pos = state.avatar.position
     state.camera_rot = state.avatar.look_dir

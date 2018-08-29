@@ -26,7 +26,7 @@ static Vector3 support_diff(const GJKShape& s1, const GJKShape& s2, const Vector
 
 struct Simplex
 {
-    Vector3 vertices[4];
+    Vector3 vertices[32];
     unsigned char size;
 };
 
@@ -138,7 +138,13 @@ static bool do_simplex(Simplex* s, Vector3* search_dir)
     return false;
 }
 
-bool gjk_intersect(const GJKShape& s1, const GJKShape& s2)
+struct GJKResult
+{
+    bool collision;
+    Simplex simplex;
+};
+
+static GJKResult run_gjk(const GJKShape& s1, const GJKShape& s2)
 {
     Simplex s = {};
 
@@ -151,13 +157,18 @@ bool gjk_intersect(const GJKShape& s1, const GJKShape& s2)
         Vector3 simplex_candidate = support_diff(s1, s2, search_dir);
         float d = vector3_dot(simplex_candidate, search_dir);
         if (d < 0)
-            return false;
+            return {false};
 
         s.vertices[s.size++] = simplex_candidate;
 
         if (do_simplex(&s, &search_dir))
-            return true;
+            return {true, s};
     }
 
-    return false;
+    return {false};
+}
+
+bool gjk_intersect(const GJKShape& s1, const GJKShape& s2)
+{
+    return run_gjk(s1, s2).collision;
 }
