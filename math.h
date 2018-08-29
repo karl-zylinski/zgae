@@ -43,6 +43,7 @@ Vector3 operator+(const Vector3& v1, const Vector3& v2);
 Vector3 operator-(const Vector3& v1, const Vector3& v2);
 Vector3 operator*(const Vector3& v, float s);
 Vector3 operator*(const Vector3& v1, const Vector3& v2);
+bool operator==(const Vector3& v1, const Vector3& v2);
 void operator+=(Vector4& v1, const Vector4& v2);
 Vector4 operator+(const Vector4& v1, const Vector4& v2);
 Vector4 operator*(const Vector4& v, float s);
