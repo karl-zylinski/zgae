@@ -1,17 +1,17 @@
 #include "gjk.h"
 #include "math.h"
 
-static Vector3 support(const GJKShape& s, const Vector3& d)
+static Vec3 support(const GJKShape& s, const Vec3& d)
 {
-    float max_dot = vector3_dot(s.vertices[0], d);
+    float max_dot = dot(s.vertices[0], d);
     size_t max_dot_idx = 0;
 
     for (size_t i = 1; i < s.num_vertices; ++i)
     {
-        float dot = vector3_dot(s.vertices[i], d);
-        if (dot > max_dot)
+        float cur_dot = dot(s.vertices[i], d);
+        if (cur_dot > max_dot)
         {
-            max_dot = dot;
+            max_dot = cur_dot;
             max_dot_idx = i;
         }
     }
@@ -19,67 +19,67 @@ static Vector3 support(const GJKShape& s, const Vector3& d)
     return s.vertices[max_dot_idx];
 }
 
-static Vector3 support_diff(const GJKShape& s1, const GJKShape& s2, const Vector3& d)
+static Vec3 support_diff(const GJKShape& s1, const GJKShape& s2, const Vec3& d)
 {
     return support(s1, d) - support(s2, -d);
 }
 
 struct Simplex
 {
-    Vector3 vertices[32];
+    Vec3 vertices[32];
     unsigned char size;
 };
 
-static bool do_simplex(Simplex* s, Vector3* search_dir)
+static bool do_simplex(Simplex* s, Vec3* search_dir)
 {
     switch(s->size)
     {
         case 2:
         {
-            Vector3& B = s->vertices[0];
-            Vector3& A = s->vertices[1];
-            Vector3 AB = B - A;
-            Vector3 AO = -A;
+            Vec3& B = s->vertices[0];
+            Vec3& A = s->vertices[1];
+            Vec3 AB = B - A;
+            Vec3 AO = -A;
 
-            if (vector3_dot(AB, AO) > 0)
-                *search_dir = vector3_cross(AB, vector3_cross(AO, AB));
+            if (dot(AB, AO) > 0)
+                *search_dir = cross(AB, cross(AO, AB));
             else
                 *search_dir = AO;
         } break;
         case 3:
         {
-            Vector3& C = s->vertices[0];
-            Vector3& B = s->vertices[1];
-            Vector3& A = s->vertices[2];
-            Vector3 AB = B - A;
-            Vector3 AC = C - A;
-            Vector3 ABC = vector3_cross(AB, AC);
-            Vector3 AO = -A;
+            Vec3& C = s->vertices[0];
+            Vec3& B = s->vertices[1];
+            Vec3& A = s->vertices[2];
+            Vec3 AB = B - A;
+            Vec3 AC = C - A;
+            Vec3 ABC = cross(AB, AC);
+            Vec3 AO = -A;
 
-            if (vector3_dot(vector3_cross(ABC, AC), AO) > 0)
+            if (dot(cross(ABC, AC), AO) > 0)
             {
-                if (vector3_dot(AC, AO) > 0)
-                    *search_dir = vector3_cross(AC, vector3_cross(AO, AC));
+                if (dot(AC, AO) > 0)
+                    *search_dir = cross(AC, cross(AO, AC));
                 else
                 {
-                    if (vector3_dot(AB, AO) > 0)
-                        *search_dir = vector3_cross(AB, vector3_cross(AO, AB));
+                    if (dot(AB, AO) > 0)
+                        *search_dir = cross(AB, cross(AO, AB));
                     else
                         *search_dir = AO;
                 }
             }
             else
             {
-                if (vector3_dot(vector3_cross(AB, ABC), AO) > 0)
+                if (dot(cross(AB, ABC), AO) > 0)
                 {
-                    if (vector3_dot(AB, AO) > 0)
-                        *search_dir = vector3_cross(AB, vector3_cross(AO, AB));
+                    if (dot(AB, AO) > 0)
+                        *search_dir = cross(AB, cross(AO, AB));
                     else
                         *search_dir = AO;
                 }
                 else
                 {
-                    if (vector3_dot(ABC, AO) > 0)
+                    if (dot(ABC, AO) > 0)
                         *search_dir = ABC;
                     else
                         *search_dir = -ABC;
@@ -88,20 +88,20 @@ static bool do_simplex(Simplex* s, Vector3* search_dir)
         } break;
         case 4:
         {
-            Vector3 D = s->vertices[0];
-            Vector3 C = s->vertices[1];
-            Vector3 B = s->vertices[2];
-            Vector3 A = s->vertices[3];
-            Vector3 AB = B - A;
-            Vector3 AC = C - A;
-            Vector3 AD = D - A;
-            Vector3 AO = -A;
+            Vec3 D = s->vertices[0];
+            Vec3 C = s->vertices[1];
+            Vec3 B = s->vertices[2];
+            Vec3 A = s->vertices[3];
+            Vec3 AB = B - A;
+            Vec3 AC = C - A;
+            Vec3 AD = D - A;
+            Vec3 AO = -A;
 
-            Vector3 ABC = vector3_cross(AB, AC);
-            Vector3 ACD = vector3_cross(AC, AD);
-            Vector3 ADB = vector3_cross(AD, AB);
+            Vec3 ABC = cross(AB, AC);
+            Vec3 ACD = cross(AC, AD);
+            Vec3 ADB = cross(AD, AB);
 
-            if (vector3_dot(ABC, AO) > 0)
+            if (dot(ABC, AO) > 0)
             {
                 s->size = 3;
                 s->vertices[0] = C;
@@ -111,7 +111,7 @@ static bool do_simplex(Simplex* s, Vector3* search_dir)
                 return false;
             }
 
-            if (vector3_dot(ACD, AO) > 0)
+            if (dot(ACD, AO) > 0)
             {
                 s->size = 3;
                 s->vertices[0] = D;
@@ -121,7 +121,7 @@ static bool do_simplex(Simplex* s, Vector3* search_dir)
                 return false;
             }
 
-            if (vector3_dot(ADB, AO) > 0)
+            if (dot(ADB, AO) > 0)
             {
                 s->size = 3;
                 s->vertices[0] = B;
@@ -148,14 +148,14 @@ static GJKResult run_gjk(const GJKShape& s1, const GJKShape& s2)
 {
     Simplex s = {};
 
-    Vector3 first_point = support_diff(s1, s2, {1, 0, 0});
+    Vec3 first_point = support_diff(s1, s2, {1, 0, 0});
     s.vertices[s.size++] = first_point;
-    Vector3 search_dir = -first_point;
+    Vec3 search_dir = -first_point;
 
     while (true)
     {
-        Vector3 simplex_candidate = support_diff(s1, s2, search_dir);
-        float d = vector3_dot(simplex_candidate, search_dir);
+        Vec3 simplex_candidate = support_diff(s1, s2, search_dir);
+        float d = dot(simplex_candidate, search_dir);
         if (d < 0)
             return {false};
 

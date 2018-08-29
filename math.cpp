@@ -1,7 +1,7 @@
 #include "math.h"
 #include <cmath>
 
-Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2)
+Mat4 operator*(const Mat4& m1, const Mat4& m2)
 {
     return
     {
@@ -27,66 +27,66 @@ Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2)
     };
 }
 
-void operator+=(Vector2& v1, const Vector2& v2)
+void operator+=(Vec2& v1, const Vec2& v2)
 {
     v1.x += v2.x;
     v1.y += v2.y;
 }
 
-Vector2 operator+(const Vector2& v1, const Vector2& v2)
+Vec2 operator+(const Vec2& v1, const Vec2& v2)
 {
     return {v1.x + v2.x, v1.y + v2.y};
 }
 
-void operator+=(Vector2i& v1, const Vector2i& v2)
+void operator+=(Vec2i& v1, const Vec2i& v2)
 {
     v1.x += v2.x;
     v1.y += v2.y;
 }
 
-Vector2i operator+(const Vector2i& v1, const Vector2i& v2)
+Vec2i operator+(const Vec2i& v1, const Vec2i& v2)
 {
     return {v1.x + v2.x, v1.y + v2.y};
 }
 
-void operator+=(Vector3& v1, const Vector3& v2)
+void operator+=(Vec3& v1, const Vec3& v2)
 {
     v1.x += v2.x;
     v1.y += v2.y;
     v1.z += v2.z;
 }
 
-Vector3 operator-(const Vector3& v)
+Vec3 operator-(const Vec3& v)
 {
     return {-v.x, -v.y, -v.z};
 }
 
-Vector3 operator+(const Vector3& v1, const Vector3& v2)
+Vec3 operator+(const Vec3& v1, const Vec3& v2)
 {
     return {v1.x + v2.x, v1.y + v2.y, v1.z + v2.z};
 }
 
-Vector3 operator-(const Vector3& v1, const Vector3& v2)
+Vec3 operator-(const Vec3& v1, const Vec3& v2)
 {
     return {v1.x - v2.x, v1.y - v2.y, v1.z - v2.z};
 }
 
-Vector3 operator*(const Vector3& v, float s)
+Vec3 operator*(const Vec3& v, float s)
 {
     return {v.x * s, v.y * s, v.z * s};
 }
 
-Vector3 operator*(const Vector3& v1, const Vector3& v2)
+Vec3 operator*(const Vec3& v1, const Vec3& v2)
 {
     return {v1.x * v2.x, v1.y * v2.y, v1.z * v2.z};
 }
 
-bool operator==(const Vector3& v1, const Vector3& v2)
+bool operator==(const Vec3& v1, const Vec3& v2)
 {
     return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
 }
 
-void operator+=(Vector4& v1, const Vector4& v2)
+void operator+=(Vec4& v1, const Vec4& v2)
 {
     v1.x += v2.x;
     v1.y += v2.y;
@@ -94,22 +94,22 @@ void operator+=(Vector4& v1, const Vector4& v2)
     v1.w += v2.w;
 }
 
-Vector4 operator+(const Vector4& v1, const Vector4& v2)
+Vec4 operator+(const Vec4& v1, const Vec4& v2)
 {
     return {v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w + v2.w};
 }
 
-Vector4 operator*(const Vector4& v, float s)
+Vec4 operator*(const Vec4& v, float s)
 {
     return {v.x * s, v.y * s, v.z * s, v.w * s};
 }
 
-Vector4 operator*(const Vector4& v1, const Vector4& v2)
+Vec4 operator*(const Vec4& v1, const Vec4& v2)
 {
     return {v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w * v2.w};
 }
 
-Vector4 operator*(const Vector4& v, const Matrix4x4& m)
+Vec4 operator*(const Vec4& v, const Mat4& m)
 {
     return
     {
@@ -120,7 +120,7 @@ Vector4 operator*(const Vector4& v, const Matrix4x4& m)
     };
 }
 
-Matrix4x4 operator*(const Matrix4x4& m, float s)
+Mat4 operator*(const Mat4& m, float s)
 {
     return
     {
@@ -131,12 +131,12 @@ Matrix4x4 operator*(const Matrix4x4& m, float s)
     };
 }
 
-Vector4 operator-(const Vector4& v1, const Vector4& v2)
+Vec4 operator-(const Vec4& v1, const Vec4& v2)
 {
     return {v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w};
 }
 
-Quaternion operator*(const Quaternion& a, const Quaternion& b)
+Quat operator*(const Quat& a, const Quat& b)
 {
     return
     {
@@ -147,27 +147,27 @@ Quaternion operator*(const Quaternion& a, const Quaternion& b)
     };
 }
 
-bool operator==(const Quaternion& q1, const Quaternion& q2)
+bool operator==(const Quat& q1, const Quat& q2)
 {
     return q1.x == q2.x && q1.y == q2.y && q1.z == q2.z && q1.w == q2.w;
 }
 
-bool almost_equal(const Vector2& v1, const Vector2& v2)
+bool almost_equal(const Vec2& v1, const Vec2& v2)
 {
     return almost_equal(v1.x, v2.x) && almost_equal(v1.y, v2.y);
 }
 
-bool almost_equal(const Vector3& v1, const Vector3& v2)
+bool almost_equal(const Vec3& v1, const Vec3& v2)
 {
     return almost_equal(v1.x, v2.x) && almost_equal(v1.y, v2.y) && almost_equal(v1.z, v2.z);
 }
 
-bool almost_equal(const Vector4& v1, const Vector4& v2)
+bool almost_equal(const Vec4& v1, const Vec4& v2)
 {
     return almost_equal(v1.x, v2.x) && almost_equal(v1.y, v2.y) && almost_equal(v1.z, v2.z) && v1.w == v2.w;
 }
 
-Matrix4x4 matrix4x4_identity()
+Mat4 mat4_identity()
 {
     return
     {
@@ -178,7 +178,7 @@ Matrix4x4 matrix4x4_identity()
     };
 }
 
-Matrix4x4 matrix4x4_inverse(const Matrix4x4& m)
+Mat4 mat4_inverse(const Mat4& m)
 {
     const float* a = &m.x.x;
     float a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
@@ -202,7 +202,7 @@ Matrix4x4 matrix4x4_inverse(const Matrix4x4& m)
     // Calculate the determinant
     float det = 1.0f / (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
 
-    Matrix4x4 result;
+    Mat4 result;
     result.x.x = (a11 * b11 - a12 * b10 + a13 * b09) * det;
     result.x.y = (a02 * b10 - a01 * b11 - a03 * b09) * det;
     result.x.z = (a31 * b05 - a32 * b04 + a33 * b03) * det;
@@ -222,7 +222,7 @@ Matrix4x4 matrix4x4_inverse(const Matrix4x4& m)
     return result;
 }
 
-Matrix4x4 matrix4x4_from_rotation_and_translation(const Quaternion& q, const Vector3& t)
+Mat4 mat4_from_rotation_and_translation(const Quat& q, const Vec3& t)
 {
     const float x = q.x, y = q.y, z = q.z, w = q.w,
         x2 = x + x,
@@ -239,7 +239,7 @@ Matrix4x4 matrix4x4_from_rotation_and_translation(const Quaternion& q, const Vec
         wy = w * y2,
         wz = w * z2;
 
-    Matrix4x4 out = {};
+    Mat4 out = {};
     out.x.x = 1 - (yy + zz);
     out.x.y = xy + wz;
     out.x.z = xz - wy;
@@ -259,17 +259,17 @@ Matrix4x4 matrix4x4_from_rotation_and_translation(const Quaternion& q, const Vec
     return out;
 }
 
-Vector3 matrix4x4_right(const Matrix4x4& m)
+Vec3 mat4_right(const Mat4& m)
 {
     return {m.x.x, m.x.y, m.x.z};
 }
 
-Vector3 matrix4x4_up(const Matrix4x4& m)
+Vec3 mat4_up(const Mat4& m)
 {
     return {m.y.x, m.y.y, m.y.z};
 }
 
-Vector3 vector3_cross(const Vector3& v1, const Vector3& v2)
+Vec3 cross(const Vec3& v1, const Vec3& v2)
 {
     return 
     {
@@ -279,24 +279,24 @@ Vector3 vector3_cross(const Vector3& v1, const Vector3& v2)
     };
 }
 
-float vector3_length(const Vector3& v)
+float vec3_len(const Vec3& v)
 {
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-float vector3_squared_length(const Vector3& v)
+float vec3_sq_length(const Vec3& v)
 {
     return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
-float vector3_dot(const Vector3& v1, const Vector3& v2)
+float dot(const Vec3& v1, const Vec3& v2)
 {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-Vector3 vector3_normalize(const Vector3& v)
+Vec3 vec3_normalize(const Vec3& v)
 {
-    float len = vector3_length(v);
+    float len = vec3_len(v);
     return
     {
         v.x / len,
@@ -305,24 +305,24 @@ Vector3 vector3_normalize(const Vector3& v)
     };
 }
 
-Vector3 vector3_tangent(const Vector3& v)
+Vec3 vec3_tangent(const Vec3& v)
 {
-    Vector3 c1 = vector3_cross(v, {0.0, 0.0, 1.0});
-    Vector3 c2 = vector3_cross(v, {0.0, 1.0, 0.0});
-    return vector3_normalize(vector3_squared_length(c1) > vector3_squared_length(c2) ? c1 : c2);
+    Vec3 c1 = cross(v, {0.0, 0.0, 1.0});
+    Vec3 c2 = cross(v, {0.0, 1.0, 0.0});
+    return vec3_normalize(vec3_sq_length(c1) > vec3_sq_length(c2) ? c1 : c2);
 }
 
-Vector3 vector3_bitangent(const Vector3& v)
+Vec3 vec3_bitangent(const Vec3& v)
 {
-    return vector3_normalize(vector3_cross(vector3_tangent(v), v));
+    return vec3_normalize(cross(vec3_tangent(v), v));
 }
 
-float vector4_dot(const Vector4& v1, const Vector4& v2)
+float dot(const Vec4& v1, const Vec4& v2)
 {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
 }
 
-Quaternion quaternion_rotate_x(const Quaternion& q, float rads)
+Quat quat_rotate_x(const Quat& q, float rads)
 {
     float adjusted_rads = rads * 0.5f; 
     float bx = sin(adjusted_rads);
@@ -336,7 +336,7 @@ Quaternion quaternion_rotate_x(const Quaternion& q, float rads)
     };
 }
 
-Quaternion quaternion_rotate_y(const Quaternion& q, float rads)
+Quat quat_rotate_y(const Quat& q, float rads)
 {
     float adjusted_rads = rads * 0.5f;
     float by = sin(adjusted_rads);
@@ -350,7 +350,7 @@ Quaternion quaternion_rotate_y(const Quaternion& q, float rads)
     };
 }
 
-Quaternion quaternion_rotate_z(const Quaternion& q, float rads)
+Quat quat_rotate_z(const Quat& q, float rads)
 {
     float adjusted_rads = rads * 0.5f;
     float bz = sin(adjusted_rads);
@@ -364,12 +364,12 @@ Quaternion quaternion_rotate_z(const Quaternion& q, float rads)
     };
 }
 
-Quaternion quaternion_from_axis_angle(const Vector3& axis, float angle)
+Quat quat_from_axis_angle(const Vec3& axis, float angle)
 {
     float half_angle = angle * 0.5f;
     float s = sin(half_angle);
     return
-    quaternion_normalize({
+    quat_normalize({
         axis.x * s,
         axis.y * s,
         axis.z * s,
@@ -377,12 +377,12 @@ Quaternion quaternion_from_axis_angle(const Vector3& axis, float angle)
     });
 }
 
-Quaternion quaternion_identity()
+Quat quat_identity()
 {
     return {0, 0, 0, 1};
 }
 
-Quaternion quaternion_normalize(const Quaternion& q)
+Quat quat_normalize(const Quat& q)
 {
     float len = sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
     return
@@ -394,27 +394,27 @@ Quaternion quaternion_normalize(const Quaternion& q)
     };
 }
 
-Quaternion quaternion_look_at(const Vector3& source, const Vector3& dest)
+Quat quat_look_at(const Vec3& source, const Vec3& dest)
 {
-    Vector3 source_to_dest = vector3_normalize(dest - source);
-    float dot = vector3_dot(vector3_forward, source_to_dest);
+    Vec3 source_to_dest = vec3_normalize(dest - source);
+    float d = dot(vec3_forward, source_to_dest);
 
-    if (fabs(dot - (-1.0f)) < SmallNumber)
+    if (fabs(d - (-1.0f)) < SmallNumber)
     {
-        return quaternion_from_axis_angle(vector3_up, PI);
+        return quat_from_axis_angle(vec3_up, PI);
     }
 
-    if (fabs(dot - ( 1.0f)) < SmallNumber)
+    if (fabs(d - ( 1.0f)) < SmallNumber)
     {
-        return quaternion_identity();
+        return quat_identity();
     }
 
-    float rot_angle = acos(dot);
-    Vector3 rot_axis = vector3_normalize(vector3_cross(vector3_forward, source_to_dest));
-    return quaternion_from_axis_angle(rot_axis, rot_angle);
+    float rot_angle = acos(d);
+    Vec3 rot_axis = vec3_normalize(cross(vec3_forward, source_to_dest));
+    return quat_from_axis_angle(rot_axis, rot_angle);
 }
 
-Quaternion quaternion_conjugate(const Quaternion& q)
+Quat quat_conjugate(const Quat& q)
 {
     return
     {
@@ -425,11 +425,11 @@ Quaternion quaternion_conjugate(const Quaternion& q)
     };
 }
 
-Vector3 quaternion_transform_vector3(const Quaternion& q, const Vector3& v)
+Vec3 quat_transform_vec3(const Quat& q, const Vec3& v)
 {
-    const Vector3 qv = {q.x, q.y, q.z};
-    const Vector3 uv = vector3_cross(qv, v);
-    const Vector3 uuv = vector3_cross(qv, uv);
+    const Vec3 qv = {q.x, q.y, q.z};
+    const Vec3 uv = cross(qv, v);
+    const Vec3 uuv = cross(qv, uv);
     return v + ((uv * q.w) + uuv) * 2.0f;
 }
 

@@ -1,11 +1,11 @@
 
 /*struct EPAFace {
     float distance;
-    Vector3 normal;
+    Vec3 normal;
     unsigned simplex_index;
 }
 
-static void simplex_insert(Simplex* s, const Vector3& v, unsigned idx)
+static void simplex_insert(Simplex* s, const Vec3& v, unsigned idx)
 {
     if (idx == s->size)
     {
@@ -14,7 +14,7 @@ static void simplex_insert(Simplex* s, const Vector3& v, unsigned idx)
         return;
     }
 
-    memmove(s->vertices + idx + 1, s->vertices + idx, sizeof(Vector3) * (s->size - idx));
+    memmove(s->vertices + idx + 1, s->vertices + idx, sizeof(Vec3) * (s->size - idx));
     s[idx] = v;
     ++s->size;
 }
@@ -28,24 +28,24 @@ static EPAFace find_closest_face(const Simplex& s)
     {
         int j = ((i + 1) == s.size) ? 0 : i + 1;
         int k = ((k + 1) == s.size) ? 0 : k + 1;
-        Vector3 A = s.vertices[i];
-        Vector3 B = s.vertices[j];
-        Vector3 C = s.vertices[k];
+        Vec3 A = s.vertices[i];
+        Vec3 B = s.vertices[j];
+        Vec3 C = s.vertices[k];
 
-        Vector3 AB = B - A;
-        Vector3 AC = C - A;
-        Vector3 OA = -A;
-        Vector3 ABC = vector3_cross(AB, vector3_cross(OA, AB))
+        Vec3 AB = B - A;
+        Vec3 AC = C - A;
+        Vec3 OA = -A;
+        Vec3 ABC = cross(AB, cross(OA, AB))
     }
 }
 
-static Vector3 run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s)
+static Vec3 run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s)
 {
     while(true)
     {
-        Vector3 f = find_closest_face(s);
-        Vector3 d = support(s1, s2, f.normal);
-        float depth = vector3_dot(d, f.normal);
+        Vec3 f = find_closest_face(s);
+        Vec3 d = support(s1, s2, f.normal);
+        float depth = dot(d, f.normal);
 
         if (almost_equal(depth, f.distance))
             return f.normal * depth;
@@ -54,7 +54,7 @@ static Vector3 run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s)
     }
 }
 
-Vector3 gjk_epa_intersect_and_solve(const GJKShape& s1, const GJKShape& s2)
+Vec3 gjk_epa_intersect_and_solve(const GJKShape& s1, const GJKShape& s2)
 {
     GJKResult res = run_gjk(s1, s2);
 
@@ -65,7 +65,7 @@ Vector3 gjk_epa_intersect_and_solve(const GJKShape& s1, const GJKShape& s2)
 }*/
 
 
-static Vector3 get_spherical_coords(unsigned lat_number, unsigned long_number, unsigned latitude_bands, unsigned longitude_bands)
+static Vec3 get_spherical_coords(unsigned lat_number, unsigned long_number, unsigned latitude_bands, unsigned longitude_bands)
 {
     float theta = lat_number * PI / latitude_bands;
     float sin_theta = sinf(theta);
@@ -94,7 +94,7 @@ static Mesh create_sphere(float radius)
     unsigned cur_vertex = 0;
     unsigned cur_index = 0;
 
-    Vector3 top_coord{0, 1, 0};
+    Vec3 top_coord{0, 1, 0};
     m.vertices[0].position = top_coord * radius;
     m.vertices[0].normal = top_coord;
     m.vertices[0].color = color_random();
@@ -122,7 +122,7 @@ static Mesh create_sphere(float radius)
     {
         for (unsigned long_number = 0; long_number < longitude_bands; long_number++)
         {
-            Vector3 coords = get_spherical_coords(lat_number, long_number, latitude_bands, longitude_bands);
+            Vec3 coords = get_spherical_coords(lat_number, long_number, latitude_bands, longitude_bands);
             m.vertices[cur_vertex].position = coords * radius;
             m.vertices[cur_vertex].normal = coords;
             m.vertices[cur_vertex].color = color_random();
@@ -172,7 +172,7 @@ static Mesh create_sphere(float radius)
     }
 
 
-    Vector3 bottom_coord{0, -1, 0};
+    Vec3 bottom_coord{0, -1, 0};
     m.vertices[m.num_vertices - 1].position = bottom_coord * radius;
     m.vertices[m.num_vertices - 1].normal = bottom_coord;
     m.vertices[m.num_vertices - 1].color = color_random();

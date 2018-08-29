@@ -2,11 +2,11 @@
 
 #include "key.h"
 
-struct Vector2i;
+struct Vec2i;
 
 typedef void(*WindowKeyPressedCallback)(Key key);
 typedef void(*WindowKeyReleasedCallback)(Key key);
-typedef void(*WindowMouseMovedCalledback)(const Vector2i& delta);
+typedef void(*WindowMouseMovedCalledback)(const Vec2i& delta);
 
 struct WindowState
 {

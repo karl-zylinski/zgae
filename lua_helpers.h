@@ -10,8 +10,8 @@ struct LuaValue
         const char* str_val;
         double dbl_val;
         void* ptr_val;
-        Quaternion quat_val;
-        Vector3 vec3_val;
+        Quat quat_val;
+        Vec3 vec3_val;
     };
 };
 

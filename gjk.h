@@ -1,10 +1,10 @@
 #pragma once
 
-struct Vector3;
+struct Vec3;
 
 struct GJKShape
 {
-    Vector3* vertices;
+    Vec3* vertices;
     size_t num_vertices;
 };
 

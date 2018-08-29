@@ -18,7 +18,7 @@ static void key_released_callback(Key key)
     keyboard_released(key);
 }
 
-static void mouse_moved_callback(const Vector2i& delta)
+static void mouse_moved_callback(const Vec2i& delta)
 {
     mouse_add_delta(delta);
 }

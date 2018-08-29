@@ -54,12 +54,12 @@ static int set_position(lua_State* L)
     LuaValue l_vec = lua_get_vec3(L, 2);
 
     if (!l_vec.valid)
-        Error("ERROR in render_object.set_position: Expected Vector3 in argument 2.");
+        Error("ERROR in render_object.set_position: Expected Vec3 in argument 2.");
 
-    Vector3 pos = l_vec.vec3_val;
+    Vec3 pos = l_vec.vec3_val;
     RenderObject* ro = render_object_get(h);
     ro->position = pos;
-    ro->world_transform = matrix4x4_from_rotation_and_translation(ro->rotation, ro->position);
+    ro->world_transform = mat4_from_rotation_and_translation(ro->rotation, ro->position);
     return 0;
 }
 
@@ -75,12 +75,12 @@ static int set_rotation(lua_State* L)
     LuaValue l_quat = lua_get_quat(L, 2);
 
     if (!l_quat.valid)
-        Error("ERROR in render_object.set_rotation: Expected Quaternion in argument 2.");
+        Error("ERROR in render_object.set_rotation: Expected Quat in argument 2.");
 
-    Quaternion rot = l_quat.quat_val;
+    Quat rot = l_quat.quat_val;
     RenderObject* ro = render_object_get(h);
     ro->rotation = rot;
-    ro->world_transform = matrix4x4_from_rotation_and_translation(ro->rotation, ro->position);
+    ro->world_transform = mat4_from_rotation_and_translation(ro->rotation, ro->position);
     return 0;
 }
 

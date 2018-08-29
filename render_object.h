@@ -5,9 +5,9 @@
 struct RenderObject
 {
     unsigned long long id;
-    Matrix4x4 world_transform;
-    Vector3 position;
-    Quaternion rotation;
+    Mat4 world_transform;
+    Vec3 position;
+    Quat rotation;
     RRHandle geometry_handle;
     bool is_light;
 };

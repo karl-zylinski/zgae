@@ -10,11 +10,11 @@
 
 struct Collider
 {
-    Vector3* vertices;
-    Vector3* transformed_vertices;
+    Vec3* vertices;
+    Vec3* transformed_vertices;
     size_t num_vertices;
-    Vector3 position;
-    Quaternion rotation;
+    Vec3 position;
+    Quat rotation;
 };
 
 struct ColliderResource
@@ -32,10 +32,10 @@ void check_dirty_transform(ColliderHandle h)
         return;
 
     Collider& c = D_colliders[h.h].c;
-    memcpy(c.transformed_vertices, c.vertices, sizeof(Vector3) * c.num_vertices);
+    memcpy(c.transformed_vertices, c.vertices, sizeof(Vec3) * c.num_vertices);
     for (size_t i = 0; i < c.num_vertices; ++i)
     {
-        c.transformed_vertices[i] = quaternion_transform_vector3(c.rotation, c.transformed_vertices[i]);
+        c.transformed_vertices[i] = quat_transform_vec3(c.rotation, c.transformed_vertices[i]);
         c.transformed_vertices[i] += c.position;
     }
 
@@ -63,20 +63,20 @@ bool physics_intersect(ColliderHandle h1, ColliderHandle h2)
 ColliderHandle physics_create_mesh_collider(const Mesh& m)
 {
     Collider c = {};
-    size_t vsize = sizeof(Vector3) * m.num_vertices;
-    c.vertices = (Vector3*)zalloc(vsize);
-    c.transformed_vertices = (Vector3*)zalloc(vsize);
+    size_t vsize = sizeof(Vec3) * m.num_vertices;
+    c.vertices = (Vec3*)zalloc(vsize);
+    c.transformed_vertices = (Vec3*)zalloc(vsize);
 
     for (size_t i = 0; i < m.num_vertices; ++i)
         c.vertices[i] = m.vertices[i].position;
 
     memcpy(c.transformed_vertices, c.vertices, vsize);
     c.num_vertices = m.num_vertices;
-    c.rotation = quaternion_identity();
+    c.rotation = quat_identity();
 
     for (size_t i = 0; i < c.num_vertices; ++i)
     {
-        c.transformed_vertices[i] = quaternion_transform_vector3(c.rotation, c.transformed_vertices[i]);
+        c.transformed_vertices[i] = quat_transform_vec3(c.rotation, c.transformed_vertices[i]);
         c.transformed_vertices[i] += c.position;
     }
 
@@ -98,7 +98,7 @@ ColliderHandle physics_create_mesh_collider(const Mesh& m)
     return {idx};
 }
 
-void physics_set_collider_position(ColliderHandle h, const Vector3& pos)
+void physics_set_collider_position(ColliderHandle h, const Vec3& pos)
 {
     Assert(D_colliders[h.h].used, "Trying to set position on unused PhyscsShape");
     Collider& c = D_colliders[h.h].c;
@@ -110,7 +110,7 @@ void physics_set_collider_position(ColliderHandle h, const Vector3& pos)
     D_colliders[h.h].dirty_transform = true;
 }
 
-void physics_set_collider_rotation(ColliderHandle h, const Quaternion& rot)
+void physics_set_collider_rotation(ColliderHandle h, const Quat& rot)
 {
     Assert(D_colliders[h.h].used, "Trying to set position on unused PhyscsShape");
     Collider& c = D_colliders[h.h].c;

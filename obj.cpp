@@ -27,9 +27,9 @@ struct ParsedFace
 
 struct ParsedData
 {
-    Vector3* vertices;
-    Vector3* normals;
-    Vector2* uvs;
+    Vec3* vertices;
+    Vec3* normals;
+    Vec2* uvs;
     ParsedFace* faces;
 };
 
@@ -43,7 +43,7 @@ static void skip_to_numeric(ParserState* ps)
 
 static void parse_uv(ParserState* ps, ParsedData* pd)
 {
-    Vector2 uv = {};
+    Vec2 uv = {};
     skip_to_numeric(ps);
     uv.x = strtof((const char*)ps->head, (char**)&ps->head);
     skip_to_numeric(ps);
@@ -53,7 +53,7 @@ static void parse_uv(ParserState* ps, ParsedData* pd)
 
 static void parse_normal(ParserState* ps, ParsedData* pd)
 {
-    Vector3 normal = {};
+    Vec3 normal = {};
     skip_to_numeric(ps);
     normal.x = strtof((const char*)ps->head, (char**)&ps->head);
     skip_to_numeric(ps);
@@ -65,7 +65,7 @@ static void parse_normal(ParserState* ps, ParsedData* pd)
 
 static void parse_vertex(ParserState* ps, ParsedData* pd)
 {
-    Vector3 vertex = {};
+    Vec3 vertex = {};
     skip_to_numeric(ps);
     vertex.x = strtof((const char*)ps->head, (char**)&ps->head);
     skip_to_numeric(ps);
@@ -158,7 +158,7 @@ static int get_existing_vertex(const Vertex* vertices, const Vertex& v1)
     return -1;
 }
 
-static void add_vertex_to_mesh(Vertex** vertices, unsigned** indices, const Vector3& pos, const Vector3& normal, const Vector2& uv, const Color& c)
+static void add_vertex_to_mesh(Vertex** vertices, unsigned** indices, const Vec3& pos, const Vec3& normal, const Vec2& uv, const Color& c)
 {
     Vertex v = {};
     v.position = pos;

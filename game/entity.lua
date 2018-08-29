@@ -5,8 +5,8 @@ local id_counter = 1
 function Entity:init(rw, position, rotation, geometry, init_func, update_func)
     self.id = id_counter
     id_counter = id_counter + 1
-    self.position = position or Vector3(0, 0, 0)
-    self.rotation = rotation or Quaternion()
+    self.position = position or Vec3(0, 0, 0)
+    self.rotation = rotation or Quat()
     self.update_func = update_func
     self.render_world = rw
 
@@ -68,8 +68,8 @@ function Entity:set_position(position)
 end
 
 function Entity:move(delta)
-    if not is_class(delta, Vector3) then
-        error("Arg 1 nil (delta): Vector3 required")
+    if not is_class(delta, Vec3) then
+        error("Arg 1 nil (delta): Vec3 required")
     end
 
     self:set_position(self.position + delta)
@@ -77,7 +77,7 @@ end
 
 function Entity:set_rotation(rotation)
     if rotation == nil then
-        error("Arg 1 nil (rotation): Quaternion requried")
+        error("Arg 1 nil (rotation): Quat requried")
     end
 
     self.rotation = rotation

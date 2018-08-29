@@ -1,9 +1,9 @@
 local function avatar_init(e)
-    e.look_dir = Quaternion()
+    e.look_dir = Quat()
 end
 
 local function avatar_update(e)
-    local movement = Vector3()
+    local movement = Vec3()
     local dt = time.dt()
 
     if keyboard.is_held(Key.W) then
@@ -25,9 +25,9 @@ local function avatar_update(e)
     local md = mouse.get_delta()
     local yaw = md.x
     local pitch = md.y
-    local yawq = Quaternion.from_axis_angle(Vector3(0, yaw, 0), dt*20)
+    local yawq = Quat.from_axis_angle(Vec3(0, yaw, 0), dt*20)
     e.rotation = (e.rotation*yawq):normalized()
-    local pitchq = Quaternion.from_axis_angle(Vector3(pitch, 0, 0), dt*20)
+    local pitchq = Quat.from_axis_angle(Vec3(pitch, 0, 0), dt*20)
     e.look_dir = (yawq*e.look_dir*pitchq):normalized()
     e.position = e.position + e.rotation:transform_vec3(movement)
 end

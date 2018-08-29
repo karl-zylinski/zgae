@@ -4,8 +4,8 @@
 
 struct Vertex
 {
-    Vector3 position;
-    Vector3 normal;
-    Vector2 uv;
+    Vec3 position;
+    Vec3 normal;
+    Vec2 uv;
     Color color;
 };

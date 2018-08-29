@@ -19,9 +19,9 @@ struct RenderTargetResource
 
 struct ConstantBuffer
 {
-    Matrix4x4 model_view_projection;
-    Matrix4x4 model;
-    Matrix4x4 projection;
+    Mat4 model_view_projection;
+    Mat4 model;
+    Mat4 projection;
 };
 
 struct Geometry {
@@ -501,7 +501,7 @@ void RendererD3D::set_render_targets(RenderTarget** rts, unsigned num)
     _device_context->RSSetViewports(1, &viewport);
 }
 
-void RendererD3D::draw(const RenderObject& object, const Matrix4x4& view_matrix, const Matrix4x4& projection_matrix)
+void RendererD3D::draw(const RenderObject& object, const Mat4& view_matrix, const Mat4& projection_matrix)
 {
     auto geometry = get_resource(object.geometry_handle).geometry;
     ConstantBuffer constant_buffer_data = {};
@@ -602,10 +602,10 @@ void RendererD3D::pre_draw_frame()
     }
 }
 
-void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot, const Vector3& cam_pos)
+void RendererD3D::draw_world(const RenderWorld& world, const Quat& cam_rot, const Vec3& cam_pos)
 {
     pre_draw_frame();
-    Matrix4x4 view_matrix = matrix4x4_inverse(matrix4x4_from_rotation_and_translation(cam_rot, cam_pos));
+    Mat4 view_matrix = mat4_inverse(mat4_from_rotation_and_translation(cam_rot, cam_pos));
 
     array_empty(_objects_to_render);
     render_world_get_objects_to_render(&world, &_objects_to_render);
@@ -617,7 +617,7 @@ void RendererD3D::draw_world(const RenderWorld& world, const Quaternion& cam_rot
     float aspect = ((float)_back_buffer.width) / ((float)_back_buffer.height);
     float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
     float x_scale = y_scale / aspect;
-    Matrix4x4 projection = {
+    Mat4 projection = {
         x_scale, 0, 0, 0,
         0, y_scale, 0, 0,
         0, 0, far_plane/(far_plane-near_plane), 1,

@@ -1,9 +1,9 @@
 local function ship_init(e)
-    e.camera_anchor = Vector3(0, 3, -9)
+    e.camera_anchor = Vec3(0, 3, -9)
 end
 
 local function ship_update(e)
-    local movement = Vector3()
+    local movement = Vec3()
     local dt = time.dt()
 
     if keyboard.is_held(Key.Up) then

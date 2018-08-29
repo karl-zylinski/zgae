@@ -61,7 +61,7 @@ static int set_collider_position(lua_State* L)
     LuaValue l_vec = lua_get_vec3(L, 2);
 
     if (!l_vec.valid)
-        Error("ERROR in physics.set_collider_position: Expected Vector3 in argument 2.");
+        Error("ERROR in physics.set_collider_position: Expected Vec3 in argument 2.");
 
     physics_set_collider_position(h, l_vec.vec3_val);
     return 0;
@@ -78,7 +78,7 @@ static int set_collider_rotation(lua_State* L)
     LuaValue l_quat = lua_get_quat(L, 2);
 
     if (!l_quat.valid)
-        Error("ERROR in physics.set_collider_rotation: Expected Quaternion in argument 2.");
+        Error("ERROR in physics.set_collider_rotation: Expected Quat in argument 2.");
 
     physics_set_collider_rotation(h, l_quat.quat_val);
     return 0;

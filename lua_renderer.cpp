@@ -31,15 +31,15 @@ static int draw_world(lua_State* L)
     LuaValue lq = lua_get_quat(L, 2);
 
     if (!lq.valid)
-        Error("ERROR in renderer.draw_world: Expected Quaternion in argument 2.");
+        Error("ERROR in renderer.draw_world: Expected Quat in argument 2.");
 
     LuaValue lv3 = lua_get_vec3(L, 3);
 
     if (!lv3.valid)
-        Error("ERROR in renderer.draw_world: Expected Vector3 in argument 3.");
+        Error("ERROR in renderer.draw_world: Expected Vec3 in argument 3.");
 
-    Quaternion camera_rot = lq.quat_val;
-    Vector3 camera_pos = lv3.vec3_val;
+    Quat camera_rot = lq.quat_val;
+    Vec3 camera_pos = lv3.vec3_val;
 
     renderer->draw_world(*rw, camera_rot, camera_pos);
     return 0;

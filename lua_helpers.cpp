@@ -53,7 +53,7 @@ LuaValue lua_get_quat(lua_State* L, int arg)
     if (!lx.valid || !ly.valid || !lz.valid || !lw.valid)
         return {false};
 
-    Quaternion q = {(float)lx.dbl_val, (float)ly.dbl_val, (float)lz.dbl_val, (float)lw.dbl_val };
+    Quat q = {(float)lx.dbl_val, (float)ly.dbl_val, (float)lz.dbl_val, (float)lw.dbl_val };
     LuaValue lv = {};
     lv.valid = true;
     lv.quat_val = q;
@@ -73,7 +73,7 @@ LuaValue lua_get_vec3(lua_State* L, int arg)
     if (!lx.valid || !ly.valid || !lz.valid)
         return {false};
 
-    Vector3 v = {(float)lx.dbl_val, (float)ly.dbl_val, (float)lz.dbl_val };
+    Vec3 v = {(float)lx.dbl_val, (float)ly.dbl_val, (float)lz.dbl_val };
     LuaValue lv = {};
     lv.valid = true;
     lv.vec3_val = v;

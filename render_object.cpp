@@ -8,7 +8,7 @@ RenderObjectHandle render_object_create()
 {
     RenderObject obj = {};
     obj.id = object_id_counter++;
-    obj.world_transform = matrix4x4_identity();
+    obj.world_transform = mat4_identity();
 
     for (size_t i = 0; i < array_num(D_ror_lut); ++i)
     {

@@ -4,8 +4,8 @@ require 'avatar'
 require 'ship'
 
 local state = {
-    camera_rot = Quaternion(),
-    camera_pos = Vector3(),
+    camera_rot = Quat(),
+    camera_pos = Vec3(),
     ship = nil,
     avatar = nil
 }
@@ -22,22 +22,22 @@ end
 function start()
     world.render_world = render_world.create()
     --local sph_geo = renderer.load_geometry_obj("sphere.wobj")
-    --local p1 = spawn_entity(Vector3(4, 1, 10), nil, sph_geo)
-    --local p2 = spawn_entity(Vector3(-7, 0, 21), nil, sph_geo)
+    --local p1 = spawn_entity(Vec3(4, 1, 10), nil, sph_geo)
+    --local p2 = spawn_entity(Vec3(-7, 0, 21), nil, sph_geo)
     --state.ship = spawn_ship(nil, nil)
     state.avatar = spawn_avatar(nil, nil)
     local box_geo = renderer.load_geometry_obj("box.wobj")
-    state.box1 = spawn_entity(Vector3(0, 0, 10), nil, box_geo)
+    state.box1 = spawn_entity(Vec3(0, 0, 10), nil, box_geo)
     state.box1:set_collider(physics.create_mesh_collider("box.wobj"))
-    state.box2 = spawn_entity(Vector3(-1, 0.5, 11), nil, box_geo)
+    state.box2 = spawn_entity(Vec3(-1, 0.5, 11), nil, box_geo)
     state.box2:set_collider(physics.create_mesh_collider("box.wobj"))
 end
 
 function update()
-    local rot = Quaternion.from_axis_angle(Vector3(0, 1, 0), time.dt())
+    local rot = Quat.from_axis_angle(Vec3(0, 1, 0), time.dt())
     state.box2:set_rotation((state.box2.rotation*rot):normalized());
 
-    local box2_move = Vector3()
+    local box2_move = Vec3()
     if keyboard.is_held(Key.Left) then
         box2_move.x = -time.dt()
     end
