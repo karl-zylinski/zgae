@@ -22,7 +22,12 @@ static int add_mesh(lua_State* L)
     if (!l_vec.valid)
         Error("ERROR in physics.add_mesh: Expected Vector3 in argument 2.");
 
-    PhysicsShapeHandle h = physics_add_mesh(lm.mesh, l_vec.vec3_val);
+    LuaValue l_quat = lua_get_quat(L, 3);
+
+    if (!l_quat.valid)
+        Error("ERROR in physics.add_mesh: Expected Quaternion in argument 3.");
+
+    PhysicsShapeHandle h = physics_add_mesh(lm.mesh, l_vec.vec3_val, l_quat.quat_val);
     zfree(lm.mesh.vertices);
     zfree(lm.mesh.indices);
     lua_pushnumber(L, (lua_Number)h.h);
@@ -49,7 +54,6 @@ static int intersect(lua_State* L)
     return 1;
 }
 
-
 static int set_shape_position(lua_State* L)
 {
     LuaValue h_int = lua_get_integer(L, 1);
@@ -67,11 +71,28 @@ static int set_shape_position(lua_State* L)
     return 0;
 }
 
+static int set_shape_rotation(lua_State* L)
+{
+    LuaValue h_int = lua_get_integer(L, 1);
+
+    if (!h_int.valid)
+        Error("ERROR in physics.set_shape_rotation: Expected PhysicsShapeHandle in argument 1.");
+
+    PhysicsShapeHandle h = {(size_t)h_int.int_val};
+    LuaValue l_quat = lua_get_quat(L, 2);
+
+    if (!l_quat.valid)
+        Error("ERROR in physics.set_shape_rotation: Expected Quaternion in argument 2.");
+
+    physics_set_shape_rotation(h, l_quat.quat_val);
+    return 0;
+}
 
 static const struct luaL_Reg lib [] = {
     {"add_mesh", add_mesh},
     {"intersect", intersect},
     {"set_shape_position", set_shape_position},
+    {"set_shape_rotation", set_shape_rotation},
     {NULL, NULL}
 };
 

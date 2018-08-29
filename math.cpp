@@ -147,6 +147,11 @@ Quaternion operator*(const Quaternion& a, const Quaternion& b)
     };
 }
 
+bool operator==(const Quaternion& q1, const Quaternion& q2)
+{
+    return q1.x == q2.x && q1.y == q2.y && q1.z == q2.z && q1.w == q2.w;
+}
+
 bool almost_equal(const Vector2& v1, const Vector2& v2)
 {
     return almost_equal(v1.x, v2.x) && almost_equal(v1.y, v2.y);

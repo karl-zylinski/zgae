@@ -14,6 +14,7 @@ struct PhysicsShape
     Vector3* transformed_vertices;
     size_t num_vertices;
     Vector3 position;
+    Quaternion rotation;
 };
 
 struct PhysicsShapeResource
@@ -25,7 +26,7 @@ struct PhysicsShapeResource
 
 static PhysicsShapeResource* D_shapes = nullptr;
 
-PhysicsShapeHandle physics_add_mesh(const Mesh& m, const Vector3& pos)
+PhysicsShapeHandle physics_add_mesh(const Mesh& m, const Vector3& pos, const Quaternion& rot)
 {
     PhysicsShape ps = {};
     size_t vsize = sizeof(Vector3) * m.num_vertices;
@@ -38,9 +39,13 @@ PhysicsShapeHandle physics_add_mesh(const Mesh& m, const Vector3& pos)
     memcpy(ps.transformed_vertices, ps.vertices, vsize);
     ps.num_vertices = m.num_vertices;
     ps.position = pos;
+    ps.rotation = rot;
 
     for (size_t i = 0; i < ps.num_vertices; ++i)
+    {
+        ps.transformed_vertices[i] = quaternion_transform_vector3(ps.rotation, ps.transformed_vertices[i]);
         ps.transformed_vertices[i] += ps.position;
+    }
 
     for (size_t i = 0; i < array_num(D_shapes); ++i)
     {
@@ -69,7 +74,10 @@ void check_dirty_transform(PhysicsShapeHandle h)
     PhysicsShape& ps = D_shapes[h.h].ps;
     memcpy(ps.transformed_vertices, ps.vertices, sizeof(Vector3) * ps.num_vertices);
     for (size_t i = 0; i < ps.num_vertices; ++i)
+    {
+        ps.transformed_vertices[i] = quaternion_transform_vector3(ps.rotation, ps.transformed_vertices[i]);
         ps.transformed_vertices[i] += ps.position;
+    }
 
     D_shapes[h.h].dirty_transform = false;
 }
@@ -102,6 +110,18 @@ void physics_set_shape_position(PhysicsShapeHandle h, const Vector3& pos)
         return;
 
     ps.position = pos;
+    D_shapes[h.h].dirty_transform = true;
+}
+
+void physics_set_shape_rotation(PhysicsShapeHandle h, const Quaternion& rot)
+{
+    Assert(D_shapes[h.h].used, "Trying to set position on unused PhyscsShape");
+    PhysicsShape& ps = D_shapes[h.h].ps;
+
+    if (rot == ps.rotation)
+        return;
+
+    ps.rotation = rot;
     D_shapes[h.h].dirty_transform = true;
 }
 

@@ -58,9 +58,29 @@ static int set_position(lua_State* L)
 
     Vector3 pos = l_vec.vec3_val;
     RenderObject* ro = render_object_get(h);
-    ro->world_transform.w.x = pos.x;
-    ro->world_transform.w.y = pos.y;
-    ro->world_transform.w.z = pos.z;
+    ro->position = pos;
+    ro->world_transform = matrix4x4_from_rotation_and_translation(ro->rotation, ro->position);
+    return 0;
+}
+
+static int set_rotation(lua_State* L)
+{
+    LuaValue l_roh = lua_get_integer(L, 1);
+
+    if (!l_roh.valid)
+        Error("ERROR in render_object.set_rotation: Expected RenderObject handle in argument 1.");
+
+    RenderObjectHandle h = {(size_t)l_roh.int_val};
+
+    LuaValue l_quat = lua_get_quat(L, 2);
+
+    if (!l_quat.valid)
+        Error("ERROR in render_object.set_rotation: Expected Quaternion in argument 2.");
+
+    Quaternion rot = l_quat.quat_val;
+    RenderObject* ro = render_object_get(h);
+    ro->rotation = rot;
+    ro->world_transform = matrix4x4_from_rotation_and_translation(ro->rotation, ro->position);
     return 0;
 }
 
@@ -69,6 +89,7 @@ static const struct luaL_Reg lib [] = {
     {"destroy", destroy},
     {"set_geometry", set_geometry},
     {"set_position", set_position},
+    {"set_rotation", set_rotation},
     {NULL, NULL}
 };
 

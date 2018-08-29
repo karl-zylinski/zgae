@@ -28,13 +28,16 @@ function start()
     state.avatar = spawn_avatar(nil, nil)
     local box_geo = renderer.load_geometry_obj("box.wobj")
     state.box1 = spawn_entity(Vector3(0, 0, 10), nil, box_geo)
-    state.ps1 = physics.add_mesh("box.wobj", Vector3(0, 0, 10))
+    state.ps1 = physics.add_mesh("box.wobj", Vector3(0, 0, 10), Quaternion())
     state.ps2_pos = Vector3(-1, 0.5, 11)
-    state.box2 = spawn_entity(state.ps2_pos, nil, box_geo)
-    state.ps2 = physics.add_mesh("box.wobj", state.ps2_pos)
+    state.box2 = spawn_entity(state.ps2_pos, Quaternion(), box_geo)
+    state.ps2 = physics.add_mesh("box.wobj", state.ps2_pos, Quaternion())
 end
 
 function update()
+    local rot = Quaternion.from_axis_angle(Vector3(0, 1, 0), time.dt())
+    state.box2:set_rotation((state.box2.rotation*rot):normalized());
+
     if keyboard.is_held(Key.Left) then
         state.ps2_pos.x = state.ps2_pos.x-time.dt()
     end
@@ -53,6 +56,7 @@ function update()
 
     state.box2:set_position(state.ps2_pos)
     physics.set_shape_position(state.ps2, state.ps2_pos)
+    physics.set_shape_rotation(state.ps2, state.box2.rotation)
 
     local lax = physics.intersect(state.ps1, state.ps2)
     print(lax == true)

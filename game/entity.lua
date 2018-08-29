@@ -14,6 +14,7 @@ function Entity:init(rw, position, rotation, geometry, init_func, update_func)
         self.render_object = render_object.create()
         render_object.set_geometry(self.render_object, geometry)
         render_object.set_position(self.render_object, self.position)
+        render_object.set_rotation(self.render_object, self.rotation)
         render_world.add(self.render_world, self.render_object)
     end
 
@@ -60,6 +61,19 @@ function Entity:set_position(position)
         render_object.set_position(self.render_object, self.position)
     end
 end
+
+function Entity:set_rotation(rotation)
+    if rotation == nil then
+        error("Trying to set rotation to nil")
+    end
+
+    self.rotation = rotation
+
+    if self.render_object ~= nil then
+        render_object.set_rotation(self.render_object, self.rotation)
+    end
+end
+
 
 function Entity:update()
     if self.update_func == nil then

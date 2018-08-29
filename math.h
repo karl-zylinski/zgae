@@ -52,6 +52,7 @@ Vector4 operator*(const Vector4& v, const Matrix4x4& m);
 Matrix4x4 operator*(const Matrix4x4& m, float s);
 Vector4 operator-(const Vector4& v1, const Vector4& v2);
 Quaternion operator*(const Quaternion& a, const Quaternion& b);
+bool operator==(const Quaternion& q1, const Quaternion& q2);
 
 bool almost_equal(const Vector2& v1, const Vector2& v2);
 bool almost_equal(const Vector3& v1, const Vector3& v2);
