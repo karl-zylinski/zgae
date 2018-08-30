@@ -2,14 +2,15 @@
 #include <string.h>
 #include "memory.h"
 
-char* str_append(const char* original, const char* to_append)
+char* str_append(const char* original, const char* to_append, size_t to_append_len)
 {
     auto org_len = strlen(original);
-    auto append_len = strlen(to_append);
-    auto new_string_len = org_len + append_len + 1;
-    char* new_string = (char*)zalloc(new_string_len);
-    strcpy(new_string, original);
-    strcat(new_string, to_append);
+    auto append_len = to_append_len == (size_t)(-1) ? strlen(to_append) : to_append_len;
+    auto new_string_len = org_len + append_len;
+    char* new_string = (char*)zalloc(new_string_len + 1);
+    memcpy(new_string, original, org_len);
+    memcpy(new_string + org_len, to_append, append_len);
+    new_string[new_string_len] = 0;
     return new_string;
 }
 
@@ -72,4 +73,51 @@ bool str_ends_with(const char* str, const char* ends)
     }
 
     return true;
+}
+
+
+long long str_hash(const char* str)
+{
+    size_t len = strlen(str);
+    long long seed = 0;
+
+    const long long m = 0xc6a4a7935bd1e995ULL;
+    const unsigned r = 47;
+
+    long long h = seed ^ (len * m);
+
+    const long long * data = (const long long *)str;
+    const long long * end = data + (len / 8);
+
+    while (data != end)
+    {
+        long long k = *data++;
+        
+        k *= m;
+        k ^= k >> r;
+        k *= m;
+
+        h ^= k;
+        h *= m;
+    }
+
+    const unsigned char * data2 = (const unsigned char*)data;
+
+    switch (len & 7)
+    {
+    case 7: h ^= ((long long)data2[6]) << 48;
+    case 6: h ^= ((long long)data2[5]) << 40;
+    case 5: h ^= ((long long)data2[4]) << 32;
+    case 4: h ^= ((long long)data2[3]) << 24;
+    case 3: h ^= ((long long)data2[2]) << 16;
+    case 2: h ^= ((long long)data2[1]) << 8;
+    case 1: h ^= ((long long)data2[0]);
+        h *= m;
+    };
+
+    h ^= h >> r;
+    h *= m;
+    h ^= h >> r;
+
+    return h;
 }

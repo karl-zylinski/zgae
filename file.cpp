@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "memory.h"
 
-LoadedFile file_load(const char* filename)
+LoadedFile file_load(const char* filename, FileEnding ending)
 {
     FILE* file_handle = fopen(filename, "rb");
 
@@ -11,21 +11,26 @@ LoadedFile file_load(const char* filename)
 
     fseek(file_handle, 0, SEEK_END);
     unsigned filesize = ftell(file_handle);
+    unsigned buffersize = filesize + (ending == FileEnding::Zero ? 1 : 0);
     fseek(file_handle, 0, SEEK_SET);
 
     if (filesize == 0)
         return {false};
 
-    unsigned char* data = (unsigned char*)zalloc(unsigned(filesize));
+    unsigned char* data = (unsigned char*)zalloc(buffersize);
 
     if (data == nullptr)
         return {false};
 
     fread(data, 1, filesize, file_handle);
+
+    if (ending == FileEnding::Zero)
+        data[filesize] = 0;
+
     fclose(file_handle);
     File file = {};
     file.data = data;
-    file.size = filesize;
+    file.size = buffersize;
     return {true, file};
 }
 

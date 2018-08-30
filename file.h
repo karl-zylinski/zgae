@@ -12,5 +12,10 @@ struct LoadedFile
     File file;
 };
 
-LoadedFile file_load(const char* filename);
+enum struct FileEnding
+{
+    None, Zero
+};
+
+LoadedFile file_load(const char* filename, FileEnding ending);
 bool file_write(void* data, unsigned size, const char* filename);

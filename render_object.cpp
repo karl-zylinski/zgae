@@ -10,7 +10,7 @@ RenderObjectHandle render_object_create()
     obj.id = object_id_counter++;
     obj.world_transform = mat4_identity();
 
-    for (size_t i = 0; i < array_num(D_ror_lut); ++i)
+    for (size_t i = 0; i < array_size(D_ror_lut); ++i)
     {
         if (D_ror_lut[i].used == false)
         {
@@ -20,7 +20,7 @@ RenderObjectHandle render_object_create()
         }
     }
 
-    size_t idx = array_num(D_ror_lut);
+    size_t idx = array_size(D_ror_lut);
     RenderObjectResource ror = {};
     ror.used = true;
     ror.ro = obj;

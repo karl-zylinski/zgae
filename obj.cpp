@@ -142,7 +142,7 @@ static ParsedData parse(unsigned char* data, unsigned data_size)
 
 static int get_existing_vertex(const Vertex* vertices, const Vertex& v1)
 {
-    for (unsigned i = 0; i < array_num(vertices); ++i)
+    for (unsigned i = 0; i < array_size(vertices); ++i)
     {
         const Vertex& v2 = vertices[i];
 
@@ -174,13 +174,13 @@ static void add_vertex_to_mesh(Vertex** vertices, unsigned** indices, const Vec3
         return;
     }
 
-    array_push(*indices, (unsigned)array_num(*vertices));
+    array_push(*indices, (unsigned)array_size(*vertices));
     array_push(*vertices, v);
 }
 
 LoadedMesh obj_load(const char* filename)
 {
-    LoadedFile lf = file_load(filename);
+    LoadedFile lf = file_load(filename, FileEnding::None);
 
     if (!lf.valid)
         return {false};
@@ -190,7 +190,7 @@ LoadedMesh obj_load(const char* filename)
     Vertex* vertices = nullptr;
     unsigned* indices = nullptr;
 
-    for (unsigned i = 0; i < array_num(pd.faces); ++i)
+    for (unsigned i = 0; i < array_size(pd.faces); ++i)
     {
         const ParsedFace& f = pd.faces[i];
         add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v1], pd.normals[f.n1], pd.uvs[f.u1], {1.0f, 1.0f,1, 1.0f});
@@ -204,9 +204,9 @@ LoadedMesh obj_load(const char* filename)
     array_destroy(pd.faces);
 
     Mesh m = {};
-    m.num_vertices = (unsigned)array_num(vertices);
+    m.num_vertices = (unsigned)array_size(vertices);
     m.vertices = (Vertex*)array_grab_data(vertices);
-    m.num_indices = (unsigned)array_num(indices);
+    m.num_indices = (unsigned)array_size(indices);
     m.indices = (unsigned*)array_grab_data(indices);
     return {true, m};
 }

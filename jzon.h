@@ -12,7 +12,7 @@ typedef struct JzonValue
     bool is_array : 1;
     bool is_bool : 1;
     bool is_null : 1;
-    unsigned size;
+    size_t size;
 
     union
     {
@@ -20,22 +20,22 @@ typedef struct JzonValue
         int int_val;
         bool bool_val;
         float float_val;
-        struct JzonKeyValuePair** table_val;
-        struct JzonValue** array_val;
+        struct JzonKeyValuePair* table_val;
+        struct JzonValue* array_val;
     };
 } JzonValue;
 
 struct JzonKeyValuePair {
     char* key;
     long long key_hash;
-    JzonValue* value;
+    JzonValue val;
 };
 
 struct JzonParseResult {
     bool success;
-    JzonValue* output;
+    JzonValue output;
 };
 
 JzonParseResult jzon_parse(const char* input);
-void jzon_free(JzonValue* value);
+void jzon_free(JzonValue* val);
 JzonValue* jzon_get(JzonValue* object, const char* key);

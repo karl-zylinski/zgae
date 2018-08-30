@@ -7,6 +7,7 @@
 #include "game_main.h"
 #include "time.h"
 #include <Windows.h>
+#include "shader.h"
 
 static void key_pressed_callback(Key key)
 {
@@ -35,7 +36,7 @@ int main()
     RendererD3D renderer = {};
     renderer.init(win.handle);
 
-    RRHandle default_shader = renderer.load_shader("shader.shader");
+    RRHandle default_shader = shader_load(&renderer, "shader_default.shader");
     renderer.set_shader(default_shader);
 
     LARGE_INTEGER counter_li;

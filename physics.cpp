@@ -80,7 +80,7 @@ ColliderHandle physics_create_mesh_collider(const Mesh& m)
         c.transformed_vertices[i] += c.position;
     }
 
-    for (size_t i = 0; i < array_num(D_colliders); ++i)
+    for (size_t i = 0; i < array_size(D_colliders); ++i)
     {
         if (D_colliders[i].used == false)
         {
@@ -90,7 +90,7 @@ ColliderHandle physics_create_mesh_collider(const Mesh& m)
         }
     }
 
-    size_t idx = array_num(D_colliders);
+    size_t idx = array_size(D_colliders);
     ColliderResource cr = {};
     cr.used = true;
     cr.c = c;
@@ -124,7 +124,7 @@ void physics_set_collider_rotation(ColliderHandle h, const Quat& rot)
 
 void physics_shutdown()
 {
-    for (size_t i = 0; i < array_num(D_colliders); ++i)
+    for (size_t i = 0; i < array_size(D_colliders); ++i)
     {
         if (!D_colliders[i].used)
             continue;

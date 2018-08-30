@@ -10,7 +10,7 @@ void render_world_add(RenderWorld* w, RenderObjectHandle h)
 
 void render_world_remove(RenderWorld* w, RenderObjectHandle h)
 {
-    for (size_t i = 0; i < array_num(w->D_objects); ++i)
+    for (size_t i = 0; i < array_size(w->D_objects); ++i)
     {
         if (w->D_objects[i].h == h.h)
         {
@@ -29,7 +29,7 @@ void render_world_get_objects_to_render(const RenderWorld* w, RenderObject* cons
 {
     RenderObjectResource* ror_lut = render_object_get_lut();
 
-    for (size_t i = 0; i < array_num(w->D_objects); ++i)
+    for (size_t i = 0; i < array_size(w->D_objects); ++i)
     {
         RenderObjectResource ror = ror_lut[w->D_objects[i].h];
         if (ror.used && ror.ro.geometry_handle.h != 0)

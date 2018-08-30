@@ -128,15 +128,7 @@ void RendererD3D::init(void* wh)
         &_device_context
     ), nullptr);
 
-    D3D11_BUFFER_DESC cbd = {};
-    cbd.ByteWidth = sizeof(ConstantBuffer);
-    cbd.Usage = D3D11_USAGE_DYNAMIC;
-    cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    cbd.MiscFlags = 0;
-    cbd.StructureByteStride = 0;
-    _device->CreateBuffer(&cbd, nullptr, &_constant_buffer);
-    D3D11_TEXTURE2D_DESC dstd = {};
+        D3D11_TEXTURE2D_DESC dstd = {};
     dstd.Width = w;
     dstd.Height = h;
     dstd.MipLevels = 1;
@@ -204,7 +196,7 @@ RRHandle RendererD3D::load_shader(const char* filename)
     ID3DBlob* ps_blob = nullptr;
     ID3DBlob* error_blob = nullptr;
 
-    LoadedFile shader_file = file_load(filename);
+    LoadedFile shader_file = file_load(filename, FileEnding::None);
 
     if (!shader_file.valid)
         return {InvalidHandle};
@@ -499,7 +491,7 @@ void RendererD3D::set_render_targets(RenderTarget** rts, unsigned num)
 void RendererD3D::draw(const RenderObject& object, const Mat4& view_matrix, const Mat4& projection_matrix)
 {
     auto geometry = get_resource(object.geometry_handle).geometry;
-    ConstantBuffer constant_buffer_data = {};
+    /*ConstantBuffer constant_buffer_data = {};
     constant_buffer_data.model_view_projection = object.world_transform * view_matrix * projection_matrix;
     constant_buffer_data.model = object.world_transform;
     constant_buffer_data.projection = projection_matrix;
@@ -512,7 +504,7 @@ void RendererD3D::draw(const RenderObject& object, const Mat4& view_matrix, cons
     _device_context->IASetVertexBuffers(0, 1, &geometry.vertices, &stride, &offset);
     _device_context->IASetIndexBuffer(geometry.indices, DXGI_FORMAT_R32_UINT, 0);
     _device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    _device_context->DrawIndexed(geometry.num_indices, 0, 0);
+    _device_context->DrawIndexed(geometry.num_indices, 0, 0);*/
 }
 
 void RendererD3D::clear_depth_stencil()
@@ -618,7 +610,7 @@ void RendererD3D::draw_world(const RenderWorld& world, const Quat& cam_rot, cons
         0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0 
     };
 
-    for (unsigned i = 0; i < array_num(_objects_to_render); ++i)
+    for (unsigned i = 0; i < array_size(_objects_to_render); ++i)
         draw(_objects_to_render[i], view_matrix, projection);
 
     present();
@@ -702,12 +694,12 @@ RenderResource& RendererD3D::get_resource(RRHandle r)
 
 void RendererD3D::draw_debug_mesh(const Vec3* vertices, unsigned num_vertices)
 {
-    Assert(num_vertices % 3 = 0, "draw_debug_mesh must be supplied a multiple of 3 vertices");
+    Assert(num_vertices % 3 == 0, "draw_debug_mesh must be supplied a multiple of 3 vertices");
 
     unsigned handle = find_free_resource_handle();
 
     if (handle == InvalidHandle)
-        return {InvalidHandle};
+        return;
 
     ID3D11Buffer* vertex_buffer;
     {
