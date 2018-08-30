@@ -32,12 +32,13 @@ struct RendererD3D : public Renderer
     void present();
     MappedTexture map_texture(const RenderTarget& rt);
     void unmap_texture(const MappedTexture& m);
-    void pre_draw_frame();
+    void pre_frame();
     void set_scissor_rect(const Rect& r);
     void disable_scissor();
     void draw_world(const RenderWorld& world, const Quat& cam_rot, const Vec3& cam_pos);
     RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height);
     RenderResource& get_resource(RRHandle r);
+    void draw_debug_mesh(const Vec3* vertices, unsigned num_vertices);
 
 private:
     RenderTarget create_back_buffer();

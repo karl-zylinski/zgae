@@ -22,10 +22,11 @@ struct Renderer
     virtual void present() = 0;
     virtual MappedTexture map_texture(const RenderTarget& rt) = 0;
     virtual void unmap_texture(const MappedTexture& m) = 0;
-    virtual void pre_draw_frame() = 0;
+    virtual void pre_frame() = 0;
     virtual void set_scissor_rect(const Rect& r) = 0;
     virtual void disable_scissor() = 0;
     virtual void draw_world(const RenderWorld& world, const Quat& cam_rot, const Vec3& cam_pos) = 0;
     virtual RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height) = 0;
     virtual RenderResource& get_resource(RRHandle r) = 0;
+    virtual void draw_debug_mesh(const Vec3* vertices, unsigned num_vertices) = 0;
 };

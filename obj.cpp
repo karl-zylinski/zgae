@@ -205,8 +205,8 @@ LoadedMesh obj_load(const char* filename)
 
     Mesh m = {};
     m.num_vertices = (unsigned)array_num(vertices);
-    m.vertices = (Vertex*)array_move_data(vertices);
+    m.vertices = (Vertex*)array_grab_data(vertices);
     m.num_indices = (unsigned)array_num(indices);
-    m.indices = (unsigned*)array_move_data(indices);
+    m.indices = (unsigned*)array_grab_data(indices);
     return {true, m};
 }

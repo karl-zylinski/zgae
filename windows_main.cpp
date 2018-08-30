@@ -59,12 +59,7 @@ int main()
         set_frame_timers(frame_dt, time_since_start);
         timer_last_frame = cur_counter;
         windows_process_all_window_messsages();
-        game_update(&renderer);
-        renderer.pre_draw_frame();
-        game_draw(&renderer);
-        renderer.present();
-        keyboard_end_of_frame();
-        mouse_end_of_frame();
+        game_do_frame(&renderer);
     }
 
     game_shutdown(&renderer);

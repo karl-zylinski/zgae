@@ -573,7 +573,7 @@ void RendererD3D::unmap_texture(const MappedTexture& m)
     unload_resource(m.texture);
 }
 
-void RendererD3D::pre_draw_frame()
+void RendererD3D::pre_frame()
 {
     bool clear_depth = false;
     for (unsigned i = 0; i < max_render_targets; ++i)
@@ -604,7 +604,6 @@ void RendererD3D::pre_draw_frame()
 
 void RendererD3D::draw_world(const RenderWorld& world, const Quat& cam_rot, const Vec3& cam_pos)
 {
-    pre_draw_frame();
     Mat4 view_matrix = mat4_inverse(mat4_from_rotation_and_translation(cam_rot, cam_pos));
 
     array_empty(_objects_to_render);
@@ -704,4 +703,9 @@ RenderResource& RendererD3D::get_resource(RRHandle r)
 {
     Assert(r.h > 0 && r.h < max_resources, "Resource handle out of bounds.");
     return _resources[r.h];
+}
+
+void RendererD3D::draw_debug_mesh(const Vec3* vertices, unsigned num_vertices)
+{
+    
 }

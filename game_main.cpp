@@ -8,6 +8,7 @@
 #include "lua_render_object.h"
 #include "lua_time.h"
 #include "lua_physics.h"
+#include "renderer.h"
 #include "render_object.h"
 #include "physics.h"
 #include "lua.hpp"
@@ -71,14 +72,24 @@ void game_start(Renderer* renderer)
     run_lua_func(L, "start");
 }
 
-void game_update(Renderer* renderer)
+static void update(Renderer* renderer)
 {
     run_lua_func(state.lua_state, "update");
 }
 
-void game_draw(Renderer* renderer)
+static void draw(Renderer* renderer)
 {
     run_lua_func(state.lua_state, "draw");
+}
+
+void game_do_frame(Renderer* renderer)
+{
+    renderer->pre_frame();
+    update(renderer);
+    draw(renderer);
+    renderer->present();
+    keyboard_end_of_frame();
+    mouse_end_of_frame();
 }
 
 void game_shutdown(Renderer* renderer)

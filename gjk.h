@@ -9,3 +9,4 @@ struct GJKShape
 };
 
 bool gjk_intersect(const GJKShape& s1, const GJKShape& s2);
+Vec3 gjk_epa_intersect_and_solve(const GJKShape& s1, const GJKShape& s2);

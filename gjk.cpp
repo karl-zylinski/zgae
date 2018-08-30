@@ -26,7 +26,7 @@ static Vec3 support_diff(const GJKShape& s1, const GJKShape& s2, const Vec3& d)
 
 struct Simplex
 {
-    Vec3 vertices[32];
+    Vec3 vertices[4];
     unsigned char size;
 };
 
@@ -172,3 +172,81 @@ bool gjk_intersect(const GJKShape& s1, const GJKShape& s2)
 {
     return run_gjk(s1, s2).collision;
 }
+
+/*struct EPAFace {
+    float distance;
+    Vec3 normal;
+    unsigned simplex_index;
+}
+
+static void simplex_insert(Simplex* s, const Vec3& v, unsigned idx)
+{
+    if (idx == s->size)
+    {
+        s[idx] = v;
+        ++s->size;
+        return;
+    }
+
+    memmove(s->vertices + idx + 1, s->vertices + idx, sizeof(Vec3) * (s->size - idx));
+    s[idx] = v;
+    ++s->size;
+}
+
+static EPAFace find_closest_face(const Simplex& s)
+{
+    EPAFace closest = {};
+    closest.distance = FLT_MAX;
+
+    for (unsigned i = 0; i < s.size; ++i)
+    {
+        int j = ((i + 1) == s.size) ? 0 : i + 1;
+        int k = ((k + 1) == s.size) ? 0 : k + 1;
+        Vec3 A = s.vertices[i];
+        Vec3 B = s.vertices[j];
+        Vec3 C = s.vertices[k];
+
+        Vec3 AB = B - A;
+        Vec3 AC = C - A;
+        Vec3 OA = -A;
+        Vec3 ABC = cross(AB, cross(OA, AB))
+    }
+}
+
+struct Face {
+    Vector3 vertices[3];
+    Vector3 normal;
+}
+
+static Vec3 run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s)
+{
+    Assert(s->size == 4, "Trying to run EPA with non-tetrahedron simplex.")
+    const max_faces = 32;
+    Face faces[max_faces];
+    unsigned num_faces = 4;
+    faces[0].vertices[0] = s->vertices[0];
+    faces[0].vertices[1] = s->vertices[0];
+    faces[0].vertices[2] = s->vertices[0];
+
+    while(true)
+    {
+        Vec3 f = find_closest_face(s);
+        Vec3 d = support(s1, s2, f.normal);
+        float depth = dot(d, f.normal);
+
+        if (almost_equal(depth, f.distance))
+            return f.normal * depth;
+
+        simplex_insert(s, d, f.simplex_index);
+    }
+}
+
+Vec3 gjk_epa_intersect_and_solve(const GJKShape& s1, const GJKShape& s2)
+{
+    GJKResult res = run_gjk(s1, s2);
+
+    if (!res.collsion)
+        return {0, 0, 0};
+
+    return run_epa(s1, s2, &res.simplex);
+}*/

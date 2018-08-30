@@ -52,14 +52,14 @@ static void* _array_copy_data(void* a, size_t item_size)
 
 #define array_copy_data(a) (_array_copy_data((a), sizeof(*(a))))
 
-static void* _array_move_data(void* a, size_t item_size)
+static void* _array_grab_data(void* a, size_t item_size)
 {
     void* copied = _array_copy_data(a, item_size);
     array_destroy(a);
     return copied;
 }
 
-#define array_move_data(a) (_array_move_data((a), sizeof(*(a))))
+#define array_grab_data(a) (_array_grab_data((a), sizeof(*(a))))
 
 static void _array_maybe_grow(void** a, size_t item_size)
 {
