@@ -15,6 +15,7 @@ struct Renderer
     virtual void shutdown() = 0;
     virtual RRHandle load_shader(const ShaderIntermediate& si) = 0;
     virtual void set_shader(RRHandle shader) = 0;
+    virtual void set_constant_buffer_data(RRHandle shader, const char* name, void* data, unsigned data_size) = 0;
     virtual RenderTarget create_render_texture(PixelFormat pf, unsigned width, unsigned height) = 0;
     virtual RRHandle load_mesh(Mesh* m) = 0;
     virtual void unload_resource(RRHandle handle) = 0;
@@ -29,5 +30,5 @@ struct Renderer
     virtual void draw_world(const RenderWorld& world, const Quat& cam_rot, const Vec3& cam_pos) = 0;
     virtual RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height) = 0;
     virtual RenderResource& get_resource(RRHandle r) = 0;
-    virtual void draw_debug_mesh(const Vec3* vertices, unsigned num_vertices) = 0;
+    virtual void draw_debug_mesh(const Vec3* vertices, unsigned num_vertices, const Color& color) = 0;
 };

@@ -25,14 +25,17 @@ static ShaderDataType type_str_to_enum(const char* str)
 
 static ShaderConstantBufferAutoValue cb_autoval_str_to_enum(const char* str)
 {
-    if (str_eql(str, "mat_mvp"))
-        return ShaderConstantBufferAutoValue::MatMVP;
+    if (str_eql(str, "mat_model_view_projection"))
+        return ShaderConstantBufferAutoValue::MatModelViewProjection;
 
     if (str_eql(str, "mat_model"))
         return ShaderConstantBufferAutoValue::MatModel;
 
     if (str_eql(str, "mat_projection"))
         return ShaderConstantBufferAutoValue::MatProjection;
+
+    if (str_eql(str, "mat_view_projection"))
+        return ShaderConstantBufferAutoValue::MatViewProjection;
 
     return ShaderConstantBufferAutoValue::None;
 }

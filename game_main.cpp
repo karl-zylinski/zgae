@@ -87,6 +87,12 @@ void game_do_frame(Renderer* renderer)
     renderer->pre_frame();
     update(renderer);
     draw(renderer);
+    static Vec3 debug_triangle[] = {
+        {-1, 0, 0},
+        {1, 0, 0},
+        {0, -1, 0}
+    };
+    renderer->draw_debug_mesh(debug_triangle, 3, color_random());
     renderer->present();
     keyboard_end_of_frame();
     mouse_end_of_frame();

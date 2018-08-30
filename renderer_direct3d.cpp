@@ -12,6 +12,7 @@
 #include <cmath>
 #include "shader_intermediate.h"
 #include "string_helpers.h"
+#include "shader.h"
 
 struct RenderTargetResource
 {
@@ -36,6 +37,7 @@ struct D3D11ConstantBufferItem
     long long name_hash;
     ShaderDataType type;
     ShaderConstantBufferAutoValue auto_value;
+    void* value;
 };
 
 struct Shader
@@ -47,7 +49,7 @@ struct Shader
     ID3D11Buffer* constant_buffer;
     D3D11ConstantBufferItem* constant_buffer_items;
     unsigned constant_buffer_items_num;
-    unsigned constant_buffer_autovals_total_size;
+    unsigned constant_buffer_total_size;
 };
 
 enum struct RenderResourceType
@@ -179,6 +181,22 @@ void RendererD3D::init(void* wh)
     _device_context->RSSetState(_raster_state);
     
     disable_scissor();
+
+    float near_plane = 0.01f;
+    float far_plane = 1000.0f;
+    float fov = 75.0f;
+    float aspect = ((float)_back_buffer.width) / ((float)_back_buffer.height);
+    float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
+    float x_scale = y_scale / aspect;
+    _projection_matrix = {
+        x_scale, 0, 0, 0,
+        0, y_scale, 0, 0,
+        0, 0, far_plane/(far_plane-near_plane), 1,
+        0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0 
+    };
+    _latest_view_matrix = mat4_identity();
+
+    _debug_shader = shader_load(this, "debug_draw.shader");
 }
 
 void RendererD3D::shutdown()
@@ -284,7 +302,6 @@ RRHandle RendererD3D::load_shader(const ShaderIntermediate& si)
 
     s.constant_buffer_items = (D3D11ConstantBufferItem*)zalloc_zero(sizeof(D3D11ConstantBufferItem)*si.constant_buffer_size);
     s.constant_buffer_items_num = si.constant_buffer_size;
-    unsigned cb_total_size = 0;
     for (unsigned i = 0; i < si.constant_buffer_size; ++i)
     {
         const ShaderConstantBufferItem& cbi = si.constant_buffer[i];
@@ -293,15 +310,11 @@ RRHandle RendererD3D::load_shader(const ShaderIntermediate& si)
         d3dcbi.size = shader_data_type_size(cbi.type);
         d3dcbi.name_hash = str_hash(cbi.name);
         d3dcbi.type = cbi.type;
-
-        if (d3dcbi.auto_value != ShaderConstantBufferAutoValue::None)
-            s.constant_buffer_autovals_total_size += d3dcbi.size;
-
-        cb_total_size += d3dcbi.size;
+        s.constant_buffer_total_size += d3dcbi.size;
     }
 
     D3D11_BUFFER_DESC cbd = {};
-    cbd.ByteWidth = cb_total_size;
+    cbd.ByteWidth = s.constant_buffer_total_size;
     cbd.Usage = D3D11_USAGE_DYNAMIC;
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -372,6 +385,26 @@ RenderTarget RendererD3D::create_back_buffer()
     rt.clear_depth_stencil = true;
     rt.clear_color = {0, 0, 0, 1};
     return rt;
+}
+
+void RendererD3D::set_constant_buffer_data(RRHandle shader, const char* name, void* data, unsigned data_size)
+{
+    Shader& s = get_resource(_current_shader).shader;
+    long long name_hash = str_hash(name);
+
+    for (unsigned i = 0; i < s.constant_buffer_items_num; ++i)
+    {
+        D3D11ConstantBufferItem& cbi = s.constant_buffer_items[i];
+        if (cbi.name_hash == name_hash)
+        {
+            zfree(cbi.value);
+            cbi.value = zalloc(data_size);
+            memcpy(cbi.value, data, data_size);
+            return;
+        }
+    }
+    
+    Error("Tried to set unknown constant buffer data.");
 }
 
 RenderTarget RendererD3D::create_render_texture(PixelFormat pf, unsigned width, unsigned height)
@@ -504,6 +537,10 @@ void RendererD3D::unload_resource(RRHandle handle)
             res.shader.input_layout->Release();
             res.shader.vertex_shader->Release();
             res.shader.pixel_shader->Release();
+
+            for (unsigned i = 0; i < res.shader.constant_buffer_items_num; ++i)
+                zfree(res.shader.constant_buffer_items[i].value);
+
             zfree(res.shader.constant_buffer_items);
             break;
 
@@ -553,12 +590,11 @@ void RendererD3D::set_render_targets(RenderTarget** rts, unsigned num)
     _device_context->RSSetViewports(1, &viewport);
 }
 
-void RendererD3D::draw(const RenderObject& object, const Mat4& view_matrix, const Mat4& projection_matrix)
+void RendererD3D::load_constant_buffers(const Mat4& world_transform, const Mat4& view_matrix, const Mat4& projection_matrix)
 {
-    auto geometry = get_resource(object.geometry_handle).geometry;
     Shader& s = get_resource(_current_shader).shader;
 
-    char* cb_data = (char*)zalloc(s.constant_buffer_autovals_total_size);
+    char* cb_data = (char*)zalloc(s.constant_buffer_total_size);
     unsigned cb_data_size = 0;
     for (unsigned i = 0; i < s.constant_buffer_items_num; ++i)
     {
@@ -566,28 +602,42 @@ void RendererD3D::draw(const RenderObject& object, const Mat4& view_matrix, cons
 
         switch (cbi.auto_value)
         {
-            case ShaderConstantBufferAutoValue::MatMVP: {
-                Mat4 mvp = object.world_transform * view_matrix * projection_matrix;
+            case ShaderConstantBufferAutoValue::MatModelViewProjection: {
+                Mat4 mvp = world_transform * view_matrix * projection_matrix;
                 memcpy(cb_data + cb_data_size, &mvp, sizeof(Mat4));
                 cb_data_size += sizeof(Mat4);
             } break;
             case ShaderConstantBufferAutoValue::MatModel: {
-                memcpy(cb_data + cb_data_size, &object.world_transform, sizeof(Mat4));
+                memcpy(cb_data + cb_data_size, &world_transform, sizeof(Mat4));
                 cb_data_size += sizeof(Mat4);
             } break;
             case ShaderConstantBufferAutoValue::MatProjection: {
                 memcpy(cb_data + cb_data_size, &projection_matrix, sizeof(Mat4));
                 cb_data_size += sizeof(Mat4);
             } break;
+            case ShaderConstantBufferAutoValue::MatViewProjection: {
+                Mat4 vp = view_matrix * projection_matrix;
+                memcpy(cb_data + cb_data_size, &vp, sizeof(Mat4));
+                cb_data_size += sizeof(Mat4);
+            } break;
+            default:{
+                memcpy(cb_data + cb_data_size, cbi.value, cbi.size);
+                cb_data_size += cbi.size;
+            } break;
         }
     }
 
-    Assert(s.constant_buffer_autovals_total_size == cb_data_size, "Mismatch between expected and actual constant buffer data size.");
+    Assert(s.constant_buffer_total_size == cb_data_size, "Mismatch between expected and actual constant buffer data size.");
     set_constant_buffers(_device_context, s.constant_buffer, cb_data, cb_data_size);
     zfree(cb_data);
     _device_context->VSSetConstantBuffers(0, 1, &s.constant_buffer);
     _device_context->PSSetConstantBuffers(0, 1, &s.constant_buffer);
+}
 
+void RendererD3D::draw(const RenderObject& object, const Mat4& view_matrix, const Mat4& projection_matrix)
+{
+    load_constant_buffers(object.world_transform, view_matrix, projection_matrix);
+    auto geometry = get_resource(object.geometry_handle).geometry;
     unsigned stride = sizeof(Vertex);
     unsigned offset = 0;
     _device_context->IASetVertexBuffers(0, 1, &geometry.vertices, &stride, &offset);
@@ -681,26 +731,12 @@ void RendererD3D::pre_frame()
 void RendererD3D::draw_world(const RenderWorld& world, const Quat& cam_rot, const Vec3& cam_pos)
 {
     Mat4 view_matrix = mat4_inverse(mat4_from_rotation_and_translation(cam_rot, cam_pos));
-
+    _latest_view_matrix = view_matrix;
     array_empty(_objects_to_render);
     render_world_get_objects_to_render(&world, &_objects_to_render);
 
-    // TODO: Make configurable!!
-    float near_plane = 0.01f;
-    float far_plane = 1000.0f;
-    float fov = 75.0f;
-    float aspect = ((float)_back_buffer.width) / ((float)_back_buffer.height);
-    float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
-    float x_scale = y_scale / aspect;
-    Mat4 projection = {
-        x_scale, 0, 0, 0,
-        0, y_scale, 0, 0,
-        0, 0, far_plane/(far_plane-near_plane), 1,
-        0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0 
-    };
-
     for (unsigned i = 0; i < array_size(_objects_to_render); ++i)
-        draw(_objects_to_render[i], view_matrix, projection);
+        draw(_objects_to_render[i], view_matrix, _projection_matrix);
 
     present();
 }
@@ -781,7 +817,7 @@ RenderResource& RendererD3D::get_resource(RRHandle r)
     return _resources[r.h];
 }
 
-void RendererD3D::draw_debug_mesh(const Vec3* vertices, unsigned num_vertices)
+void RendererD3D::draw_debug_mesh(const Vec3* vertices, unsigned num_vertices, const Color& color)
 {
     Assert(num_vertices % 3 == 0, "draw_debug_mesh must be supplied a multiple of 3 vertices");
 
@@ -804,6 +840,15 @@ void RendererD3D::draw_debug_mesh(const Vec3* vertices, unsigned num_vertices)
 
     RRHandle cur_shader = _current_shader;
     set_shader(_debug_shader);
+    set_constant_buffer_data(_debug_shader, "color", (void*)&color, sizeof(Color));
+
+    load_constant_buffers(mat4_identity(), _latest_view_matrix, _projection_matrix);
+    unsigned stride = sizeof(Vec3);
+    unsigned offset = 0;
+    _device_context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+    _device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    _device_context->Draw(num_vertices, 0);
+
     vertex_buffer->Release();
     set_shader(cur_shader);
 }

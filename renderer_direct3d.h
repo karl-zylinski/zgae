@@ -15,7 +15,6 @@ struct ID3D11DepthStencilView;
 struct ID3D11RasterizerState;
 struct IDXGISwapChain;
 struct Object;
-struct Mat4;
 struct RenderObject;
 
 struct RendererD3D : public Renderer
@@ -24,6 +23,7 @@ struct RendererD3D : public Renderer
     void shutdown();
     RRHandle load_shader(const ShaderIntermediate& si);
     void set_shader(RRHandle shader);
+    void set_constant_buffer_data(RRHandle shader, const char* name, void* data, unsigned data_size);
     RenderTarget create_render_texture(PixelFormat pf, unsigned width, unsigned height);
     RRHandle load_mesh(Mesh* m);
     void unload_resource(RRHandle handle);
@@ -38,9 +38,10 @@ struct RendererD3D : public Renderer
     void draw_world(const RenderWorld& world, const Quat& cam_rot, const Vec3& cam_pos);
     RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height);
     RenderResource& get_resource(RRHandle r);
-    void draw_debug_mesh(const Vec3* vertices, unsigned num_vertices);
+    void draw_debug_mesh(const Vec3* vertices, unsigned num_vertices, const Color& color);
 
 private:
+    void load_constant_buffers(const Mat4& world_transform, const Mat4& view_matrix, const Mat4& projection_matrix);
     RenderTarget create_back_buffer();
     unsigned find_free_resource_handle() const;
     void draw(const RenderObject& object, const Mat4& view_matrix, const Mat4& projection_matrix);
@@ -62,4 +63,6 @@ private:
     RenderObject* _objects_to_render;
     RRHandle _debug_shader;
     RRHandle _current_shader;
+    Mat4 _projection_matrix;
+    Mat4 _latest_view_matrix;
 };

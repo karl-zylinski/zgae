@@ -12,7 +12,8 @@ enum struct ShaderDataType
 enum struct ShaderConstantBufferAutoValue
 {
     None,
-    MatMVP,
+    MatModelViewProjection,
+    MatViewProjection,
     MatModel,
     MatProjection
 };

@@ -2,7 +2,7 @@ constant_buffer = [
     {
         name = "model_view_projection"
         type = "mat4"
-        value = "mat_mvp"
+        value = "mat_model_view_projection"
     }
     {
         name = "model"
