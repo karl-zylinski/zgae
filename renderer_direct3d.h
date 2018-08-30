@@ -52,7 +52,6 @@ private:
     void* _window_handle;
     ID3D11Device* _device;
     ID3D11DeviceContext* _device_context;
-    ID3D11Buffer* _constant_buffer;
     ID3D11Texture2D* _depth_stencil_texture;
     ID3D11DepthStencilView* _depth_stencil_view;
     ID3D11RasterizerState* _raster_state;
@@ -61,4 +60,6 @@ private:
     RenderResource* _resources;
     RenderTarget* _render_targets[max_render_targets];
     RenderObject* _objects_to_render;
+    RRHandle _debug_shader;
+    RRHandle _current_shader;
 };

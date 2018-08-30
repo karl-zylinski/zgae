@@ -16,14 +16,6 @@ struct RenderTargetResource
     ID3D11Texture2D* texture;
     ID3D11RenderTargetView* view;
 };
-
-struct ConstantBuffer
-{
-    Mat4 model_view_projection;
-    Mat4 model;
-    Mat4 projection;
-};
-
 struct Geometry {
     ID3D11Buffer* vertices;
     ID3D11Buffer* indices;
@@ -181,6 +173,8 @@ void RendererD3D::init(void* wh)
     _device_context->RSSetState(_raster_state);
     
     disable_scissor();
+
+    _debug_shader = load_shader("debug_draw.shader");
 }
 
 void RendererD3D::shutdown()
@@ -282,6 +276,7 @@ RRHandle RendererD3D::load_shader(const char* filename)
 
 void RendererD3D::set_shader(RRHandle shader)
 {
+    _current_shader = shader;
     Shader& s = get_resource(shader).shader;
     _device_context->VSSetShader(s.vertex_shader, 0, 0);
     _device_context->PSSetShader(s.pixel_shader, 0, 0);
@@ -365,11 +360,11 @@ RenderTarget RendererD3D::create_render_texture(PixelFormat pf, unsigned width, 
     return rt;
 }
 
-static void set_constant_buffers(ID3D11DeviceContext* device_context, ID3D11Buffer* constant_buffer, const ConstantBuffer& data)
+static void set_constant_buffers(ID3D11DeviceContext* device_context, ID3D11Buffer* constant_buffer, void* data, unsigned size)
 {
     D3D11_MAPPED_SUBRESOURCE ms_constant_buffer;
     device_context->Map(constant_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ms_constant_buffer);
-    memcpy(ms_constant_buffer.pData, &data, sizeof(ConstantBuffer));
+    memcpy(ms_constant_buffer.pData, data, size);
     device_context->Unmap(constant_buffer, 0);
 }
 
@@ -707,5 +702,27 @@ RenderResource& RendererD3D::get_resource(RRHandle r)
 
 void RendererD3D::draw_debug_mesh(const Vec3* vertices, unsigned num_vertices)
 {
-    
+    Assert(num_vertices % 3 = 0, "draw_debug_mesh must be supplied a multiple of 3 vertices");
+
+    unsigned handle = find_free_resource_handle();
+
+    if (handle == InvalidHandle)
+        return {InvalidHandle};
+
+    ID3D11Buffer* vertex_buffer;
+    {
+        D3D11_BUFFER_DESC bd = {};
+        bd.Usage = D3D11_USAGE_DYNAMIC;
+        bd.ByteWidth = sizeof(Vec3) * num_vertices;
+        bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        D3D11_SUBRESOURCE_DATA srd = {};
+        srd.pSysMem = vertices;
+        _device->CreateBuffer(&bd, &srd, &vertex_buffer);
+    }
+
+    RRHandle cur_shader = _current_shader;
+    set_shader(_debug_shader);
+    vertex_buffer->Release();
+    set_shader(cur_shader);
 }
