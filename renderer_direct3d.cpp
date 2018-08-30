@@ -10,6 +10,8 @@
 #include "mesh.h"
 #include "array.h"
 #include <cmath>
+#include "shader_intermediate.h"
+#include "string_helpers.h"
 
 struct RenderTargetResource
 {
@@ -28,12 +30,24 @@ struct Texture
     ID3D11ShaderResourceView* view;
 };
 
+struct D3D11ConstantBufferItem
+{
+    unsigned size;
+    long long name_hash;
+    ShaderDataType type;
+    ShaderConstantBufferAutoValue auto_value;
+};
+
 struct Shader
 {
     ID3D11VertexShader* vertex_shader;
     ID3D11PixelShader* pixel_shader;
     ID3D11InputLayout* input_layout;
     ID3D11SamplerState* sampler_state;
+    ID3D11Buffer* constant_buffer;
+    D3D11ConstantBufferItem* constant_buffer_items;
+    unsigned constant_buffer_items_num;
+    unsigned constant_buffer_autovals_total_size;
 };
 
 enum struct RenderResourceType
@@ -165,8 +179,6 @@ void RendererD3D::init(void* wh)
     _device_context->RSSetState(_raster_state);
     
     disable_scissor();
-
-    _debug_shader = load_shader("debug_draw.shader");
 }
 
 void RendererD3D::shutdown()
@@ -185,7 +197,34 @@ void RendererD3D::shutdown()
     array_destroy(_objects_to_render);
 }
 
-RRHandle RendererD3D::load_shader(const char* filename)
+static const char* shader_input_layout_value_to_d3d_semantic(ShaderInputLayoutValue v)
+{
+    switch(v)
+    {
+        case ShaderInputLayoutValue::VertexPosition: return "POSITION";
+        case ShaderInputLayoutValue::VertexNormal: return "NORMAL";
+        case ShaderInputLayoutValue::VertexTexCoord: return "TEXCOORD";
+        case ShaderInputLayoutValue::VertexColor: return "COLOR";
+    }
+    
+    Error("Trying to create shader with invalid input layout value.");
+    return nullptr;
+}
+
+static DXGI_FORMAT shader_data_type_to_dxgi_format(ShaderDataType t)
+{
+    switch (t)
+    {
+        case ShaderDataType::Vec2: return DXGI_FORMAT_R32G32_FLOAT;
+        case ShaderDataType::Vec3: return DXGI_FORMAT_R32G32B32_FLOAT;
+        case ShaderDataType::Vec4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+    }
+
+    Error("Trying to get DXGI_FORMAT for invalid ShaderDataType");
+    return DXGI_FORMAT_UNKNOWN;
+}
+
+RRHandle RendererD3D::load_shader(const ShaderIntermediate& si)
 {
     unsigned handle = find_free_resource_handle();
 
@@ -196,14 +235,9 @@ RRHandle RendererD3D::load_shader(const char* filename)
     ID3DBlob* ps_blob = nullptr;
     ID3DBlob* error_blob = nullptr;
 
-    LoadedFile shader_file = file_load(filename, FileEnding::None);
-
-    if (!shader_file.valid)
-        return {InvalidHandle};
-
     check_ok(D3DCompile(
-        shader_file.file.data,
-        shader_file.file.size,
+        si.source,
+        si.source_size,
         nullptr,
         nullptr,
         nullptr,
@@ -216,8 +250,8 @@ RRHandle RendererD3D::load_shader(const char* filename)
     ), error_blob);
 
     check_ok(D3DCompile(
-        shader_file.file.data,
-        shader_file.file.size,
+        si.source,
+        si.source_size,
         nullptr,
         nullptr,
         nullptr,
@@ -229,21 +263,51 @@ RRHandle RendererD3D::load_shader(const char* filename)
         &error_blob
     ), error_blob);
 
-    zfree(shader_file.file.data);
-
     Shader s = {};
     _device->CreateVertexShader(vs_blob->GetBufferPointer(), vs_blob->GetBufferSize(), nullptr, &s.vertex_shader);
     _device->CreatePixelShader(ps_blob->GetBufferPointer(), ps_blob->GetBufferSize(), nullptr, &s.pixel_shader);
-    D3D11_INPUT_ELEMENT_DESC ied[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
 
-    _device->CreateInputLayout(ied, 4, vs_blob->GetBufferPointer(), vs_blob->GetBufferSize(), &s.input_layout);
+    D3D11_INPUT_ELEMENT_DESC* ied = (D3D11_INPUT_ELEMENT_DESC*)zalloc_zero(sizeof(D3D11_INPUT_ELEMENT_DESC) * si.input_layout_size);
+    unsigned offset = 0;
+    for (unsigned i = 0; i < si.input_layout_size; ++i)
+    {
+        const ShaderInputLayoutItem& ili = si.input_layout[i];
+        const char* semantic = shader_input_layout_value_to_d3d_semantic(ili.value);
+        DXGI_FORMAT format = shader_data_type_to_dxgi_format(ili.type);
+        ied[i] = {semantic, 0, format, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        offset += shader_data_type_size(ili.type);
+    }
+    _device->CreateInputLayout(ied, si.input_layout_size, vs_blob->GetBufferPointer(), vs_blob->GetBufferSize(), &s.input_layout);
     vs_blob->Release();
     ps_blob->Release();
+    zfree(ied);
+
+    s.constant_buffer_items = (D3D11ConstantBufferItem*)zalloc_zero(sizeof(D3D11ConstantBufferItem)*si.constant_buffer_size);
+    s.constant_buffer_items_num = si.constant_buffer_size;
+    unsigned cb_total_size = 0;
+    for (unsigned i = 0; i < si.constant_buffer_size; ++i)
+    {
+        const ShaderConstantBufferItem& cbi = si.constant_buffer[i];
+        D3D11ConstantBufferItem& d3dcbi = s.constant_buffer_items[i];
+        d3dcbi.auto_value = cbi.auto_value;
+        d3dcbi.size = shader_data_type_size(cbi.type);
+        d3dcbi.name_hash = str_hash(cbi.name);
+        d3dcbi.type = cbi.type;
+
+        if (d3dcbi.auto_value != ShaderConstantBufferAutoValue::None)
+            s.constant_buffer_autovals_total_size += d3dcbi.size;
+
+        cb_total_size += d3dcbi.size;
+    }
+
+    D3D11_BUFFER_DESC cbd = {};
+    cbd.ByteWidth = cb_total_size;
+    cbd.Usage = D3D11_USAGE_DYNAMIC;
+    cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cbd.MiscFlags = 0;
+    cbd.StructureByteStride = 0;
+    _device->CreateBuffer(&cbd, nullptr, &s.constant_buffer);
 
     D3D11_SAMPLER_DESC sd = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
     sd.MaxAnisotropy = 0;
@@ -440,6 +504,7 @@ void RendererD3D::unload_resource(RRHandle handle)
             res.shader.input_layout->Release();
             res.shader.vertex_shader->Release();
             res.shader.pixel_shader->Release();
+            zfree(res.shader.constant_buffer_items);
             break;
 
         case RenderResourceType::RenderTarget:
@@ -491,20 +556,44 @@ void RendererD3D::set_render_targets(RenderTarget** rts, unsigned num)
 void RendererD3D::draw(const RenderObject& object, const Mat4& view_matrix, const Mat4& projection_matrix)
 {
     auto geometry = get_resource(object.geometry_handle).geometry;
-    /*ConstantBuffer constant_buffer_data = {};
-    constant_buffer_data.model_view_projection = object.world_transform * view_matrix * projection_matrix;
-    constant_buffer_data.model = object.world_transform;
-    constant_buffer_data.projection = projection_matrix;
-    set_constant_buffers(_device_context, _constant_buffer, constant_buffer_data);
-    _device_context->VSSetConstantBuffers(0, 1, &_constant_buffer);
-    _device_context->PSSetConstantBuffers(0, 1, &_constant_buffer);
+    Shader& s = get_resource(_current_shader).shader;
+
+    char* cb_data = (char*)zalloc(s.constant_buffer_autovals_total_size);
+    unsigned cb_data_size = 0;
+    for (unsigned i = 0; i < s.constant_buffer_items_num; ++i)
+    {
+        const D3D11ConstantBufferItem& cbi = s.constant_buffer_items[i];
+
+        switch (cbi.auto_value)
+        {
+            case ShaderConstantBufferAutoValue::MatMVP: {
+                Mat4 mvp = object.world_transform * view_matrix * projection_matrix;
+                memcpy(cb_data + cb_data_size, &mvp, sizeof(Mat4));
+                cb_data_size += sizeof(Mat4);
+            } break;
+            case ShaderConstantBufferAutoValue::MatModel: {
+                memcpy(cb_data + cb_data_size, &object.world_transform, sizeof(Mat4));
+                cb_data_size += sizeof(Mat4);
+            } break;
+            case ShaderConstantBufferAutoValue::MatProjection: {
+                memcpy(cb_data + cb_data_size, &projection_matrix, sizeof(Mat4));
+                cb_data_size += sizeof(Mat4);
+            } break;
+        }
+    }
+
+    Assert(s.constant_buffer_autovals_total_size == cb_data_size, "Mismatch between expected and actual constant buffer data size.");
+    set_constant_buffers(_device_context, s.constant_buffer, cb_data, cb_data_size);
+    zfree(cb_data);
+    _device_context->VSSetConstantBuffers(0, 1, &s.constant_buffer);
+    _device_context->PSSetConstantBuffers(0, 1, &s.constant_buffer);
 
     unsigned stride = sizeof(Vertex);
     unsigned offset = 0;
     _device_context->IASetVertexBuffers(0, 1, &geometry.vertices, &stride, &offset);
     _device_context->IASetIndexBuffer(geometry.indices, DXGI_FORMAT_R32_UINT, 0);
     _device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    _device_context->DrawIndexed(geometry.num_indices, 0, 0);*/
+    _device_context->DrawIndexed(geometry.num_indices, 0, 0);
 }
 
 void RendererD3D::clear_depth_stencil()

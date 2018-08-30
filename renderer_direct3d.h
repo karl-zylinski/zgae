@@ -22,7 +22,7 @@ struct RendererD3D : public Renderer
 {
     void init(void* window_handle);
     void shutdown();
-    RRHandle load_shader(const char* filename);
+    RRHandle load_shader(const ShaderIntermediate& si);
     void set_shader(RRHandle shader);
     RenderTarget create_render_texture(PixelFormat pf, unsigned width, unsigned height);
     RRHandle load_mesh(Mesh* m);

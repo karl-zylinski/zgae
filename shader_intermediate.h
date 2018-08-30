@@ -19,29 +19,47 @@ enum struct ShaderConstantBufferAutoValue
 
 struct ShaderConstantBufferItem
 {
-    const* char name;
+    char* name;
     ShaderDataType type;
-    ShaderAutoValue auto_value;
+    ShaderConstantBufferAutoValue auto_value;
 };
 
-struct ShaderInputLayoutValue
+enum struct ShaderInputLayoutValue
 {
     Invalid,
     VertexPosition,
     VertexNormal,
-    VertexTexcoord,
+    VertexTexCoord,
     VertexColor
 };
 
 struct ShaderInputLayoutItem
 {
-    const* char name;
+    char* name;
     ShaderDataType type;
     ShaderInputLayoutValue value;
 };
 
 struct ShaderIntermediate
 {
-    ShaderConstantBufferItem* D_constant_buffer;
-    ShaderInputLayoutItem D_input_layout;
+    char* source;
+    size_t source_size;
+    ShaderConstantBufferItem* constant_buffer;
+    ShaderInputLayoutItem* input_layout;
+    unsigned constant_buffer_size;
+    unsigned input_layout_size;
 };
+
+static unsigned shader_data_type_size(ShaderDataType type)
+{
+    switch (type)
+    {
+        case ShaderDataType::Mat4: return 64;
+        case ShaderDataType::Vec2: return 8;
+        case ShaderDataType::Vec3: return 12;
+        case ShaderDataType::Vec4: return 16;
+    }
+
+    Error("Trying to get size of invalid ShaderDataType type");
+    return 0;
+}

@@ -1,7 +1,7 @@
 #include "memory.h"
 
 #if defined(ENABLE_MEMORY_TRACING)
-    static const unsigned G_max_captured_callstacks = 1024;
+    static const unsigned G_max_captured_callstacks = 4096;
     static CapturedCallstack G_captured_callstacks[G_max_captured_callstacks];
 
     void add_captured_callstack(const CapturedCallstack& cc)

@@ -12,7 +12,7 @@ constant_buffer = [
     {
         name = "projection"
         type = "mat4"
-        value = "mar_projection"
+        value = "mat_projection"
     }
 ]
 

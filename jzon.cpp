@@ -382,7 +382,7 @@ JzonParseResult jzon_parse(const char* input)
 {
     JzonParseResult result = {};
     skip_whitespace(&input);
-    result.success = parse_table(&input, &result.output, true);
+    result.valid = parse_table(&input, &result.output, true);
     return result;
 }
 

@@ -1,5 +1,6 @@
 #include "string_helpers.h"
 #include <string.h>
+#include <ctype.h>
 #include "memory.h"
 
 char* str_append(const char* original, const char* to_append, size_t to_append_len)
@@ -39,11 +40,28 @@ char* str_copy(const char* original)
 
 char* str_copy(const char* original, size_t size)
 {
-    auto org_len = size;
-    auto new_string_len = org_len + 1;
+    size_t org_len = size;
+    size_t new_string_len = org_len + 1;
     char* new_string = (char*)zalloc(new_string_len);
     memcpy(new_string, original, size);
     new_string[new_string_len - 1] = 0;
+    return new_string;
+}
+
+char* lstr_copy(const char* original)
+{
+    return lstr_copy(original, strlen(original));
+}
+
+char* lstr_copy(const char* original, size_t size)
+{
+    size_t new_string_len = size + 1;
+    char* new_string = (char*)zalloc(new_string_len);
+
+    for (size_t i = 0; i < size; ++i)
+        new_string[i] = (char)tolower(original[i]);
+
+    new_string[size] = 0;
     return new_string;
 }
 
@@ -69,6 +87,23 @@ bool str_ends_with(const char* str, const char* ends)
         char ec = ends[el - 1 - i];
 
         if (sc != ec)
+            return false;
+    }
+
+    return true;
+}
+
+bool lstr_eql(const char* str1, const char* str2)
+{
+    size_t l1 = strlen(str1);
+    size_t l2 = strlen(str2);
+
+    if (l1 != l2)
+        return false;
+
+    for (size_t i = 0; i < l1; ++i)
+    {
+        if (tolower(str1[i]) != tolower(str2[i]))
             return false;
     }
 

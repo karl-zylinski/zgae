@@ -7,12 +7,13 @@ struct RenderResource;
 struct Quat;
 struct Vec3;
 struct Mesh;
+struct ShaderIntermediate;
 
 struct Renderer
 {
     virtual void init(void* window_handle) = 0;
     virtual void shutdown() = 0;
-    virtual RRHandle load_shader(const char* filename) = 0;
+    virtual RRHandle load_shader(const ShaderIntermediate& si) = 0;
     virtual void set_shader(RRHandle shader) = 0;
     virtual RenderTarget create_render_texture(PixelFormat pf, unsigned width, unsigned height) = 0;
     virtual RRHandle load_mesh(Mesh* m) = 0;

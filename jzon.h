@@ -32,7 +32,7 @@ struct JzonKeyValuePair {
 };
 
 struct JzonParseResult {
-    bool success;
+    bool valid;
     JzonValue output;
 };
 
