@@ -10,8 +10,12 @@ static Renderer* renderer;
 
 static int load_geometry_obj(lua_State* L)
 {
-    const char* filename = luaL_checkstring(L, 1);
-    LoadedMesh lm = obj_load(filename);
+    LuaValue l_str = lua_get_string(L, 1);
+
+    if (!l_str.valid)
+        Error("ERROR in renderer.load_geometry_obj: Expected string in argument 1.");
+
+    LoadedMesh lm = obj_load(l_str.str_val);
 
     if (!lm.valid)
         Error("OHN OES");
@@ -26,8 +30,12 @@ static int load_geometry_obj(lua_State* L)
 
 static int draw_world(lua_State* L)
 {
-    RenderWorld* rw = (RenderWorld*) lua_touserdata(L, 1);
+    LuaValue l_rw = lua_get_ptr(L, 1);
 
+    if (!l_rw.valid)
+        Error("ERROR in renderer.draw_world: Expected RenderWorld pointer in argument 1.");
+
+    RenderWorld* rw = (RenderWorld*)l_rw.ptr_val;
     LuaValue lq = lua_get_quat(L, 2);
 
     if (!lq.valid)

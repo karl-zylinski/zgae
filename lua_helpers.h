@@ -15,9 +15,11 @@ struct LuaValue
     };
 };
 
+struct Vec2i;
 LuaValue lua_get_integer(lua_State* L, int arg);
 LuaValue lua_get_double(lua_State* L, int arg);
 LuaValue lua_get_ptr(lua_State* L, int arg);
 LuaValue lua_get_quat(lua_State* L, int arg);
 LuaValue lua_get_vec3(lua_State* L, int arg);
 LuaValue lua_get_string(lua_State* L, int arg);
+void lua_push_vec2i(lua_State* L, const Vec2i& v);

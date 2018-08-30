@@ -14,7 +14,12 @@ static int create(lua_State* L)
 
 static int destroy(lua_State* L)
 {
-    RenderWorld* rw = (RenderWorld*) lua_touserdata(L, 1);
+    LuaValue l_rw = lua_get_ptr(L, 1);
+
+    if (!l_rw.valid)
+        Error("ERROR in render_world.destroy: Expected RenderWorld pointer in argument 1.");
+
+    RenderWorld* rw = (RenderWorld*)l_rw.ptr_val;
     render_world_destroy(rw);
     zfree(rw);
     return 0;

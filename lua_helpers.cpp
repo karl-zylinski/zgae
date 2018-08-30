@@ -92,3 +92,14 @@ LuaValue lua_get_string(lua_State* L, int arg)
     lv.str_val = str;
     return lv;
 }
+
+void lua_push_vec2i(lua_State* L, const Vec2i& v)
+{
+    lua_createtable(L, 0, 2);
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, v.x);
+    lua_settable(L, -3);
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, v.y);
+    lua_settable(L, -3);
+}
