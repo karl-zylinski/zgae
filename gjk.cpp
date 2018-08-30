@@ -1,5 +1,8 @@
 #include "gjk.h"
 #include "math.h"
+#include "color.h"
+#include "debug.h"
+#include "array.h"
 
 static Vec3 support(const GJKShape& s, const Vec3& d)
 {
@@ -173,13 +176,7 @@ bool gjk_intersect(const GJKShape& s1, const GJKShape& s2)
     return run_gjk(s1, s2).collision;
 }
 
-/*struct EPAFace {
-    float distance;
-    Vec3 normal;
-    unsigned simplex_index;
-}
-
-static void simplex_insert(Simplex* s, const Vec3& v, unsigned idx)
+/*static void simplex_insert(Simplex* s, const Vec3& v, unsigned idx)
 {
     if (idx == s->size)
     {
@@ -216,11 +213,11 @@ static EPAFace find_closest_face(const Simplex& s)
 struct Face {
     Vector3 vertices[3];
     Vector3 normal;
-}
+}*/
 
 static Vec3 run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s)
 {
-    Assert(s->size == 4, "Trying to run EPA with non-tetrahedron simplex.")
+   /* Assert(s->size == 4, "Trying to run EPA with non-tetrahedron simplex.")
     const max_faces = 32;
     Face faces[max_faces];
     unsigned num_faces = 4;
@@ -238,15 +235,71 @@ static Vec3 run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s)
             return f.normal * depth;
 
         simplex_insert(s, d, f.simplex_index);
+    }*/
+    return {0,0,0};
+}
+
+struct EPAFace {
+    float distance;
+    Vec3 normal;
+    Vec3 vertices[3];
+};
+
+static EPAFace* convert_simplex_to_epa_faces(Simplex& s)
+{
+    EPAFace* faces = nullptr;
+    for (unsigned i = 0; i < s.size; ++i)
+    {
+        int j = ((i + 1) == s.size) ? 0 : i + 1;
+        int k = ((j + 1) == s.size) ? 0 : j + 1;
+        Vec3& A = s.vertices[i];
+        Vec3& B = s.vertices[j];
+        Vec3& C = s.vertices[k];
+
+        Vec3 AB = B - A;
+        Vec3 AC = C - A;
+        Vec3 OA = -A;
+        Vec3 ABC = cross(AB, AC);
+        EPAFace f = {};
+        f.normal = vec3_normalize(ABC);
+
+        if (dot(ABC, OA) > 0)
+        {
+            f.vertices[0] = B;
+            f.vertices[1] = A;
+            f.vertices[2] = C;
+        }
+        else
+        {
+            f.vertices[0] = A;
+            f.vertices[1] = B;
+            f.vertices[2] = C;
+        }
+
+        array_push(faces, f);
     }
+    return faces;
 }
 
 Vec3 gjk_epa_intersect_and_solve(const GJKShape& s1, const GJKShape& s2)
 {
     GJKResult res = run_gjk(s1, s2);
 
-    if (!res.collsion)
+    if (!res.collision)
         return {0, 0, 0};
 
+    EPAFace* faces = convert_simplex_to_epa_faces(res.simplex);
+
+    Color colors[] = {
+        {1, 1, 1, 1},
+        {1, 0, 0, 1},
+        {0, 1, 0, 1},
+        {0, 0, 1, 0}
+    };
+
+    for (unsigned i = 0; i < array_size(faces); ++i)
+        debug_draw_mesh(faces[i].vertices, 3, colors[i]);
+
+    array_destroy(faces);
     return run_epa(s1, s2, &res.simplex);
-}*/
+}

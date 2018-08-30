@@ -50,6 +50,25 @@ static int intersect(lua_State* L)
     return 1;
 }
 
+static int intersect_and_solve(lua_State* L)
+{
+    LuaValue h1_int = lua_get_integer(L, 1);
+
+    if (!h1_int.valid)
+        Error("ERROR in render_object.intersect: Expected ColliderHandle in argument 1.");
+
+    ColliderHandle h1 = {(size_t)h1_int.int_val};
+
+    LuaValue h2_int = lua_get_integer(L, 2);
+
+    if (!h2_int.valid)
+        Error("ERROR in render_object.intersect: Expected ColliderHandle in argument 2.");
+
+    ColliderHandle h2 = {(size_t)h2_int.int_val};
+    Vec3 sol = physics_intersect_and_solve(h1, h2);
+    return 0;
+}
+
 static int set_collider_position(lua_State* L)
 {
     LuaValue h_int = lua_get_integer(L, 1);
@@ -87,6 +106,7 @@ static int set_collider_rotation(lua_State* L)
 static const struct luaL_Reg lib [] = {
     {"create_mesh_collider", create_mesh_collider},
     {"intersect", intersect},
+    {"intersect_and_solve", intersect_and_solve},
     {"set_collider_position", set_collider_position},
     {"set_collider_rotation", set_collider_rotation},
     {NULL, NULL}

@@ -12,6 +12,7 @@
 #include "render_object.h"
 #include "physics.h"
 #include "lua.hpp"
+#include "debug.h"
 
 struct GameState
 {
@@ -33,6 +34,7 @@ static void run_lua_func(lua_State* L, const char* func)
 
 void game_start(Renderer* renderer)
 {
+    debug_init(renderer);
     keyboard_init();
     mouse_init();
     memzero(&state, sizeof(GameState));
@@ -87,12 +89,6 @@ void game_do_frame(Renderer* renderer)
     renderer->pre_frame();
     update(renderer);
     draw(renderer);
-    static Vec3 debug_triangle[] = {
-        {-1, 0, 0},
-        {1, 0, 0},
-        {0, -1, 0}
-    };
-    renderer->draw_debug_mesh(debug_triangle, 3, color_random());
     renderer->present();
     keyboard_end_of_frame();
     mouse_end_of_frame();
