@@ -31,4 +31,5 @@ struct Renderer
     virtual RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height) = 0;
     virtual RenderResource& get_resource(RRHandle r) = 0;
     virtual void draw_debug_mesh(const Vec3* vertices, unsigned num_vertices, const Color& color) = 0;
+    virtual void resize_back_buffer(unsigned width, unsigned height) = 0;
 };

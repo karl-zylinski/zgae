@@ -126,21 +126,26 @@ static LRESULT window_proc(HWND window_handle, UINT message, WPARAM wparam, LPAR
 
     switch(message)
     {
+    case WM_SIZE: {
+        WORD width = LOWORD(lparam);
+        WORD height = HIWORD(lparam);
+        state->width = width;
+        state->height = height;
+
+        if (state->resized_callback != nullptr)
+            state->resized_callback(width, height);
+        } return 0;
     case WM_QUIT:
     case WM_CLOSE:
         state->closed = true;
         return 0;
     case WM_KEYDOWN:
         if (state->key_pressed_callback != nullptr)
-        {
             state->key_pressed_callback(key_from_windows_key_code(wparam, lparam));
-        }
         return 0;
     case WM_KEYUP:
         if (state->key_released_callback != nullptr)
-        {
             state->key_released_callback(key_from_windows_key_code(wparam, lparam));
-        }
         return 0;
     case WM_INPUT:
         {
@@ -195,6 +200,8 @@ void windows_create_window(WindowsWindow* w, const char* title, unsigned width, 
         instance_handle,
         nullptr);
     w->handle = handle;
+    w->state.width = width;
+    w->state.height = height;
     ShowWindow(handle, true);
     SetWindowLongPtr(handle, GWLP_USERDATA, (LONG_PTR)w);
     RAWINPUTDEVICE rid = {};

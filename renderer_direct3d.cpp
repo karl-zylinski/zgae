@@ -144,26 +144,9 @@ void RendererD3D::init(void* wh)
         &_device_context
     ), nullptr);
 
-        D3D11_TEXTURE2D_DESC dstd = {};
-    dstd.Width = w;
-    dstd.Height = h;
-    dstd.MipLevels = 1;
-    dstd.ArraySize = 1;
-    dstd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    dstd.SampleDesc.Count = 1;
-    dstd.Usage = D3D11_USAGE_DEFAULT;
-    dstd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-    dstd.CPUAccessFlags = 0;
-    dstd.MiscFlags = 0;
-    _device->CreateTexture2D(&dstd, nullptr, &_depth_stencil_texture);
-    D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
-    dsvd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    dsvd.Texture2D.MipSlice = 0;
-    dsvd.Flags = 0;
-    _device->CreateDepthStencilView(_depth_stencil_texture, &dsvd, &_depth_stencil_view);
 
-    _back_buffer = create_back_buffer();
+    create_depth_stencil_view(w, h);
+    create_back_buffer();
     set_render_target(&_back_buffer);
 
     D3D11_RASTERIZER_DESC rsd;
@@ -181,20 +164,8 @@ void RendererD3D::init(void* wh)
     _device_context->RSSetState(_raster_state);
     
     disable_scissor();
-
-    float near_plane = 0.01f;
-    float far_plane = 1000.0f;
-    float fov = 75.0f;
-    float aspect = ((float)_back_buffer.width) / ((float)_back_buffer.height);
-    float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
-    float x_scale = y_scale / aspect;
-    _projection_matrix = {
-        x_scale, 0, 0, 0,
-        0, y_scale, 0, 0,
-        0, 0, far_plane/(far_plane-near_plane), 1,
-        0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0 
-    };
-    _latest_view_matrix = mat4_identity();
+    create_projection_matrix();
+     _latest_view_matrix = mat4_identity();
 
     _debug_shader = shader_load(this, "debug_draw.shader");
 }
@@ -213,6 +184,22 @@ void RendererD3D::shutdown()
     _device_context->Release();
     zfree(_resources);
     array_destroy(_objects_to_render);
+}
+
+void RendererD3D::create_projection_matrix()
+{
+    float near_plane = 0.01f;
+    float far_plane = 1000.0f;
+    float fov = 75.0f;
+    float aspect = ((float)_back_buffer.width) / ((float)_back_buffer.height);
+    float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
+    float x_scale = y_scale / aspect;
+    _projection_matrix = {
+        x_scale, 0, 0, 0,
+        0, y_scale, 0, 0,
+        0, 0, far_plane/(far_plane-near_plane), 1,
+        0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0 
+    };
 }
 
 static const char* shader_input_layout_value_to_d3d_semantic(ShaderInputLayoutValue v)
@@ -357,7 +344,7 @@ void RendererD3D::set_shader(RRHandle shader)
     }
 }
 
-RenderTarget RendererD3D::create_back_buffer()
+void RendererD3D::create_back_buffer()
 {
     unsigned handle = find_free_resource_handle();
     Assert(handle != InvalidHandle, "Couldn't create back-buffer.");
@@ -377,14 +364,36 @@ RenderTarget RendererD3D::create_back_buffer()
     r.render_target = rts;
     _resources[handle] = r;
 
-    RenderTarget rt;
+    RenderTarget rt = {};
     rt.render_resource = {handle};
     rt.width = td.Width;
     rt.height = td.Height;
     rt.clear = true;
     rt.clear_depth_stencil = true;
     rt.clear_color = {0, 0, 0, 1};
-    return rt;
+    _back_buffer = rt;
+}
+
+void RendererD3D::create_depth_stencil_view(unsigned width, unsigned height)
+{
+    D3D11_TEXTURE2D_DESC dstd = {};
+    dstd.Width = width;
+    dstd.Height = height;
+    dstd.MipLevels = 1;
+    dstd.ArraySize = 1;
+    dstd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dstd.SampleDesc.Count = 1;
+    dstd.Usage = D3D11_USAGE_DEFAULT;
+    dstd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    dstd.CPUAccessFlags = 0;
+    dstd.MiscFlags = 0;
+    _device->CreateTexture2D(&dstd, nullptr, &_depth_stencil_texture);
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
+    dsvd.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    dsvd.Texture2D.MipSlice = 0;
+    dsvd.Flags = 0;
+    _device->CreateDepthStencilView(_depth_stencil_texture, &dsvd, &_depth_stencil_view);
 }
 
 void RendererD3D::set_constant_buffer_data(RRHandle shader, const char* name, void* data, unsigned data_size)
@@ -577,6 +586,7 @@ void RendererD3D::set_render_targets(RenderTarget** rts, unsigned num)
         targets[i] = get_resource(rts[i]->render_resource).render_target.view;
     }
     _device_context->OMSetRenderTargets(num, targets, _depth_stencil_view);
+
     memset(_render_targets, 0, sizeof(_render_targets));
     memcpy(_render_targets, rts, sizeof(RenderTarget**) * num);
 
@@ -851,4 +861,20 @@ void RendererD3D::draw_debug_mesh(const Vec3* vertices, unsigned num_vertices, c
 
     vertex_buffer->Release();
     set_shader(cur_shader);
+}
+
+void RendererD3D::resize_back_buffer(unsigned width, unsigned height)
+{
+    if (width == 0 || height == 0)
+        return;
+
+    unload_resource(_back_buffer.render_resource);
+    _depth_stencil_view->Release();
+    _depth_stencil_texture->Release();
+    _swap_chain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+    create_depth_stencil_view(width, height);
+    create_back_buffer();
+    set_render_target(&_back_buffer);
+    create_projection_matrix();
+    disable_scissor();
 }

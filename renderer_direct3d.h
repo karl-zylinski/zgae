@@ -39,14 +39,17 @@ struct RendererD3D : public Renderer
     RRHandle load_texture(void* data, PixelFormat pf, unsigned width, unsigned height);
     RenderResource& get_resource(RRHandle r);
     void draw_debug_mesh(const Vec3* vertices, unsigned num_vertices, const Color& color);
+    void resize_back_buffer(unsigned width, unsigned height);
 
 private:
     void load_constant_buffers(const Mat4& world_transform, const Mat4& view_matrix, const Mat4& projection_matrix);
-    RenderTarget create_back_buffer();
+    void create_back_buffer();
+    void create_depth_stencil_view(unsigned width, unsigned height);
     unsigned find_free_resource_handle() const;
     void draw(const RenderObject& object, const Mat4& view_matrix, const Mat4& projection_matrix);
     void clear_depth_stencil();
     void clear_render_target(RenderTarget* sc, const Color& color);
+    void create_projection_matrix();
     
     static const unsigned max_resources = 4096;
     static const unsigned max_render_targets = 4;

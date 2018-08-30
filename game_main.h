@@ -1,8 +1,9 @@
 #pragma once
 
 struct Renderer;
+struct WindowState;
 
-void game_start(Renderer* renderer);
-void game_update(Renderer* renderer);
-void game_do_frame(Renderer* renderer);
-void game_shutdown(Renderer* renderer);
+void game_start(WindowState* window, Renderer* renderer);
+void game_update();
+void game_do_frame();
+void game_shutdown();

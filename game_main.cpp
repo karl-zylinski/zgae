@@ -13,13 +13,17 @@
 #include "physics.h"
 #include "lua.hpp"
 #include "debug.h"
+#include "window_state.h"
+#include "shader.h"
 
 struct GameState
 {
     lua_State* lua_state;
 };
 
-static GameState state;
+static GameState _state;
+static Renderer* _renderer;
+static WindowState* _window_state;
 
 static void run_lua_func(lua_State* L, const char* func)
 {
@@ -32,16 +36,45 @@ static void run_lua_func(lua_State* L, const char* func)
     }
 }
 
-void game_start(Renderer* renderer)
+
+static void key_pressed_callback(Key key)
 {
-    debug_init(renderer);
+    keyboard_pressed(key);
+}
+
+static void key_released_callback(Key key)
+{
+    keyboard_released(key);
+}
+
+static void mouse_moved_callback(const Vec2i& delta)
+{
+    mouse_add_delta(delta);
+}
+
+static void window_resized_callback(unsigned width, unsigned height)
+{
+    _renderer->resize_back_buffer(width, height);
+}
+
+void game_start(WindowState* window_state, Renderer* renderer)
+{
+    _window_state = window_state;
+    _renderer = renderer;
+    _window_state->key_released_callback = key_released_callback;
+    _window_state->key_pressed_callback = key_pressed_callback;
+    _window_state->mouse_moved_callback = mouse_moved_callback;
+    _window_state->resized_callback = window_resized_callback;
+    RRHandle default_shader = shader_load(_renderer, "shader_default.shader");
+    _renderer->set_shader(default_shader);
+    debug_init(_renderer);
     keyboard_init();
     mouse_init();
-    memzero(&state, sizeof(GameState));
+    memzero(&_state, sizeof(GameState));
     lua_State* L = luaL_newstate();
-    state.lua_state = L;
+    _state.lua_state = L;
     luaL_openlibs(L);
-    lua_renderer_init(L, renderer);
+    lua_renderer_init(L, _renderer);
     lua_render_world_init(L);
     lua_physics_init(L);
     lua_keyboard_init(L);
@@ -74,29 +107,19 @@ void game_start(Renderer* renderer)
     run_lua_func(L, "start");
 }
 
-static void update(Renderer* renderer)
+void game_do_frame()
 {
-    run_lua_func(state.lua_state, "update");
-}
-
-static void draw(Renderer* renderer)
-{
-    run_lua_func(state.lua_state, "draw");
-}
-
-void game_do_frame(Renderer* renderer)
-{
-    renderer->pre_frame();
-    update(renderer);
-    draw(renderer);
-    renderer->present();
+    _renderer->pre_frame();
+    run_lua_func(_state.lua_state, "update");
+    run_lua_func(_state.lua_state, "draw");
+    _renderer->present();
     keyboard_end_of_frame();
     mouse_end_of_frame();
 }
 
-void game_shutdown(Renderer* renderer)
+void game_shutdown()
 {
-    run_lua_func(state.lua_state, "shutdown");
+    run_lua_func(_state.lua_state, "shutdown");
     render_object_deinit_lut();
     physics_shutdown();
 }
