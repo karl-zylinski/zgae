@@ -47,6 +47,7 @@ static GJKShape gjk_shape_from_collider(const Collider& c)
     GJKShape s = {};
     s.vertices = c.transformed_vertices;
     s.num_vertices = c.num_vertices;
+    s.position = c.position;
     return s;
 }
 

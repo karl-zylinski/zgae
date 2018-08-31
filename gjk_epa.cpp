@@ -1,7 +1,6 @@
 #include "gjk_epa.h"
 #include "math.h"
 #include "color.h"
-#include "debug.h"
 #include "array.h"
 #include <math.h>
 
@@ -134,19 +133,6 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
                 *search_dir = ADB;
                 return false;
             }
-            
-            Vec3 f1[] = {A, B, C};
-            Vec3 f2[] = {A, C, D};
-            Vec3 f3[] = {A, D, B};
-            Vec3 f4[] = {B, D, C};
-
-            debug_force_pump_window();
-            debug_clear_frame();
-            debug_draw_mesh(f1, 3, debug_get_random_color(1));
-            debug_draw_mesh(f2, 3, debug_get_random_color(2));
-            debug_draw_mesh(f3, 3, debug_get_random_color(3));
-            debug_draw_mesh(f4, 3, debug_get_random_color(4));
-            debug_present();
 
             return true;
         } break;
@@ -322,16 +308,6 @@ static GJKEPASolution run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s
 
     while(true)
     {
-        /*debug_force_pump_window();
-        debug_clear_frame();
-        for (unsigned i = 0; i < array_size(faces); ++i)
-        {
-            static Color nocolor = {};
-            if (faces[i].dbg_color == nocolor)
-                faces[i].dbg_color = debug_get_random_color(i);
-            debug_draw_mesh(faces[i].vertices, 3, faces[i].dbg_color);
-        }
-        debug_present();*/
         if (array_size(faces) == 0)
         {
             array_destroy(faces);
@@ -350,8 +326,6 @@ static GJKEPASolution run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s
 
         if (fabs(depth - f.distance) < 0.0001f)
         {
-            /*for (unsigned i = 0; i < array_size(faces); ++i)
-                debug_draw_mesh(faces[i].vertices, 3, debug_get_random_color(i));*/
             Vec3 sol = -f.normal * depth;
             array_destroy(faces);
             return {true, sol};

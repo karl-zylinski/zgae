@@ -5,6 +5,7 @@ struct GJKShape
 {
     Vec3* vertices;
     size_t num_vertices;
+    Vec3 position;
 };
 
 struct GJKEPASolution
