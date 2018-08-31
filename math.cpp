@@ -266,7 +266,7 @@ Vec3 mat4_right(const Mat4& m)
 
 Vec3 mat4_up(const Mat4& m)
 {
-    return {m.y.x, m.y.y, m.y.z};
+    return {m.z.x, m.z.y, m.z.z};
 }
 
 Vec3 cross(const Vec3& v1, const Vec3& v2)

@@ -109,7 +109,6 @@ void game_do_frame()
 {
     _renderer->pre_frame();
     run_lua_func(_state.lua_state, "update");
-    run_lua_func(_state.lua_state, "draw");
     _renderer->present();
     keyboard_end_of_frame();
     mouse_end_of_frame();

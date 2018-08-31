@@ -29,7 +29,7 @@ VOut VShader(float3 position : POSITION, float3 normal : NORMAL, float2 uv : TEX
 
 float4 PShader(float4 position : SV_POSITION, float4 vertex_world_pos : POSITION1, float3 normal : NORMAL, float2 uv : TEXCOORD, float4 color : COLOR) : SV_TARGET
 {
-    float3 sun = float3(29, 35, -29);
+    float3 sun = float3(29, -29, 35);
     float3 pos_to_sun = sun - vertex_world_pos.xyz;
     float l = max(dot(normalize(pos_to_sun), normal), 0.1f);
     return float4(color.rgb * l, 1);

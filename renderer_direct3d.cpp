@@ -152,7 +152,7 @@ void RendererD3D::init(void* wh)
     D3D11_RASTERIZER_DESC rsd;
     rsd.FillMode = D3D11_FILL_SOLID;
     rsd.CullMode = D3D11_CULL_BACK;
-    rsd.FrontCounterClockwise = false;
+    rsd.FrontCounterClockwise = true;
     rsd.DepthBias = false;
     rsd.DepthBiasClamp = 0;
     rsd.SlopeScaledDepthBias = 0;
@@ -192,13 +192,13 @@ void RendererD3D::create_projection_matrix()
     float far_plane = 1000.0f;
     float fov = 75.0f;
     float aspect = ((float)_back_buffer.width) / ((float)_back_buffer.height);
-    float y_scale = 1.0f / tanf((3.14f / 180.0f) * fov / 2);
+    float y_scale = 1.0f / tanf((PI / 180.0f) * fov / 2);
     float x_scale = y_scale / aspect;
     _projection_matrix = {
         x_scale, 0, 0, 0,
-        0, y_scale, 0, 0,
         0, 0, far_plane/(far_plane-near_plane), 1,
-        0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0 
+        0, y_scale, 0, 0,
+        0, 0, (-far_plane * near_plane) / (far_plane - near_plane), 0
     };
 }
 

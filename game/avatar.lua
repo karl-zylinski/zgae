@@ -7,11 +7,11 @@ local function avatar_update(e)
     local dt = time.dt()
 
     if keyboard.is_held(Key.W) then
-        movement.z = movement.z+dt*10
+        movement.y = movement.y+dt*10
     end
 
     if keyboard.is_held(Key.S) then
-        movement.z = movement.z-dt*10
+        movement.y = movement.y-dt*10
     end
 
     if keyboard.is_held(Key.A) then
@@ -25,9 +25,9 @@ local function avatar_update(e)
     local md = mouse.get_delta()
     local yaw = md.x
     local pitch = md.y
-    local yawq = Quat.from_axis_angle(Vec3(0, yaw, 0), dt*20)
+    local yawq = Quat.from_axis_angle(Vec3(0, 0, -yaw), dt*20)
     e.rotation = (e.rotation*yawq):normalized()
-    local pitchq = Quat.from_axis_angle(Vec3(pitch, 0, 0), dt*20)
+    local pitchq = Quat.from_axis_angle(Vec3(-pitch, 0, 0), dt*20)
     e.look_dir = (yawq*e.look_dir*pitchq):normalized()
     e.position = e.position + e.rotation:transform_vec3(movement)
 end

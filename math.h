@@ -72,10 +72,9 @@ Vec3 vec3_tangent(const Vec3& v);
 Vec3 vec3_bitangent(const Vec3& v);
 Vec3 vec3_normalize(const Vec3& v);
 
-static const Vec3 vec3_up = {0, 1, 0};
-static const Vec3 vec3_forward = {0, 0, 1};
+static const Vec3 vec3_up = {0, 0, 1};
+static const Vec3 vec3_forward = {0, 1, 0};
 static const Vec3 vec3_zero = {0, 0, 0};
-static const Vec3 vec3_lookdir = {0, 0, -1};
 
 float dot(const Vec4& v1, const Vec4& v2);
 
