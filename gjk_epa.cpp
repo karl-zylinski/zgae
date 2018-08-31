@@ -165,7 +165,7 @@ static GJKResult run_gjk(const GJKShape& s1, const GJKShape& s2)
 {
     Simplex s = {};
 
-    Vec3 first_point = support_diff(s1, s2, {1, 0, 0});
+    Vec3 first_point = support_diff(s1, s2, {0, 5, 0});
     s.vertices[s.size++] = first_point;
     Vec3 search_dir = -first_point;
 
@@ -268,8 +268,8 @@ static bool remove_edge_if_present(Edge*& edges, const Edge& e)
 {
     for (unsigned i = 0; i < array_size(edges); ++i)
     {
-        if ((almost_equal(edges[i].start, e.start) && almost_equal(edges[i].end, e.end))
-            || (almost_equal(edges[i].start, e.end) && almost_equal(edges[i].end, e.start)))
+        if ((edges[i].start == e.end && edges[i].end == e.start) ||
+            (edges[i].start == e.start && edges[i].end == e.end))
         {
             array_remove(edges, i);
             return true;
