@@ -1,6 +1,7 @@
 #include "color.h"
 #include <stdlib.h>
 #include "math.h"
+#include "memory.h"
 
 Color color_random()
 {

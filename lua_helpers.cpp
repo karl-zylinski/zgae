@@ -103,3 +103,17 @@ void lua_push_vec2i(lua_State* L, const Vec2i& v)
     lua_pushnumber(L, v.y);
     lua_settable(L, -3);
 }
+
+void lua_push_vec3(lua_State* L, const Vec3& v)
+{
+    lua_createtable(L, 0, 3);
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, v.x);
+    lua_settable(L, -3);
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, v.y);
+    lua_settable(L, -3);
+    lua_pushstring(L, "z");
+    lua_pushnumber(L, v.z);
+    lua_settable(L, -3);
+}

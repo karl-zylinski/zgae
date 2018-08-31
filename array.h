@@ -88,7 +88,8 @@ static void _array_remove(void* a, size_t idx, size_t item_size)
         return;
     }
 
-    memmove(((char*)a) + idx*item_size, ((char*)a) + (idx + 1)*item_size, (array_size(a) - idx - 1)*item_size);
+    array_header(a)->size--;
+    memmove(((char*)a) + idx*item_size, ((char*)a) + (idx + 1)*item_size, (array_size(a) - idx)*item_size);
 }
 
 #define array_remove(a, idx) _array_remove(a, idx, sizeof(*(a)))

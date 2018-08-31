@@ -4,7 +4,7 @@
 #include "math.h"
 #include "mesh.h"
 #include "vertex.h"
-#include "gjk.h"
+#include "gjk_epa.h"
 
 //TODO: needs physicsworld??
 
@@ -60,14 +60,15 @@ bool physics_intersect(ColliderHandle h1, ColliderHandle h2)
     return gjk_intersect(s1, s2);
 }
 
-Vec3 physics_intersect_and_solve(ColliderHandle h1, ColliderHandle h2)
+Collision physics_intersect_and_solve(ColliderHandle h1, ColliderHandle h2)
 {
     Assert(D_colliders[h1.h].used && D_colliders[h2.h].used, "Tried to intersect and solve one ore more invalid physics shapes");
     check_dirty_transform(h1);
     check_dirty_transform(h2);
     GJKShape s1 = gjk_shape_from_collider(D_colliders[h1.h].c);
     GJKShape s2 = gjk_shape_from_collider(D_colliders[h2.h].c);
-    return gjk_epa_intersect_and_solve(s1, s2);
+    GJKEPASolution s = gjk_epa_intersect_and_solve(s1, s2);
+    return {s.colliding, s.solution};
 }
 
 ColliderHandle physics_create_mesh_collider(const Mesh& m)

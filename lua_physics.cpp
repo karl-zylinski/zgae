@@ -65,8 +65,10 @@ static int intersect_and_solve(lua_State* L)
         Error("ERROR in render_object.intersect: Expected ColliderHandle in argument 2.");
 
     ColliderHandle h2 = {(size_t)h2_int.int_val};
-    Vec3 sol = physics_intersect_and_solve(h1, h2);
-    return 0;
+    Collision col = physics_intersect_and_solve(h1, h2);
+    lua_pushboolean(L, col.colliding);
+    lua_push_vec3(L, col.solution);
+    return 1;
 }
 
 static int set_collider_position(lua_State* L)

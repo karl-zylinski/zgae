@@ -5,7 +5,7 @@ struct RenderObject;
 
 struct RenderWorld
 {
-    RenderObjectHandle* D_objects; // Stretchy. For quick drawing, used by renderer
+    RenderObjectHandle* D_objects;
 };
 
 void render_world_add(RenderWorld* w, RenderObjectHandle h);

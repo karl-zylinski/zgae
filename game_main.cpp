@@ -12,7 +12,6 @@
 #include "render_object.h"
 #include "physics.h"
 #include "lua.hpp"
-#include "debug.h"
 #include "window_state.h"
 #include "shader.h"
 
@@ -67,7 +66,6 @@ void game_start(WindowState* window_state, Renderer* renderer)
     _window_state->resized_callback = window_resized_callback;
     RRHandle default_shader = shader_load(_renderer, "shader_default.shader");
     _renderer->set_shader(default_shader);
-    debug_init(_renderer);
     keyboard_init();
     mouse_init();
     memzero(&_state, sizeof(GameState));

@@ -5,6 +5,7 @@
 #include "game_main.h"
 #include "time.h"
 #include <Windows.h>
+#include "debug.h"
 
 int main()
 {
@@ -15,6 +16,7 @@ int main()
     
     RendererD3D renderer = {};
     renderer.init(win.handle);
+    debug_init(&renderer, windows_process_all_window_messsages);
 
     LARGE_INTEGER counter_li;
     QueryPerformanceCounter(&counter_li);
@@ -41,6 +43,7 @@ int main()
     }
 
     game_shutdown();
+    debug_shutdown();
     renderer.shutdown();
     memory_shutdown();
 }
