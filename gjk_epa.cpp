@@ -34,7 +34,12 @@ struct Simplex
     unsigned char size;
 };
 
-static bool do_simplex(Simplex* s, Vec3* search_dir)
+enum struct GJKStatus
+{
+    Continue, Abort, Colliding
+};
+
+static GJKStatus do_simplex(Simplex* s, Vec3* search_dir)
 {
     switch(s->size)
     {
@@ -105,6 +110,9 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
             Vec3 ACD = cross(AC, AD);
             Vec3 ADB = cross(AD, AB);
 
+            if (ABC == ACD || ABC == ADB || ACD == ADB)
+                return GJKStatus::Abort;
+
             if (dot(ABC, AO) >= 0)
             {
                 s->size = 3;
@@ -112,7 +120,7 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
                 s->vertices[1] = B;
                 s->vertices[2] = A;
                 *search_dir = ABC;
-                return false;
+                return GJKStatus::Continue;
             }
 
             if (dot(ACD, AO) >= 0)
@@ -122,7 +130,7 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
                 s->vertices[1] = C;
                 s->vertices[2] = A;
                 *search_dir = ACD;
-                return false;
+                return GJKStatus::Continue;
             }
 
             if (dot(ADB, AO) >= 0)
@@ -132,14 +140,14 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
                 s->vertices[1] = D;
                 s->vertices[2] = A;
                 *search_dir = ADB;
-                return false;
+                return GJKStatus::Continue;
             }
 
-            return true;
+            return GJKStatus::Colliding;
         } break;
     }
 
-    return false;
+    return GJKStatus::Continue;
 }
 
 struct GJKResult
@@ -151,21 +159,25 @@ struct GJKResult
 static GJKResult run_gjk(const GJKShape& s1, const GJKShape& s2)
 {
     Simplex s = {};
-
+    GJKStatus status = GJKStatus::Continue;
     Vec3 first_point = support_diff(s1, s2, {0, 5, 0});
     s.vertices[s.size++] = first_point;
     Vec3 search_dir = -first_point;
 
-    while (true)
+    while (status != GJKStatus::Abort)
     {
         Vec3 simplex_candidate = support_diff(s1, s2, search_dir);
         if (dot(simplex_candidate, search_dir) <= 0)
             return {false};
 
         s.vertices[s.size++] = simplex_candidate;
+        status = do_simplex(&s, &search_dir);
 
-        if (do_simplex(&s, &search_dir))
-            return {true, s};
+        switch(status)
+        {
+            case GJKStatus::Colliding: return {true, s};
+            case GJKStatus::Abort: return {false};
+        }
     }
 
     return {false};
