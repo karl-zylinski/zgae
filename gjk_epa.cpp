@@ -3,6 +3,7 @@
 #include "color.h"
 #include "array.h"
 #include <math.h>
+#include "debug.h"
 
 static Vec3 support(const GJKShape& s, const Vec3& d)
 {
@@ -44,7 +45,7 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
             Vec3 AB = B - A;
             Vec3 AO = -A;
 
-            if (dot(AB, AO) > 0)
+            if (dot(AB, AO) >= 0)
                 *search_dir = cross(AB, cross(AO, AB));
             else
                 *search_dir = AO;
@@ -59,13 +60,13 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
             Vec3 ABC = cross(AB, AC);
             Vec3 AO = -A;
 
-            if (dot(cross(ABC, AC), AO) > 0)
+            if (dot(cross(ABC, AC), AO) >= 0)
             {
-                if (dot(AC, AO) > 0)
+                if (dot(AC, AO) >= 0)
                     *search_dir = cross(AC, cross(AO, AC));
                 else
                 {
-                    if (dot(AB, AO) > 0)
+                    if (dot(AB, AO) >= 0)
                         *search_dir = cross(AB, cross(AO, AB));
                     else
                         *search_dir = AO;
@@ -73,16 +74,16 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
             }
             else
             {
-                if (dot(cross(AB, ABC), AO) > 0)
+                if (dot(cross(AB, ABC), AO) >= 0)
                 {
-                    if (dot(AB, AO) > 0)
+                    if (dot(AB, AO) >= 0)
                         *search_dir = cross(AB, cross(AO, AB));
                     else
                         *search_dir = AO;
                 }
                 else
                 {
-                    if (dot(ABC, AO) > 0)
+                    if (dot(ABC, AO) >= 0)
                         *search_dir = ABC;
                     else
                         *search_dir = -ABC;
@@ -104,7 +105,7 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
             Vec3 ACD = cross(AC, AD);
             Vec3 ADB = cross(AD, AB);
 
-            if (dot(ABC, AO) > 0)
+            if (dot(ABC, AO) >= 0)
             {
                 s->size = 3;
                 s->vertices[0] = C;
@@ -114,7 +115,7 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
                 return false;
             }
 
-            if (dot(ACD, AO) > 0)
+            if (dot(ACD, AO) >= 0)
             {
                 s->size = 3;
                 s->vertices[0] = D;
@@ -124,7 +125,7 @@ static bool do_simplex(Simplex* s, Vec3* search_dir)
                 return false;
             }
 
-            if (dot(ADB, AO) > 0)
+            if (dot(ADB, AO) >= 0)
             {
                 s->size = 3;
                 s->vertices[0] = B;
@@ -158,7 +159,7 @@ static GJKResult run_gjk(const GJKShape& s1, const GJKShape& s2)
     while (true)
     {
         Vec3 simplex_candidate = support_diff(s1, s2, search_dir);
-        if (dot(simplex_candidate, search_dir) < 0)
+        if (dot(simplex_candidate, search_dir) <= 0)
             return {false};
 
         s.vertices[s.size++] = simplex_candidate;
@@ -193,7 +194,7 @@ static EPAFace& find_closest_face(EPAFace* faces)
     for (unsigned i = 1; i < array_size(faces); ++i)
     {
         EPAFace* f = faces + i;
-        float d = (float)fabs(dot(f->normal, f->vertices[0]));
+        float d = dot(f->normal, f->vertices[0]);
         if (d < closest->distance)
         {
             f->distance = d;
@@ -273,7 +274,7 @@ static void extend_polytope(EPAFace*& faces, const Vec3& extend_to)
     {
         EPAFace& f = faces[i];
 
-        if (dot(f.normal, extend_to-f.vertices[0]) > 0)
+        if (dot(f.normal, extend_to) > 0)
         {
             Edge e1 = {f.vertices[0], f.vertices[1]};
             Edge e2 = {f.vertices[1], f.vertices[2]};
@@ -306,23 +307,20 @@ static GJKEPASolution run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s
 
     EPAFace* faces = convert_simplex_to_epa_faces(*s);
 
+    for (unsigned i = 0; i < array_size(faces); ++i)
+        debug_draw_mesh(faces[i].vertices, 3, debug_get_random_color(i));
+
     while(true)
     {
         if (array_size(faces) == 0)
         {
             array_destroy(faces);
-            return {false}; // hack for corner-cases, shouldn't use EPA for such shallow penetrations anyways
+            return {false};
         }
 
         EPAFace& f = find_closest_face(faces);
         Vec3 d = support_diff(s1, s2, f.normal);
         float depth = dot(d, f.normal);
-
-        if (depth == 0)
-        {
-            array_destroy(faces);
-            return {false}; // hack for corner-cases, shouldn't use EPA for such shallow penetrations anyways
-        }
 
         if (fabs(depth - f.distance) < 0.0001f)
         {

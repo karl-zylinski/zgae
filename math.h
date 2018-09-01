@@ -44,6 +44,7 @@ Vec3 operator-(const Vec3& v1, const Vec3& v2);
 Vec3 operator*(const Vec3& v, float s);
 Vec3 operator*(const Vec3& v1, const Vec3& v2);
 bool operator==(const Vec3& v1, const Vec3& v2);
+bool operator!=(const Vec3& v1, const Vec3& v2);
 void operator+=(Vec4& v1, const Vec4& v2);
 Vec4 operator+(const Vec4& v1, const Vec4& v2);
 Vec4 operator*(const Vec4& v, float s);

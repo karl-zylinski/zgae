@@ -21,13 +21,14 @@ end
 
 function start()
     world.render_world = render_world.create()
-    state.ship = spawn_ship(Vec3(0, 10, 0), nil)
+    --state.ship = spawn_ship(Vec3(0, 10, 0), nil)
     state.avatar = spawn_avatar(Vec3(0, -3, 0), nil)
-    local box_geo = renderer.load_geometry_obj("box.wobj")
+    local box_geo = renderer.load_geometry_obj("tet.wobj")
     state.box1 = spawn_entity(Vec3(3, 0, 0), nil, box_geo)
-    state.box1:set_collider(physics.create_mesh_collider("box.wobj"))
+    state.box1:set_collider(physics.create_mesh_collider("tet.wobj"))
+    local box_geo = renderer.load_geometry_obj("tet.wobj")
     state.box2 = spawn_entity(Vec3(1.7, 0, 2.1), Quat.from_axis_angle(Vec3(0, 0, 1), 0.000001), box_geo)
-    state.box2:set_collider(physics.create_mesh_collider("box.wobj"))
+    state.box2:set_collider(physics.create_mesh_collider("tet.wobj"))
 end
 
 function update()

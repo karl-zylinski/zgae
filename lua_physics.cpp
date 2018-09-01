@@ -18,14 +18,13 @@ static int create_mesh_collider(lua_State* L)
     if (!l_filename.valid)
         Error("Trying to add physics mesh with invalid filename.");
 
-    LoadedMesh lm = obj_load(l_filename.str_val);
+    LoadedVertices lv = obj_load_only_vertices(l_filename.str_val);
 
-    if (!lm.valid)
+    if (!lv.valid)
         Error("Failed loading mesh.");
 
-    ColliderHandle h = physics_create_mesh_collider(lm.mesh);
-    zfree(lm.mesh.vertices);
-    zfree(lm.mesh.indices);
+    ColliderHandle h = physics_create_mesh_collider(lv.vertices, lv.num_vertices);
+    zfree(lv.vertices);
     lua_pushnumber(L, (lua_Number)h.h);
     return 1;
 }

@@ -86,6 +86,11 @@ bool operator==(const Vec3& v1, const Vec3& v2)
     return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
 }
 
+bool operator!=(const Vec3& v1, const Vec3& v2)
+{
+    return v1.x != v2.x && v1.y != v2.y && v1.z != v2.z;
+}
+
 void operator+=(Vec4& v1, const Vec4& v2)
 {
     v1.x += v2.x;
@@ -297,6 +302,7 @@ float dot(const Vec3& v1, const Vec3& v2)
 Vec3 vec3_normalize(const Vec3& v)
 {
     float len = vec3_len(v);
+    Assert(len != 0, "Trying to normalize zero Vec3");
     return
     {
         v.x / len,
@@ -385,6 +391,7 @@ Quat quat_identity()
 Quat quat_normalize(const Quat& q)
 {
     float len = sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
+    Assert(len != 0, "Trying to normalize zero length Quat");
     return
     {
         q.x / len,

@@ -72,18 +72,15 @@ Collision physics_intersect_and_solve(ColliderHandle h1, ColliderHandle h2)
     return {s.colliding, s.solution};
 }
 
-ColliderHandle physics_create_mesh_collider(const Mesh& m)
+ColliderHandle physics_create_mesh_collider(const Vec3* vertices, size_t num_vertices)
 {
+    size_t vsize = sizeof(Vec3) * num_vertices;
     Collider c = {};
-    size_t vsize = sizeof(Vec3) * m.num_vertices;
     c.vertices = (Vec3*)zalloc(vsize);
+    memcpy(c.vertices, vertices, vsize);
     c.transformed_vertices = (Vec3*)zalloc(vsize);
-
-    for (size_t i = 0; i < m.num_vertices; ++i)
-        c.vertices[i] = m.vertices[i].position;
-
     memcpy(c.transformed_vertices, c.vertices, vsize);
-    c.num_vertices = m.num_vertices;
+    c.num_vertices = num_vertices;
     c.rotation = quat_identity();
 
     for (size_t i = 0; i < c.num_vertices; ++i)

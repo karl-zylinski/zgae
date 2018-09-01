@@ -109,7 +109,12 @@ static void skip_line(ParserState* ps)
     ++ps->head;
 }
 
-static ParsedData parse(unsigned char* data, unsigned data_size)
+enum struct ParseMode {
+    All,
+    OnlyVertices
+};
+
+static ParsedData parse(unsigned char* data, unsigned data_size, ParseMode mode)
 {
     ParserState ps = {};
     ps.data = data;
@@ -125,13 +130,13 @@ static ParsedData parse(unsigned char* data, unsigned data_size)
 
         if (!first_on_line)
             skip_line(&ps);
-        else if (c == 'v' && ps.head + 1 < ps.end && (*(ps.head+1)) == 't')
+        else if (c == 'v' && ps.head + 1 < ps.end && (*(ps.head+1)) == 't' && mode == ParseMode::All)
             parse_uv(&ps, &pd);
-        else if (c == 'v' && ps.head + 1 < ps.end && (*(ps.head+1)) == 'n')
+        else if (c == 'v' && ps.head + 1 < ps.end && (*(ps.head+1)) == 'n' && mode == ParseMode::All)
             parse_normal(&ps, &pd);
-        else if (c == 'v')
+        else if (c == 'v' && ps.head + 1 < ps.end && (*(ps.head+1)) == ' ')
             parse_vertex(&ps, &pd);
-        else if (c == 'f')
+        else if (c == 'f' && mode == ParseMode::All)
             parse_face(&ps, &pd);
         else
             skip_line(&ps);
@@ -185,7 +190,7 @@ LoadedMesh obj_load(const char* filename)
     if (!lf.valid)
         return {false};
 
-    ParsedData pd = parse(lf.file.data, lf.file.size);
+    ParsedData pd = parse(lf.file.data, lf.file.size, ParseMode::All);
     zfree(lf.file.data);
     Vertex* vertices = nullptr;
     unsigned* indices = nullptr;
@@ -209,4 +214,20 @@ LoadedMesh obj_load(const char* filename)
     m.num_indices = (unsigned)array_size(indices);
     m.indices = (unsigned*)array_grab_data(indices);
     return {true, m};
+}
+
+LoadedVertices obj_load_only_vertices(const char* filename)
+{
+    LoadedFile lf = file_load(filename, FileEnding::None);
+
+    if (!lf.valid)
+        return {false};
+
+    ParsedData pd = parse(lf.file.data, lf.file.size, ParseMode::OnlyVertices);
+    zfree(lf.file.data);    
+    LoadedVertices lv = {};
+    lv.valid = true;
+    lv.num_vertices = array_size(pd.vertices);
+    lv.vertices = (Vec3*)array_grab_data(pd.vertices);
+    return lv;
 }
