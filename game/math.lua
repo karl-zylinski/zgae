@@ -206,3 +206,5 @@ function Vec4:init(x, y, z, w)
     self.z = z or 0
     self.w = w or 0
 end
+
+PI = 3.1415926535897932

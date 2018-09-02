@@ -65,13 +65,13 @@ static GJKStatus do_simplex(Simplex* s, Vec3* search_dir)
             Vec3 ABC = cross(AB, AC);
             Vec3 AO = -A;
 
-            if (dot(cross(ABC, AC), AO) >= 0)
+            if (dot(cross(ABC, AC), AO) > 0)
             {
-                if (dot(AC, AO) >= 0)
+                if (dot(AC, AO) > 0)
                     *search_dir = cross(AC, cross(AO, AC));
                 else
                 {
-                    if (dot(AB, AO) >= 0)
+                    if (dot(AB, AO) > 0)
                         *search_dir = cross(AB, cross(AO, AB));
                     else
                         *search_dir = AO;
@@ -79,16 +79,16 @@ static GJKStatus do_simplex(Simplex* s, Vec3* search_dir)
             }
             else
             {
-                if (dot(cross(AB, ABC), AO) >= 0)
+                if (dot(cross(AB, ABC), AO) > 0)
                 {
-                    if (dot(AB, AO) >= 0)
+                    if (dot(AB, AO) > 0)
                         *search_dir = cross(AB, cross(AO, AB));
                     else
                         *search_dir = AO;
                 }
                 else
                 {
-                    if (dot(ABC, AO) >= 0)
+                    if (dot(ABC, AO) > 0)
                         *search_dir = ABC;
                     else
                         *search_dir = -ABC;
@@ -113,8 +113,12 @@ static GJKStatus do_simplex(Simplex* s, Vec3* search_dir)
             if (ABC == ACD || ABC == ADB || ACD == ADB)
                 return GJKStatus::Abort;
 
-            if (dot(ABC, AO) >= 0)
+            float d1 = dot(ABC, AO);
+            if (d1 >= 0)
             {
+                if (dot(AB, AO) == 0 || dot(AC, AO) == 0)
+                    return GJKStatus::Abort; // Origin is on an edge, can result in loop.
+
                 s->size = 3;
                 s->vertices[0] = C;
                 s->vertices[1] = B;
@@ -123,8 +127,12 @@ static GJKStatus do_simplex(Simplex* s, Vec3* search_dir)
                 return GJKStatus::Continue;
             }
 
-            if (dot(ACD, AO) >= 0)
+            float d2 = dot(ACD, AO);
+            if (d2 >= 0)
             {
+                if (dot(AC, AO) == 0 || dot(AC, AO) == 0)
+                    return GJKStatus::Abort; 
+
                 s->size = 3;
                 s->vertices[0] = D;
                 s->vertices[1] = C;
@@ -133,8 +141,12 @@ static GJKStatus do_simplex(Simplex* s, Vec3* search_dir)
                 return GJKStatus::Continue;
             }
 
-            if (dot(ADB, AO) >= 0)
+            float d3 = dot(ADB, AO);
+            if (d3 >= 0)
             {
+                if (dot(AD, AO) == 0 || dot(AB, AO) == 0)
+                    return GJKStatus::Abort; 
+
                 s->size = 3;
                 s->vertices[0] = B;
                 s->vertices[1] = D;
@@ -201,12 +213,14 @@ struct EPAFace {
 static EPAFace& find_closest_face(EPAFace* faces)
 {
     EPAFace* closest = faces;
-    closest->distance = (float)fabs(dot(closest->normal, closest->vertices[0]));
+    closest->distance = dot(closest->normal, closest->vertices[0]);
+    Assert(closest->distance >= 0, "EPAFace in wrong direction.");
 
     for (unsigned i = 1; i < array_size(faces); ++i)
     {
         EPAFace* f = faces + i;
         float d = dot(f->normal, f->vertices[0]);
+        Assert(d >= 0, "EPAFace in wrong direction.");
         if (d < closest->distance)
         {
             f->distance = d;
@@ -222,21 +236,35 @@ static void add_face(EPAFace*& faces, const Vec3& A, const Vec3& B, const Vec3& 
     Vec3 AB = B - A;
     Vec3 AC = C - A;
     Vec3 ABC = cross(AC, AB);
-    EPAFace f = {};
-    f.normal = vec3_normalize(ABC);
 
-    if (dot(f.normal, A) < 0)
+    EPAFace f = {};
+    f.vertices[0] = B;
+    f.vertices[1] = A;
+    f.vertices[2] = C;
+
+    if (ABC == vec3_zero)
+    {
+        array_push(faces, f);
+        return;
+    }
+
+    f.normal = vec3_normalize(ABC);
+    float normal_dir = dot(f.normal, A);
+
+    if (normal_dir < 0)
     {
         f.vertices[0] = A;
         f.vertices[1] = B;
         f.vertices[2] = C;
         f.normal = -f.normal;
     }
-    else
+
+    if (fabs(normal_dir) < SmallNumber)
     {
-        f.vertices[0] = B;
-        f.vertices[1] = A;
-        f.vertices[2] = C;
+        /* Normal is zero or almsot zero, another case of zero-in-plane.
+           Both this case and the ABC == vec3_zero case will cause algorithm
+           to abort next iteration, since depth must be zero. */
+        f.normal = vec3_zero;
     }
 
     array_push(faces, f);
@@ -286,7 +314,7 @@ static void extend_polytope(EPAFace*& faces, const Vec3& extend_to)
     {
         EPAFace& f = faces[i];
 
-        if (dot(f.normal, extend_to) > 0)
+        if (dot(f.normal, extend_to-f.vertices[0]) > 0)
         {
             Edge e1 = {f.vertices[0], f.vertices[1]};
             Edge e2 = {f.vertices[1], f.vertices[2]};
@@ -333,6 +361,13 @@ static GJKEPASolution run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s
         EPAFace& f = find_closest_face(faces);
         Vec3 d = support_diff(s1, s2, f.normal);
         float depth = dot(d, f.normal);
+
+        if (f.distance == 0)
+        {
+            array_destroy(faces);
+            // Origin is on face, so depth will be zero. Solution is zero vector.
+            return {true, {0, 0, 0}};
+        }
 
         if (fabs(depth - f.distance) < 0.0001f)
         {

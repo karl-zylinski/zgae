@@ -27,7 +27,7 @@ function start()
     state.box1 = spawn_entity(Vec3(3, 0, 0), nil, box_geo)
     state.box1:set_collider(physics.create_mesh_collider("tet.wobj"))
     local box_geo = renderer.load_geometry_obj("tet.wobj")
-    state.box2 = spawn_entity(Vec3(1.7, 0, 2.1), Quat.from_axis_angle(Vec3(0, 0, 1), 0.000001), box_geo)
+    state.box2 = spawn_entity(Vec3(3,1.5, 0), Quat.from_axis_angle(Vec3(0, 0, 1), PI), box_geo)
     state.box2:set_collider(physics.create_mesh_collider("tet.wobj"))
 end
 
