@@ -383,11 +383,6 @@ Quat quat_from_axis_angle(const Vec3& axis, float angle)
     });
 }
 
-Quat quat_identity()
-{
-    return {0, 0, 0, 1};
-}
-
 Quat quat_normalize(const Quat& q)
 {
     float len = sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
@@ -413,7 +408,7 @@ Quat quat_look_at(const Vec3& source, const Vec3& dest)
 
     if (fabs(d - ( 1.0f)) < SmallNumber)
     {
-        return quat_identity();
+        return quat_identity;
     }
 
     float rot_angle = acos(d);

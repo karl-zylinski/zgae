@@ -5,15 +5,16 @@
 #include "lua_render_world.h"
 #include "lua_keyboard.h"
 #include "lua_mouse.h"
-#include "lua_render_object.h"
 #include "lua_time.h"
 #include "lua_physics.h"
+#include "lua_entity.h"
 #include "renderer.h"
 #include "render_object.h"
 #include "physics.h"
 #include "lua.hpp"
 #include "window_state.h"
 #include "shader.h"
+#include "entity.h"
 
 struct GameState
 {
@@ -66,6 +67,7 @@ void game_start(WindowState* window_state, Renderer* renderer)
     _window_state->resized_callback = window_resized_callback;
     RRHandle default_shader = shader_load(_renderer, "shader_default.shader");
     _renderer->set_shader(default_shader);
+    entity_init();
     keyboard_init();
     mouse_init();
     memzero(&_state, sizeof(GameState));
@@ -75,9 +77,9 @@ void game_start(WindowState* window_state, Renderer* renderer)
     lua_renderer_init(L, _renderer);
     lua_render_world_init(L);
     lua_physics_init(L);
+    lua_entity_init(L);
     lua_keyboard_init(L);
     lua_mouse_init(L);
-    lua_render_object_init(L);
     lua_time_init(L);
     luaL_dostring(L, "package.path = \"./game\"..\"/?.lua;\"..\"./game\"..\"/?/init.lua;\"..package.path");
     luaL_dostring(L, "package.cpath = \"./game\"..\"/?.so;\"..package.cpath");
@@ -119,4 +121,5 @@ void game_shutdown()
     run_lua_func(_state.lua_state, "shutdown");
     render_object_deinit_lut();
     physics_shutdown();
+    entity_shutdown();
 }

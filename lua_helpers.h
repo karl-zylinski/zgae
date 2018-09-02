@@ -24,3 +24,4 @@ LuaValue lua_get_vec3(lua_State* L, int arg);
 LuaValue lua_get_string(lua_State* L, int arg);
 void lua_push_vec2i(lua_State* L, const Vec2i& v);
 void lua_push_vec3(lua_State* L, const Vec3& v);
+void lua_push_quat(lua_State* L, const Quat& q);

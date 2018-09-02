@@ -51,7 +51,7 @@ static GJKShape gjk_shape_from_collider(const Collider& c)
     return s;
 }
 
-bool physics_intersect(ColliderHandle h1, ColliderHandle h2)
+bool physics_intersects(ColliderHandle h1, ColliderHandle h2)
 {
     Assert(D_colliders[h1.h].used && D_colliders[h2.h].used, "Tried to intersect one ore more invalid physics shapes");
     check_dirty_transform(h1);
@@ -81,7 +81,7 @@ ColliderHandle physics_create_mesh_collider(const Vec3* vertices, size_t num_ver
     c.transformed_vertices = (Vec3*)zalloc(vsize);
     memcpy(c.transformed_vertices, c.vertices, vsize);
     c.num_vertices = num_vertices;
-    c.rotation = quat_identity();
+    c.rotation = quat_identity;
 
     for (size_t i = 0; i < c.num_vertices; ++i)
     {

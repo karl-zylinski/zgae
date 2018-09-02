@@ -16,6 +16,6 @@ struct Collision
 ColliderHandle physics_create_mesh_collider(const Vec3* vertices, size_t num_vertices);
 void physics_set_collider_position(ColliderHandle h, const Vec3& pos);
 void physics_set_collider_rotation(ColliderHandle h, const Quat& rot);
-bool physics_intersect(ColliderHandle h1, ColliderHandle h2);
+bool physics_intersects(ColliderHandle h1, ColliderHandle h2);
 Collision physics_intersect_and_solve(ColliderHandle h1, ColliderHandle h2);
 void physics_shutdown();

@@ -76,6 +76,7 @@ Vec3 vec3_normalize(const Vec3& v);
 static const Vec3 vec3_up = {0, 0, 1};
 static const Vec3 vec3_forward = {0, 1, 0};
 static const Vec3 vec3_zero = {0, 0, 0};
+static const Quat quat_identity = {0, 0, 0, 1};
 
 float dot(const Vec4& v1, const Vec4& v2);
 
@@ -83,7 +84,6 @@ Quat quat_rotate_x(const Quat& q, float rads);
 Quat quat_rotate_y(const Quat& q, float rads);
 Quat quat_rotate_z(const Quat& q, float rads);
 Quat quat_from_axis_angle(const Vec3& axis, float angle);
-Quat quat_identity();
 Quat quat_normalize(const Quat& q);
 Quat quat_look_at(const Vec3& source, const Vec3& dest);
 Quat quat_conjugate(const Quat& q);

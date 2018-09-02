@@ -5,12 +5,6 @@
 #include "obj.h"
 #include "memory.h"
 
-static int create_collider(lua_State* L)
-{
-
-    return 1;
-}
-
 static int create_mesh_collider(lua_State* L)
 {
     LuaValue l_filename = lua_get_string(L, 1);
@@ -44,7 +38,7 @@ static int intersect(lua_State* L)
         Error("ERROR in render_object.intersect: Expected ColliderHandle in argument 2.");
 
     ColliderHandle h2 = {(size_t)h2_int.int_val};
-    bool intersect = physics_intersect(h1, h2);
+    bool intersect = physics_intersects(h1, h2);
     lua_pushboolean(L, intersect);
     return 1;
 }

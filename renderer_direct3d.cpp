@@ -647,7 +647,7 @@ void RendererD3D::load_constant_buffers(const Mat4& world_transform, const Mat4&
 void RendererD3D::draw(const RenderObject& object, const Mat4& view_matrix, const Mat4& projection_matrix)
 {
     load_constant_buffers(object.world_transform, view_matrix, projection_matrix);
-    auto geometry = get_resource(object.geometry_handle).geometry;
+    auto geometry = get_resource(object.geometry).geometry;
     unsigned stride = sizeof(Vertex);
     unsigned offset = 0;
     _device_context->IASetVertexBuffers(0, 1, &geometry.vertices, &stride, &offset);

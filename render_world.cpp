@@ -32,7 +32,7 @@ void render_world_get_objects_to_render(const RenderWorld* w, RenderObject* cons
     for (size_t i = 0; i < array_size(w->D_objects); ++i)
     {
         RenderObjectResource ror = ror_lut[w->D_objects[i].h];
-        if (ror.used && ror.ro.geometry_handle.h != 0)
+        if (ror.used && ror.ro.geometry.h != 0)
             array_push(*ros, ror.ro);
     }
 }
