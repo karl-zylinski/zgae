@@ -5,24 +5,18 @@
 
 static int create(lua_State* L)
 {
-    LuaValue l_rw = lua_get_ptr(L, 1);
-
-    if (!l_rw.valid)
-        Error("ERROR in entity.create: Expected RenderWorld pointer in argument 1.");
-
-    RenderWorld* rw = (RenderWorld*)l_rw.ptr_val;
-    LuaValue l_vec = lua_get_vec3(L, 2);
+    LuaValue l_vec = lua_get_vec3(L, 1);
 
     if (!l_vec.valid)
-        Error("ERROR in entity.create: Expected Vec3 in argument 2.");
+        Error("ERROR in entity.create: Expected Vec3 in argument 1.");
 
-    LuaValue l_q = lua_get_quat(L, 3);
+    LuaValue l_q = lua_get_quat(L, 2);
 
     if (!l_q.valid)
-        Error("ERROR in entity.create: Expected Quat in argument 3.");
+        Error("ERROR in entity.create: Expected Quat in argument 2.");
     
-    LuaValue l_rrh = lua_get_integer(L, 4);
-    EntityHandle e = entity_create(rw, l_vec.vec3_val, l_q.quat_val, {(unsigned)l_rrh.int_val});
+    LuaValue l_rrh = lua_get_integer(L, 3); // ok to be zero
+    EntityHandle e = entity_create(l_vec.vec3_val, l_q.quat_val, {(unsigned)l_rrh.int_val});
     lua_pushnumber(L, (lua_Number)e);
     return 1;
 }

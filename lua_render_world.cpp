@@ -36,10 +36,10 @@ static int add(lua_State* L)
     LuaValue l_int = lua_get_integer(L,2);
 
     if (!l_int.valid)
-        Error("ERROR in render_world.add: Expected RenderObject handle in argument 2.");
+        Error("ERROR in render_world.add: Expected EntityHandle in argument 2.");
 
-    RenderObjectHandle h = {(size_t)l_int.int_val};
-    render_world_add(rw, h);
+    EntityHandle e = {(size_t)l_int.int_val};
+    render_world_add(rw, e);
     return 0;
 }
 
@@ -54,10 +54,10 @@ static int remove(lua_State* L)
     LuaValue l_int = lua_get_integer(L,2);
 
     if (!l_int.valid)
-        Error("ERROR in render_world.add: Expected RenderObject handle in argument 2.");
+        Error("ERROR in render_world.add: Expected EntityHandle in argument 2.");
 
-    RenderObjectHandle h = {(size_t)l_int.int_val};
-    render_world_remove(rw, h);
+    EntityHandle e = {(size_t)l_int.int_val};
+    render_world_remove(rw, e);
     return 0;
 }
 

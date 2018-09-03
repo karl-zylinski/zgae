@@ -15,7 +15,7 @@ world = {
 }
 
 function spawn_entity(pos, rot, geometry, init_func, update_func)
-    local entity_handle = entity.create(world.render_world, pos, rot, geometry)
+    local entity_handle = entity.create(pos, rot, geometry)
     local e = {
         handle = entity_handle,
         update_func = update_func
@@ -26,6 +26,7 @@ function spawn_entity(pos, rot, geometry, init_func, update_func)
     end
 
     world.entities[entity_handle] = e
+    render_world.add(world.render_world, entity_handle)
     return e
 end
 
@@ -33,6 +34,8 @@ function start()
     world.render_world = render_world.create()
     --state.ship = spawn_ship(Vec3(0, 10, 0), nil)
     state.avatar = spawn_avatar(Vec3(0, -3, 0), Quat())
+    local floor_geo = renderer.load_geometry_obj("floor.wobj")
+    state.floor = spawn_entity(Vec3(0, 0, -4), Quat(), floor_geo)
     local box_geo = renderer.load_geometry_obj("box.wobj")
     state.box1 = spawn_entity(Vec3(3, 0, 0), Quat(), box_geo)
     --state.box1:set_collider(physics.create_mesh_collider("box.wobj"))

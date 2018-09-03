@@ -2,11 +2,17 @@
 #include "render_world.h"
 #include "render_object.h"
 #include "array.h"
+#include "entity.h"
 
 void render_world_add(RenderWorld* w, RenderObjectHandle h)
 {
     array_push(w->D_objects, h);
 } 
+
+void render_world_add(RenderWorld* w, EntityHandle h)
+{
+    render_world_add(w, entity_get_render_object(h));
+}
 
 void render_world_remove(RenderWorld* w, RenderObjectHandle h)
 {
@@ -18,6 +24,11 @@ void render_world_remove(RenderWorld* w, RenderObjectHandle h)
             break;
         }
     }
+}
+
+void render_world_remove(RenderWorld* w, EntityHandle h)
+{
+    render_world_remove(w, entity_get_render_object(h));
 }
 
 void render_world_destroy(RenderWorld* w)

@@ -2,7 +2,6 @@
 #include "render_object.h"
 #include "physics.h"
 #include "array.h"
-#include "render_world.h"
 
 struct Entity
 {
@@ -25,17 +24,14 @@ void entity_init()
     array_push(D_entities, {});
 }
 
-EntityHandle entity_create(RenderWorld* rw, const Vec3& position, const Quat& rotation, RRHandle geometry)
+EntityHandle entity_create(const Vec3& position, const Quat& rotation, RRHandle geometry)
 {
     Entity e = {};
     e.position = position;
     e.rotation = rotation;
 
-    if (geometry.h && rw)
-    {
+    if (geometry.h)
         e.render_object = render_object_create(geometry, position, rotation);
-        render_world_add(rw, e.render_object);
-    }
 
     for (size_t i = 0; i < array_size(D_entities); ++i)
     {
@@ -113,6 +109,11 @@ void entity_set_collider(EntityHandle h, ColliderHandle ch)
     e->collider = ch;
     physics_set_collider_position(ch, e->position);
     physics_set_collider_rotation(ch, e->rotation);
+}
+
+RenderObjectHandle entity_get_render_object(EntityHandle e)
+{
+    return D_entities[e].e.render_object;
 }
 
 bool entity_intersects(EntityHandle eh1, EntityHandle eh2)
