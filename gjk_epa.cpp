@@ -3,7 +3,6 @@
 #include "color.h"
 #include "array.h"
 #include <math.h>
-#include "debug.h"
 
 static Vec3 support(const GJKShape& s, const Vec3& d)
 {
@@ -346,9 +345,6 @@ static GJKEPASolution run_epa(const GJKShape& s1, const GJKShape& s2, Simplex* s
     Assert(s->size == 4, "Trying to run EPA with non-tetrahedron simplex.");
 
     EPAFace* faces = convert_simplex_to_epa_faces(*s);
-
-    for (unsigned i = 0; i < array_size(faces); ++i)
-        debug_draw_mesh(faces[i].vertices, 3, debug_get_random_color(i));
 
     while(true)
     {

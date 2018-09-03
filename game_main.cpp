@@ -110,6 +110,7 @@ void game_start(WindowState* window_state, Renderer* renderer)
 void game_do_frame()
 {
     _renderer->pre_frame();
+    physics_simulate();
     run_lua_func(_state.lua_state, "update");
     _renderer->present();
     keyboard_end_of_frame();

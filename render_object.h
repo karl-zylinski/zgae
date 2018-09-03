@@ -14,10 +14,7 @@ struct RenderObjectResource
     bool used;
 };
 
-struct RenderObjectHandle
-{
-    size_t h;
-};
+struct RenderObjectHandle { size_t h; };
 
 RenderObjectHandle render_object_create(RRHandle geomerty, const Vec3& position, const Quat& rotation);
 void render_object_destroy(RenderObjectHandle h);

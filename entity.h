@@ -2,8 +2,8 @@
 #include "render_resource.h"
 #include "physics.h"
 #include "render_object.h"
+#include "entity_handle.h"
 
-typedef size_t EntityHandle;
 struct RenderWorld;
 struct Vec3;
 struct Quat;
@@ -17,5 +17,6 @@ const Quat& entity_get_rotation(EntityHandle h);
 void entity_set_collider(EntityHandle eh, ColliderHandle ch);
 bool entity_intersects(EntityHandle eh1, EntityHandle eh2);
 RenderObjectHandle entity_get_render_object(EntityHandle e);
+ColliderHandle entity_get_collider(EntityHandle e);
 void entity_init();
 void entity_shutdown();

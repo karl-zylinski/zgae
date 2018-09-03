@@ -4,6 +4,7 @@
 #include "render_world.h"
 #include "render_object.h"
 #include "lua_helpers.h"
+#include "entity.h"
 
 static int create(lua_State* L)
 {
@@ -39,7 +40,7 @@ static int add(lua_State* L)
         Error("ERROR in render_world.add: Expected EntityHandle in argument 2.");
 
     EntityHandle e = {(size_t)l_int.int_val};
-    render_world_add(rw, e);
+    render_world_add(rw, entity_get_render_object(e));
     return 0;
 }
 
@@ -57,7 +58,7 @@ static int remove(lua_State* L)
         Error("ERROR in render_world.add: Expected EntityHandle in argument 2.");
 
     EntityHandle e = {(size_t)l_int.int_val};
-    render_world_remove(rw, e);
+    render_world_remove(rw, entity_get_render_object(e));
     return 0;
 }
 

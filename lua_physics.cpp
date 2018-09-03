@@ -4,6 +4,18 @@
 #include "lua_helpers.h"
 #include "obj.h"
 #include "memory.h"
+#include "entity_handle.h"
+
+static int create_rigid_body(lua_State* L)
+{
+    LuaValue h_int = lua_get_integer(L, 1);
+
+    if (!h_int.valid)
+        Error("ERROR in physics.create_rigid_body: Expected EntityHandle in argument 1.");
+
+    physics_create_rigid_body(EntityHandle{(size_t)h_int.int_val});
+    return 0;
+}
 
 static int create_mesh_collider(lua_State* L)
 {
@@ -99,6 +111,7 @@ static int set_collider_rotation(lua_State* L)
 }
 
 static const struct luaL_Reg lib [] = {
+    {"create_rigid_body", create_rigid_body},
     {"create_mesh_collider", create_mesh_collider},
     {"intersect", intersect},
     {"intersect_and_solve", intersect_and_solve},

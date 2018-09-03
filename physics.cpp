@@ -5,6 +5,8 @@
 #include "mesh.h"
 #include "vertex.h"
 #include "gjk_epa.h"
+#include "time.h"
+#include "entity.h"
 
 //TODO: needs physicsworld??
 
@@ -17,6 +19,12 @@ struct Collider
     Quat rotation;
 };
 
+struct RigidBody
+{
+    EntityHandle entity;
+    Vec3 velocity;
+};
+
 struct ColliderResource
 {
     Collider c;
@@ -24,7 +32,14 @@ struct ColliderResource
     bool used;
 };
 
+struct RigidBodyResource
+{
+    RigidBody rb;
+    bool used;
+};
+
 static ColliderResource* D_colliders = nullptr;
+static RigidBodyResource* D_rigid_bodies = nullptr;
 
 void check_dirty_transform(ColliderHandle h)
 {
@@ -107,6 +122,29 @@ ColliderHandle physics_create_mesh_collider(const Vec3* vertices, size_t num_ver
     return {idx};
 }
 
+RigidBodyHandle physics_create_rigid_body(EntityHandle e)
+{
+    RigidBody rb = {};
+    rb.entity = e;
+
+    for (size_t i = 0; i < array_size(D_rigid_bodies); ++i)
+    {
+        if (D_rigid_bodies[i].used == false)
+        {
+            D_rigid_bodies[i].rb = rb;
+            D_rigid_bodies[i].used = true;
+            return {i};
+        }
+    }
+
+    size_t idx = array_size(D_rigid_bodies);
+    RigidBodyResource rbr = {};
+    rbr.used = true;
+    rbr.rb = rb;
+    array_push(D_rigid_bodies, rbr);
+    return {idx};
+}
+
 void physics_set_collider_position(ColliderHandle h, const Vec3& pos)
 {
     Assert(D_colliders[h.h].used, "Trying to set position on unused PhyscsShape");
@@ -143,4 +181,36 @@ void physics_shutdown()
     }
 
     array_destroy(D_colliders);
+    array_destroy(D_rigid_bodies);
+}
+
+void physics_simulate()
+{
+    float dt = time_dt();
+
+    for (size_t i = 0; i < array_size(D_rigid_bodies); ++i)
+    {
+        if (!D_rigid_bodies[i].used)
+            continue;
+
+        RigidBody& rb = D_rigid_bodies[i].rb;
+        static const Vec3 G = {0, 0, -30.0f};
+        rb.velocity += G * dt;
+        entity_set_position(rb.entity, entity_get_position(rb.entity) + rb.velocity * dt);
+        ColliderHandle ch = entity_get_collider(rb.entity);
+
+        for (size_t j = 0; j < array_size(D_colliders); ++j)
+        {
+            if (ch.h == j)
+                continue;
+
+            Collision coll = physics_intersect_and_solve(ch, {j});
+
+            if (coll.colliding)
+            {
+                entity_set_position(rb.entity, entity_get_position(rb.entity) + coll.solution);
+                rb.velocity = vec3_zero;
+            }
+        }
+    }
 }

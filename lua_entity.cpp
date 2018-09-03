@@ -17,7 +17,7 @@ static int create(lua_State* L)
     
     LuaValue l_rrh = lua_get_integer(L, 3); // ok to be zero
     EntityHandle e = entity_create(l_vec.vec3_val, l_q.quat_val, {(unsigned)l_rrh.int_val});
-    lua_pushnumber(L, (lua_Number)e);
+    lua_pushnumber(L, (lua_Number)e.h);
     return 1;
 }
 
@@ -28,7 +28,7 @@ static int destroy(lua_State* L)
     if (!h_int.valid)
         Error("ERROR in entity.destroy: Expected EntityHandle in argument 1.");
 
-    entity_destroy((size_t)h_int.int_val);
+    entity_destroy(EntityHandle{(size_t)h_int.int_val});
     return 0;
 }
 
@@ -45,7 +45,7 @@ static int set_position(lua_State* L)
     if (!l_vec.valid)
         Error("ERROR in entity.set_position: Expected Vec3 in argument 2.");
 
-    entity_set_position(l_h.int_val, l_vec.vec3_val);
+    entity_set_position(EntityHandle{(size_t)l_h.int_val}, l_vec.vec3_val);
     return 0;
 }
 
@@ -61,7 +61,7 @@ static int set_rotation(lua_State* L)
     if (!l_quat.valid)
         Error("ERROR in entity.set_rotation: Expected Quat in argument 2.");
 
-    entity_set_rotation(l_h.int_val, l_quat.quat_val);
+    entity_set_rotation(EntityHandle{(size_t)l_h.int_val}, l_quat.quat_val);
     return 0;
 }
 
@@ -77,7 +77,7 @@ static int set_collider(lua_State* L)
     if (!l_ch.valid)
         Error("ERROR in entity.set_collider: Expected ColliderHandle in argument 2.");
 
-    entity_set_collider((size_t)l_h.int_val, {(unsigned)l_ch.int_val});
+    entity_set_collider(EntityHandle{(size_t)l_h.int_val}, {(unsigned)l_ch.int_val});
     return 0;
 }
 
@@ -88,7 +88,7 @@ static int get_position(lua_State* L)
     if (!l_h.valid)
         Error("ERROR in entity.get_position: Expected EntityHandle in argument 1.");
 
-    lua_push_vec3(L, entity_get_position(l_h.int_val));
+    lua_push_vec3(L, entity_get_position(EntityHandle{(size_t)l_h.int_val}));
     return 1;
 }
 
@@ -99,7 +99,7 @@ static int get_rotation(lua_State* L)
     if (!l_h.valid)
         Error("ERROR in entity.get_rotation: Expected EntityHandle in argument 1.");
 
-    lua_push_quat(L, entity_get_rotation(l_h.int_val));
+    lua_push_quat(L, entity_get_rotation(EntityHandle{(size_t)l_h.int_val}));
     return 1;
 }
 
@@ -115,7 +115,7 @@ static int move(lua_State* L)
     if (!l_vec.valid)
         Error("ERROR in entity.move: Expected Vec3 in argument 2.");
 
-    entity_set_position(l_h.int_val, entity_get_position(l_h.int_val) + l_vec.vec3_val);
+    entity_set_position(EntityHandle{(size_t)l_h.int_val}, entity_get_position(EntityHandle{(size_t)l_h.int_val}) + l_vec.vec3_val);
     return 0;
 }
 
@@ -131,7 +131,7 @@ static int intersects(lua_State* L)
     if (!l_h2.valid)
         Error("ERROR in entity.intersects: Expected EntityHandle in argument 2.");
 
-    lua_pushboolean(L, entity_intersects(l_h1.int_val, l_h2.int_val));
+    lua_pushboolean(L, entity_intersects(EntityHandle{(size_t)l_h1.int_val}, EntityHandle{(size_t)l_h2.int_val}));
     return 1;
 }
 

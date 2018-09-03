@@ -39,7 +39,7 @@ EntityHandle entity_create(const Vec3& position, const Quat& rotation, RRHandle 
         {
             D_entities[i].e = e;
             D_entities[i].free = false;
-            return i;
+            return EntityHandle{i};
         }
     }
 
@@ -47,60 +47,82 @@ EntityHandle entity_create(const Vec3& position, const Quat& rotation, RRHandle 
     EntityResource er = {};
     er.e = e;
     array_push(D_entities, er);
-    return idx;
+    return EntityHandle{idx};
 }
 
-void entity_destroy(EntityHandle h)
+void entity_destroy(EntityHandle eh)
 {
+    size_t h = eh.h;
     if (!h)
         return;
 
-    Error("Implement removal from render world");
+    if (D_entities[h].e.render_object.h)
+        render_object_destroy(D_entities[h].e.render_object);
+
     D_entities[h].free = true;
 }
 
-void entity_set_position(EntityHandle h, const Vec3& pos)
+void entity_set_position(EntityHandle eh, const Vec3& pos)
 {
+    size_t h = eh.h;
     if (!h || D_entities[h].free)
         return;
 
     Entity* e = &D_entities[h].e;
     e->position = pos;
 
+    if (e->collider.h)
+    {
+        physics_set_collider_position(e->collider, e->position);
+    }
+
     if (e->render_object.h)
         render_object_set_position_and_rotation(e->render_object, e->position, e->rotation);
 }
 
-void entity_set_rotation(EntityHandle h, const Quat& rot)
+void entity_set_rotation(EntityHandle eh, const Quat& rot)
 {
+    size_t h = eh.h;
+
     if (!h || D_entities[h].free)
         return;
 
     Entity* e = &D_entities[h].e;
     e->rotation = rot;
 
+    if (e->collider.h)
+    {
+        physics_set_collider_rotation(e->collider, e->rotation);
+    }
+
     if (e->render_object.h)
         render_object_set_position_and_rotation(e->render_object, e->position, e->rotation);
 }
 
-const Vec3& entity_get_position(EntityHandle h)
+const Vec3& entity_get_position(EntityHandle eh)
 {
+    size_t h = eh.h;
+
     if (!h || D_entities[h].free)
         return vec3_zero;
 
     return D_entities[h].e.position;
 }
 
-const Quat& entity_get_rotation(EntityHandle h)
+const Quat& entity_get_rotation(EntityHandle eh)
 {
+    size_t h = eh.h;
+
     if (!h || D_entities[h].free)
         return quat_identity;
 
     return D_entities[h].e.rotation;
 }
 
-void entity_set_collider(EntityHandle h, ColliderHandle ch)
+void entity_set_collider(EntityHandle eh, ColliderHandle ch)
 {
+    size_t h = eh.h;
+
     if (!h || D_entities[h].free)
         return;
 
@@ -113,17 +135,22 @@ void entity_set_collider(EntityHandle h, ColliderHandle ch)
 
 RenderObjectHandle entity_get_render_object(EntityHandle e)
 {
-    return D_entities[e].e.render_object;
+    return D_entities[e.h].e.render_object;
+}
+
+ColliderHandle entity_get_collider(EntityHandle e)
+{
+    return D_entities[e.h].e.collider;
 }
 
 bool entity_intersects(EntityHandle eh1, EntityHandle eh2)
 {
-    if (!eh1 || D_entities[eh1].free || !eh2 || D_entities[eh2].free)
+    if (!eh1.h || D_entities[eh1.h].free || !eh2.h || D_entities[eh2.h].free)
         return false;
 
 
-    Entity* e1 = &D_entities[eh1].e;
-    Entity* e2 = &D_entities[eh2].e;
+    Entity* e1 = &D_entities[eh1.h].e;
+    Entity* e2 = &D_entities[eh2.h].e;
 
     if (!e1->collider.h || !e2->collider.h)
         return false;

@@ -9,10 +9,6 @@ void render_world_add(RenderWorld* w, RenderObjectHandle h)
     array_push(w->D_objects, h);
 } 
 
-void render_world_add(RenderWorld* w, EntityHandle h)
-{
-    render_world_add(w, entity_get_render_object(h));
-}
 
 void render_world_remove(RenderWorld* w, RenderObjectHandle h)
 {
@@ -26,10 +22,6 @@ void render_world_remove(RenderWorld* w, RenderObjectHandle h)
     }
 }
 
-void render_world_remove(RenderWorld* w, EntityHandle h)
-{
-    render_world_remove(w, entity_get_render_object(h));
-}
 
 void render_world_destroy(RenderWorld* w)
 {
@@ -42,7 +34,7 @@ void render_world_get_objects_to_render(const RenderWorld* w, RenderObject* cons
 
     for (size_t i = 0; i < array_size(w->D_objects); ++i)
     {
-        RenderObjectResource ror = ror_lut[w->D_objects[i].h];
+        RenderObjectResource& ror = ror_lut[w->D_objects[i].h];
         if (ror.used && ror.ro.geometry.h != 0)
             array_push(*ros, ror.ro);
     }
