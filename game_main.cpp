@@ -81,8 +81,8 @@ void game_start(WindowState* window_state, Renderer* renderer)
     lua_keyboard_init(L);
     lua_mouse_init(L);
     lua_time_init(L);
-    luaL_dostring(L, "package.path = \"./game\"..\"/?.lua;\"..\"./game\"..\"/?/init.lua;\"..package.path");
-    luaL_dostring(L, "package.cpath = \"./game\"..\"/?.so;\"..package.cpath");
+    luaL_dostring(L, "package.path = \"./game\"..\"/?.lua;\"..\"./game\"..\"/?/init.lua;\"");
+    luaL_dostring(L, "package.cpath = \"./game\"..\"/?.so;\"");
 
     const char* files_to_run[] = {
         "game/helpers.lua",

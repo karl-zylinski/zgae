@@ -1,7 +1,7 @@
 #include "entity.h"
 #include "render_object.h"
-#include "physics.h"
 #include "array.h"
+#include "physics.h"
 
 struct Entity
 {

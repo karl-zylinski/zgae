@@ -1,11 +1,10 @@
 #pragma once
 #include "math.h"
 #include "entity_handle.h"
+#include "collider_handle.h"
+#include "rigid_body_handle.h"
 
 struct Mesh;
-
-struct ColliderHandle { size_t h; };
-struct RigidBodyHandle { size_t h; };
 
 struct Collision
 {

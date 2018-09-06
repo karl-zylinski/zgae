@@ -1,8 +1,8 @@
 #pragma once
 #include "render_resource.h"
-#include "physics.h"
 #include "render_object.h"
 #include "entity_handle.h"
+#include "collider_handle.h"
 
 struct RenderWorld;
 struct Vec3;

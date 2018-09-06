@@ -31,5 +31,5 @@ function spawn_ship(pos, rot)
         ship_geo = renderer.load_geometry_obj("ship.wobj")
     end
 
-    return spawn_entity(pos, rot, ship_geo, ship_init, ship_update)
+    return Entity(pos, rot, ship_init, ship_update, ship_geo)
 end

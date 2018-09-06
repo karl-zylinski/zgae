@@ -1,6 +1,7 @@
 #include "lua_entity.h"
 #include "lua.hpp"
 #include "entity.h"
+#include "render_object.h"
 #include "lua_helpers.h"
 
 static int create(lua_State* L)
@@ -81,6 +82,29 @@ static int set_collider(lua_State* L)
     return 0;
 }
 
+static int set_geometry(lua_State* L)
+{
+    LuaValue l_h = lua_get_integer(L, 1);
+
+    if (!l_h.valid)
+        Error("ERROR in entity.set_geometry: Expected EntityHandle in argument 1.");
+
+    LuaValue l_roh = lua_get_integer(L, 2);
+
+    if (!l_roh.valid)
+        Error("ERROR in entity.set_geometry: Expected RRHandle in argument 2.");
+
+    RenderObjectHandle roh = entity_get_render_object(EntityHandle{(size_t)l_h.int_val});
+    RenderObject* ro = render_object_get(roh);
+
+    if (l_roh.int_val == 0)
+        render_object_destroy(roh);
+    else
+        ro->geometry = RRHandle{(unsigned)l_roh.int_val};
+
+    return 0;
+}
+
 static int get_position(lua_State* L)
 {
     LuaValue l_h = lua_get_integer(L, 1);
@@ -136,19 +160,27 @@ static int intersects(lua_State* L)
 }
 
 static const struct luaL_Reg lib [] = {
-    {"create", create},
-    {"destroy", destroy},
-    {"set_collider", set_collider},
-    {"set_position", set_position},
-    {"set_rotation", set_rotation},
-    {"get_position", get_position},
-    {"get_rotation", get_rotation},
-    {"move", move},
-    {"intersects", intersects},
+    {"entity_create", create},
+    {"entity_destroy", destroy},
+    {"entity_set_collider", set_collider},
+    {"entity_set_position", set_position},
+    {"entity_set_rotation", set_rotation},
+    {"entity_get_position", get_position},
+    {"entity_get_rotation", get_rotation},
+    {"entity_set_geometry", set_geometry},
+    {"entity_move", move},
+    {"entity_intersects", intersects},
     {NULL, NULL}
 };
 
+
 void lua_entity_init(lua_State* L)
 {
-    luaL_register(L, "entity", lib);
+    const luaL_Reg* reg = lib;
+    while(reg->func != nullptr)
+    {
+        lua_pushcfunction(L, reg->func);
+        lua_setglobal(L, reg->name);
+        ++reg;
+    }
 }

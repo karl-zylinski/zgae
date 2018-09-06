@@ -76,7 +76,7 @@ if build then
     end
 
     if #object_files > 0 then
-        local link_cmd = "link.exe " .. extra_link_opts .. " /subsystem:windows /entry:mainCRTStartup dbghelp.lib d3d11.lib user32.lib dxgi.lib D3DCompiler.lib lua51.lib luajit.lib /out:zgae.exe " .. object_files
+        local link_cmd = "link.exe " .. extra_link_opts .. " /subsystem:console /entry:mainCRTStartup dbghelp.lib d3d11.lib user32.lib dxgi.lib D3DCompiler.lib lua51.lib luajit.lib /out:zgae.exe " .. object_files
         run_or_die(link_cmd)
     end
 end
