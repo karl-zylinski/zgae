@@ -53,14 +53,14 @@ static int draw_world(lua_State* L)
     return 0;
 }
 
-static const struct luaL_Reg lib [] = {
-    {"draw_world", draw_world},
-    {"load_geometry_obj", load_geometry_obj},
+static const struct LuaCFunction funcs [] = {
+    {"renderer_draw_world", draw_world},
+    {"renderer_load_geometry_obj", load_geometry_obj},
     {NULL, NULL}
 };
 
 void lua_renderer_init(lua_State* L, Renderer* r)
 {
     renderer = r;
-    luaL_register(L, "renderer", lib);
+    register_lua_functions(L, funcs);
 }

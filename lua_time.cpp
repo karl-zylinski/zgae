@@ -1,6 +1,7 @@
 #include "lua_time.h"
 #include "time.h"
 #include "lua.hpp"
+#include "lua_helpers.h"
 
 static int dt(lua_State* L)
 {
@@ -14,13 +15,13 @@ static int since_start(lua_State* L)
     return 1;
 }
 
-static const struct luaL_Reg lib [] = {
-    {"dt", dt},
-    {"since_start", since_start},
+static const struct LuaCFunction funcs[] = {
+    {"time_dt", dt},
+    {"time_since_start", since_start},
     {NULL, NULL}
 };
 
 void lua_time_init(lua_State* L)
 {
-    luaL_register(L, "time", lib);
+    register_lua_functions(L, funcs);
 }

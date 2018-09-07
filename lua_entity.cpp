@@ -159,7 +159,8 @@ static int intersects(lua_State* L)
     return 1;
 }
 
-static const struct luaL_Reg lib [] = {
+
+static const struct LuaCFunction entity_funcs [] = {
     {"entity_create", create},
     {"entity_destroy", destroy},
     {"entity_set_collider", set_collider},
@@ -174,13 +175,8 @@ static const struct luaL_Reg lib [] = {
 };
 
 
+
 void lua_entity_init(lua_State* L)
 {
-    const luaL_Reg* reg = lib;
-    while(reg->func != nullptr)
-    {
-        lua_pushcfunction(L, reg->func);
-        lua_setglobal(L, reg->name);
-        ++reg;
-    }
+    register_lua_functions(L, entity_funcs);
 }

@@ -62,15 +62,15 @@ static int remove(lua_State* L)
     return 0;
 }
 
-static const struct luaL_Reg lib [] = {
-    {"create", create},
-    {"destroy", destroy},
-    {"add", add},
-    {"remove", remove},
+static const struct LuaCFunction funcs [] = {
+    {"render_world_create", create},
+    {"render_world_destroy", destroy},
+    {"render_world_add", add},
+    {"render_world_remove", remove},
     {NULL, NULL}
 };
 
 void lua_render_world_init(lua_State* L)
 {
-    luaL_register(L, "render_world", lib);
+    register_lua_functions(L, funcs);
 }

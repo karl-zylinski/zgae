@@ -10,12 +10,12 @@ static int get_delta(lua_State* L)
     return 1;
 }
 
-static const struct luaL_Reg lib [] = {
-    {"get_delta", get_delta},
+static const struct LuaCFunction funcs [] = {
+    {"mouse_get_delta", get_delta},
     {NULL, NULL}
 };
 
 void lua_mouse_init(lua_State* L)
 {
-    luaL_register(L, "mouse", lib);
+    register_lua_functions(L, funcs);
 }

@@ -15,6 +15,13 @@ struct LuaValue
     };
 };
 
+struct LuaCFunction
+{
+    const char* name;
+    int (*func)(lua_State*);
+};
+
+void register_lua_functions(lua_State* L, const LuaCFunction* funcs);
 struct Vec2i;
 LuaValue lua_get_integer(lua_State* L, int arg);
 LuaValue lua_get_double(lua_State* L, int arg);

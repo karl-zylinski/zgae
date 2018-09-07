@@ -6,25 +6,25 @@ end
 
 local function avatar_update(e)
     local movement = Vec3()
-    local dt = time.dt()
+    local dt = time_dt()
 
-    if keyboard.is_held(Key.W) then
+    if keyboard_is_held(Key.W) then
         movement.y = movement.y+dt*10
     end
 
-    if keyboard.is_held(Key.S) then
+    if keyboard_is_held(Key.S) then
         movement.y = movement.y-dt*10
     end
 
-    if keyboard.is_held(Key.A) then
+    if keyboard_is_held(Key.A) then
         movement.x = movement.x-dt*10
     end
 
-    if keyboard.is_held(Key.D) then
+    if keyboard_is_held(Key.D) then
         movement.x = movement.x+dt*10
     end
 
-    local md = mouse.get_delta()
+    local md = mouse_get_delta()
     local yaw = md.x
     local pitch = md.y
     local yawq = Quat.from_axis_angle(Vec3(0, 0, -yaw), dt*20)

@@ -93,6 +93,17 @@ LuaValue lua_get_string(lua_State* L, int arg)
     return lv;
 }
 
+void register_lua_functions(lua_State* L, const LuaCFunction* funcs)
+{
+    const LuaCFunction* f = funcs;
+    while(f->func != nullptr)
+    {
+        lua_pushcfunction(L, f->func);
+        lua_setglobal(L, f->name);
+        ++f;
+    }
+}
+
 void lua_push_vec2i(lua_State* L, const Vec2i& v)
 {
     lua_createtable(L, 0, 2);

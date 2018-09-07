@@ -24,10 +24,10 @@ end
 
 function Entity:set_geometry(geometry)
     if geometry == nil then
-        render_world.remove(world.render_world, self.handle)
+        render_world_remove(world.render_world, self.handle)
     end
 
-    render_world.add(world.render_world, self.handle)
+    render_world_add(world.render_world, self.handle)
     entity_set_geometry(self.handle, geometry);
 end
 
@@ -60,9 +60,9 @@ function Entity:get_collider(collider)
 end
 
 function Entity:create_rigid_body()
-    physics.create_rigid_body(self.handle)
+    physics_create_rigid_body(self.handle)
 end
 
 function Entity:destroy_rigid_body()
-    physics.destroy_rigid_body(self.handle)
+    physics_destroy_rigid_body(self.handle)
 end

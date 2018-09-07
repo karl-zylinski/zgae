@@ -4,7 +4,7 @@ end
 
 local function ship_update(e)
     local movement = Vec3()
-    local dt = time.dt()
+    local dt = time_dt()
 
     if keyboard.is_held(Key.Up) then
         movement.z = movement.z+dt

@@ -110,17 +110,17 @@ static int set_collider_rotation(lua_State* L)
     return 0;
 }
 
-static const struct luaL_Reg lib [] = {
-    {"create_rigid_body", create_rigid_body},
-    {"create_mesh_collider", create_mesh_collider},
-    {"intersect", intersect},
-    {"intersect_and_solve", intersect_and_solve},
-    {"set_collider_position", set_collider_position},
-    {"set_collider_rotation", set_collider_rotation},
+static const struct LuaCFunction funcs [] = {
+    {"physics_create_rigid_body", create_rigid_body},
+    {"physics_create_mesh_collider", create_mesh_collider},
+    {"physics_intersect", intersect},
+    {"physics_intersect_and_solve", intersect_and_solve},
+    {"physics_set_collider_position", set_collider_position},
+    {"physics_set_collider_rotation", set_collider_rotation},
     {NULL, NULL}
 };
 
 void lua_physics_init(lua_State* L)
 {
-    luaL_register(L, "physics", lib);
+    register_lua_functions(L, funcs);
 }

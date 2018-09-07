@@ -26,14 +26,14 @@ static int was_released(lua_State* L){
 
 }
 
-static const struct luaL_Reg lib [] = {
-    {"is_held", is_held},
-    {"was_pressed", was_pressed},
-    {"was_released", was_released},
+static const struct LuaCFunction funcs [] = {
+    {"keyboard_is_held", is_held},
+    {"keyboard_was_pressed", was_pressed},
+    {"keyboard_was_released", was_released},
     {NULL, NULL}
 };
 
 void lua_keyboard_init(lua_State* L)
 {
-    luaL_register(L, "keyboard", lib);
+    register_lua_functions(L, funcs);
 }
