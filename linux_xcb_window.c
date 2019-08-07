@@ -1,6 +1,7 @@
 #include "linux_xcb_window.h"
 #include <xcb/xcb.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
 
 void linux_xcb_create_window(linux_xcb_window_t* w, const char* title, uint32_t width, uint32_t height)
@@ -22,6 +23,16 @@ void linux_xcb_create_window(linux_xcb_window_t* w, const char* title, uint32_t 
         screen->root_visual,
         mask, values);
     xcb_map_window(w->connection, w->handle);
+
+    xcb_change_property(
+        w->connection,
+        XCB_PROP_MODE_REPLACE,
+        w->handle,
+        XCB_ATOM_WM_NAME,
+        XCB_ATOM_STRING,
+        8,
+        strlen(title),
+        title);
 
     xcb_intern_atom_cookie_t cookie = xcb_intern_atom(w->connection, 1, 12, "WM_PROTOCOLS");
     xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(w->connection, cookie, 0);
