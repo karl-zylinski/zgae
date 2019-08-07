@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "window_state.h"
+#include "window.h"
 
 typedef struct {
     struct xcb_connection_t* connection;
