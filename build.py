@@ -3,13 +3,11 @@
 import os
 import sys
 
-from os.path import isfile
-
 all_files = os.listdir(".")
 to_compile = []
 
 for f in all_files:
-    if not isfile(f):
+    if not os.path.isfile(f):
         continue
 
     if f.endswith(".c"):
