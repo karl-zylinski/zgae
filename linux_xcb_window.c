@@ -56,8 +56,12 @@ void linux_xcb_process_all_events(linux_xcb_window_t* win)
         switch(evt->response_type & ~0x80)
         {
             case XCB_KEY_PRESS: {
-                if (((xcb_key_press_event_t*)evt)->detail == 9)
-                    win->state.open_state = WINDOW_OPEN_STATE_CLOSED;
+                xcb_keycode_t code = ((xcb_key_press_event_t*)evt)->detail;
+                win->state.key_pressed_callback(code);
+            } break;
+            case XCB_KEY_RELEASE: { // This is broken, needs poooop xcb crap. I just want to know when the actual key goes up, nothing else...
+                xcb_keycode_t code = ((xcb_key_release_event_t*)evt)->detail;
+                win->state.key_released_callback(code);
             } break;
             case XCB_CLIENT_MESSAGE:
             {
