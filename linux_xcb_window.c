@@ -7,7 +7,7 @@
 
 void linux_xcb_create_window(linux_xcb_window_t* w, const char* title, uint32_t width, uint32_t height)
 {
-    info("Creating XCB window with title %s, width %d and height %d", title, width, height);
+    info("Creating XCB window w/ title %s, width %d, height %d", title, width, height);
     w->connection = xcb_connect(NULL, NULL);
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
@@ -19,7 +19,7 @@ void linux_xcb_create_window(linux_xcb_window_t* w, const char* title, uint32_t 
         XCB_COPY_FROM_PARENT,
         w->handle,
         screen->root,
-        0, 0, 640, 480,
+        0, 0, width, height,
         10,
         XCB_WINDOW_CLASS_INPUT_OUTPUT,
         screen->root_visual,

@@ -4,12 +4,12 @@
 #include <stdio.h>
 #include "debug.h"
 
-void key_pressed(key_e key)
+void key_pressed(key_t key)
 {
     info("pressed: %d", (uint32_t)key);
 }
 
-void key_released(key_e key)
+void key_released(key_t key)
 {
     info("pressed: %d", (uint32_t)key);
 }

@@ -39,7 +39,7 @@ typedef enum
     KEY_7,
     KEY_8,
     KEY_9,
-    KEY_ESCAPE,
+    key_tSCAPE,
     KEY_LEFT_CONTROL,
     KEY_LEFT_SHIFT,
     KEY_LEFT_ALT,
@@ -58,7 +58,7 @@ typedef enum
     KEY_Slash,
     KEY_BackSlash,
     KEY_Tilde,
-    KEY_Equal,
+    key_tqual,
     KEY_Dash,
     KEY_Space,
     KEY_Return,
@@ -66,7 +66,7 @@ typedef enum
     KEY_Tab,
     KEY_PageUp,
     KEY_PageDown,
-    KEY_End,
+    key_tnd,
     KEY_Home,
     KEY_Insert,
     KEY_Delete,
@@ -105,4 +105,4 @@ typedef enum
     KEY_F15,
     KEY_Pause,
     KEY_NumKeys
-} key_e;
+} key_t;
