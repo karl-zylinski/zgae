@@ -21,7 +21,7 @@ built_objects = []
 for in_filename in to_compile:
     object_filename = in_filename[0:-2] + ".o"
     out_filename = "build/" + object_filename
-    compile_error = os.system("clang -c -std=c99 -Wall -Werror %s -o %s -g -DVK_USE_PLATFORM_XCB_KHR" % (in_filename, out_filename))
+    compile_error = os.system("clang -c -std=c99 -Wall -Werror %s -o %s -g -DENABLE_SLOW_DEBUG_CHECKS -DVK_USE_PLATFORM_XCB_KHR" % (in_filename, out_filename))
 
     if compile_error != 0:
         exit("\nbuild.py exited: compilation error")
@@ -30,7 +30,7 @@ for in_filename in to_compile:
 
 
 linker_input_str = " ".join(built_objects)
-linker_error = os.system("clang %s -o zgae -lxcb -lvulkan" % linker_input_str)
+linker_error = os.system("clang %s -rdynamic -o zgae -lxcb -lvulkan" % linker_input_str)
 
 if linker_error != 0:
     exit("\nbuild.py exited: linker error")

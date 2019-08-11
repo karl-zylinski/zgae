@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include "debug.h"
 
 void linux_xcb_create_window(linux_xcb_window_t* w, const char* title, uint32_t width, uint32_t height)
 {
+    info("Creating XCB window with title %s, width %d and height %d", title, width, height);
     w->connection = xcb_connect(NULL, NULL);
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
@@ -65,6 +67,7 @@ void linux_xcb_process_all_events(linux_xcb_window_t* win)
             } break;
             case XCB_CLIENT_MESSAGE:
             {
+                info("XCB got message to close application");
                 if((*(xcb_client_message_event_t*)evt).data.data32[0] == (*window_deleted_reply).atom)
                     win->state.open_state = WINDOW_OPEN_STATE_CLOSED;
             } break;
