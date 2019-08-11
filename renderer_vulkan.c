@@ -34,9 +34,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     void* user_data)
 {
     if (severity < VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-        info("Vulkan info: %s", data->pMessage);
+        info("(From Vulkan) %s", data->pMessage);
     else
-        error("Vulkan error: %s", data->pMessage);
+        error("(From Vulkan) %s", data->pMessage);
     return VK_FALSE;
 }
 

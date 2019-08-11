@@ -3,6 +3,7 @@
 #include "key.h"
 #include <stdio.h>
 #include "debug.h"
+#include "memory.h"
 
 void key_pressed(key_t key)
 {
@@ -32,6 +33,7 @@ int main()
 
     info("Main loop exited, shutting down");
     renderer_shutdown(renderer_state);
+    memory_check_leaks();
     info("Shutdown finished");
     return 0;
 }
