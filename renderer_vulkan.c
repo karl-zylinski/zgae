@@ -164,7 +164,7 @@ static void create_swapchain(
     for (uint32_t i = 0; i < old_bufs_count; i++)
         vkDestroyImageView(device, old_bufs[i].view, NULL);
 
-    swapchain_buffer_t* bufs = memraz(old_bufs, sizeof(swapchain_buffer_t) * swapchain_image_count);
+    swapchain_buffer_t* bufs = memra_zero(old_bufs, sizeof(swapchain_buffer_t) * swapchain_image_count);
 
     for (uint32_t i = 0; i < swapchain_image_count; ++i)
     {
@@ -337,7 +337,7 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     info("Creating Vulkan renderer");
 
     check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
-    renderer_state_t* rs = memaz(sizeof(renderer_state_t));
+    renderer_state_t* rs = mema_zero(sizeof(renderer_state_t));
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");

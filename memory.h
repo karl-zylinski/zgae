@@ -9,7 +9,7 @@ static inline void* mema(size_t size)
     return p;
 }
 
-static inline void* memaz(size_t size)
+static inline void* mema_zero(size_t size)
 {
     void* p = mema(size);
     memset(p, 0, size);
@@ -22,7 +22,7 @@ static inline void* memra(void* cur, size_t size)
     return p;
 }
 
-static inline void* memraz(void* cur, size_t size)
+static inline void* memra_zero(void* cur, size_t size)
 {
     void* p = memra(cur, size);
     memset(p, 0, size);

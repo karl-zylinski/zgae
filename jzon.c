@@ -79,7 +79,7 @@ static char* parse_multiline_string(const char** input)
     
     *input += 3;
     char* start = (char*)*input;
-    char* result = (char*)memaz(1);
+    char* result = (char*)mema_zero(1);
 
     while (current(input))
     {
