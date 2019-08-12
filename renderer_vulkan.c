@@ -344,7 +344,7 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
 
     VkApplicationInfo ai = {};
     ai.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    ai.pApplicationName = "VulkanTest";
+    ai.pApplicationName = "ZGAE";
     ai.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     ai.apiVersion = VK_API_VERSION_1_0;
 
@@ -506,7 +506,6 @@ void renderer_shutdown(renderer_state_t* rs)
     info("Destroying Vulkan renderer");
     VkDevice device = rs->device;
     vkFreeCommandBuffers(device, rs->graphics_cmd_pool, 1, &rs->graphics_cmd_buffer);
-
     destroy_depth_buffer(device, &rs->depth_buffer);
     vkDestroyCommandPool(device, rs->graphics_cmd_pool, NULL);
     for (uint32_t i = 0; i < rs->swapchain_buffers_count; i++)
