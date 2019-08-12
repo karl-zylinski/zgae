@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "debug.h"
 #include "memory.h"
+#include "jzon.h"
+#include "file.h"
 
 void key_pressed(key_t key)
 {
@@ -17,8 +19,15 @@ void key_released(key_t key)
 
 int main()
 {
+    char* data;
+    size_t data_size;
+    file_load_str("shader_default.shader", &data, &data_size);
+    jzon_value_t jzon_res;
+    int parse_success = jzon_parse(data, &jzon_res);
+    check(parse_success == 1, "lax");
+
     info("Starting ZGAE");
-    linux_xcb_window_t win = {0};
+    linux_xcb_window_t win = {};
     win.state.key_pressed_callback = &key_pressed;
     win.state.key_released_callback = &key_released;
     linux_xcb_create_window(&win, "ZGAE", 800, 600);

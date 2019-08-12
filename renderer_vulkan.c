@@ -5,9 +5,20 @@
 #include "debug.h"
 #include "math.h"
 
-#define VERIFY_RES() check(res == VK_SUCCESS, "VULKAN ERROR")
+#define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
 
 typedef struct {
+    VkImage image;
+    VkImageView view;
+} swapchain_buffer_t;
+
+typedef struct {
+    VkImage image;
+    VkImageView view;
+    VkDeviceMemory memory;
+} depth_buffer_t;
+
+struct renderer_state {
     VkInstance instance;
     VkDebugUtilsMessengerEXT debug_messenger;
     VkSurfaceKHR surface;
@@ -17,14 +28,16 @@ typedef struct {
     VkPhysicalDeviceMemoryProperties gpu_memory_properties;
     VkDevice device;
     VkSwapchainKHR swapchain;
+    vec2u_t swapchain_size;
+    swapchain_buffer_t* swapchain_buffers;
+    uint32_t swapchain_buffers_count;
     uint32_t graphics_queue_family_idx;
     VkQueue graphics_queue;
     uint32_t present_queue_family_idx;
     VkQueue present_queue;
-} vk_state_t;
-
-struct renderer_state {
-    vk_state_t vk_state;
+    VkCommandPool graphics_cmd_pool;
+    VkCommandBuffer graphics_cmd_buffer;
+    depth_buffer_t depth_buffer;
 };
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
@@ -86,12 +99,14 @@ static VkCompositeAlphaFlagBitsKHR choose_swapchain_composite_alpha(VkCompositeA
     return VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
 }
 
-static VkSwapchainKHR create_swapchain(
+static void create_swapchain(
+    VkSwapchainKHR* out_current_swapchain, swapchain_buffer_t** out_sc_bufs, uint32_t* out_sc_bufs_count, vec2u_t* out_swapchain_size,
     VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface, VkFormat format,
     uint32_t graphics_queue_family_idx, uint32_t present_queue_family_idx, VkSwapchainKHR old_swapchain)
 {
     vec2u_t size = get_surface_size(gpu, surface);
     info("Creating swapchain with size %dx%d", size.x, size.y);
+    *out_swapchain_size = size;
     VkResult res;
 
     VkSurfaceCapabilitiesKHR surface_capabilities;
@@ -114,7 +129,7 @@ static VkSwapchainKHR create_swapchain(
     scci.compositeAlpha = choose_swapchain_composite_alpha(surface_capabilities.supportedCompositeAlpha);
     scci.imageArrayLayers = 1;
     scci.presentMode = choose_swapchain_present_mode(gpu, surface);
-    scci.oldSwapchain = old_swapchain;
+    scci.oldSwapchain = *out_current_swapchain;
     scci.clipped = 1;
     scci.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
     scci.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -132,7 +147,134 @@ static VkSwapchainKHR create_swapchain(
     VkSwapchainKHR swapchain;
     res = vkCreateSwapchainKHR(device, &scci, NULL, &swapchain);
     VERIFY_RES();
-    return swapchain;
+    *out_current_swapchain = swapchain;
+
+    uint32_t swapchain_image_count;
+    res = vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, NULL);
+    VERIFY_RES();
+    check(swapchain_image_count > 0, "Swapchain contains no images");
+    VkImage* swapchain_images = mema(swapchain_image_count * sizeof(VkImage));
+    res = vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, swapchain_images);
+    VERIFY_RES();
+
+    info("Creating %d buffers for swapchain", swapchain_image_count);
+    swapchain_buffer_t* old_bufs = *out_sc_bufs;
+    uint32_t old_bufs_count = *out_sc_bufs_count;
+
+    for (uint32_t i = 0; i < old_bufs_count; i++)
+        vkDestroyImageView(device, old_bufs[i].view, NULL);
+
+    swapchain_buffer_t* bufs = memraz(old_bufs, sizeof(swapchain_buffer_t) * swapchain_image_count);
+
+    for (uint32_t i = 0; i < swapchain_image_count; ++i)
+    {
+        bufs[i].image = swapchain_images[i];
+
+        VkImageViewCreateInfo vci = {};
+        vci.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        vci.image = bufs[i].image;
+        vci.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        vci.format = format;
+        vci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        vci.subresourceRange.levelCount = 1;
+        vci.subresourceRange.layerCount = 1;
+
+        res = vkCreateImageView(device, &vci, NULL, &bufs[i].view);
+        VERIFY_RES();
+    }
+
+    memf(swapchain_images);
+    *out_sc_bufs = bufs;
+    *out_sc_bufs_count = swapchain_image_count;
+}
+
+int memory_type_from_properties(uint32_t req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
+{
+    for (uint32_t i = 0; i < memory_properties->memoryTypeCount; ++i)
+    {
+        if ((req_memory_type & (1 << i)) && (memory_properties->memoryTypes[i].propertyFlags & memory_requirement_mask) == memory_requirement_mask)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+void destroy_depth_buffer(VkDevice device, const depth_buffer_t* depth_buffer)
+{
+    if (!depth_buffer->view && !depth_buffer->image && !depth_buffer->memory)
+        return;
+
+    info("Destroying depth buffer");
+    vkDestroyImageView(device, depth_buffer->view, NULL);
+    vkDestroyImage(device, depth_buffer->image, NULL);
+    vkFreeMemory(device, depth_buffer->memory, NULL);
+}
+
+static void create_depth_buffer(depth_buffer_t* out_depth_buffer, VkDevice device, VkPhysicalDevice gpu, const VkPhysicalDeviceMemoryProperties* memory_properties, vec2u_t size)
+{
+    destroy_depth_buffer(device, out_depth_buffer);
+    info("Creating depth buffer");
+    depth_buffer_t depth_buffer = {};
+
+    VkImageCreateInfo depth_ici = {};
+    const VkFormat depth_format = VK_FORMAT_D16_UNORM;
+    VkFormatProperties depth_format_props;
+    vkGetPhysicalDeviceFormatProperties(gpu, depth_format, &depth_format_props);
+    if (depth_format_props.linearTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+        depth_ici.tiling = VK_IMAGE_TILING_LINEAR;
+    else if (depth_format_props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+        depth_ici.tiling = VK_IMAGE_TILING_OPTIMAL;
+    else
+        error("VK_FORMAT_D16_UNORM unsupported");
+
+    depth_ici.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    depth_ici.imageType = VK_IMAGE_TYPE_2D;
+    depth_ici.format = depth_format;
+    depth_ici.extent.width = size.x;
+    depth_ici.extent.height = size.y;
+    depth_ici.extent.depth = 1;
+    depth_ici.mipLevels = 1;
+    depth_ici.arrayLayers = 1;
+    
+    #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
+
+    depth_ici.samples = NUM_SAMPLES;
+    depth_ici.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depth_ici.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    depth_ici.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    VkResult res;
+    res = vkCreateImage(device, &depth_ici, NULL, &depth_buffer.image);
+    VERIFY_RES();
+
+    VkMemoryRequirements depth_mem_reqs;
+    vkGetImageMemoryRequirements(device, depth_buffer.image, &depth_mem_reqs);
+
+    VkMemoryAllocateInfo depth_mai = {};
+    depth_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    depth_mai.allocationSize = depth_mem_reqs.size;
+    depth_mai.memoryTypeIndex = memory_type_from_properties(depth_mem_reqs.memoryTypeBits, memory_properties, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    check(depth_mai.memoryTypeIndex != -1, "Failed to find memory type for depth buffer");
+    res = vkAllocateMemory(device, &depth_mai, NULL, &depth_buffer.memory);
+    VERIFY_RES();
+    res = vkBindImageMemory(device, depth_buffer.image, depth_buffer.memory, 0);
+    VERIFY_RES();
+
+    VkImageViewCreateInfo depth_ivci = {};
+    depth_ivci.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    depth_ivci.image = VK_NULL_HANDLE;
+    depth_ivci.format = depth_format;
+    depth_ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    depth_ivci.subresourceRange.levelCount = 1;
+    depth_ivci.subresourceRange.layerCount = 1;
+    depth_ivci.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    depth_ivci.image = depth_buffer.image;
+    res = vkCreateImageView(device, &depth_ivci, NULL, &depth_buffer.view);
+    VERIFY_RES();
+    *out_depth_buffer = depth_buffer;
 }
 
 static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface)
@@ -196,7 +338,6 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
 
     check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
     renderer_state_t* rs = memaz(sizeof(renderer_state_t));
-    vk_state_t* vks = &rs->vk_state;
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -224,12 +365,12 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     ici.ppEnabledLayerNames = validation_layers;
     ici.enabledLayerCount = sizeof(validation_layers)/sizeof(char*);
     ici.pNext = &debug_ext_ci;
-    res = vkCreateInstance(&ici, NULL, &vks->instance);
+    res = vkCreateInstance(&ici, NULL, &rs->instance);
     VERIFY_RES();
-    VkInstance instance = vks->instance;
+    VkInstance instance = rs->instance;
 
     vkCreateDebugUtilsMessengerEXT_t vkCreateDebugUtilsMessengerEXT = (vkCreateDebugUtilsMessengerEXT_t)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    res = vkCreateDebugUtilsMessengerEXT(instance, &debug_ext_ci, NULL, &vks->debug_messenger);
+    res = vkCreateDebugUtilsMessengerEXT(instance, &debug_ext_ci, NULL, &rs->debug_messenger);
     VERIFY_RES();
 
     info("Creating XCB Vulkan surface");
@@ -238,9 +379,9 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     xcbci.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
     xcbci.connection = win->connection;
     xcbci.window = win->handle;
-    res = vkCreateXcbSurfaceKHR(instance, &xcbci, NULL, &vks->surface);
+    res = vkCreateXcbSurfaceKHR(instance, &xcbci, NULL, &rs->surface);
     VERIFY_RES();
-    VkSurfaceKHR surface = vks->surface;
+    VkSurfaceKHR surface = rs->surface;
 
     info("Selecting GPU and fetching properties");
     uint32_t num_available_gpus = 0;
@@ -251,10 +392,10 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     res = vkEnumeratePhysicalDevices(instance, &num_available_gpus, available_gpus);
     VERIFY_RES();
     VkPhysicalDevice gpu = choose_gpu(available_gpus, num_available_gpus);
-    vks->gpu = gpu;
-    vkGetPhysicalDeviceProperties(vks->gpu, &vks->gpu_properties);
-    vkGetPhysicalDeviceMemoryProperties(vks->gpu, &vks->gpu_memory_properties);
-    info("Selected GPU %s", vks->gpu_properties.deviceName);
+    rs->gpu = gpu;
+    vkGetPhysicalDeviceProperties(rs->gpu, &rs->gpu_properties);
+    vkGetPhysicalDeviceMemoryProperties(rs->gpu, &rs->gpu_memory_properties);
+    info("Selected GPU %s", rs->gpu_properties.deviceName);
 
     info("Finding GPU graphics and present queue families");
     uint32_t queue_family_count = 0;
@@ -269,8 +410,8 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
         VERIFY_RES();
     }
 
-    vks->graphics_queue_family_idx = -1;
-    vks->present_queue_family_idx = -1;
+    rs->graphics_queue_family_idx = -1;
+    rs->present_queue_family_idx = -1;
 
     // We first try to find a queue family with both graphics and present capabilities,
     // if it fails we try to look for two separate queue families
@@ -278,35 +419,35 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     {
         if (queue_family_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
-            vks->graphics_queue_family_idx = i;
+            rs->graphics_queue_family_idx = i;
 
             if (queues_with_present_support[i] == VK_TRUE)
             {
-                vks->present_queue_family_idx = i;
+                rs->present_queue_family_idx = i;
                 info("Found combined queue family");
                 break;
             }
         }
     }
-    check(vks->graphics_queue_family_idx != -1, "Couldn't find graphics queue family");
-    if (vks->present_queue_family_idx == -1)
+    check(rs->graphics_queue_family_idx != -1, "Couldn't find graphics queue family");
+    if (rs->present_queue_family_idx == -1)
     {
         for (uint32_t i = 0; i < queue_family_count; ++i)
         {
             if (queues_with_present_support[i] == VK_TRUE)
             {
-                vks->present_queue_family_idx = i;
+                rs->present_queue_family_idx = i;
                 info("Found two separate queue families");
                 break;
             }
         }
     }
-    check(vks->present_queue_family_idx != -1, "Couldn't find present queue family");
+    check(rs->present_queue_family_idx != -1, "Couldn't find present queue family");
     memf(queues_with_present_support);
 
     info("Creating Vulkan logical device");
     VkDeviceQueueCreateInfo dqci = {};
-    dqci.queueFamilyIndex = vks->graphics_queue_family_idx;
+    dqci.queueFamilyIndex = rs->graphics_queue_family_idx;
     dqci.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     dqci.queueCount = 1;
     float queue_priorities[] = {0.0};
@@ -320,21 +461,42 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     dci.ppEnabledExtensionNames = device_extensions;
     dci.enabledExtensionCount = sizeof(device_extensions)/sizeof(char*);
 
-    res = vkCreateDevice(gpu, &dci, NULL, &vks->device);
+    res = vkCreateDevice(gpu, &dci, NULL, &rs->device);
     VERIFY_RES();
-    VkDevice device = vks->device;
+    VkDevice device = rs->device;
 
-    vks->surface_format = choose_surface_format(gpu, surface);
-    info("Chose surface VkFormat: %d", vks->surface_format);
+    rs->surface_format = choose_surface_format(gpu, surface);
+    info("Chose surface VkFormat: %d", rs->surface_format);
 
-    vks->swapchain = create_swapchain(gpu, device, surface, vks->surface_format, vks->graphics_queue_family_idx, vks->present_queue_family_idx, NULL);
+    create_swapchain(
+        &rs->swapchain, &rs->swapchain_buffers, &rs->swapchain_buffers_count, &rs->swapchain_size,
+        gpu, device, surface,
+        rs->surface_format, rs->graphics_queue_family_idx,
+        rs->present_queue_family_idx, NULL);
 
     info("Creating graphics and present queues");
-    vkGetDeviceQueue(device, vks->graphics_queue_family_idx, 0, &vks->graphics_queue);
-    if (vks->graphics_queue_family_idx == vks->present_queue_family_idx)
-        vks->present_queue = vks->graphics_queue;
+    vkGetDeviceQueue(device, rs->graphics_queue_family_idx, 0, &rs->graphics_queue);
+    if (rs->graphics_queue_family_idx == rs->present_queue_family_idx)
+        rs->present_queue = rs->graphics_queue;
     else
-        vkGetDeviceQueue(device, vks->present_queue_family_idx, 0, &vks->present_queue);
+        vkGetDeviceQueue(device, rs->present_queue_family_idx, 0, &rs->present_queue);
+
+    info("Creating graphics queue command pool and command buffer");
+    VkCommandPoolCreateInfo cpci = {};
+    cpci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    cpci.queueFamilyIndex = rs->graphics_queue_family_idx;
+    res = vkCreateCommandPool(device, &cpci, NULL, &rs->graphics_cmd_pool);
+    VERIFY_RES();
+
+    VkCommandBufferAllocateInfo cbai = {};
+    cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cbai.commandPool = rs->graphics_cmd_pool;
+    cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cbai.commandBufferCount = 1;
+    res = vkAllocateCommandBuffers(device, &cbai, &rs->graphics_cmd_buffer);
+    VERIFY_RES();
+
+    create_depth_buffer(&rs->depth_buffer, device, gpu, &rs->gpu_memory_properties, rs->swapchain_size);
 
     return rs;
 }
@@ -342,12 +504,17 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
 void renderer_shutdown(renderer_state_t* rs)
 {
     info("Destroying Vulkan renderer");
-    vk_state_t* vks = &rs->vk_state;
-    VkDevice device = vks->device;
-    vkDestroySwapchainKHR(device, vks->swapchain, NULL);
+    VkDevice device = rs->device;
+    vkFreeCommandBuffers(device, rs->graphics_cmd_pool, 1, &rs->graphics_cmd_buffer);
+
+    destroy_depth_buffer(device, &rs->depth_buffer);
+    vkDestroyCommandPool(device, rs->graphics_cmd_pool, NULL);
+    for (uint32_t i = 0; i < rs->swapchain_buffers_count; i++)
+        vkDestroyImageView(device, rs->swapchain_buffers[i].view, NULL);
+    vkDestroySwapchainKHR(device, rs->swapchain, NULL);
     vkDestroyDevice(device, NULL);
-    vkDestroyDebugUtilsMessengerEXT_t vkDestroyDebugUtilsMessengerEXT = (vkDestroyDebugUtilsMessengerEXT_t)vkGetInstanceProcAddr(vks->instance, "vkDestroyDebugUtilsMessengerEXT");
-    vkDestroyDebugUtilsMessengerEXT(vks->instance, vks->debug_messenger, NULL);
-    vkDestroyInstance(vks->instance, NULL);
+    vkDestroyDebugUtilsMessengerEXT_t vkDestroyDebugUtilsMessengerEXT = (vkDestroyDebugUtilsMessengerEXT_t)vkGetInstanceProcAddr(rs->instance, "vkDestroyDebugUtilsMessengerEXT");
+    vkDestroyDebugUtilsMessengerEXT(rs->instance, rs->debug_messenger, NULL);
+    vkDestroyInstance(rs->instance, NULL);
     memf(rs);
 }
