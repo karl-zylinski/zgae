@@ -38,6 +38,7 @@ int main()
 
     info("Main loop exited, shutting down");
     renderer_shutdown(renderer_state);
+    linux_xcb_destroy_window(win);
     memory_check_leaks();
     info("Shutdown finished");
     return 0;

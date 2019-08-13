@@ -57,6 +57,12 @@ struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32 width
     return w;
 }
 
+void linux_xcb_destroy_window(struct linux_xcb_window* w)
+{
+    (void)w;
+    error("Please implement.");
+}
+
 void linux_xcb_update_callbacks(struct linux_xcb_window* w, const struct window_callbacks* wc)
 {
     w->state.callbacks = *wc;
