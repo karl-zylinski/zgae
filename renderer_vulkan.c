@@ -195,7 +195,7 @@ static void create_swapchain(
     *out_sc_bufs_count = swapchain_image_count;
 }
 
-int memory_type_from_properties(uint32 req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
+uint32 memory_type_from_properties(uint32 req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
 {
     for (uint32 i = 0; i < memory_properties->memoryTypeCount; ++i)
     {
