@@ -1,6 +1,6 @@
 #pragma once
 
-#define renderer_resource_t uint32
+#define renderer_resource uint32
 struct renderer_state;
 
 enum shader_data_type
@@ -54,5 +54,5 @@ struct shader_intermediate
     uint32 input_layout_size;
 };
 
-renderer_resource_t shader_load(struct renderer_state* rs, const char* filename);
+renderer_resource shader_load(struct renderer_state* rs, const char* filename);
 uint32 shader_data_type_size(enum shader_data_type type);

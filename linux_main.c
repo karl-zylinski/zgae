@@ -27,7 +27,7 @@ int main()
     linux_xcb_update_callbacks(win, &wc);
 
     struct renderer_state* renderer_state = renderer_init(WINDOW_TYPE_XCB, win);
-    renderer_resource_t shader = shader_load(renderer_state, "shader_default.shader");
+    renderer_resource shader = shader_load(renderer_state, "shader_default.shader");
     (void)shader;
 
     info("Entering main loop");
