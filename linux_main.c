@@ -7,14 +7,14 @@
 #include "jzon.h"
 #include "shader.h"
 
-void key_pressed(enum key key)
+void key_pressed(enum key k)
 {
-    info("pressed: %d", (uint32)key);
+    info("pressed: %d", (uint32)k);
 }
 
-void key_released(enum key key)
+void key_released(enum key k)
 {
-    info("pressed: %d", (uint32)key);
+    info("pressed: %d", (uint32)k);
 }
 
 int main()

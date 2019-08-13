@@ -62,29 +62,29 @@ void linux_xcb_update_callbacks(struct linux_xcb_window* w, const struct window_
     w->state.callbacks = *wc;
 }
 
-void linux_xcb_process_all_events(struct linux_xcb_window* win)
+void linux_xcb_process_all_events(struct linux_xcb_window* w)
 {
-    xcb_intern_atom_cookie_t window_deleted_cookie = xcb_intern_atom(win->connection, 0, 16, "WM_DELETE_WINDOW");
-    xcb_intern_atom_reply_t* window_deleted_reply = xcb_intern_atom_reply(win->connection, window_deleted_cookie, 0);
+    xcb_intern_atom_cookie_t window_deleted_cookie = xcb_intern_atom(w->connection, 0, 16, "WM_DELETE_WINDOW");
+    xcb_intern_atom_reply_t* window_deleted_reply = xcb_intern_atom_reply(w->connection, window_deleted_cookie, 0);
 
     xcb_generic_event_t* evt;
-    while ((evt = xcb_poll_for_event(win->connection)))
+    while ((evt = xcb_poll_for_event(w->connection)))
     {
         switch(evt->response_type & ~0x80)
         {
             case XCB_KEY_PRESS: {
                 xcb_keycode_t code = ((xcb_key_press_event_t*)evt)->detail;
-                win->state.callbacks.key_pressed_callback(code);
+                w->state.callbacks.key_pressed_callback(code);
             } break;
             case XCB_KEY_RELEASE: { // This is broken, needs poooop xcb crap. I just want to know when the actual key goes up, nothing else...
                 xcb_keycode_t code = ((xcb_key_release_event_t*)evt)->detail;
-                win->state.callbacks.key_released_callback(code);
+                w->state.callbacks.key_released_callback(code);
             } break;
             case XCB_CLIENT_MESSAGE:
             {
                 info("XCB got message to close application");
                 if((*(xcb_client_message_event_t*)evt).data.data32[0] == (*window_deleted_reply).atom)
-                    win->state.open_state = WINDOW_OPEN_STATE_CLOSED;
+                    w->state.open_state = WINDOW_OPEN_STATE_CLOSED;
             } break;
             default: break;
         }

@@ -24,6 +24,6 @@ struct array_header
     array_full(a) ? a = array_internal_grow(a, sizeof(*a)) : 0, \
     a[array_internal_make_insert_room(a, idx, sizeof(*(a)))] = item
 
-void* array_internal_grow(void* old_a, uint32 item_size);
-void* array_internal_copy_data(void *a, uint32 item_size);
-uint32 array_internal_make_insert_room(void* a, uint32 idx, uint32 item_size);
+void* array_internal_grow(void* old_arr, uint32 item_size);
+void* array_internal_copy_data(void *arr, uint32 item_size);
+uint32 array_internal_make_insert_room(void* arr, uint32 idx, uint32 item_size);

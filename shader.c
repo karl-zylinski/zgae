@@ -145,9 +145,9 @@ renderer_resource shader_load(struct renderer_state* rs, const char* filename)
     return HANDLE_INVALID;
 }
 
-uint32 shader_data_type_size(enum shader_data_type type)
+uint32 shader_data_type_size(enum shader_data_type t)
 {
-    switch (type)
+    switch (t)
     {
         case SHADER_DATA_TYPE_MAT4: return 64;
         case SHADER_DATA_TYPE_VEC2: return 8;

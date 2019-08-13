@@ -339,11 +339,11 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32 num_gpus)
 typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
 
-struct renderer_state* renderer_init(enum window_type window_type, void* window_data)
+struct renderer_state* renderer_init(enum window_type wt, void* window_data)
 {
     info("Creating Vulkan renderer");
 
-    check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
+    check(wt == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
     struct renderer_state* rs = mema_zero(sizeof(struct renderer_state));
     VkResult res;
 

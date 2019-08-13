@@ -55,4 +55,4 @@ struct shader_intermediate
 };
 
 renderer_resource shader_load(struct renderer_state* rs, const char* filename);
-uint32 shader_data_type_size(enum shader_data_type type);
+uint32 shader_data_type_size(enum shader_data_type t);

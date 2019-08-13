@@ -2,17 +2,17 @@
 #include <string.h>
 #include "memory.h"
 
-void str_app(char* s, const char* to_append)
+void str_app(char* s, const char* app)
 {
-    str_app_s(s, to_append, strlen(to_append));
+    str_app_s(s, app, strlen(app));
 }
 
-void str_app_s(char* s, const char* to_append, uint64 to_append_len)
+void str_app_s(char* s, const char* app, uint64 app_len)
 {
     uint64 s_len = strlen(s);
-    uint64 tot_len = s_len + to_append_len;
+    uint64 tot_len = s_len + app_len;
     memra(s, tot_len + 1);
-    memcpy(s + s_len, to_append, to_append_len);
+    memcpy(s + s_len, app, app_len);
     s[tot_len] = 0;
 }
 
