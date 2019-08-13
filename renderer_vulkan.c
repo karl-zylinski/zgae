@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "debug.h"
 #include "math.h"
+#include "window.h"
 
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
 
@@ -332,12 +333,12 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32_t num_gpus)
 typedef VkResult (*vkCreateDebugUtilsMessengerEXT_t)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 typedef void (*vkDestroyDebugUtilsMessengerEXT_t)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
 
-renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
+struct renderer_state* renderer_init(enum window_type window_type, void* window_data)
 {
     info("Creating Vulkan renderer");
 
     check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
-    renderer_state_t* rs = mema_zero(sizeof(renderer_state_t));
+    struct renderer_state* rs = mema_zero(sizeof(struct renderer_state));
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -374,11 +375,11 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     VERIFY_RES();
 
     info("Creating XCB Vulkan surface");
-    linux_xcb_window_t* win = window_data;
+    struct linux_xcb_window* win = window_data;
     VkXcbSurfaceCreateInfoKHR xcbci = {};
     xcbci.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-    xcbci.connection = win->connection;
-    xcbci.window = win->handle;
+    xcbci.connection = linux_xcb_get_connection(win);
+    xcbci.window = linux_xcb_get_window_handle(win);
     res = vkCreateXcbSurfaceKHR(instance, &xcbci, NULL, &rs->surface);
     VERIFY_RES();
     VkSurfaceKHR surface = rs->surface;
@@ -501,7 +502,7 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     return rs;
 }
 
-void renderer_shutdown(renderer_state_t* rs)
+void renderer_shutdown(struct renderer_state* rs)
 {
     info("Destroying Vulkan renderer");
     VkDevice device = rs->device;

@@ -29,6 +29,11 @@ char* str_copy_s(const char* s, size_t size)
     return ns;
 }
 
+int str_eql(const char* s1, const char* s2)
+{
+    return strcmp(s1, s2) == 0;
+}
+
 int64_t str_hash(const char* s)
 {
     size_t len = strlen(s);

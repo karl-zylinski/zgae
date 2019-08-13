@@ -4,9 +4,19 @@
 #include <string.h>
 #include <stdint.h>
 #include "debug.h"
+#include "key.h"
+#include "window.h"
+#include "memory.h"
 
-void linux_xcb_create_window(linux_xcb_window_t* w, const char* title, uint32_t width, uint32_t height)
+struct linux_xcb_window {
+    struct xcb_connection_t* connection;
+    uint32_t handle;
+    struct window_state state;
+};
+
+struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32_t width, uint32_t height)
 {
+    struct linux_xcb_window* w = mema_zero(sizeof(struct linux_xcb_window));
     info("Creating XCB window w/ title %s, width %d, height %d", title, width, height);
     w->connection = xcb_connect(NULL, NULL);
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
@@ -45,9 +55,15 @@ void linux_xcb_create_window(linux_xcb_window_t* w, const char* title, uint32_t 
     xcb_change_property(w->connection, XCB_PROP_MODE_REPLACE, w->handle, (*reply).atom, 4, 32, 1, &(*reply2).atom);
 
     xcb_flush(w->connection);
+    return w;
 }
 
-void linux_xcb_process_all_events(linux_xcb_window_t* win)
+void linux_xcb_update_callbacks(struct linux_xcb_window* w, const struct window_callbacks* wc)
+{
+    w->state.callbacks = *wc;
+}
+
+void linux_xcb_process_all_events(struct linux_xcb_window* win)
 {
     xcb_intern_atom_cookie_t window_deleted_cookie = xcb_intern_atom(win->connection, 0, 16, "WM_DELETE_WINDOW");
     xcb_intern_atom_reply_t* window_deleted_reply = xcb_intern_atom_reply(win->connection, window_deleted_cookie, 0);
@@ -59,11 +75,11 @@ void linux_xcb_process_all_events(linux_xcb_window_t* win)
         {
             case XCB_KEY_PRESS: {
                 xcb_keycode_t code = ((xcb_key_press_event_t*)evt)->detail;
-                win->state.key_pressed_callback(code);
+                win->state.callbacks.key_pressed_callback(code);
             } break;
             case XCB_KEY_RELEASE: { // This is broken, needs poooop xcb crap. I just want to know when the actual key goes up, nothing else...
                 xcb_keycode_t code = ((xcb_key_release_event_t*)evt)->detail;
-                win->state.key_released_callback(code);
+                win->state.callbacks.key_released_callback(code);
             } break;
             case XCB_CLIENT_MESSAGE:
             {
@@ -75,4 +91,19 @@ void linux_xcb_process_all_events(linux_xcb_window_t* win)
         }
         free(evt);
     }
+}
+
+struct xcb_connection_t* linux_xcb_get_connection(struct linux_xcb_window* w)
+{
+    return w->connection;
+}
+
+uint32_t linux_xcb_get_window_handle(struct linux_xcb_window* w)
+{
+    return w->handle;
+}
+
+int linux_xcb_is_window_open(struct linux_xcb_window* w)
+{
+    return w->state.open_state == WINDOW_OPEN_STATE_OPEN;
 }

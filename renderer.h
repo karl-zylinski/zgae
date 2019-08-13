@@ -1,9 +1,8 @@
 #pragma once
 
-#include "window.h"
+enum window_type;
+struct renderer_state;
 
-typedef struct renderer_state renderer_state_t;
-
-renderer_state_t* renderer_init(window_type_t window_type, void* window_data);
-void renderer_shutdown(renderer_state_t* rs);
+struct renderer_state* renderer_init(enum window_type window_type, void* window_data);
+void renderer_shutdown(struct renderer_state* rs);
 //void renderer_load_shader(renderer_state_t* rs, const shader_intermediate_t* si);

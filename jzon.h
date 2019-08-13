@@ -1,10 +1,10 @@
 #pragma once
 #include <stdint.h>
-#include <string.h>
+#include <stdlib.h>
 
-typedef struct jzon_key_value_pair jzon_key_value_pair_t;
+struct jzon_key_value_pair;
 
-typedef struct jzon_value
+struct jzon_value
 {
     uint32_t is_string : 1;
     uint32_t is_int : 1;
@@ -21,17 +21,17 @@ typedef struct jzon_value
         int32_t int_val;
         uint32_t bool_val;
         float float_val;
-        jzon_key_value_pair_t* table_val;
+        struct jzon_key_value_pair* table_val;
         struct jzon_value* array_val;
     };
-} jzon_value_t;
+};
 
 struct jzon_key_value_pair {
     char* key;
     long long key_hash;
-    jzon_value_t val;
+    struct jzon_value val;
 };
 
-int jzon_parse(const char* input, jzon_value_t* output);
-void jzon_free(jzon_value_t* val);
-jzon_value_t* jzon_get(jzon_value_t* object, const char* key);
+int jzon_parse(const char* input, struct jzon_value* output);
+void jzon_free(struct jzon_value* val);
+struct jzon_value* jzon_get(struct jzon_value* object, const char* key);
