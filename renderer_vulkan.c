@@ -50,6 +50,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     const VkDebugUtilsMessengerCallbackDataEXT* data,
     void* user_data)
 {
+    (void)type;
+    (void)user_data;
+
     if (severity < VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         info("(From Vulkan) %s", data->pMessage);
     else
@@ -62,7 +65,7 @@ static struct vec2u get_surface_size(VkPhysicalDevice gpu, VkSurfaceKHR surface)
     VkSurfaceCapabilitiesKHR surface_capabilities;
     VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surface_capabilities);
     VERIFY_RES();
-    check(surface_capabilities.currentExtent.width != -1, "Couldn't get surface size");
+    check(surface_capabilities.currentExtent.width != (uint32)-1, "Couldn't get surface size");
     struct vec2u size = {surface_capabilities.currentExtent.width, surface_capabilities.currentExtent.height};
     return size;
 }
@@ -106,7 +109,7 @@ static VkCompositeAlphaFlagBitsKHR choose_swapchain_composite_alpha(VkCompositeA
 static void create_swapchain(
     VkSwapchainKHR* out_current_swapchain, struct swapchain_buffer** out_sc_bufs, uint32* out_sc_bufs_count, struct vec2u* out_swapchain_size,
     VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface, VkFormat format,
-    uint32 graphics_queue_family_idx, uint32 present_queue_family_idx, VkSwapchainKHR old_swapchain)
+    uint32 graphics_queue_family_idx, uint32 present_queue_family_idx)
 {
     struct vec2u size = get_surface_size(gpu, surface);
     info("Creating swapchain with size %dx%d", size.x, size.y);
@@ -261,7 +264,7 @@ static void create_depth_buffer(struct depth_buffer* out_depth_buffer, VkDevice 
     depth_mai.allocationSize = depth_mem_reqs.size;
     depth_mai.memoryTypeIndex = memory_type_from_properties(depth_mem_reqs.memoryTypeBits, memory_properties, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    check(depth_mai.memoryTypeIndex != -1, "Failed to find memory type for depth buffer");
+    check(depth_mai.memoryTypeIndex != (uint32)-1, "Failed to find memory type for depth buffer");
     res = vkAllocateMemory(device, &depth_mai, NULL, &depth_buffer.memory);
     VERIFY_RES();
     res = vkBindImageMemory(device, depth_buffer.image, depth_buffer.memory, 0);
@@ -433,8 +436,8 @@ struct renderer_state* renderer_init(enum window_type window_type, void* window_
             }
         }
     }
-    check(rs->graphics_queue_family_idx != -1, "Couldn't find graphics queue family");
-    if (rs->present_queue_family_idx == -1)
+    check(rs->graphics_queue_family_idx != (uint32)-1, "Couldn't find graphics queue family");
+    if (rs->present_queue_family_idx == (uint32)-1)
     {
         for (uint32 i = 0; i < queue_family_count; ++i)
         {
@@ -446,7 +449,7 @@ struct renderer_state* renderer_init(enum window_type window_type, void* window_
             }
         }
     }
-    check(rs->present_queue_family_idx != -1, "Couldn't find present queue family");
+    check(rs->present_queue_family_idx != (uint32)-1, "Couldn't find present queue family");
     memf(queues_with_present_support);
 
     info("Creating Vulkan logical device");
@@ -475,8 +478,7 @@ struct renderer_state* renderer_init(enum window_type window_type, void* window_
     create_swapchain(
         &rs->swapchain, &rs->swapchain_buffers, &rs->swapchain_buffers_count, &rs->swapchain_size,
         gpu, device, surface,
-        rs->surface_format, rs->graphics_queue_family_idx,
-        rs->present_queue_family_idx, NULL);
+        rs->surface_format, rs->graphics_queue_family_idx, rs->present_queue_family_idx);
 
     info("Creating graphics and present queues");
     vkGetDeviceQueue(device, rs->graphics_queue_family_idx, 0, &rs->graphics_queue);

@@ -134,6 +134,7 @@ renderer_resource_t shader_load(struct renderer_state* rs, const char* filename)
     int source_load_ok = file_load_str(jz_source->string_val, &si.source, &si.source_size);
     ensure(source_load_ok);
 
+    (void)rs;
     //renderer_resource_t rr = renderer_load_shader(rs, si);
 
     memf(si.source);

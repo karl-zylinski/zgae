@@ -2,11 +2,9 @@
 #include "window.h"
 #include "renderer.h"
 #include "key.h"
-#include <stdio.h>
 #include "debug.h"
 #include "memory.h"
 #include "jzon.h"
-#include "file.h"
 #include "shader.h"
 
 void key_pressed(enum key key)
