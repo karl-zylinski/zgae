@@ -1,4 +1,5 @@
 #pragma once
+// This file is (the only) foracbly included by the compiler!
 
 typedef char int8;
 typedef unsigned char uint8;
