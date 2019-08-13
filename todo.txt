@@ -1,4 +1,4 @@
-- anv. c11 typedef redef ext? ge typer _t suffix, kanske ha macro för fwd declare (lägg i types.h och döp om till global_include.h)? typ fwd(renderer_state_t)
+- anv. c11 typedef redef ext? ge typer _t suffix, kanske ha macro för fwd declare (lägg i types.h och döp om till global_include.h)? typ fwd(renderer_state_t)... fast funkar inte för typedeffade handels etc... kanske ha dem i en struct? typ typedef struct { handle_t h; } render_resource_t;
 - dra in stdint, stdbool i types istället för min skit i types.h (global_include.h)? återgå till size_t? (dra även in stdlib)
 - var nöjd med ovanstående
 - fixa shader load
