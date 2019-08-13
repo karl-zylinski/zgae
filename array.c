@@ -2,7 +2,7 @@
 #include "memory.h"
 #include <string.h>
 
-void* _array_grow(void* old_a, uint32 item_size)
+void* array_internal_grow(void* old_a, uint32 item_size)
 {
     uint32 old_capacity = array_capacity(old_a);
     uint32 new_capacity = old_capacity == 0 ? 1 : old_capacity*2;
@@ -16,7 +16,7 @@ void* _array_grow(void* old_a, uint32 item_size)
     return (void*)((uint8*)new_h + sizeof(struct array_header));
 }
 
-void * _array_copy_data(void *a, uint32 item_size)
+void* array_internal_copy_data(void *a, uint32 item_size)
 {
    if (!a)
       return NULL;
@@ -27,7 +27,7 @@ void * _array_copy_data(void *a, uint32 item_size)
    return d;
 }
 
-uint32 _array_make_insert_room(void* a, uint32 idx, uint32 item_size)
+uint32 array_internal_make_insert_room(void* a, uint32 idx, uint32 item_size)
 {
     if (idx == array_size(a))
     {
