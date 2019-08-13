@@ -1,20 +1,19 @@
 #include "linux_xcb_window.h"
 #include <xcb/xcb.h>
-#include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include "debug.h"
 #include "key.h"
 #include "window.h"
 #include "memory.h"
+#include <stdlib.h>
 
 struct linux_xcb_window {
     struct xcb_connection_t* connection;
-    uint32_t handle;
+    uint32 handle;
     struct window_state state;
 };
 
-struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32_t width, uint32_t height)
+struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32 width, uint32 height)
 {
     struct linux_xcb_window* w = mema_zero(sizeof(struct linux_xcb_window));
     info("Creating XCB window w/ title %s, width %d, height %d", title, width, height);
@@ -22,8 +21,8 @@ struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32_t wid
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
 
-    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-    uint32_t values[] = {screen->black_pixel,  XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS};
+    uint32 mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    uint32 values[] = {screen->black_pixel,  XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS};
     xcb_create_window(
         w->connection,
         XCB_COPY_FROM_PARENT,
@@ -98,7 +97,7 @@ struct xcb_connection_t* linux_xcb_get_connection(struct linux_xcb_window* w)
     return w->connection;
 }
 
-uint32_t linux_xcb_get_window_handle(struct linux_xcb_window* w)
+uint32 linux_xcb_get_window_handle(struct linux_xcb_window* w)
 {
     return w->handle;
 }

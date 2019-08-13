@@ -15,28 +15,28 @@ static char current(const char** input)
     return **input;
 }
 
-static int is_str(const char* input, const char* str)
+static bool is_str(const char* input, const char* str)
 {
     size_t len = strlen(str);
 
     for (unsigned i = 0; i < len; ++i)
     {
         if (input[i] == 0)
-            return 0;
+            return false;
 
         if (input[i] != str[i])
-            return 0;
+            return false;
     }
 
-    return 1;
+    return true;
 }
 
-static int is_multiline_string_quotes(const char* str)
+static bool is_multiline_string_quotes(const char* str)
 {
     return is_str(str, "\"\"\"");
 }
 
-static size_t find_table_pair_insertion_index(struct jzon_key_value_pair* table, int64_t key_hash)
+static uint64 find_table_pair_insertion_index(struct jzon_key_value_pair* table, int64 key_hash)
 {
     if (array_size(table) == 0)
         return 0;
@@ -50,7 +50,7 @@ static size_t find_table_pair_insertion_index(struct jzon_key_value_pair* table,
     return array_size(table);
 }
 
-static int is_whitespace(char c)
+static bool is_whitespace(char c)
 {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
@@ -167,26 +167,26 @@ static char* parse_keyname(const char** input)
     return NULL;
 }
 
-static int parse_string(const char** input, struct jzon_value* output)
+static bool parse_string(const char** input, struct jzon_value* output)
 {
     char* str = parse_string_internal(input);
 
     if (!str)
-        return 0;
+        return false;
 
-    output->is_string = 1;
+    output->is_string = true;
     output->string_val = str;
-    return 1;
+    return true;
 }
 
-static int parse_value(const char** input, struct jzon_value* output);
+static bool parse_value(const char** input, struct jzon_value* output);
 
-static int parse_array(const char** input, struct jzon_value* output)
+static bool parse_array(const char** input, struct jzon_value* output)
 {   
     if (current(input) != '[')
-        return 0;
+        return false;
     
-    output->is_array = 1;
+    output->is_array = true;
     next(input);
     skip_whitespace(input);
 
@@ -195,7 +195,7 @@ static int parse_array(const char** input, struct jzon_value* output)
     {
         next(input);
         output->size = 0; 
-        return 1;
+        return true;
     }
 
     struct jzon_value* array = NULL;
@@ -206,7 +206,7 @@ static int parse_array(const char** input, struct jzon_value* output)
         struct jzon_value value = {};
 
         if (!parse_value(input, &value))
-            return 0;
+            return false;
 
         array_push(array, value);
         skip_whitespace(input);
@@ -220,24 +220,24 @@ static int parse_array(const char** input, struct jzon_value* output)
     
     output->size = array_size(array);
     output->array_val = (struct jzon_value*)array_copy_data(array);
-    return 1;
+    return true;
 }
 
-static int parse_table(const char** input, struct jzon_value* output, int root_table)
+static bool parse_table(const char** input, struct jzon_value* output, bool root_table)
 {
     if (current(input) == '{')
         next(input);
     else if (!root_table)
-        return 0;
+        return false;
 
-    output->is_table = 1;
+    output->is_table = true;
     skip_whitespace(input);
 
     // Empty object.
     if (current(input) == '}')
     {
         output->size = 0;
-        return 1;
+        return true;
     }
 
     struct jzon_key_value_pair* table = NULL;
@@ -249,13 +249,13 @@ static int parse_table(const char** input, struct jzon_value* output, int root_t
         skip_whitespace(input);
 
         if (!key || current(input) != '=')
-            return 0;
+            return false;
 
         next(input);
         struct jzon_value value = {};
 
         if (!parse_value(input, &value))
-            return 0;
+            return false;
 
         struct jzon_key_value_pair pair = {};
         pair.key = key;
@@ -273,12 +273,12 @@ static int parse_table(const char** input, struct jzon_value* output, int root_t
 
     output->size = array_size(table);
     output->table_val = (struct jzon_key_value_pair*)array_copy_data(table);
-    return 1;
+    return true;
 }
 
-static int parse_number(const char** input, struct jzon_value* output)
+static bool parse_number(const char** input, struct jzon_value* output)
 {
-    int is_float = 0;
+    bool is_float = false;
     char* start = (char*)*input;
 
     if (current(input) == '-')
@@ -289,7 +289,7 @@ static int parse_number(const char** input, struct jzon_value* output)
 
     if (current(input) == '.')
     {
-        is_float = 1;
+        is_float = true;
         next(input);
 
         while (current(input) >= '0' && current(input) <= '9')
@@ -298,7 +298,7 @@ static int parse_number(const char** input, struct jzon_value* output)
 
     if (current(input) == 'e' || current(input) == 'E')
     {
-        is_float = 1;
+        is_float = true;
         next(input);
 
         if (current(input) == '-' || current(input) == '+')
@@ -310,63 +310,63 @@ static int parse_number(const char** input, struct jzon_value* output)
 
     if (is_float)
     {
-        output->is_float = 1;
+        output->is_float = true;
         output->float_val = (float)strtod(start, NULL);
     }
     else
     {
-        output->is_int = 1;
-        output->int_val = (int32_t)strtol(start, NULL, 10);
+        output->is_int = true;
+        output->int_val = (int32)strtol(start, NULL, 10);
     }
 
-    return 1;
+    return true;
 }
 
-static int parse_true(const char** input, struct jzon_value* output)
+static bool parse_true(const char** input, struct jzon_value* output)
 {
     if (is_str(*input, "true"))
     {
-        output->is_bool = 1;
-        output->bool_val = 1;
-        return 1;
+        output->is_bool = true;
+        output->bool_val = true;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
-static int parse_false(const char** input, struct jzon_value* output)
+static bool parse_false(const char** input, struct jzon_value* output)
 {
     if (is_str(*input, "false"))
     {
-        output->is_bool = 1;
-        output->bool_val = 0;
+        output->is_bool = true;
+        output->bool_val = false;
         *input += 5;
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
-static int parse_null(const char** input, struct jzon_value* output)
+static bool parse_null(const char** input, struct jzon_value* output)
 {
     if (is_str(*input, "null"))
     {
-        output->is_null = 1;
+        output->is_null = true;
         *input += 4;
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
-static int parse_value(const char** input, struct jzon_value* output)
+static bool parse_value(const char** input, struct jzon_value* output)
 {
     skip_whitespace(input);
     char ch = current(input);
 
     switch (ch)
     {
-        case '{': return parse_table(input, output, 0);
+        case '{': return parse_table(input, output, false);
         case '[': return parse_array(input, output);
         case '"': return parse_string(input, output);
         case '-': return parse_number(input, output);
@@ -377,18 +377,18 @@ static int parse_value(const char** input, struct jzon_value* output)
     }
 }
 
-int jzon_parse(const char* input, struct jzon_value* output)
+bool jzon_parse(const char* input, struct jzon_value* output)
 {
     memset(output, 0, sizeof(struct jzon_value));
     skip_whitespace(&input);
-    return parse_table(&input, output, 1);
+    return parse_table(&input, output, true);
 }
 
 void jzon_free(struct jzon_value* val)
 {
     if (val->is_table)
     {
-        for (uint32_t i = 0; i < val->size; ++i)
+        for (uint32 i = 0; i < val->size; ++i)
         {
             memf(val->table_val[i].key);
             jzon_free(&val->table_val[i].val);
@@ -398,7 +398,7 @@ void jzon_free(struct jzon_value* val)
     }
     else if (val->is_array)
     {
-        for (uint32_t i = 0; i < val->size; ++i)
+        for (uint32 i = 0; i < val->size; ++i)
             jzon_free(&val->array_val[i]);
 
         memf(val->array_val);
@@ -417,7 +417,7 @@ struct jzon_value* jzon_get(struct jzon_value* table, const char* key)
     if (table->size == 0)
         return NULL;
     
-    int64_t key_hash = str_hash(key);
+    int64 key_hash = str_hash(key);
 
     size_t first = 0;
     size_t last = table->size - 1;

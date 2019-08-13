@@ -1,10 +1,8 @@
 #pragma once
 
-#include <stdlib.h>
-
-void* mema(size_t size);
-void* mema_zero(size_t size);
-void* memra(void* cur, size_t size);
-void* memra_zero(void* cur, size_t size);
+void* mema(uint64 size);
+void* mema_zero(uint64 size);
+void* memra(void* cur, uint64 size);
+void* memra_zero(void* cur, uint64 size);
 void memf(void* p);
 void memory_check_leaks();

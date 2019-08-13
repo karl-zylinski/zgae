@@ -1,12 +1,12 @@
 #include "shader.h"
 #include "jzon.h"
 #include "file.h"
-#include "shader_intermediate.h"
 #include "str.h"
 #include "array.h"
 #include "renderer.h"
 #include "handle.h"
 #include "memory.h"
+#include "debug.h"
 
 static enum shader_data_type type_str_to_enum(const char* str)
 {
@@ -64,7 +64,7 @@ renderer_resource_t shader_load(struct renderer_state* rs, const char* filename)
     struct shader_intermediate si = {};
     #define ensure(expr) if (!(expr)) return HANDLE_INVALID
     char* fd;
-    size_t fs;
+    uint64 fs;
     file_load_str(filename, &fd, &fs);
     ensure(fd);
     struct jzon_value parsed;
@@ -76,7 +76,7 @@ renderer_resource_t shader_load(struct renderer_state* rs, const char* filename)
     ensure(jz_cb_arr && jz_cb_arr->is_array);
     si.constant_buffer_size = (unsigned)jz_cb_arr->size;
     si.constant_buffer = mema_zero(sizeof(struct shader_constant_buffer_item) * si.constant_buffer_size);
-    for (size_t i = 0; i < jz_cb_arr->size; ++i)
+    for (uint32 i = 0; i < jz_cb_arr->size; ++i)
     {
         struct shader_constant_buffer_item* cbi = &si.constant_buffer[i];
         struct jzon_value* jz_cb_item = jz_cb_arr->array_val + i;
@@ -105,7 +105,8 @@ renderer_resource_t shader_load(struct renderer_state* rs, const char* filename)
     ensure(jz_il_arr && jz_il_arr->is_array);
     si.input_layout_size = (unsigned)jz_il_arr->size;
     si.input_layout = mema_zero(sizeof(struct shader_input_layout_item) * si.input_layout_size);
-    for (size_t i = 0; i < jz_il_arr->size; ++i)
+    for (uint32 i = 0; i < jz_il_arr->size; ++i)
+    for (uint32 i = 0; i < jz_il_arr->size; ++i)
     {
         struct shader_input_layout_item* ili = &si.input_layout[i];
         struct jzon_value* jz_il_item = jz_il_arr->array_val + i;
@@ -141,4 +142,19 @@ renderer_resource_t shader_load(struct renderer_state* rs, const char* filename)
     jzon_free(&parsed);
 
     return HANDLE_INVALID;
+}
+
+uint32 shader_data_type_size(enum shader_data_type type)
+{
+    switch (type)
+    {
+        case SHADER_DATA_TYPE_MAT4: return 64;
+        case SHADER_DATA_TYPE_VEC2: return 8;
+        case SHADER_DATA_TYPE_VEC3: return 12;
+        case SHADER_DATA_TYPE_VEC4: return 16;
+        case SHADER_DATA_TYPE_INVALID: break;
+    }
+
+    error("Trying to get size of invalid shader_data_type_t");
+    return 0;
 }

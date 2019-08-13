@@ -11,12 +11,12 @@
 
 void key_pressed(enum key key)
 {
-    info("pressed: %d", (uint32_t)key);
+    info("pressed: %d", (uint32)key);
 }
 
 void key_released(enum key key)
 {
-    info("pressed: %d", (uint32_t)key);
+    info("pressed: %d", (uint32)key);
 }
 
 int main()
@@ -29,7 +29,7 @@ int main()
     linux_xcb_update_callbacks(win, &wc);
 
     struct renderer_state* renderer_state = renderer_init(WINDOW_TYPE_XCB, win);
-    uint32_t shader = shader_load(renderer_state, "shader_default.shader");
+    renderer_resource_t shader = shader_load(renderer_state, "shader_default.shader");
     (void)shader;
 
     info("Entering main loop");

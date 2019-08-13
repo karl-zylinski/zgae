@@ -1,13 +1,10 @@
 #pragma once
 // Adaption of Strechy buffers by Sean Barret and Niklas Gray
 
-#include <stdint.h>
-#include <stdlib.h>
-
 struct array_header
 {
-    uint32_t size;
-    uint32_t capacity;
+    uint32 size;
+    uint32 capacity;
 };
 
 #define array_header(a) \
@@ -27,6 +24,6 @@ struct array_header
     array_full(a) ? a = _array_grow(a, sizeof(*a)) : 0, \
     a[_array_make_insert_room(a, idx, sizeof(*(a)))] = item
 
-void* _array_grow(void* old_a, size_t item_size);
-void * _array_copy_data(void *a, int item_size);
-int _array_make_insert_room(void* a, int idx, int item_size);
+void* _array_grow(void* old_a, uint32 item_size);
+void * _array_copy_data(void *a, uint32 item_size);
+uint32 _array_make_insert_room(void* a, uint32 idx, uint32 item_size);

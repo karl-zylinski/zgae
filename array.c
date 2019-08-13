@@ -2,10 +2,10 @@
 #include "memory.h"
 #include <string.h>
 
-void* _array_grow(void* old_a, size_t item_size)
+void* _array_grow(void* old_a, uint32 item_size)
 {
-    size_t old_capacity = array_capacity(old_a);
-    size_t new_capacity = old_capacity == 0 ? 1 : old_capacity*2;
+    uint32 old_capacity = array_capacity(old_a);
+    uint32 new_capacity = old_capacity == 0 ? 1 : old_capacity*2;
     struct array_header* new_h = memra(old_a ? array_header(old_a) : 0, sizeof(struct array_header) + new_capacity*item_size);
 
     if (!old_a)
@@ -13,21 +13,21 @@ void* _array_grow(void* old_a, size_t item_size)
     
     new_h->capacity = new_capacity;
 
-    return (void*)((uint8_t*)new_h + sizeof(struct array_header));
+    return (void*)((uint8*)new_h + sizeof(struct array_header));
 }
 
-void * _array_copy_data(void *a, int item_size)
+void * _array_copy_data(void *a, uint32 item_size)
 {
    if (!a)
       return NULL;
 
-   int s = array_size(a) * item_size;
+   uint64 s = array_size(a) * item_size;
    void* d = mema(s);
    memcpy(d, a, s);
    return d;
 }
 
-int _array_make_insert_room(void* a, int idx, int item_size)
+uint32 _array_make_insert_room(void* a, uint32 idx, uint32 item_size)
 {
     if (idx == array_size(a))
     {
