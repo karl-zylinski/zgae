@@ -1,0 +1,4 @@
+- anv. c11 typedef redef ext? ge typer _t suffix
+- dra in stdint, stdbool i types istället för min skit? återgå till size_t? (dra även in stdlib)
+- var nöjd med ovanstående
+- fixa shader load
