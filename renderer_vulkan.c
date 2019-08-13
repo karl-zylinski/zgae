@@ -333,8 +333,8 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32 num_gpus)
     return gpus[0];
 }
 
-typedef VkResult (*vkCreateDebugUtilsMessengerEXT_t)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
-typedef void (*vkDestroyDebugUtilsMessengerEXT_t)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
+typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
+typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
 
 struct renderer_state* renderer_init(enum window_type window_type, void* window_data)
 {
@@ -373,7 +373,7 @@ struct renderer_state* renderer_init(enum window_type window_type, void* window_
     VERIFY_RES();
     VkInstance instance = rs->instance;
 
-    vkCreateDebugUtilsMessengerEXT_t vkCreateDebugUtilsMessengerEXT = (vkCreateDebugUtilsMessengerEXT_t)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    fptr_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (fptr_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     res = vkCreateDebugUtilsMessengerEXT(instance, &debug_ext_ci, NULL, &rs->debug_messenger);
     VERIFY_RES();
 
@@ -516,7 +516,7 @@ void renderer_shutdown(struct renderer_state* rs)
         vkDestroyImageView(device, rs->swapchain_buffers[i].view, NULL);
     vkDestroySwapchainKHR(device, rs->swapchain, NULL);
     vkDestroyDevice(device, NULL);
-    vkDestroyDebugUtilsMessengerEXT_t vkDestroyDebugUtilsMessengerEXT = (vkDestroyDebugUtilsMessengerEXT_t)vkGetInstanceProcAddr(rs->instance, "vkDestroyDebugUtilsMessengerEXT");
+    fptr_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (fptr_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(rs->instance, "vkDestroyDebugUtilsMessengerEXT");
     vkDestroyDebugUtilsMessengerEXT(rs->instance, rs->debug_messenger, NULL);
     vkDestroyInstance(rs->instance, NULL);
     memf(rs);

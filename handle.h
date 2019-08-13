@@ -1,4 +1,4 @@
 #pragma once
 
-#define handle_t uint32
-#define HANDLE_INVALID (handle_t)(-1);
+#define handle uint32
+#define HANDLE_INVALID (handle)(-1);
