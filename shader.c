@@ -61,6 +61,7 @@ static enum shader_input_layout_value il_val_str_to_enum(const char* str)
 
 renderer_resource shader_load(struct renderer_state* rs, const char* filename)
 {
+    info("Loading shader from %s", filename);
     struct shader_intermediate si = {};
     #define ensure(expr) if (!(expr)) return HANDLE_INVALID
     char* fd;

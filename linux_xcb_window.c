@@ -20,7 +20,6 @@ struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32 width
     w->connection = xcb_connect(NULL, NULL);
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
-
     uint32 mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
     uint32 values[] = {screen->black_pixel,  XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS};
     xcb_create_window(
@@ -35,6 +34,7 @@ struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32 width
         mask, values);
     xcb_map_window(w->connection, w->handle);
 
+    // Set title.
     xcb_change_property(
         w->connection,
         XCB_PROP_MODE_REPLACE,
@@ -45,12 +45,11 @@ struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32 width
         strlen(title),
         title);
 
+    // For being able to get window closed event.
     xcb_intern_atom_cookie_t cookie = xcb_intern_atom(w->connection, 1, 12, "WM_PROTOCOLS");
     xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(w->connection, cookie, 0);
-
     xcb_intern_atom_cookie_t cookie2 = xcb_intern_atom(w->connection, 0, 16, "WM_DELETE_WINDOW");
     xcb_intern_atom_reply_t* reply2 = xcb_intern_atom_reply(w->connection, cookie2, 0);
-
     xcb_change_property(w->connection, XCB_PROP_MODE_REPLACE, w->handle, (*reply).atom, 4, 32, 1, &(*reply2).atom);
 
     xcb_flush(w->connection);
@@ -59,8 +58,9 @@ struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32 width
 
 void linux_xcb_destroy_window(struct linux_xcb_window* w)
 {
+    info("Destroying XCB window");
     (void)w;
-    error("Please implement.");
+    error("Please implement!!");
 }
 
 void linux_xcb_update_callbacks(struct linux_xcb_window* w, const struct window_callbacks* wc)
@@ -70,6 +70,7 @@ void linux_xcb_update_callbacks(struct linux_xcb_window* w, const struct window_
 
 void linux_xcb_process_all_events(struct linux_xcb_window* w)
 {
+    // For being able to get window closed event.
     xcb_intern_atom_cookie_t window_deleted_cookie = xcb_intern_atom(w->connection, 0, 16, "WM_DELETE_WINDOW");
     xcb_intern_atom_reply_t* window_deleted_reply = xcb_intern_atom_reply(w->connection, window_deleted_cookie, 0);
 
@@ -88,7 +89,7 @@ void linux_xcb_process_all_events(struct linux_xcb_window* w)
             } break;
             case XCB_CLIENT_MESSAGE:
             {
-                info("XCB got message to close application");
+                info("XCB window closed");
                 if((*(xcb_client_message_event_t*)evt).data.data32[0] == (*window_deleted_reply).atom)
                     w->state.open_state = WINDOW_OPEN_STATE_CLOSED;
             } break;
