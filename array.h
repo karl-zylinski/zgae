@@ -3,8 +3,8 @@
 
 struct array_header
 {
-    uint32_t size;
-    uint32_t capacity;
+    size_t size;
+    size_t capacity;
 };
 
 #define array_header(a) \
@@ -24,6 +24,6 @@ struct array_header
     array_full(a) ? a = array_internal_grow(a, sizeof(*a)) : 0, \
     a[array_internal_make_insert_room(a, idx, sizeof(*(a)))] = item
 
-void* array_internal_grow(void* old_arr, uint32_t item_size);
-void* array_internal_copy_data(void *arr, uint32_t item_size);
-uint32_t array_internal_make_insert_room(void* arr, uint32_t idx, uint32_t item_size);
+void* array_internal_grow(void* old_arr, size_t item_size);
+void* array_internal_copy_data(void *arr, size_t item_size);
+size_t array_internal_make_insert_room(void* arr, size_t idx, size_t item_size);

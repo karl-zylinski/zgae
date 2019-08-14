@@ -7,10 +7,10 @@ void str_app(char* s, const char* app)
     str_app_s(s, app, strlen(app));
 }
 
-void str_app_s(char* s, const char* app, uint64_t app_len)
+void str_app_s(char* s, const char* app, size_t app_len)
 {
-    uint64_t s_len = strlen(s);
-    uint64_t tot_len = s_len + app_len;
+    size_t s_len = strlen(s);
+    size_t tot_len = s_len + app_len;
     memra(s, tot_len + 1);
     memcpy(s + s_len, app, app_len);
     s[tot_len] = 0;
@@ -21,7 +21,7 @@ char* str_copy(const char* s)
     return str_copy_s(s, strlen(s));
 }
 
-char* str_copy_s(const char* s, uint64_t size)
+char* str_copy_s(const char* s, size_t size)
 {
     char* ns = mema(size + 1);
     memcpy(ns, s, size);
@@ -36,7 +36,7 @@ bool str_eql(const char* s1, const char* s2)
 
 int64_t str_hash(const char* s)
 {
-    uint64_t len = strlen(s);
+    size_t len = strlen(s);
     int64_t seed = 0;
 
     const int64_t m = 0xc6a4a7935bd1e995ULL;

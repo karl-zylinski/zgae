@@ -4,7 +4,6 @@
 #include "str.h"
 #include "array.h"
 #include "renderer.h"
-#include "handle.h"
 #include "memory.h"
 #include "debug.h"
 

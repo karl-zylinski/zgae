@@ -1,6 +1,6 @@
 #pragma once
 
-#define renderer_resource_t uint32_t
+fwd_handle(renderer_resource_t);
 fwd_struct(renderer_state_t);
 
 typedef enum shader_data_type_t
