@@ -4,3 +4,4 @@
     * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do
 
 - rename: array -> dynamic_array and use da_push prefix and da_variable on actual arrays.
+- dyanmic_array: make array_internal_ensure_min_size func use array_internal_grow with capacity parameter
