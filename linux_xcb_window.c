@@ -13,7 +13,7 @@ typedef struct linux_xcb_window_t {
     window_state_t state;
 } linux_xcb_window_t;
 
-linux_xcb_window_t* linux_xcb_create_window(const char* title, uint32_t width, uint32_t height)
+linux_xcb_window_t* linux_xcb_window_create(const char* title, uint32_t width, uint32_t height)
 {
     linux_xcb_window_t* w = mema_zero(sizeof(linux_xcb_window_t));
     info("Creating XCB window w/ title %s, width %d, height %d", title, width, height);
@@ -56,19 +56,19 @@ linux_xcb_window_t* linux_xcb_create_window(const char* title, uint32_t width, u
     return w;
 }
 
-void linux_xcb_destroy_window(linux_xcb_window_t* w)
+void linux_xcb_window_destroy(linux_xcb_window_t* w)
 {
     info("Destroying XCB window");
     (void)w;
     error("Please implement!!");
 }
 
-void linux_xcb_update_callbacks(linux_xcb_window_t* w, const window_callbacks_t* wc)
+void linux_xcb_window_update_callbacks(linux_xcb_window_t* w, const window_callbacks_t* wc)
 {
     w->state.callbacks = *wc;
 }
 
-void linux_xcb_process_all_events(linux_xcb_window_t* w)
+void linux_xcb_window_process_all_events(linux_xcb_window_t* w)
 {
     // For being able to get window closed event.
     xcb_intern_atom_cookie_t window_deleted_cookie = xcb_intern_atom(w->connection, 0, 16, "WM_DELETE_WINDOW");
@@ -99,17 +99,17 @@ void linux_xcb_process_all_events(linux_xcb_window_t* w)
     }
 }
 
-xcb_connection_t* linux_xcb_get_connection(linux_xcb_window_t* w)
+xcb_connection_t* linux_xcb_window_get_connection(linux_xcb_window_t* w)
 {
     return w->connection;
 }
 
-uint32_t linux_xcb_get_window_handle(linux_xcb_window_t* w)
+uint32_t linux_xcb_window_get_handle(linux_xcb_window_t* w)
 {
     return w->handle;
 }
 
-int linux_xcb_is_window_open(linux_xcb_window_t* w)
+int linux_xcb_window_is_open(linux_xcb_window_t* w)
 {
     return w->state.open_state == WINDOW_OPEN_STATE_OPEN;
 }

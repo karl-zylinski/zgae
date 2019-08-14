@@ -64,7 +64,7 @@ renderer_resource_t shader_load(renderer_state_t* rs, const char* filename)
     shader_intermediate_t si = {};
     #define ensure(expr) if (!(expr)) return HANDLE_INVALID
     char* fd;
-    uint64_t fs;
+    size_t fs;
     file_load_str(filename, &fd, &fs);
     ensure(fd);
     jzon_value_t parsed;
@@ -106,7 +106,6 @@ renderer_resource_t shader_load(renderer_state_t* rs, const char* filename)
     si.input_layout_size = (unsigned)jz_il_arr->size;
     si.input_layout = mema_zero(sizeof(shader_input_layout_item_t) * si.input_layout_size);
     for (uint32_t i = 0; i < jz_il_arr->size; ++i)
-    for (uint32_t i = 0; i < jz_il_arr->size; ++i)
     {
         shader_input_layout_item_t* ili = &si.input_layout[i];
         jzon_value_t* jz_il_item = jz_il_arr->array_val + i;
@@ -128,14 +127,14 @@ renderer_resource_t shader_load(renderer_state_t* rs, const char* filename)
         ili->value = val;
     }
 
-    jzon_value_t* jz_source = jzon_get(&parsed, "source_hlsl");
+    jzon_value_t* jz_source = jzon_get(&parsed, "source");
     ensure(jz_source && jz_source->is_string);
 
     int source_load_ok = file_load_str(jz_source->string_val, &si.source, &si.source_size);
     ensure(source_load_ok);
 
-    (void)rs;
-    //renderer_resource_t rr = renderer_load_shader(rs, si);
+    renderer_resource_t rr = renderer_load_shader(rs, &si);
+    (void)rr;
 
     memf(si.source);
     memf(si.constant_buffer);

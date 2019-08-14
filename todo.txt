@@ -1,1 +1,6 @@
-- fixa shader load
+- shader:
+    * one shader intermediate for vertex, one for fragment
+    * add enum for shader intermediate type
+    * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do
+
+- rename: array -> dynamic_array and use da_push prefix and da_variable on actual arrays.

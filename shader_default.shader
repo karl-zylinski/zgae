@@ -39,4 +39,5 @@ input_layout = [
     }
 ]
 
-source_hlsl = "shader_default.hlsl"
+source = "shader_default_vertex.spv"
+#source = "shader_default_fragment.spv" 

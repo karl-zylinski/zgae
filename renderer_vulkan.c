@@ -5,6 +5,8 @@
 #include "debug.h"
 #include "math.h"
 #include "window.h"
+#include "handle_pool.h"
+#include "array.h"
 
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
 
@@ -20,6 +22,25 @@ typedef struct depth_buffer_t
     VkImageView view;
     VkDeviceMemory memory;
 } depth_buffer_t;
+
+typedef enum renderer_resource_type_t
+{
+    RENDERER_RESOURCE_TYPE_SHADER
+} renderer_resource_type_t;
+
+typedef struct shader_t
+{
+
+} shader_t;
+
+typedef struct renderer_resource_t
+{
+    renderer_resource_type_t type;
+    union
+    {
+        shader_t shader;
+    };
+} renderer_resource_t;
 
 typedef struct renderer_state_t
 {
@@ -42,6 +63,8 @@ typedef struct renderer_state_t
     VkCommandPool graphics_cmd_pool;
     VkCommandBuffer graphics_cmd_buffer;
     depth_buffer_t depth_buffer;
+    renderer_resource_t* resources;
+    handle_pool_t renderer_resource_handle_pool;
 } renderer_state_t;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
@@ -339,12 +362,15 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32_t num_gpus)
 typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
 
-renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
+renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
 {
     info("Creating Vulkan renderer");
 
     check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
     renderer_state_t* rs = mema_zero(sizeof(renderer_state_t));
+    handle_pool_init(&rs->renderer_resource_handle_pool);
+    #define stringify(m) (#m)
+    handle_pool_set_type(&rs->renderer_resource_handle_pool, RENDERER_RESOURCE_TYPE_SHADER, stringify(RENDERER_RESOURCE_TYPE_SHADER));
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -384,8 +410,8 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     linux_xcb_window_t* win = window_data;
     VkXcbSurfaceCreateInfoKHR xcbci = {};
     xcbci.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-    xcbci.connection = linux_xcb_get_connection(win);
-    xcbci.window = linux_xcb_get_window_handle(win);
+    xcbci.connection = linux_xcb_window_get_connection(win);
+    xcbci.window = linux_xcb_window_get_handle(win);
     res = vkCreateXcbSurfaceKHR(instance, &xcbci, NULL, &rs->surface);
     VERIFY_RES();
     VkSurfaceKHR surface = rs->surface;
@@ -507,7 +533,7 @@ renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
     return rs;
 }
 
-void renderer_shutdown(renderer_state_t* rs)
+void renderer_destroy(renderer_state_t* rs)
 {
     info("Destroying Vulkan renderer");
     VkDevice device = rs->device;
@@ -521,5 +547,15 @@ void renderer_shutdown(renderer_state_t* rs)
     fptr_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (fptr_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(rs->instance, "vkDestroyDebugUtilsMessengerEXT");
     vkDestroyDebugUtilsMessengerEXT(rs->instance, rs->debug_messenger, NULL);
     vkDestroyInstance(rs->instance, NULL);
+    handle_pool_destroy(&rs->renderer_resource_handle_pool);
     memf(rs);
+}
+
+renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shader_intermediate_t* si)
+{
+    renderer_resource_type_t h = handle_pool_reserve(&rs->renderer_resource_handle_pool, RENDERER_RESOURCE_TYPE_SHADER);
+    (void)si;
+    renderer_resource_t shader = {};
+    array_set(rs->resources, handle_index(h), shader);
+    return h;
 }
