@@ -8,20 +8,20 @@
 
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
 
-struct swapchain_buffer
+typedef struct swapchain_buffer_t
 {
     VkImage image;
     VkImageView view;
-};
+} swapchain_buffer_t;
 
-struct depth_buffer
+typedef struct depth_buffer_t
 {
     VkImage image;
     VkImageView view;
     VkDeviceMemory memory;
-};
+} depth_buffer_t;
 
-struct renderer_state
+typedef struct renderer_state_t
 {
     VkInstance instance;
     VkDebugUtilsMessengerEXT debug_messenger;
@@ -32,17 +32,17 @@ struct renderer_state
     VkPhysicalDeviceMemoryProperties gpu_memory_properties;
     VkDevice device;
     VkSwapchainKHR swapchain;
-    struct vec2u swapchain_size;
-    struct swapchain_buffer* swapchain_buffers;
-    uint32 swapchain_buffers_count;
-    uint32 graphics_queue_family_idx;
+    vec2u_t swapchain_size;
+    swapchain_buffer_t* swapchain_buffers;
+    uint32_t swapchain_buffers_count;
+    uint32_t graphics_queue_family_idx;
     VkQueue graphics_queue;
-    uint32 present_queue_family_idx;
+    uint32_t present_queue_family_idx;
     VkQueue present_queue;
     VkCommandPool graphics_cmd_pool;
     VkCommandBuffer graphics_cmd_buffer;
-    struct depth_buffer depth_buffer;
-};
+    depth_buffer_t depth_buffer;
+} renderer_state_t;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -60,26 +60,26 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     return VK_FALSE;
 }
 
-static struct vec2u get_surface_size(VkPhysicalDevice gpu, VkSurfaceKHR surface)
+static vec2u_t get_surface_size(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 {
     VkSurfaceCapabilitiesKHR surface_capabilities;
     VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surface_capabilities);
     VERIFY_RES();
-    check(surface_capabilities.currentExtent.width != (uint32)-1, "Couldn't get surface size");
-    struct vec2u size = {surface_capabilities.currentExtent.width, surface_capabilities.currentExtent.height};
+    check(surface_capabilities.currentExtent.width != (uint32_t)-1, "Couldn't get surface size");
+    vec2u_t size = {surface_capabilities.currentExtent.width, surface_capabilities.currentExtent.height};
     return size;
 }
 
 static VkPresentModeKHR choose_swapchain_present_mode(VkPhysicalDevice gpu, VkSurfaceKHR surface) {
     VkResult res;
-    uint32 present_modes_count;
+    uint32_t present_modes_count;
     res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, NULL);
     VERIFY_RES();
     VkPresentModeKHR* present_modes = mema(present_modes_count * sizeof(VkPresentModeKHR));
     res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, present_modes);
     VERIFY_RES();
 
-    for (uint32 i = 0; i < present_modes_count; ++i)
+    for (uint32_t i = 0; i < present_modes_count; ++i)
     {
         if (present_modes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
         {
@@ -107,11 +107,11 @@ static VkCompositeAlphaFlagBitsKHR choose_swapchain_composite_alpha(VkCompositeA
 }
 
 static void create_swapchain(
-    VkSwapchainKHR* out_current_swapchain, struct swapchain_buffer** out_sc_bufs, uint32* out_sc_bufs_count, struct vec2u* out_swapchain_size,
+    VkSwapchainKHR* out_current_swapchain, swapchain_buffer_t** out_sc_bufs, uint32_t* out_sc_bufs_count, vec2u_t* out_swapchain_size,
     VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface, VkFormat format,
-    uint32 graphics_queue_family_idx, uint32 present_queue_family_idx)
+    uint32_t graphics_queue_family_idx, uint32_t present_queue_family_idx)
 {
-    struct vec2u size = get_surface_size(gpu, surface);
+    vec2u_t size = get_surface_size(gpu, surface);
     info("Creating swapchain with size %dx%d", size.x, size.y);
     *out_swapchain_size = size;
     VkResult res;
@@ -142,7 +142,7 @@ static void create_swapchain(
     scci.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     scci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    uint32 queue_family_indicies[] = {graphics_queue_family_idx, present_queue_family_idx};
+    uint32_t queue_family_indicies[] = {graphics_queue_family_idx, present_queue_family_idx};
 
     if (queue_family_indicies[0] != queue_family_indicies[1])
     {
@@ -156,7 +156,7 @@ static void create_swapchain(
     VERIFY_RES();
     *out_current_swapchain = swapchain;
 
-    uint32 swapchain_image_count;
+    uint32_t swapchain_image_count;
     res = vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, NULL);
     VERIFY_RES();
     check(swapchain_image_count > 0, "Swapchain contains no images");
@@ -165,15 +165,15 @@ static void create_swapchain(
     VERIFY_RES();
 
     info("Creating %d buffers for swapchain", swapchain_image_count);
-    struct swapchain_buffer* old_bufs = *out_sc_bufs;
-    uint32 old_bufs_count = *out_sc_bufs_count;
+    swapchain_buffer_t* old_bufs = *out_sc_bufs;
+    uint32_t old_bufs_count = *out_sc_bufs_count;
 
-    for (uint32 i = 0; i < old_bufs_count; i++)
+    for (uint32_t i = 0; i < old_bufs_count; i++)
         vkDestroyImageView(device, old_bufs[i].view, NULL);
 
-    struct swapchain_buffer* bufs = memra_zero(old_bufs, sizeof(struct swapchain_buffer) * swapchain_image_count);
+    swapchain_buffer_t* bufs = memra_zero(old_bufs, sizeof(swapchain_buffer_t) * swapchain_image_count);
 
-    for (uint32 i = 0; i < swapchain_image_count; ++i)
+    for (uint32_t i = 0; i < swapchain_image_count; ++i)
     {
         bufs[i].image = swapchain_images[i];
 
@@ -195,9 +195,9 @@ static void create_swapchain(
     *out_sc_bufs_count = swapchain_image_count;
 }
 
-uint32 memory_type_from_properties(uint32 req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
+uint32_t memory_type_from_properties(uint32_t req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
 {
-    for (uint32 i = 0; i < memory_properties->memoryTypeCount; ++i)
+    for (uint32_t i = 0; i < memory_properties->memoryTypeCount; ++i)
     {
         if ((req_memory_type & (1 << i)) && (memory_properties->memoryTypes[i].propertyFlags & memory_requirement_mask) == memory_requirement_mask)
         {
@@ -208,7 +208,7 @@ uint32 memory_type_from_properties(uint32 req_memory_type, const VkPhysicalDevic
     return -1;
 }
 
-void destroy_depth_buffer(VkDevice device, const struct depth_buffer* depth_buffer)
+void destroy_depth_buffer(VkDevice device, const depth_buffer_t* depth_buffer)
 {
     if (!depth_buffer->view && !depth_buffer->image && !depth_buffer->memory)
         return;
@@ -219,11 +219,11 @@ void destroy_depth_buffer(VkDevice device, const struct depth_buffer* depth_buff
     vkFreeMemory(device, depth_buffer->memory, NULL);
 }
 
-static void create_depth_buffer(struct depth_buffer* out_depth_buffer, VkDevice device, VkPhysicalDevice gpu, const VkPhysicalDeviceMemoryProperties* memory_properties, struct vec2u size)
+static void create_depth_buffer(depth_buffer_t* out_depth_buffer, VkDevice device, VkPhysicalDevice gpu, const VkPhysicalDeviceMemoryProperties* memory_properties, vec2u_t size)
 {
     destroy_depth_buffer(device, out_depth_buffer);
     info("Creating depth buffer");
-    struct depth_buffer depth_buffer = {};
+    depth_buffer_t depth_buffer = {};
 
     VkImageCreateInfo depth_ici = {};
     const VkFormat depth_format = VK_FORMAT_D16_UNORM;
@@ -264,7 +264,7 @@ static void create_depth_buffer(struct depth_buffer* out_depth_buffer, VkDevice 
     depth_mai.allocationSize = depth_mem_reqs.size;
     depth_mai.memoryTypeIndex = memory_type_from_properties(depth_mem_reqs.memoryTypeBits, memory_properties, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    check(depth_mai.memoryTypeIndex != (uint32)-1, "Failed to find memory type for depth buffer");
+    check(depth_mai.memoryTypeIndex != (uint32_t)-1, "Failed to find memory type for depth buffer");
     res = vkAllocateMemory(device, &depth_mai, NULL, &depth_buffer.memory);
     VERIFY_RES();
     res = vkBindImageMemory(device, depth_buffer.image, depth_buffer.memory, 0);
@@ -287,7 +287,7 @@ static void create_depth_buffer(struct depth_buffer* out_depth_buffer, VkDevice 
 static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 {
     VkResult res;
-    uint32 num_supported_surface_formats;
+    uint32_t num_supported_surface_formats;
     res = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &num_supported_surface_formats, NULL);
     VERIFY_RES();
     VkSurfaceFormatKHR* supported_surface_formats = mema(num_supported_surface_formats * sizeof(VkSurfaceFormatKHR));
@@ -303,7 +303,7 @@ static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface
 
     check(num_supported_surface_formats > 0, "No supported surface formats found");
 
-    for (uint32 i = 0; i < num_supported_surface_formats; ++i)
+    for (uint32_t i = 0; i < num_supported_surface_formats; ++i)
     {
         if (supported_surface_formats[i].format == VK_FORMAT_R8G8B8A8_UNORM)
         {
@@ -317,14 +317,14 @@ static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface
     return format;
 }
 
-static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32 num_gpus)
+static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32_t num_gpus)
 {
     check(num_gpus > 0, "Trying to select among 0 GPUs");
 
     if (num_gpus == 1)
         return gpus[0];
 
-    for (uint32 i = 0; i < num_gpus; ++i)
+    for (uint32_t i = 0; i < num_gpus; ++i)
     {
         VkPhysicalDeviceProperties gpu_properties;
         vkGetPhysicalDeviceProperties(gpus[i], &gpu_properties);
@@ -339,12 +339,12 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32 num_gpus)
 typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
 
-struct renderer_state* renderer_init(enum window_type wt, void* window_data)
+renderer_state_t* renderer_init(window_type_t window_type, void* window_data)
 {
     info("Creating Vulkan renderer");
 
-    check(wt == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
-    struct renderer_state* rs = mema_zero(sizeof(struct renderer_state));
+    check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
+    renderer_state_t* rs = mema_zero(sizeof(renderer_state_t));
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -381,7 +381,7 @@ struct renderer_state* renderer_init(enum window_type wt, void* window_data)
     VERIFY_RES();
 
     info("Creating XCB Vulkan surface");
-    struct linux_xcb_window* win = window_data;
+    linux_xcb_window_t* win = window_data;
     VkXcbSurfaceCreateInfoKHR xcbci = {};
     xcbci.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
     xcbci.connection = linux_xcb_get_connection(win);
@@ -391,7 +391,7 @@ struct renderer_state* renderer_init(enum window_type wt, void* window_data)
     VkSurfaceKHR surface = rs->surface;
 
     info("Selecting GPU and fetching properties");
-    uint32 num_available_gpus = 0;
+    uint32_t num_available_gpus = 0;
     res = vkEnumeratePhysicalDevices(instance, &num_available_gpus, NULL);
     check(res == VK_SUCCESS || res == VK_INCOMPLETE, "Failed enumerating GPUs");
     check(num_available_gpus > 0, "No GPUS found");
@@ -405,13 +405,13 @@ struct renderer_state* renderer_init(enum window_type wt, void* window_data)
     info("Selected GPU %s", rs->gpu_properties.deviceName);
 
     info("Finding GPU graphics and present queue families");
-    uint32 queue_family_count = 0;
+    uint32_t queue_family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, NULL);
     VkQueueFamilyProperties* queue_family_props = mema(sizeof(VkQueueFamilyProperties) * queue_family_count);
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, queue_family_props);
     
     VkBool32* queues_with_present_support = mema(queue_family_count * sizeof(VkBool32));
-    for (uint32 i = 0; i < queue_family_count; ++i)
+    for (uint32_t i = 0; i < queue_family_count; ++i)
     {
         res = vkGetPhysicalDeviceSurfaceSupportKHR(gpu, i, surface, &queues_with_present_support[i]);
         VERIFY_RES();
@@ -422,7 +422,7 @@ struct renderer_state* renderer_init(enum window_type wt, void* window_data)
 
     // We first try to find a queue family with both graphics and present capabilities,
     // if it fails we try to look for two separate queue families
-    for (uint32 i = 0; i < queue_family_count; ++i)
+    for (uint32_t i = 0; i < queue_family_count; ++i)
     {
         if (queue_family_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
@@ -436,10 +436,10 @@ struct renderer_state* renderer_init(enum window_type wt, void* window_data)
             }
         }
     }
-    check(rs->graphics_queue_family_idx != (uint32)-1, "Couldn't find graphics queue family");
-    if (rs->present_queue_family_idx == (uint32)-1)
+    check(rs->graphics_queue_family_idx != (uint32_t)-1, "Couldn't find graphics queue family");
+    if (rs->present_queue_family_idx == (uint32_t)-1)
     {
-        for (uint32 i = 0; i < queue_family_count; ++i)
+        for (uint32_t i = 0; i < queue_family_count; ++i)
         {
             if (queues_with_present_support[i] == VK_TRUE)
             {
@@ -449,7 +449,7 @@ struct renderer_state* renderer_init(enum window_type wt, void* window_data)
             }
         }
     }
-    check(rs->present_queue_family_idx != (uint32)-1, "Couldn't find present queue family");
+    check(rs->present_queue_family_idx != (uint32_t)-1, "Couldn't find present queue family");
     memf(queues_with_present_support);
 
     info("Creating Vulkan logical device");
@@ -507,14 +507,14 @@ struct renderer_state* renderer_init(enum window_type wt, void* window_data)
     return rs;
 }
 
-void renderer_shutdown(struct renderer_state* rs)
+void renderer_shutdown(renderer_state_t* rs)
 {
     info("Destroying Vulkan renderer");
     VkDevice device = rs->device;
     vkFreeCommandBuffers(device, rs->graphics_cmd_pool, 1, &rs->graphics_cmd_buffer);
     destroy_depth_buffer(device, &rs->depth_buffer);
     vkDestroyCommandPool(device, rs->graphics_cmd_pool, NULL);
-    for (uint32 i = 0; i < rs->swapchain_buffers_count; i++)
+    for (uint32_t i = 0; i < rs->swapchain_buffers_count; i++)
         vkDestroyImageView(device, rs->swapchain_buffers[i].view, NULL);
     vkDestroySwapchainKHR(device, rs->swapchain, NULL);
     vkDestroyDevice(device, NULL);

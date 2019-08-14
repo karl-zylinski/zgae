@@ -1,23 +1,23 @@
 #pragma once
 
-enum key;
-typedef void(*window_key_pressed_callback_t)(enum key);
-typedef void(*window_key_released_callback_t)(enum key);
+fwd_enum(key_t);
+typedef void(*window_key_pressed_callback_t)(key_t k);
+typedef void(*window_key_released_callback_t)(key_t k);
 
-enum window_type {
+typedef enum window_type_t {
     WINDOW_TYPE_XCB
-};
+} window_type_t;
 
-enum window_open_state {
+typedef enum window_open_state_t {
     WINDOW_OPEN_STATE_OPEN, WINDOW_OPEN_STATE_CLOSED
-};
+} window_open_state_t;
 
-struct window_callbacks {
+typedef struct window_callbacks_t {
     window_key_pressed_callback_t key_pressed_callback;
     window_key_released_callback_t key_released_callback;
-};
+} window_callbacks_t;
 
-struct window_state {
-    enum window_open_state open_state;
-    struct window_callbacks callbacks;
-};
+typedef struct window_state_t {
+    window_open_state_t open_state;
+    window_callbacks_t callbacks;
+} window_state_t;

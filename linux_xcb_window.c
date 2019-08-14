@@ -7,21 +7,21 @@
 #include "memory.h"
 #include <stdlib.h>
 
-struct linux_xcb_window {
-    struct xcb_connection_t* connection;
-    uint32 handle;
-    struct window_state state;
-};
+typedef struct linux_xcb_window_t {
+    xcb_connection_t* connection;
+    uint32_t handle;
+    window_state_t state;
+} linux_xcb_window_t;
 
-struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32 width, uint32 height)
+linux_xcb_window_t* linux_xcb_create_window(const char* title, uint32_t width, uint32_t height)
 {
-    struct linux_xcb_window* w = mema_zero(sizeof(struct linux_xcb_window));
+    linux_xcb_window_t* w = mema_zero(sizeof(linux_xcb_window_t));
     info("Creating XCB window w/ title %s, width %d, height %d", title, width, height);
     w->connection = xcb_connect(NULL, NULL);
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
-    uint32 mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-    uint32 values[] = {screen->black_pixel,  XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS};
+    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    uint32_t values[] = {screen->black_pixel,  XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS};
     xcb_create_window(
         w->connection,
         XCB_COPY_FROM_PARENT,
@@ -56,19 +56,19 @@ struct linux_xcb_window* linux_xcb_create_window(const char* title, uint32 width
     return w;
 }
 
-void linux_xcb_destroy_window(struct linux_xcb_window* w)
+void linux_xcb_destroy_window(linux_xcb_window_t* w)
 {
     info("Destroying XCB window");
     (void)w;
     error("Please implement!!");
 }
 
-void linux_xcb_update_callbacks(struct linux_xcb_window* w, const struct window_callbacks* wc)
+void linux_xcb_update_callbacks(linux_xcb_window_t* w, const window_callbacks_t* wc)
 {
     w->state.callbacks = *wc;
 }
 
-void linux_xcb_process_all_events(struct linux_xcb_window* w)
+void linux_xcb_process_all_events(linux_xcb_window_t* w)
 {
     // For being able to get window closed event.
     xcb_intern_atom_cookie_t window_deleted_cookie = xcb_intern_atom(w->connection, 0, 16, "WM_DELETE_WINDOW");
@@ -99,17 +99,17 @@ void linux_xcb_process_all_events(struct linux_xcb_window* w)
     }
 }
 
-struct xcb_connection_t* linux_xcb_get_connection(struct linux_xcb_window* w)
+xcb_connection_t* linux_xcb_get_connection(linux_xcb_window_t* w)
 {
     return w->connection;
 }
 
-uint32 linux_xcb_get_window_handle(struct linux_xcb_window* w)
+uint32_t linux_xcb_get_window_handle(linux_xcb_window_t* w)
 {
     return w->handle;
 }
 
-int linux_xcb_is_window_open(struct linux_xcb_window* w)
+int linux_xcb_is_window_open(linux_xcb_window_t* w)
 {
     return w->state.open_state == WINDOW_OPEN_STATE_OPEN;
 }

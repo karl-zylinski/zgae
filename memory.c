@@ -3,26 +3,26 @@
 #include <string.h>
 #include <stdlib.h>
 
-void* mema(uint64 size)
+void* mema(uint64_t size)
 {
     void* p = malloc(size);
     return p;
 }
 
-void* mema_zero(uint64 size)
+void* mema_zero(uint64_t size)
 {
     void* p = mema(size);
     memset(p, 0, size);
     return p;
 }
 
-void* memra(void* cur, uint64 size)
+void* memra(void* cur, uint64_t size)
 {
     void* p = realloc(cur, size);
     return p;
 }
 
-void* memra_zero(void* cur, uint64 size)
+void* memra_zero(void* cur, uint64_t size)
 {
     void* p = memra(cur, size);
     memset(p, 0, size);

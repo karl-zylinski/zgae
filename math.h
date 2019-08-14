@@ -1,6 +1,6 @@
 #pragma once
 
-struct vec2u
+typedef struct vec2u_t
 {
-    uint32 x, y;
-};
+    uint32_t x, y;
+} vec2u_t;

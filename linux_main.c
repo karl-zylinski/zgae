@@ -7,27 +7,27 @@
 #include "jzon.h"
 #include "shader.h"
 
-void key_pressed(enum key k)
+void key_pressed(key_t k)
 {
-    info("pressed: %d", (uint32)k);
+    info("pressed: %d", (uint32_t)k);
 }
 
-void key_released(enum key k)
+void key_released(key_t k)
 {
-    info("pressed: %d", (uint32)k);
+    info("pressed: %d", (uint32_t)k);
 }
 
 int main()
 {
     info("Starting ZGAE");
-    struct linux_xcb_window* win = linux_xcb_create_window("ZGAE", 800, 600);
-    struct window_callbacks wc = {};
+    linux_xcb_window_t* win = linux_xcb_create_window("ZGAE", 800, 600);
+    window_callbacks_t wc = {};
     wc.key_pressed_callback = &key_pressed;
     wc.key_released_callback = &key_released;
     linux_xcb_update_callbacks(win, &wc);
 
-    struct renderer_state* renderer_state = renderer_init(WINDOW_TYPE_XCB, win);
-    renderer_resource shader = shader_load(renderer_state, "shader_default.shader");
+    renderer_state_t* renderer_state = renderer_init(WINDOW_TYPE_XCB, win);
+    renderer_resource_t shader = shader_load(renderer_state, "shader_default.shader");
     (void)shader;
 
     info("Entering main loop");

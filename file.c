@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "memory.h"
 
-bool file_load(const char* filename, void** data, uint64* data_size)
+bool file_load(const char* filename, void** data, uint64_t* data_size)
 {
     FILE* file_handle = fopen(filename, "rb");
 
@@ -18,7 +18,7 @@ bool file_load(const char* filename, void** data, uint64* data_size)
     return true;
 }
 
-bool file_load_str(const char* filename, char** data, uint64* str_len)
+bool file_load_str(const char* filename, char** data, uint64_t* str_len)
 {
     FILE* file_handle = fopen(filename, "rb");
 

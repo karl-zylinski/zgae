@@ -36,7 +36,7 @@ static bool is_multiline_string_quotes(const char* str)
     return is_str(str, "\"\"\"");
 }
 
-static uint64 find_table_pair_insertion_index(struct jzon_key_value_pair* table, int64 key_hash)
+static uint64_t find_table_pair_insertion_index(jzon_key_value_pair_t* table, int64_t key_hash)
 {
     if (array_size(table) == 0)
         return 0;
@@ -167,7 +167,7 @@ static char* parse_keyname(const char** input)
     return NULL;
 }
 
-static bool parse_string(const char** input, struct jzon_value* output)
+static bool parse_string(const char** input, jzon_value_t* output)
 {
     char* str = parse_string_internal(input);
 
@@ -179,9 +179,9 @@ static bool parse_string(const char** input, struct jzon_value* output)
     return true;
 }
 
-static bool parse_value(const char** input, struct jzon_value* output);
+static bool parse_value(const char** input, jzon_value_t* output);
 
-static bool parse_array(const char** input, struct jzon_value* output)
+static bool parse_array(const char** input, jzon_value_t* output)
 {   
     if (current(input) != '[')
         return false;
@@ -198,12 +198,12 @@ static bool parse_array(const char** input, struct jzon_value* output)
         return true;
     }
 
-    struct jzon_value* array = NULL;
+    jzon_value_t* array = NULL;
 
     while (current(input))
     {
         skip_whitespace(input);
-        struct jzon_value value = {};
+        jzon_value_t value = {};
 
         if (!parse_value(input, &value))
             return false;
@@ -219,11 +219,11 @@ static bool parse_array(const char** input, struct jzon_value* output)
     }
     
     output->size = array_size(array);
-    output->array_val = (struct jzon_value*)array_copy_data(array);
+    output->array_val = (jzon_value_t*)array_copy_data(array);
     return true;
 }
 
-static bool parse_table(const char** input, struct jzon_value* output, bool root_table)
+static bool parse_table(const char** input, jzon_value_t* output, bool root_table)
 {
     if (current(input) == '{')
         next(input);
@@ -240,7 +240,7 @@ static bool parse_table(const char** input, struct jzon_value* output, bool root
         return true;
     }
 
-    struct jzon_key_value_pair* table = NULL;
+    jzon_key_value_pair_t* table = NULL;
 
     while (current(input))
     {
@@ -252,12 +252,12 @@ static bool parse_table(const char** input, struct jzon_value* output, bool root
             return false;
 
         next(input);
-        struct jzon_value value = {};
+        jzon_value_t value = {};
 
         if (!parse_value(input, &value))
             return false;
 
-        struct jzon_key_value_pair pair = {};
+        jzon_key_value_pair_t pair = {};
         pair.key = key;
         pair.key_hash = str_hash(key);
         pair.val = value;
@@ -272,11 +272,11 @@ static bool parse_table(const char** input, struct jzon_value* output, bool root
     }
 
     output->size = array_size(table);
-    output->table_val = (struct jzon_key_value_pair*)array_copy_data(table);
+    output->table_val = (jzon_key_value_pair_t*)array_copy_data(table);
     return true;
 }
 
-static bool parse_number(const char** input, struct jzon_value* output)
+static bool parse_number(const char** input, jzon_value_t* output)
 {
     bool is_float = false;
     char* start = (char*)*input;
@@ -316,13 +316,13 @@ static bool parse_number(const char** input, struct jzon_value* output)
     else
     {
         output->is_int = true;
-        output->int_val = (int32)strtol(start, NULL, 10);
+        output->int_val = (int32_t)strtol(start, NULL, 10);
     }
 
     return true;
 }
 
-static bool parse_true(const char** input, struct jzon_value* output)
+static bool parse_true(const char** input, jzon_value_t* output)
 {
     if (is_str(*input, "true"))
     {
@@ -334,7 +334,7 @@ static bool parse_true(const char** input, struct jzon_value* output)
     return false;
 }
 
-static bool parse_false(const char** input, struct jzon_value* output)
+static bool parse_false(const char** input, jzon_value_t* output)
 {
     if (is_str(*input, "false"))
     {
@@ -347,7 +347,7 @@ static bool parse_false(const char** input, struct jzon_value* output)
     return false;
 }
 
-static bool parse_null(const char** input, struct jzon_value* output)
+static bool parse_null(const char** input, jzon_value_t* output)
 {
     if (is_str(*input, "null"))
     {
@@ -359,7 +359,7 @@ static bool parse_null(const char** input, struct jzon_value* output)
     return false;
 }
 
-static bool parse_value(const char** input, struct jzon_value* output)
+static bool parse_value(const char** input, jzon_value_t* output)
 {
     skip_whitespace(input);
     char ch = current(input);
@@ -377,18 +377,18 @@ static bool parse_value(const char** input, struct jzon_value* output)
     }
 }
 
-bool jzon_parse(const char* input, struct jzon_value* output)
+bool jzon_parse(const char* input, jzon_value_t* output)
 {
-    memset(output, 0, sizeof(struct jzon_value));
+    memset(output, 0, sizeof(jzon_value_t));
     skip_whitespace(&input);
     return parse_table(&input, output, true);
 }
 
-void jzon_free(struct jzon_value* val)
+void jzon_free(jzon_value_t* val)
 {
     if (val->is_table)
     {
-        for (uint32 i = 0; i < val->size; ++i)
+        for (uint32_t i = 0; i < val->size; ++i)
         {
             memf(val->table_val[i].key);
             jzon_free(&val->table_val[i].val);
@@ -398,7 +398,7 @@ void jzon_free(struct jzon_value* val)
     }
     else if (val->is_array)
     {
-        for (uint32 i = 0; i < val->size; ++i)
+        for (uint32_t i = 0; i < val->size; ++i)
             jzon_free(&val->array_val[i]);
 
         memf(val->array_val);
@@ -409,7 +409,7 @@ void jzon_free(struct jzon_value* val)
     }
 }
 
-struct jzon_value* jzon_get(struct jzon_value* table, const char* key)
+jzon_value_t* jzon_get(jzon_value_t* table, const char* key)
 {
     if (!table->is_table)
         return NULL;
@@ -417,7 +417,7 @@ struct jzon_value* jzon_get(struct jzon_value* table, const char* key)
     if (table->size == 0)
         return NULL;
     
-    int64 key_hash = str_hash(key);
+    int64_t key_hash = str_hash(key);
 
     size_t first = 0;
     size_t last = table->size - 1;

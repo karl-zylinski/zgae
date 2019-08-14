@@ -1,6 +1,6 @@
 #pragma once
 
-enum key
+typedef enum key_t
 {
     KEY_UNKNOWN,
     KEY_A,
@@ -105,4 +105,4 @@ enum key
     KEY_F15,
     KEY_Pause,
     KEY_NumKeys
-};
+} key_t;
