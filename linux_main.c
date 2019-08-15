@@ -5,7 +5,7 @@
 #include "debug.h"
 #include "memory.h"
 #include "jzon.h"
-#include "shader.h"
+#include "pipeline.h"
 
 void key_pressed(key_t k)
 {
@@ -27,8 +27,8 @@ int main()
     linux_xcb_window_update_callbacks(win, &wc);
 
     renderer_state_t* renderer_state = renderer_create(WINDOW_TYPE_XCB, win);
-    renderer_resource_handle_t shader = shader_load(renderer_state, "shader_default.shader");
-    (void)shader;
+    renderer_resource_handle_t pl = pipeline_load(renderer_state, "pipeline_default.pipeline");
+    (void)pl;
 
     info("Entering main loop");
     while (linux_xcb_window_is_open(win))

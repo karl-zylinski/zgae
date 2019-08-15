@@ -1,7 +1,14 @@
 #pragma once
 
-fwd_handle(renderer_resource_t);
+fwd_handle(renderer_resource_handle_t);
 fwd_struct(renderer_state_t);
+
+typedef enum shader_type_t
+{
+    SHADER_TYPE_INVALID,
+    SHADER_TYPE_VERTEX,
+    SHADER_TYPE_FRAGMENT
+} shader_type_t;
 
 typedef enum shader_data_type_t
 {
@@ -48,11 +55,12 @@ typedef struct shader_intermediate_t
 {
     char* source;
     uint64_t source_size;
+    shader_type_t type;
     shader_constant_buffer_item_t* constant_buffer;
     shader_input_layout_item_t* input_layout;
-    uint32_t constant_buffer_size;
-    uint32_t input_layout_size;
+    uint32_t constant_buffer_num;
+    uint32_t input_layout_num;
 } shader_intermediate_t;
 
-renderer_resource_t shader_load(renderer_state_t* rs, const char* filename);
+renderer_resource_handle_t shader_load(renderer_state_t* rs, const char* filename);
 uint32_t shader_data_type_size(shader_data_type_t t);

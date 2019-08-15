@@ -1,0 +1,4 @@
+shader_stages = [
+    "shader_default_vertex.shader"
+    "shader_default_fragment.shader"
+]

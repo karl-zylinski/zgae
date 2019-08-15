@@ -38,3 +38,9 @@ void memory_check_leaks()
 {
     error("PLZ IMPLEMENT.");
 }
+
+void memcpy_alloc(void** dest, void* source, size_t size)
+{
+    *dest = mema(size);
+    memcpy(*dest, source, size);
+}

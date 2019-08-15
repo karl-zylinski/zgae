@@ -6,6 +6,8 @@
 #include "math.h"
 #include "window.h"
 #include "handle_pool.h"
+#include "shader.h"
+#include "pipeline.h"
 #include "array.h"
 
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
@@ -25,20 +27,34 @@ typedef struct depth_buffer_t
 
 typedef enum renderer_resource_type_t
 {
-    RENDERER_RESOURCE_TYPE_SHADER
+    RENDERER_RESOURCE_TYPE_INVALID,
+    RENDERER_RESOURCE_TYPE_SHADER,
+    RENDERER_RESOURCE_TYPE_PIPELINE
 } renderer_resource_type_t;
 
 typedef struct shader_t
 {
-
+    shader_type_t type;
+    shader_input_layout_item_t* input_layout;
+    uint32_t input_layout_num;
+    shader_constant_buffer_item_t* constant_buffer;
+    uint32_t constant_buffer_num;
+    VkShaderModule module;
 } shader_t;
+
+typedef struct pipeline_t
+{
+    VkPipeline vk_handle;
+} pipeline_t;
 
 typedef struct renderer_resource_t
 {
+    renderer_resource_handle_t handle;
     renderer_resource_type_t type;
     union
     {
         shader_t shader;
+        pipeline_t pipeline;
     };
 } renderer_resource_t;
 
@@ -63,8 +79,8 @@ typedef struct renderer_state_t
     VkCommandPool graphics_cmd_pool;
     VkCommandBuffer graphics_cmd_buffer;
     depth_buffer_t depth_buffer;
-    renderer_resource_t* resources;
-    handle_pool_t renderer_resource_handle_pool;
+    renderer_resource_t* da_resources;
+    handle_pool_t resource_handle_pool;
 } renderer_state_t;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
@@ -368,9 +384,10 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
 
     check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
     renderer_state_t* rs = mema_zero(sizeof(renderer_state_t));
-    handle_pool_init(&rs->renderer_resource_handle_pool);
+    handle_pool_init(&rs->resource_handle_pool);
     #define stringify(m) (#m)
-    handle_pool_set_type(&rs->renderer_resource_handle_pool, RENDERER_RESOURCE_TYPE_SHADER, stringify(RENDERER_RESOURCE_TYPE_SHADER));
+    handle_pool_set_type(&rs->resource_handle_pool, RENDERER_RESOURCE_TYPE_SHADER, stringify(RENDERER_RESOURCE_TYPE_SHADER));
+    handle_pool_set_type(&rs->resource_handle_pool, RENDERER_RESOURCE_TYPE_PIPELINE, stringify(RENDERER_RESOURCE_TYPE_PIPELINE));
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -533,10 +550,38 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
     return rs;
 }
 
+static void destroy_renderer_resources(VkDevice device, handle_pool_t* hp, renderer_resource_t* rrs, size_t rrs_n)
+{
+    for (size_t i = 0; i < rrs_n; ++i)
+    {
+        renderer_resource_t* rr = rrs + i;
+
+        switch(rr->type)
+        {
+            case RENDERER_RESOURCE_TYPE_SHADER: {
+                shader_t* s = &rr->shader;
+                vkDestroyShaderModule(device, s->module, NULL);
+                memf(s->input_layout);
+                memf(s->constant_buffer);
+            } break;
+            
+            case RENDERER_RESOURCE_TYPE_PIPELINE: {
+            } break;
+
+            case RENDERER_RESOURCE_TYPE_INVALID:
+                error("Invalid resource in renderer resource list"); break;
+        }
+
+        handle_pool_return(hp, rr->handle);
+    }
+}
+
 void renderer_destroy(renderer_state_t* rs)
 {
     info("Destroying Vulkan renderer");
     VkDevice device = rs->device;
+    destroy_renderer_resources(rs->device, &rs->resource_handle_pool, rs->da_resources, array_num(rs->da_resources));
+    array_destroy(rs->da_resources);
     vkFreeCommandBuffers(device, rs->graphics_cmd_pool, 1, &rs->graphics_cmd_buffer);
     destroy_depth_buffer(device, &rs->depth_buffer);
     vkDestroyCommandPool(device, rs->graphics_cmd_pool, NULL);
@@ -547,15 +592,59 @@ void renderer_destroy(renderer_state_t* rs)
     fptr_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (fptr_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(rs->instance, "vkDestroyDebugUtilsMessengerEXT");
     vkDestroyDebugUtilsMessengerEXT(rs->instance, rs->debug_messenger, NULL);
     vkDestroyInstance(rs->instance, NULL);
-    handle_pool_destroy(&rs->renderer_resource_handle_pool);
+    handle_pool_destroy(&rs->resource_handle_pool);
     memf(rs);
+}
+
+static renderer_resource_handle_t add_resource(handle_pool_t* hp, renderer_resource_t** da_resources, renderer_resource_t* res)
+{
+    renderer_resource_handle_t h = handle_pool_reserve(hp, res->type);
+    res->handle = h;
+    array_set(*da_resources, handle_index(h), *res);
+    return h;
+}
+
+static renderer_resource_t* get_resource(renderer_state_t* rs, renderer_resource_handle_t h)
+{
+    renderer_resource_t* rr = rs->da_resources + handle_index(h);
+    check_slow(handle_type(h) == rr->type, "Handle points to resource of wrong type");
+    return rr;
 }
 
 renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shader_intermediate_t* si)
 {
-    renderer_resource_type_t h = handle_pool_reserve(&rs->renderer_resource_handle_pool, RENDERER_RESOURCE_TYPE_SHADER);
-    (void)si;
-    renderer_resource_t shader = {};
-    array_set(rs->resources, handle_index(h), shader);
-    return h;
+    renderer_resource_t shader_res = {};
+    shader_res.type = RENDERER_RESOURCE_TYPE_SHADER;
+    shader_t* shader = &shader_res.shader;
+    memcpy_alloc((void**)&shader->input_layout, si->input_layout, sizeof(shader_input_layout_item_t) * si->input_layout_num);
+    shader->input_layout_num = si->input_layout_num;
+    memcpy_alloc((void**)&shader->constant_buffer, si->constant_buffer, sizeof(shader_constant_buffer_item_t) * si->constant_buffer_num);
+    shader->constant_buffer_num = si->constant_buffer_num;
+    shader->type = si->type;
+
+    VkShaderModuleCreateInfo smci = {};
+    smci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    smci.pCode = (uint32_t*)si->source;
+    smci.codeSize = si->source_size;
+
+    VkResult res = vkCreateShaderModule(rs->device, &smci, NULL, &shader->module);
+    VERIFY_RES();
+
+    return add_resource(&rs->resource_handle_pool, &rs->da_resources, &shader_res);
+}
+
+renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pipeline_intermediate_t* pi)
+{
+    renderer_resource_t pipeline_res = {};
+    
+    for (size_t i = 0; i < pi->shader_stages_num; ++i)
+    {
+        renderer_resource_handle_t rrh = pi->shader_stages[i];
+        renderer_resource_t* rr = get_resource(rs, rrh);
+        shader_t* s = &rr->shader;
+        (void)s;
+    }
+
+    pipeline_res.type = RENDERER_RESOURCE_TYPE_PIPELINE;
+    return add_resource(&rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
 }

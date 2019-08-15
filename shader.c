@@ -7,7 +7,18 @@
 #include "memory.h"
 #include "debug.h"
 
-static shader_data_type_t type_str_to_enum(const char* str)
+static shader_type_t type_str_to_enum(const char* str)
+{
+    if (str_eql(str, "vertex"))
+        return SHADER_TYPE_VERTEX;
+
+    if (str_eql(str, "fragment"))
+        return SHADER_TYPE_FRAGMENT;
+
+    return SHADER_TYPE_INVALID;
+}
+
+static shader_data_type_t data_type_str_to_enum(const char* str)
 {
     if (str_eql(str, "mat4"))
         return SHADER_DATA_TYPE_MAT4;
@@ -58,90 +69,104 @@ static shader_input_layout_value_t il_val_str_to_enum(const char* str)
     return SHADER_INPUT_LAYOUT_VALUE_INVALID;
 }
 
-renderer_resource_t shader_load(renderer_state_t* rs, const char* filename)
+renderer_resource_handle_t shader_load(renderer_state_t* rs, const char* filename)
 {
     info("Loading shader from %s", filename);
     shader_intermediate_t si = {};
     #define ensure(expr) if (!(expr)) return HANDLE_INVALID
     char* fd;
     size_t fs;
-    file_load_str(filename, &fd, &fs);
-    ensure(fd);
+    bool file_load_ok = file_load_str(filename, &fd, &fs);
+    ensure(file_load_ok);
     jzon_value_t parsed;
     int parse_res = jzon_parse(fd, &parsed);
     ensure(parse_res && parsed.is_table);
     memf(fd);
 
     jzon_value_t* jz_cb_arr = jzon_get(&parsed, "constant_buffer");
-    ensure(jz_cb_arr && jz_cb_arr->is_array);
-    si.constant_buffer_size = (unsigned)jz_cb_arr->size;
-    si.constant_buffer = mema_zero(sizeof(shader_constant_buffer_item_t) * si.constant_buffer_size);
-    for (uint32_t i = 0; i < jz_cb_arr->size; ++i)
+
+    if (jz_cb_arr)
     {
-        shader_constant_buffer_item_t* cbi = &si.constant_buffer[i];
-        jzon_value_t* jz_cb_item = jz_cb_arr->array_val + i;
-        ensure(jz_cb_item->is_table);
-
-        jzon_value_t* jz_cb_item_name = jzon_get(jz_cb_item, "name");
-        ensure(jz_cb_item_name && jz_cb_item_name->is_string);
-        cbi->name = jz_cb_item_name->string_val;
-
-        jzon_value_t* jz_cb_item_type = jzon_get(jz_cb_item, "type");
-        ensure(jz_cb_item_type && jz_cb_item_type->is_string);
-        shader_data_type_t sdt = type_str_to_enum(jz_cb_item_type->string_val);
-        ensure(sdt);
-        cbi->type = sdt;
-
-        jzon_value_t* jz_cb_item_autoval = jzon_get(jz_cb_item, "value");
-        
-        if (jz_cb_item_autoval && jz_cb_item_autoval->is_string)
+        ensure(jz_cb_arr->is_array);
+        si.constant_buffer_num = (unsigned)jz_cb_arr->size;
+        si.constant_buffer = mema_zero(sizeof(shader_constant_buffer_item_t) * si.constant_buffer_num);
+        for (uint32_t i = 0; i < jz_cb_arr->size; ++i)
         {
-            shader_constant_buffer_auto_value_t auto_val = cb_autoval_str_to_enum(jz_cb_item_autoval->string_val);
-            cbi->auto_value = auto_val;
+            shader_constant_buffer_item_t* cbi = &si.constant_buffer[i];
+            jzon_value_t* jz_cb_item = jz_cb_arr->array_val + i;
+            ensure(jz_cb_item->is_table);
+
+            jzon_value_t* jz_cb_item_name = jzon_get(jz_cb_item, "name");
+            ensure(jz_cb_item_name && jz_cb_item_name->is_string);
+            cbi->name = jz_cb_item_name->string_val;
+
+            jzon_value_t* jz_cb_item_type = jzon_get(jz_cb_item, "type");
+            ensure(jz_cb_item_type && jz_cb_item_type->is_string);
+            shader_data_type_t sdt = data_type_str_to_enum(jz_cb_item_type->string_val);
+            ensure(sdt);
+            cbi->type = sdt;
+
+            jzon_value_t* jz_cb_item_autoval = jzon_get(jz_cb_item, "value");
+            
+            if (jz_cb_item_autoval && jz_cb_item_autoval->is_string)
+            {
+                shader_constant_buffer_auto_value_t auto_val = cb_autoval_str_to_enum(jz_cb_item_autoval->string_val);
+                cbi->auto_value = auto_val;
+            }
         }
     }
 
     jzon_value_t* jz_il_arr = jzon_get(&parsed, "input_layout");
-    ensure(jz_il_arr && jz_il_arr->is_array);
-    si.input_layout_size = (unsigned)jz_il_arr->size;
-    si.input_layout = mema_zero(sizeof(shader_input_layout_item_t) * si.input_layout_size);
-    for (uint32_t i = 0; i < jz_il_arr->size; ++i)
+
+    if (jz_il_arr)
     {
-        shader_input_layout_item_t* ili = &si.input_layout[i];
-        jzon_value_t* jz_il_item = jz_il_arr->array_val + i;
-        ensure(jz_il_item->is_table);
+        ensure(jz_il_arr->is_array);
+        si.input_layout_num = (unsigned)jz_il_arr->size;
+        si.input_layout = mema_zero(sizeof(shader_input_layout_item_t) * si.input_layout_num);
+        for (uint32_t i = 0; i < jz_il_arr->size; ++i)
+        {
+            shader_input_layout_item_t* ili = &si.input_layout[i];
+            jzon_value_t* jz_il_item = jz_il_arr->array_val + i;
+            ensure(jz_il_item->is_table);
 
-        jzon_value_t* jz_il_item_name = jzon_get(jz_il_item, "name");
-        ensure(jz_il_item_name && jz_il_item_name->is_string);
-        ili->name = jz_il_item_name->string_val;
+            jzon_value_t* jz_il_item_name = jzon_get(jz_il_item, "name");
+            ensure(jz_il_item_name && jz_il_item_name->is_string);
+            ili->name = jz_il_item_name->string_val;
 
-        jzon_value_t* jz_il_item_type = jzon_get(jz_il_item, "type");
-        ensure(jz_il_item_type && jz_il_item_type->is_string);
-        shader_data_type_t sdt = type_str_to_enum(jz_il_item_type->string_val);
-        ensure(sdt);
-        ili->type = sdt;
+            jzon_value_t* jz_il_item_type = jzon_get(jz_il_item, "type");
+            ensure(jz_il_item_type && jz_il_item_type->is_string);
+            shader_data_type_t sdt = data_type_str_to_enum(jz_il_item_type->string_val);
+            ensure(sdt);
+            ili->type = sdt;
 
-        jzon_value_t* jz_il_item_val = jzon_get(jz_il_item, "value");
-        ensure(jz_il_item_val && jz_il_item_val->is_string);
-        shader_input_layout_value_t val = il_val_str_to_enum(jz_il_item_val->string_val);
-        ili->value = val;
+            jzon_value_t* jz_il_item_val = jzon_get(jz_il_item, "value");
+            ensure(jz_il_item_val && jz_il_item_val->is_string);
+            shader_input_layout_value_t val = il_val_str_to_enum(jz_il_item_val->string_val);
+            ili->value = val;
+        }
+
     }
+    
+    jzon_value_t* jz_type = jzon_get(&parsed, "type");
+    ensure(jz_type && jz_type->is_string);
+    shader_type_t st = type_str_to_enum(jz_type->string_val);
+    ensure(st);
+    si.type = st;
 
     jzon_value_t* jz_source = jzon_get(&parsed, "source");
     ensure(jz_source && jz_source->is_string);
 
-    int source_load_ok = file_load_str(jz_source->string_val, &si.source, &si.source_size);
+    int source_load_ok = file_load(jz_source->string_val, (void**)&si.source, &si.source_size);
     ensure(source_load_ok);
 
-    renderer_resource_t rr = renderer_load_shader(rs, &si);
-    (void)rr;
+    renderer_resource_handle_t rr = renderer_load_shader(rs, &si);
 
     memf(si.source);
     memf(si.constant_buffer);
     memf(si.input_layout);
     jzon_free(&parsed);
 
-    return HANDLE_INVALID;
+    return rr;
 }
 
 uint32_t shader_data_type_size(shader_data_type_t t)

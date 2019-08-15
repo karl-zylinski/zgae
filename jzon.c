@@ -38,16 +38,16 @@ static bool is_multiline_string_quotes(const char* str)
 
 static uint64_t find_table_pair_insertion_index(jzon_key_value_pair_t* table, int64_t key_hash)
 {
-    if (array_size(table) == 0)
+    if (array_num(table) == 0)
         return 0;
 
-    for (unsigned i = 0; i < array_size(table); ++i)
+    for (unsigned i = 0; i < array_num(table); ++i)
     {
         if (table[i].key_hash > key_hash)
             return i;
     }
 
-    return array_size(table);
+    return array_num(table);
 }
 
 static bool is_whitespace(char c)
@@ -218,7 +218,7 @@ static bool parse_array(const char** input, jzon_value_t* output)
         }
     }
     
-    output->size = array_size(array);
+    output->size = array_num(array);
     output->array_val = (jzon_value_t*)array_copy_data(array);
     return true;
 }
@@ -271,7 +271,7 @@ static bool parse_table(const char** input, jzon_value_t* output, bool root_tabl
         }
     }
 
-    output->size = array_size(table);
+    output->size = array_num(table);
     output->table_val = (jzon_key_value_pair_t*)array_copy_data(table);
     return true;
 }
@@ -430,7 +430,12 @@ jzon_value_t* jzon_get(jzon_value_t* table, const char* key)
         else if (table->table_val[middle].key_hash == key_hash)
             return &table->table_val[middle].val;
         else
+        {
+            if (middle == 0)
+                break;
+
             last = middle - 1;
+        }
 
         middle = (first + last) / 2;
     }

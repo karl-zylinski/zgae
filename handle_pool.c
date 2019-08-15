@@ -36,7 +36,7 @@ handle_t handle_pool_reserve(handle_pool_t* hp, uint8_t type_index)
 {
     check(hp->types[type_index], "Trying to reserve handle with invalid index!");
 
-    for (size_t i = 0; i < array_size(hp->handles_da); ++i)
+    for (size_t i = 0; i < array_num(hp->handles_da); ++i)
     {
         if (!handle_used(hp->handles_da[i]))
         {
@@ -46,7 +46,7 @@ handle_t handle_pool_reserve(handle_pool_t* hp, uint8_t type_index)
         }
     }
 
-    handle_t h = construct_handle(array_size(hp->handles_da), type_index, true);
+    handle_t h = construct_handle(array_num(hp->handles_da), type_index, true);
     array_push(hp->handles_da, h);
     return h;
 }
@@ -62,6 +62,6 @@ bool handle_pool_is_valid(handle_pool_t* hp, handle_t h)
     return    handle_index(h) < HANDLE_MAX_INDEX
            && handle_used(h)
            && hp->types[handle_type(h)]
-           && handle_index(h) < array_size(hp->handles_da)
+           && handle_index(h) < array_num(hp->handles_da)
            && hp->handles_da[handle_index(h)] == h;
 }
