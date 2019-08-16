@@ -7,6 +7,9 @@
 
     * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do... or maybe just have a source_spirv field and ask renderer which field to pull, like with a SHADER_LANGAUGE_TYPE enum in the renderer
     * in parser, error if > 1 shader of a type
+
+
+* add geometry loading (do vertex buffer stuff as in xcb_vulkan.c)
     
 
 - handles:
