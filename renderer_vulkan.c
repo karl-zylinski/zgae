@@ -867,6 +867,7 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     pvpsci.pViewports = NULL;
 
 
+    // Depth-stencil settings
     VkPipelineDepthStencilStateCreateInfo pdssci = {};
     pdssci.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     pdssci.depthTestEnable = VK_TRUE;
@@ -900,6 +901,7 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
         pssci[i].pName = "main";
         pssci[i].module = s->module;
     }
+
 
     // Create actual vk pipeline
     VkGraphicsPipelineCreateInfo pci = {};
