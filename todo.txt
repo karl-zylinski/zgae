@@ -1,5 +1,5 @@
 - shader:
-    * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do
+    * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do... or maybe just have a source_spirv field and ask renderer which field to pull, like with a SHADER_LANGAUGE_TYPE enum in the renderer
     * implement pipeline similar to vk
 
 - handles:

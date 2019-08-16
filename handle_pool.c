@@ -29,6 +29,9 @@ void handle_pool_set_type(handle_pool_t* hp, uint8_t type_index, const char* nam
 
 void handle_pool_destroy(handle_pool_t* hp)
 {
+    for (size_t i = 0; i < array_num(hp->handles_da); ++i)
+        check(!handle_used(hp->handles_da[i]), "Found handles in use while destroying handle pool");
+
     array_destroy(hp->handles_da);
 }
 
@@ -54,7 +57,7 @@ handle_t handle_pool_reserve(handle_pool_t* hp, uint8_t type_index)
 void handle_pool_return(handle_pool_t* hp, handle_t h)
 {
     check(handle_pool_is_valid(hp, h), "Trying to return invalid handle!");
-    hp->handles_da[handle_index(h)] ^= 0xfffffffe;
+    hp->handles_da[handle_index(h)] ^= 0x1; // First bit is used flag, XOR it out.
 }
 
 bool handle_pool_is_valid(handle_pool_t* hp, handle_t h)
