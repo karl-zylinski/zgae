@@ -3,14 +3,20 @@
         * add render_pass
         * fix writes thing (see vkUpdateDescriptorSets)
 
+    * have one constant buffer per swapchain image, i.e. 2 constant buffers per binding
     * make func to populate constant buffers
 
     * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do... or maybe just have a source_spirv field and ask renderer which field to pull, like with a SHADER_LANGAUGE_TYPE enum in the renderer
     * in parser, error if > 1 shader of a type
 
 
-* add geometry loading (do vertex buffer stuff as in xcb_vulkan.c)
-    
+
+
+- add geometry loading (do vertex buffer stuff as in xcb_vulkan.c)
+
+- add draw func that takes pipeline handle and geometry handle (are constant buffs set separately? check old renderer)
+
+- make simple xcb -> key_t mapping, just bash keys and record into an enum!
 
 - handles:
     i = index
