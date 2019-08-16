@@ -9,6 +9,7 @@
 #include "shader.h"
 #include "pipeline.h"
 #include "array.h"
+#include <string.h>
 
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
 
@@ -35,15 +36,16 @@ typedef enum renderer_resource_type_t
 typedef struct shader_t
 {
     shader_type_t type;
+    VkShaderModule module;
     shader_input_layout_item_t* input_layout;
     uint32_t input_layout_num;
-    shader_constant_buffer_item_t* constant_buffer;
-    uint32_t constant_buffer_num;
-    VkShaderModule module;
+    shader_constant_buffer_t constant_buffer;
 } shader_t;
 
 typedef struct pipeline_t
 {
+    VkBuffer* constant_buffers;
+    uint32_t constant_buffers_num;
     VkPipeline vk_handle;
 } pipeline_t;
 
@@ -562,7 +564,7 @@ static void destroy_renderer_resources(VkDevice device, handle_pool_t* hp, rende
                 shader_t* s = &rr->shader;
                 vkDestroyShaderModule(device, s->module, NULL);
                 memf(s->input_layout);
-                memf(s->constant_buffer);
+                memf(s->constant_buffer.items);
             } break;
             
             case RENDERER_RESOURCE_TYPE_PIPELINE: {
@@ -618,8 +620,8 @@ renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shad
     shader_t* shader = &shader_res.shader;
     memcpy_alloc((void**)&shader->input_layout, si->input_layout, sizeof(shader_input_layout_item_t) * si->input_layout_num);
     shader->input_layout_num = si->input_layout_num;
-    memcpy_alloc((void**)&shader->constant_buffer, si->constant_buffer, sizeof(shader_constant_buffer_item_t) * si->constant_buffer_num);
-    shader->constant_buffer_num = si->constant_buffer_num;
+    memcpy_alloc((void**)&shader->constant_buffer.items, si->constant_buffer.items, sizeof(shader_constant_buffer_item_t) * si->constant_buffer.items_num);
+    shader->constant_buffer.items_num = si->constant_buffer.items_num;
     shader->type = si->type;
 
     VkShaderModuleCreateInfo smci = {};
@@ -633,18 +635,292 @@ renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shad
     return add_resource(&rs->resource_handle_pool, &rs->da_resources, &shader_res);
 }
 
+VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
+{
+    switch(t)
+    {
+        case SHADER_DATA_TYPE_MAT4: break;
+        case SHADER_DATA_TYPE_VEC2: return VK_FORMAT_R32G32_SFLOAT;
+        case SHADER_DATA_TYPE_VEC3: return VK_FORMAT_R32G32B32_SFLOAT;
+        case SHADER_DATA_TYPE_VEC4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case SHADER_DATA_TYPE_INVALID: break;
+    }
+
+    error("VkFormat unknown for shader data type %s", stringify(t));
+    return -1;
+}
+
+VkShaderStageFlagBits vk_shader_stage_from_shader_type(shader_type_t t)
+{
+    switch(t)
+    {
+        case SHADER_TYPE_VERTEX: return VK_SHADER_STAGE_VERTEX_BIT;
+        case SHADER_TYPE_FRAGMENT: return VK_SHADER_STAGE_FRAGMENT_BIT;
+        default: break;
+    }
+
+    error("Trying to get VkShaderStageFlagBits from shader_type_t, but type isn't mapped.");
+    return 0;
+}
+
 renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pipeline_intermediate_t* pi)
 {
     renderer_resource_t pipeline_res = {};
-    
+    pipeline_res.type = RENDERER_RESOURCE_TYPE_PIPELINE;
+    pipeline_t* pipeline = &pipeline_res.pipeline;
+    VkResult res;
+
+    // First we get all the data we need from the shader stages
+    shader_input_layout_item_t* input_layout = NULL;
+    uint32_t input_layout_num = 0;
+
     for (size_t i = 0; i < pi->shader_stages_num; ++i)
     {
         renderer_resource_handle_t rrh = pi->shader_stages[i];
         renderer_resource_t* rr = get_resource(rs, rrh);
         shader_t* s = &rr->shader;
-        (void)s;
+        if (s->type == SHADER_TYPE_VERTEX)
+        {
+            check(s->input_layout_num > 0, "Vertex shader missing input layout.");
+            input_layout = s->input_layout;
+            input_layout_num = s->input_layout_num;
+        }
     }
 
-    pipeline_res.type = RENDERER_RESOURCE_TYPE_PIPELINE;
+    check(input_layout_num > 0, "No shader with input layout in pipeline.");
+
+
+    // Create vk descriptors that describe the input to vertex shader and the stride of the vertex data.
+    VkVertexInputAttributeDescription* viad = mema_zero(sizeof(VkVertexInputAttributeDescription) * input_layout_num);
+
+    uint32_t layout_offset = 0;
+    for (uint32_t i = 0; i < input_layout_num; ++i)
+    {
+        viad[i].binding = 0;
+        viad[i].location = i;
+        viad[i].format = vk_format_from_shader_data_type(input_layout[i].type);
+        viad[i].offset = layout_offset;
+        layout_offset += shader_data_type_size(input_layout[i].type);
+    }
+
+    uint32_t stride = layout_offset;
+
+    VkVertexInputBindingDescription vibd = {};
+    vibd.binding = 0;
+    vibd.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    vibd.stride = stride;
+
+    VkPipelineVertexInputStateCreateInfo pvisci = {};
+    pvisci.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    pvisci.vertexBindingDescriptionCount = 1;
+    pvisci.pVertexBindingDescriptions = &vibd;
+    pvisci.vertexAttributeDescriptionCount = input_layout_num;
+    pvisci.pVertexAttributeDescriptions = viad;
+
+    // Create vk uniform buffers for our constant buffers
+    uint32_t num_constant_buffers = 0;
+    uint32_t* used_bindings = NULL;
+
+    for (size_t i = 0; i < pi->shader_stages_num; ++i)
+    {
+        renderer_resource_handle_t rrh = pi->shader_stages[i];
+        renderer_resource_t* rr = get_resource(rs, rrh);
+        shader_t* s = &rr->shader;
+
+        if (s->constant_buffer.items_num == 0)
+            continue;
+        
+        for (uint32_t i = 0; i < array_num(used_bindings); ++i)
+            check(used_bindings[i] != s->constant_buffer.binding, "In pipeline there are two shaders with same constant buffer binding num.");
+
+        array_push(used_bindings, s->constant_buffer.binding);
+        num_constant_buffers += 1;
+    }
+
+    array_destroy(used_bindings);
+    pipeline->constant_buffers = mema_zero(sizeof(VkBuffer) * num_constant_buffers);
+    pipeline->constant_buffers_num = 0;
+    VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero(sizeof(VkDescriptorSetLayoutBinding) * num_constant_buffers);
+
+    for (size_t i = 0; i < pi->shader_stages_num; ++i)
+    {
+        renderer_resource_handle_t rrh = pi->shader_stages[i];
+        renderer_resource_t* rr = get_resource(rs, rrh);
+        shader_t* s = &rr->shader;
+
+        if (s->constant_buffer.items_num == 0)
+            continue;
+
+        uint32_t cb_size = 0;
+
+        for (uint32_t j = 0; j < s->constant_buffer.items_num; ++j)
+            cb_size += shader_data_type_size(s->constant_buffer.items[j].type);
+
+        VkBufferCreateInfo cb_bci = {};
+        cb_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        cb_bci.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        cb_bci.size = cb_size;
+        cb_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        res = vkCreateBuffer(rs->device, &cb_bci, NULL, pipeline->constant_buffers + pipeline->constant_buffers_num);
+        VERIFY_RES();
+
+        constant_buffer_bindings[pipeline->constant_buffers_num].binding = s->constant_buffer.binding;
+        constant_buffer_bindings[pipeline->constant_buffers_num].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        constant_buffer_bindings[pipeline->constant_buffers_num].descriptorCount = 1;
+        constant_buffer_bindings[pipeline->constant_buffers_num].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        ++pipeline->constant_buffers_num;
+    }
+
+    VkDescriptorSetLayoutCreateInfo dslci = {};
+    dslci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    dslci.bindingCount = num_constant_buffers;
+    dslci.pBindings = constant_buffer_bindings;
+
+    VkDescriptorSetLayout dsl;
+    res = vkCreateDescriptorSetLayout(rs->device, &dslci, NULL, &dsl);
+    VERIFY_RES();
+
+    VkPipelineLayoutCreateInfo plci = {};
+    plci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    plci.setLayoutCount = 1;
+    plci.pSetLayouts = &dsl;
+
+    VkPipelineLayout pl;
+    res = vkCreatePipelineLayout(rs->device, &plci, NULL, &pl);
+    VERIFY_RES();
+
+    // TODO: add descriptor sets thingy here, vkUpdateDescriptorSets etc
+
+
+    // Set which topology we want
+    VkPipelineInputAssemblyStateCreateInfo piasci = {};
+    piasci.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    piasci.primitiveRestartEnable = VK_FALSE;
+    piasci.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+
+    // Rasteriser settings
+    VkPipelineRasterizationStateCreateInfo prsci = {};
+    prsci.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    prsci.polygonMode = VK_POLYGON_MODE_FILL;
+    prsci.cullMode = VK_CULL_MODE_BACK_BIT;
+    prsci.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    prsci.depthClampEnable = VK_FALSE;
+    prsci.rasterizerDiscardEnable = VK_FALSE;
+    prsci.depthBiasEnable = VK_FALSE;
+    prsci.depthBiasConstantFactor = 0;
+    prsci.depthBiasClamp = 0;
+    prsci.depthBiasSlopeFactor = 0;
+    prsci.lineWidth = 1.0f;
+
+
+    // Blending settings
+    VkPipelineColorBlendStateCreateInfo pcbsci = {};
+    pcbsci.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    VkPipelineColorBlendAttachmentState pcbas[1];
+    memset(pcbas, 0, sizeof(pcbas));
+    pcbas[0].colorWriteMask = 0xf;
+    pcbas[0].blendEnable = VK_FALSE;
+    pcbas[0].alphaBlendOp = VK_BLEND_OP_ADD;
+    pcbas[0].colorBlendOp = VK_BLEND_OP_ADD;
+    pcbas[0].srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+    pcbas[0].dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+    pcbas[0].srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    pcbas[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    pcbsci.attachmentCount = 1;
+    pcbsci.pAttachments = pcbas;
+    pcbsci.logicOpEnable = VK_FALSE;
+    pcbsci.logicOp = VK_LOGIC_OP_NO_OP;
+    pcbsci.blendConstants[0] = 1.0f;
+    pcbsci.blendConstants[1] = 1.0f;
+    pcbsci.blendConstants[2] = 1.0f;
+    pcbsci.blendConstants[3] = 1.0f;
+
+
+    // Multisampling settings
+    VkPipelineMultisampleStateCreateInfo pmsci = {};
+    pmsci.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    pmsci.rasterizationSamples = NUM_SAMPLES;
+    pmsci.sampleShadingEnable = VK_FALSE;
+    pmsci.alphaToCoverageEnable = VK_FALSE;
+    pmsci.alphaToOneEnable = VK_FALSE;
+    pmsci.minSampleShading = 0.0;
+
+
+    // Dynamic state (like, which things can change with every command)
+    VkDynamicState dynamic_state_enables[VK_DYNAMIC_STATE_RANGE_SIZE];
+    memset(dynamic_state_enables, 0, sizeof(dynamic_state_enables));
+    VkPipelineDynamicStateCreateInfo pdsci = {};
+    pdsci.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    pdsci.pDynamicStates = dynamic_state_enables;
+
+
+    // Viewport settings
+    VkPipelineViewportStateCreateInfo pvpsci = {};
+    pvpsci.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    pvpsci.viewportCount = 1;
+    dynamic_state_enables[pdsci.dynamicStateCount++] = VK_DYNAMIC_STATE_VIEWPORT;
+    pvpsci.scissorCount = 1;
+    dynamic_state_enables[pdsci.dynamicStateCount++] = VK_DYNAMIC_STATE_SCISSOR;
+    pvpsci.pScissors = NULL;
+    pvpsci.pViewports = NULL;
+
+
+    VkPipelineDepthStencilStateCreateInfo pdssci = {};
+    pdssci.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    pdssci.depthTestEnable = VK_TRUE;
+    pdssci.depthWriteEnable = VK_TRUE;
+    pdssci.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    pdssci.depthBoundsTestEnable = VK_FALSE;
+    pdssci.minDepthBounds = 0;
+    pdssci.maxDepthBounds = 0;
+    pdssci.stencilTestEnable = VK_FALSE;
+    pdssci.back.failOp = VK_STENCIL_OP_KEEP;
+    pdssci.back.passOp = VK_STENCIL_OP_KEEP;
+    pdssci.back.compareOp = VK_COMPARE_OP_ALWAYS;
+    pdssci.back.compareMask = 0;
+    pdssci.back.reference = 0;
+    pdssci.back.depthFailOp = VK_STENCIL_OP_KEEP;
+    pdssci.back.writeMask = 0;
+    pdssci.front = pdssci.back;
+
+
+    // Shader stage info
+    VkPipelineShaderStageCreateInfo* pssci = mema_zero(sizeof(VkPipelineShaderStageCreateInfo) * pi->shader_stages_num);
+
+    for (size_t i = 0; i < pi->shader_stages_num; ++i)
+    {
+        renderer_resource_handle_t rrh = pi->shader_stages[i];
+        renderer_resource_t* rr = get_resource(rs, rrh);
+        shader_t* s = &rr->shader;
+
+        pssci[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        pssci[i].stage = vk_shader_stage_from_shader_type(s->type);
+        pssci[i].pName = "main";
+        pssci[i].module = s->module;
+    }
+
+    // Create actual vk pipeline
+    VkGraphicsPipelineCreateInfo pci = {};
+    pci.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pci.layout = pl;
+    pci.pVertexInputState = &pvisci;
+    pci.pInputAssemblyState = &piasci;
+    pci.pRasterizationState = &prsci;
+    pci.pColorBlendState = &pcbsci;
+    pci.pTessellationState = NULL;
+    pci.pMultisampleState = &pmsci;
+    pci.pDynamicState = &pdsci;
+    pci.pViewportState = &pvpsci;
+    pci.pDepthStencilState = &pdssci;
+    pci.pStages = pssci;
+    pci.stageCount = pi->shader_stages_num;
+    pci.renderPass = NULL;//render_pass;
+    pci.subpass = 0;
+
+    res = vkCreateGraphicsPipelines(rs->device, VK_NULL_HANDLE, 1, &pci, NULL, &pipeline->vk_handle);
+    VERIFY_RES();
+
     return add_resource(&rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
 }

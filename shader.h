@@ -51,14 +51,20 @@ typedef struct shader_input_layout_item_t
     shader_input_layout_value_t value;
 } shader_input_layout_item_t;
 
+typedef struct shader_constant_buffer_t
+{
+    shader_constant_buffer_item_t* items;
+    uint32_t items_num;
+    uint32_t binding;
+} shader_constant_buffer_t;
+
 typedef struct shader_intermediate_t
 {
     char* source;
     uint64_t source_size;
     shader_type_t type;
-    shader_constant_buffer_item_t* constant_buffer;
+    shader_constant_buffer_t constant_buffer;
     shader_input_layout_item_t* input_layout;
-    uint32_t constant_buffer_num;
     uint32_t input_layout_num;
 } shader_intermediate_t;
 

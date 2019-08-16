@@ -1,10 +1,13 @@
-constant_buffer = [
-    {
-        name = "mvp"
-        type = "mat4"
-        value = "mat_model_view_projection"
-    }
-]
+constant_buffer = {
+    binding = 0
+    fields = [
+        {
+            name = "mvp"
+            type = "mat4"
+            value = "mat_model_view_projection"
+        }
+    ]
+}
 
 input_layout = [
     {
