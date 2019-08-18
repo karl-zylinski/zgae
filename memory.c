@@ -114,21 +114,23 @@ void memf(void* p)
 
 void memory_check_leaks()
 {
-    for (uint32_t ac_idx = 0; ac_idx < MAX_ALLOC_CALLSTACKS; ++ac_idx)
-    {
-        if (alloc_callstacks[ac_idx].ptr != NULL)
+    #ifdef ENABLE_MEMORY_TRACING
+        for (uint32_t ac_idx = 0; ac_idx < MAX_ALLOC_CALLSTACKS; ++ac_idx)
         {
-            fprintf(stderr, "MEMORY LEAK, backtrace: \n");
-
-            for (uint32_t cidx = 2; cidx < alloc_callstacks[ac_idx].callstack_num; ++cidx)
+            if (alloc_callstacks[ac_idx].ptr != NULL)
             {
-                fprintf(stderr, "%s", alloc_callstacks[ac_idx].callstack[cidx]);
-                fprintf(stderr, "\n");
-            }
+                fprintf(stderr, "MEMORY LEAK, backtrace: \n");
 
-            error("Exiting.");
+                for (uint32_t cidx = 2; cidx < alloc_callstacks[ac_idx].callstack_num; ++cidx)
+                {
+                    fprintf(stderr, "%s", alloc_callstacks[ac_idx].callstack[cidx]);
+                    fprintf(stderr, "\n");
+                }
+
+                error("Exiting.");
+            }
         }
-    }
+    #endif
 }
 
 void memcpy_alloc(void** dest, void* source, size_t s)
