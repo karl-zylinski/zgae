@@ -19,7 +19,7 @@ if not os.path.isdir("build"):
 built_objects = []
 
 extra_flags = [
-    #"-DENABLE_MEMORY_TRACING",
+    "-DENABLE_MEMORY_TRACING",
     "-DENABLE_SLOW_DEBUG_CHECKS"
 ]
 

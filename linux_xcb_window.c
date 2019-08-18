@@ -246,12 +246,14 @@ static bool poll_event(linux_xcb_window_t* w)
 
     switch(evt->response_type & ~0x80)
     {
-        case XCB_KEY_PRESS: {
+        case XCB_KEY_PRESS:
+        {
             xcb_keycode_t code = ((xcb_key_press_event_t*)evt)->detail;
             w->state.callbacks.key_pressed_callback(xcb_key_to_keycode(code));
             return true;
         }
-        case XCB_KEY_RELEASE: {
+        case XCB_KEY_RELEASE:
+        {
             xcb_key_release_event_t* kr_evt = (xcb_key_release_event_t*)evt;
             xcb_keycode_t code = kr_evt->detail;
             
@@ -267,7 +269,8 @@ static bool poll_event(linux_xcb_window_t* w)
             w->state.callbacks.key_released_callback(xcb_key_to_keycode(code));
             return true;
         }
-        case XCB_FOCUS_OUT: {
+        case XCB_FOCUS_OUT:
+        {
             w->state.callbacks.focus_lost_callback();
             return true;
         }

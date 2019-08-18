@@ -145,6 +145,7 @@ int main()
         mat4_t model_matrix = mat4_identity();
         model_matrix.w.x = xpos;
         model_matrix.w.y = ypos;
+        model_matrix.x.x = 1 + 0.5*sin(time_since_start());
         mat4_t proj_view_matrix = mat4_mul(&view_matrix, &proj_matrix);
         mat4_t mvp_matrix = mat4_mul(&model_matrix, &proj_view_matrix);
 
