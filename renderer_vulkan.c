@@ -85,6 +85,8 @@ typedef struct renderer_resource_t
     };
 } renderer_resource_t;
 
+const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+
 typedef struct renderer_state_t
 {
     VkInstance instance;
@@ -97,14 +99,19 @@ typedef struct renderer_state_t
     VkDevice device;
     VkSwapchainKHR swapchain;
     vec2u_t swapchain_size;
+    uint32_t current_frame;
     swapchain_buffer_t* swapchain_buffers;
+    VkFence image_in_flight_fences[MAX_FRAMES_IN_FLIGHT];
+    VkSemaphore image_available_semaphores[MAX_FRAMES_IN_FLIGHT];
+    VkSemaphore render_finished_semaphores[MAX_FRAMES_IN_FLIGHT];
     uint32_t swapchain_buffers_count;
     uint32_t graphics_queue_family_idx;
     VkQueue graphics_queue;
     uint32_t present_queue_family_idx;
     VkQueue present_queue;
     VkCommandPool graphics_cmd_pool;
-    VkCommandBuffer graphics_cmd_buffer;
+    VkCommandBuffer* graphics_cmd_buffers;
+    uint32_t graphics_cmd_buffers_num;
     depth_buffer_t depth_buffer;
     renderer_resource_t* da_resources;
     handle_pool_t* resource_handle_pool;
@@ -629,15 +636,18 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
     VkCommandPoolCreateInfo cpci = {};
     cpci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     cpci.queueFamilyIndex = rs->graphics_queue_family_idx;
+    cpci.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     res = vkCreateCommandPool(device, &cpci, NULL, &rs->graphics_cmd_pool);
     VERIFY_RES();
 
+    rs->graphics_cmd_buffers_num = rs->swapchain_buffers_count;
+    rs->graphics_cmd_buffers = mema_zero(sizeof(VkCommandBuffer) * rs->graphics_cmd_buffers_num);
     VkCommandBufferAllocateInfo cbai = {};
     cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     cbai.commandPool = rs->graphics_cmd_pool;
     cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cbai.commandBufferCount = 1;
-    res = vkAllocateCommandBuffers(device, &cbai, &rs->graphics_cmd_buffer);
+    cbai.commandBufferCount = rs->graphics_cmd_buffers_num;
+    res = vkAllocateCommandBuffers(device, &cbai, rs->graphics_cmd_buffers);
     VERIFY_RES();
 
     info("Creating descriptor pools");
@@ -653,6 +663,25 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
 
     res = vkCreateDescriptorPool(device, &dpci, NULL, &rs->descriptor_pool_uniform_buffer);
     VERIFY_RES();
+
+    info("Creating semaphores and fences for frame syncronisation.");
+
+    VkSemaphoreCreateInfo iasci = {};
+    iasci.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkFenceCreateInfo fci = {};
+    fci.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fci.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        res = vkCreateSemaphore(device, &iasci, NULL, &rs->image_available_semaphores[i]);
+        VERIFY_RES();
+        res = vkCreateSemaphore(device, &iasci, NULL, &rs->render_finished_semaphores[i]);
+        VERIFY_RES();
+        res = vkCreateFence(device, &fci, NULL, &rs->image_in_flight_fences[i]);
+        VERIFY_RES();
+    }
 
     return rs;
 }
@@ -695,7 +724,7 @@ void renderer_destroy(renderer_state_t* rs)
     VkDevice device = rs->device;
     destroy_renderer_resources(rs->device, rs->resource_handle_pool, rs->da_resources, array_num(rs->da_resources));
     array_destroy(rs->da_resources);
-    vkFreeCommandBuffers(device, rs->graphics_cmd_pool, 1, &rs->graphics_cmd_buffer);
+    vkFreeCommandBuffers(device, rs->graphics_cmd_pool, rs->graphics_cmd_buffers_num, rs->graphics_cmd_buffers);
     destroy_depth_buffer(device, &rs->depth_buffer);
     vkDestroyCommandPool(device, rs->graphics_cmd_pool, NULL);
     for (uint32_t i = 0; i < rs->swapchain_buffers_count; i++)
@@ -1149,31 +1178,15 @@ void renderer_update_constant_buffer(renderer_state_t* rs, renderer_resource_han
 
 void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_handle, renderer_resource_handle_t geometry_handle)
 {
-    VkSemaphore image_acquired_semaphore;
-    VkSemaphoreCreateInfo iasci = {};
-    iasci.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    VkResult res = vkCreateSemaphore(rs->device, &iasci, NULL, &image_acquired_semaphore);
-    VERIFY_RES();
-
-    uint32_t current_buffer;
-    res = vkAcquireNextImageKHR(rs->device, rs->swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &current_buffer);
-    check(res >= 0, "Failed acquiring next swapchain image");
-
+    VkResult res;
     VkCommandBufferBeginInfo cbbi = {};
+    
     cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    res = vkBeginCommandBuffer(rs->graphics_cmd_buffer, &cbbi);
+    VkCommandBuffer cmd = rs->graphics_cmd_buffers[rs->current_frame];
+    res = vkBeginCommandBuffer(cmd, &cbbi);
     VERIFY_RES();
 
-    swapchain_buffer_t* scb = &rs->swapchain_buffers[current_buffer];
-    VkRenderPassBeginInfo rpbi = {};
-    rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    rpbi.renderPass = rs->render_pass;
-    rpbi.framebuffer = scb->framebuffer;
-    rpbi.renderArea.extent.width = rs->swapchain_size.x;
-    rpbi.renderArea.extent.height = rs->swapchain_size.y;
-    rpbi.clearValueCount = 2;
-
+    swapchain_buffer_t* scb = &rs->swapchain_buffers[rs->current_frame];
 
     VkClearValue clear_values[2];
     clear_values[0].color.float32[0] = 0.0f;
@@ -1183,20 +1196,26 @@ void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_han
     clear_values[1].depthStencil.depth = 1.0f;
     clear_values[1].depthStencil.stencil = 0;
 
+    VkRenderPassBeginInfo rpbi = {};
+    rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    rpbi.renderPass = rs->render_pass;
+    rpbi.framebuffer = scb->framebuffer;
+    rpbi.renderArea.extent.width = rs->swapchain_size.x;
+    rpbi.renderArea.extent.height = rs->swapchain_size.y;
+    rpbi.clearValueCount = 2;
 
     rpbi.pClearValues = clear_values;
-
-    vkCmdBeginRenderPass(rs->graphics_cmd_buffer, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(cmd, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
 
     pipeline_t* pipeline = &get_resource(rs, pipeline_handle)->pipeline;
-    vkCmdBindPipeline(rs->graphics_cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->vk_handle);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->vk_handle);
 
-    vkCmdBindDescriptorSets(rs->graphics_cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->descriptor_sets_num,
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->descriptor_sets_num,
                             pipeline->descriptor_sets, 0, NULL);
 
     const VkDeviceSize offsets[1] = {0};
     VkBuffer vertex_buffer = get_resource(rs, geometry_handle)->geometry.vertex_buffer;
-    vkCmdBindVertexBuffers(rs->graphics_cmd_buffer, 0, 1, &vertex_buffer, offsets);
+    vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
 
     VkViewport viewport = {};
     viewport.width = rs->swapchain_size.x;
@@ -1205,7 +1224,7 @@ void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_han
     viewport.maxDepth = 1.0f;
     viewport.x = 0;
     viewport.y = 0;
-    vkCmdSetViewport(rs->graphics_cmd_buffer, 0, 1, &viewport);
+    vkCmdSetViewport(cmd, 0, 1, &viewport);
 
 
     VkRect2D scissor = {};
@@ -1213,14 +1232,24 @@ void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_han
     scissor.extent.height = rs->swapchain_size.y;
     scissor.offset.x = 0;
     scissor.offset.y = 0;
-    vkCmdSetScissor(rs->graphics_cmd_buffer, 0, 1, &scissor);
+    vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-    vkCmdDraw(rs->graphics_cmd_buffer, 12 * 3, 1, 0, 0);
+    vkCmdDraw(cmd, 12 * 3, 1, 0, 0);
 
-    vkCmdEndRenderPass(rs->graphics_cmd_buffer);
+    vkCmdEndRenderPass(cmd);
 
-    res = vkEndCommandBuffer(rs->graphics_cmd_buffer);
+    res = vkEndCommandBuffer(cmd);
     VERIFY_RES();
+}
+
+void renderer_present(renderer_state_t* rs)
+{
+    VkResult res;
+    uint32_t cf = rs->current_frame;
+
+    uint32_t image_index;
+    res = vkAcquireNextImageKHR(rs->device, rs->swapchain, UINT64_MAX, rs->image_available_semaphores[cf], VK_NULL_HANDLE, &image_index);
+    check(res >= 0, "Failed acquiring next swapchain image");
 
     VkFenceCreateInfo fci = {};
     VkFence fence;
@@ -1230,27 +1259,33 @@ void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_han
     VkPipelineStageFlags psf = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo si = {}; // can be mupltiple!!
     si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    si.pWaitSemaphores = &rs->image_available_semaphores[cf];
+    si.waitSemaphoreCount = 1;
+    si.pSignalSemaphores = &rs->render_finished_semaphores[cf];
+    si.signalSemaphoreCount = 1;
     si.pWaitDstStageMask = &psf;
     si.commandBufferCount = 1;
-    si.pCommandBuffers = &rs->graphics_cmd_buffer;
+    si.pCommandBuffers = &rs->graphics_cmd_buffers[cf];
 
-    #define FENCE_TIMEOUT 100000000
-
-    res = vkQueueSubmit(rs->graphics_queue, 1, &si, fence);
+    vkResetFences(rs->device, 1, &rs->image_in_flight_fences[cf]);
+    res = vkQueueSubmit(rs->graphics_queue, 1, &si, rs->image_in_flight_fences[cf]);
     VERIFY_RES();
-
-    do {
-        res = vkWaitForFences(rs->device, 1, &fence, VK_TRUE, FENCE_TIMEOUT);
-    } while (res == VK_TIMEOUT);
-    VERIFY_RES();
-
-    vkDestroyFence(rs->device, fence, NULL);
 
     VkPresentInfoKHR pi = {};
     pi.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     pi.swapchainCount = 1;
     pi.pSwapchains = &rs->swapchain;
-    pi.pImageIndices = &current_buffer;
+    pi.pImageIndices = &image_index;
+    pi.waitSemaphoreCount = 1;
+    pi.pWaitSemaphores = &rs->render_finished_semaphores[cf];
 
     res = vkQueuePresentKHR(rs->present_queue, &pi);
+    VERIFY_RES();
+
+    rs->current_frame = (rs->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void renderer_wait_for_new_frame(renderer_state_t* rs)
+{
+    vkWaitForFences(rs->device, 1, &rs->image_in_flight_fences[rs->current_frame], VK_TRUE, UINT64_MAX);
 }

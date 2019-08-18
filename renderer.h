@@ -13,4 +13,6 @@ renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shad
 renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pipeline_intermediate_t* si);
 renderer_resource_handle_t renderer_load_geometry(renderer_state_t* rs, const geometry_vertex_t* vertices, uint32_t vertices_num);
 void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_handle, renderer_resource_handle_t geometry_handle);
+void renderer_present(renderer_state_t* rs);
 void renderer_update_constant_buffer(renderer_state_t* rs, renderer_resource_handle_t pipeline_handle, uint32_t binding, void* data, uint32_t data_size);
+void renderer_wait_for_new_frame(renderer_state_t* rs);

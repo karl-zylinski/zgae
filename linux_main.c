@@ -93,12 +93,14 @@ int main()
     mat4_t mvp_matrix = mat4_mul(&proj_view_matrix, &model_matrix);
 
     renderer_update_constant_buffer(renderer_state, ph, 0, &mvp_matrix, sizeof(mvp_matrix));
-    renderer_draw(renderer_state, ph, gh);
 
     info("Entering main loop");
     while (linux_xcb_window_is_open(win))
     {
+        renderer_wait_for_new_frame(renderer_state);
         linux_xcb_window_process_all_events(win);
+        renderer_draw(renderer_state, ph, gh);
+        renderer_present(renderer_state);
     }
 
     info("Main loop exited, shutting down");
