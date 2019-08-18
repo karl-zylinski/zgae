@@ -68,6 +68,14 @@ static geometry_vertex_t cube[] = {
     {XYZ1(-1, -1, -1), XYZ1(0.f, 1.f, 1.f)},
 };
 
+float get_cur_time_seconds()
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    uint32_t secs = t.tv_sec;
+    return (float)secs + ((float)t.tv_nsec)/1000000000.0f;
+}
+
 int main()
 {
     info("Starting ZGAE");
@@ -84,25 +92,34 @@ int main()
     
     mat4_t proj_matrix = mat4_create_projection_matrix((float)640, (float)480);
 
-
     info("Starting timers");
-    struct timespec t;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t);
-    float start_time = ((float)t.tv_nsec)/1000000000.0f;
+    
+    float start_time = get_cur_time_seconds();
     float last_frame_time = start_time;
+    float framerate_timer = start_time;
+    uint32_t frames = 0;
 
     info("Entering main loop");
 
     while (linux_xcb_window_is_open(win))
     {
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t);
-        float cur_time = ((float)t.tv_nsec)/1000000000.0f;
+        float cur_time = get_cur_time_seconds();
         float dt = cur_time - last_frame_time;
         float since_start = cur_time - start_time;
         last_frame_time = cur_time;
         set_frame_timers(dt, since_start);
+        frames = frames + 1;
+        info("%f", time_since_start());
 
-        vec3_t camera_pos = {2.5 + cos(time_since_start() * 100), -4 + sin(time_since_start() * 100), 1.5};
+        if (time_since_start() > framerate_timer + 5)
+        {
+            float d = time_since_start() - framerate_timer;
+            float fps = ((float)frames)/d;
+            info("%f fps", fps);
+            framerate_timer = time_since_start();
+        }
+
+        vec3_t camera_pos = {2.5 + cos(time_since_start()), -4 + sin(time_since_start()), 1.5};
         quat_t camera_rot = {-0.3333, 0, 0.3333, 0.6667};
         mat4_t camera_matrix = mat4_from_rotation_and_translation(&camera_rot, &camera_pos);
 
