@@ -1,5 +1,7 @@
 #pragma once
 
+void memory_init();
+
 void* mema(size_t s);
 void* mema_zero(size_t s);
 void* memra(void* p, size_t s);

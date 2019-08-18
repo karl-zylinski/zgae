@@ -68,7 +68,7 @@ static geometry_vertex_t cube[] = {
     {XYZ1(-1, -1, -1), XYZ1(0.f, 1.f, 1.f)},
 };
 
-float get_cur_time_seconds()
+static float get_cur_time_seconds()
 {
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
@@ -79,6 +79,8 @@ float get_cur_time_seconds()
 int main()
 {
     info("Starting ZGAE");
+    memory_init();
+    
     linux_xcb_window_t* win = linux_xcb_window_create("ZGAE", 640, 480);
 
     window_callbacks_t wc = {};
@@ -96,7 +98,7 @@ int main()
     
     float start_time = get_cur_time_seconds();
     float last_frame_time = start_time;
-    float framerate_timer = start_time;
+    float framerate_timer = 0;
     uint32_t frames = 0;
 
     info("Entering main loop");
@@ -109,14 +111,14 @@ int main()
         last_frame_time = cur_time;
         set_frame_timers(dt, since_start);
         frames = frames + 1;
-        info("%f", time_since_start());
 
-        if (time_since_start() > framerate_timer + 5)
+        if (time_since_start() > (framerate_timer + 2))
         {
             float d = time_since_start() - framerate_timer;
             float fps = ((float)frames)/d;
             info("%f fps", fps);
             framerate_timer = time_since_start();
+            frames = 0;
         }
 
         vec3_t camera_pos = {2.5 + cos(time_since_start()), -4 + sin(time_since_start()), 1.5};

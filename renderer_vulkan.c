@@ -262,7 +262,6 @@ static void create_swapchain(
         VERIFY_RES();
     }
 
-
     VkImageView framebuffer_attachments[2];
     framebuffer_attachments[1] = depth_buffer->view;
 
@@ -493,8 +492,9 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
     VkPhysicalDevice* available_gpus = mema(sizeof(VkPhysicalDevice) * num_available_gpus);
     res = vkEnumeratePhysicalDevices(instance, &num_available_gpus, available_gpus);
     VERIFY_RES();
-    VkPhysicalDevice gpu = choose_gpu(available_gpus, num_available_gpus);
-    rs->gpu = gpu;
+    rs->gpu = choose_gpu(available_gpus, num_available_gpus);
+    VkPhysicalDevice gpu = rs->gpu;
+    memf(available_gpus);
     vkGetPhysicalDeviceProperties(rs->gpu, &rs->gpu_properties);
     vkGetPhysicalDeviceMemoryProperties(rs->gpu, &rs->gpu_memory_properties);
     info("Selected GPU %s", rs->gpu_properties.deviceName);
@@ -546,6 +546,7 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
     }
     check(rs->present_queue_family_idx != (uint32_t)-1, "Couldn't find present queue family");
     memf(queues_with_present_support);
+    memf(queue_family_props);
 
     info("Creating Vulkan logical device");
     VkDeviceQueueCreateInfo dqci = {};
@@ -702,15 +703,14 @@ static void destroy_renderer_resources(VkDevice device, handle_pool_t* hp, rende
             
             case RENDERER_RESOURCE_TYPE_PIPELINE: {
                 pipeline_t* p = &rr->pipeline;
-                for (uint32_t i = 0; i < p->constant_buffers_num; ++i)
+                for (uint32_t frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
                 {
-                    for (uint32_t j = 0; j < MAX_FRAMES_IN_FLIGHT; ++j)
+                    memf(p->constant_buffer_descriptor_sets[frame_idx]);
+                    for (uint32_t cb_idx = 0; cb_idx < p->constant_buffers_num; ++cb_idx)
                     {
-                        vkFreeMemory(device, p->constant_buffers[i].memory[j], NULL);
-                        vkDestroyBuffer(device, p->constant_buffers[i].vk_handle[j], NULL);
+                        vkFreeMemory(device, p->constant_buffers[cb_idx].memory[frame_idx], NULL);
+                        vkDestroyBuffer(device, p->constant_buffers[cb_idx].vk_handle[frame_idx], NULL);
                     }
-
-                    memf(p->constant_buffer_descriptor_sets[i]);
                 }
 
                 vkDestroyPipelineLayout(device, p->layout, NULL);
@@ -758,6 +758,7 @@ void renderer_destroy(renderer_state_t* rs)
     vkDestroyDescriptorPool(d, rs->descriptor_pool_uniform_buffer, NULL);
 
     vkFreeCommandBuffers(d, rs->graphics_cmd_pool, rs->graphics_cmd_buffers_num, rs->graphics_cmd_buffers);
+    memf(rs->graphics_cmd_buffers);
     destroy_depth_buffer(d, &rs->depth_buffer);
     vkDestroyCommandPool(d, rs->graphics_cmd_pool, NULL);
 
@@ -768,6 +769,7 @@ void renderer_destroy(renderer_state_t* rs)
         vkDestroyFramebuffer(d, rs->swapchain_buffers[i].framebuffer, NULL);
     }
 
+    memf(rs->swapchain_buffers);
     vkDestroySwapchainKHR(d, rs->swapchain, NULL);
     vkDestroyDevice(d, NULL);
     fptr_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (fptr_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(rs->instance, "vkDestroyDebugUtilsMessengerEXT");
@@ -980,6 +982,8 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     res = vkCreateDescriptorSetLayout(rs->device, &dslci, NULL, &pipeline->constant_buffer_descriptor_set_layout);
     VERIFY_RES();
 
+    memf(constant_buffer_bindings);
+
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         pipeline->constant_buffer_descriptor_sets[i] = mema_zero(sizeof(VkDescriptorSet) * num_constant_buffers);
@@ -1132,6 +1136,9 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
 
     res = vkCreateGraphicsPipelines(rs->device, VK_NULL_HANDLE, 1, &pci, NULL, &pipeline->vk_handle);
     VERIFY_RES();
+
+    memf(viad);
+    memf(pssci);
 
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
 }

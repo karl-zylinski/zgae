@@ -7,7 +7,7 @@
 
 typedef struct handle_pool_t {
     handle_t* arr_handles;
-    const char* types[128];
+    char* types[HANDLE_MAX_TYPE_INDEX];
 } handle_pool_t;
 
 static handle_t construct_handle(size_t handle_index, uint8_t type_index, bool used)
@@ -26,20 +26,23 @@ handle_pool_t* handle_pool_create()
     return mema_zero(sizeof(handle_pool_t));
 }
 
-void handle_pool_set_type(handle_pool_t* hp, uint8_t type_index, const char* name)
-{
-    check(type_index < HANDLE_MAX_TYPE_INDEX, "Trying to set type for type index");
-    check(!hp->types[type_index], "Handle type already in use!");
-    hp->types[type_index] = str_copy(name);
-}
-
 void handle_pool_destroy(handle_pool_t* hp)
 {
     for (size_t i = 0; i < array_num(hp->arr_handles); ++i)
         check(!handle_used(hp->arr_handles[i]), "Found handles in use while destroying handle pool");
 
+    for (uint32_t i = 0; i < HANDLE_MAX_TYPE_INDEX; ++i)
+        memf(hp->types[i]);
+
     array_destroy(hp->arr_handles);
     memf(hp);
+}
+
+void handle_pool_set_type(handle_pool_t* hp, uint8_t type_index, const char* name)
+{
+    check(type_index < HANDLE_MAX_TYPE_INDEX, "Trying to set type for type index");
+    check(!hp->types[type_index], "Handle type already in use!");
+    hp->types[type_index] = str_copy(name);
 }
 
 handle_t handle_pool_reserve(handle_pool_t* hp, uint8_t type_index)

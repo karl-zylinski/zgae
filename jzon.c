@@ -220,6 +220,7 @@ static bool parse_array(const char** input, jzon_value_t* output)
     
     output->size = array_num(array);
     output->array_val = (jzon_value_t*)array_copy_data(array);
+    array_destroy(array);
     return true;
 }
 
@@ -273,6 +274,7 @@ static bool parse_table(const char** input, jzon_value_t* output, bool root_tabl
 
     output->size = array_num(table);
     output->table_val = (jzon_key_value_pair_t*)array_copy_data(table);
+    array_destroy(table);
     return true;
 }
 

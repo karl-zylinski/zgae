@@ -59,8 +59,9 @@ linux_xcb_window_t* linux_xcb_window_create(const char* title, uint32_t width, u
 void linux_xcb_window_destroy(linux_xcb_window_t* w)
 {
     info("Destroying XCB window");
-    (void)w;
-    error("Please implement!!");
+    xcb_destroy_window(w->connection, w->handle);
+    xcb_disconnect(w->connection);
+    memf(w);
 }
 
 void linux_xcb_window_update_callbacks(linux_xcb_window_t* w, const window_callbacks_t* wc)

@@ -33,7 +33,9 @@ renderer_resource_handle_t pipeline_load(renderer_state_t* rs, const char* filen
         ensure(pi.shader_stages[i] != HANDLE_INVALID);
     }
 
+    jzon_free(&parsed);
     renderer_resource_handle_t p = renderer_load_pipeline(rs, &pi);
     ensure(p != HANDLE_INVALID);
+    memf(pi.shader_stages);
     return p;
 }
