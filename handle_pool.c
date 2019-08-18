@@ -29,35 +29,35 @@ void handle_pool_set_type(handle_pool_t* hp, uint8_t type_index, const char* nam
 
 void handle_pool_destroy(handle_pool_t* hp)
 {
-    for (size_t i = 0; i < array_num(hp->handles_da); ++i)
-        check(!handle_used(hp->handles_da[i]), "Found handles in use while destroying handle pool");
+    for (size_t i = 0; i < array_num(hp->arr_handles); ++i)
+        check(!handle_used(hp->arr_handles[i]), "Found handles in use while destroying handle pool");
 
-    array_destroy(hp->handles_da);
+    array_destroy(hp->arr_handles);
 }
 
 handle_t handle_pool_reserve(handle_pool_t* hp, uint8_t type_index)
 {
     check(hp->types[type_index], "Trying to reserve handle with invalid index!");
 
-    for (size_t i = 0; i < array_num(hp->handles_da); ++i)
+    for (size_t i = 0; i < array_num(hp->arr_handles); ++i)
     {
-        if (!handle_used(hp->handles_da[i]))
+        if (!handle_used(hp->arr_handles[i]))
         {
             handle_t h = construct_handle(i, type_index, true);
-            hp->handles_da[i] = h;
+            hp->arr_handles[i] = h;
             return h;
         }
     }
 
-    handle_t h = construct_handle(array_num(hp->handles_da), type_index, true);
-    array_push(hp->handles_da, h);
+    handle_t h = construct_handle(array_num(hp->arr_handles), type_index, true);
+    array_add(hp->arr_handles, h);
     return h;
 }
 
 void handle_pool_return(handle_pool_t* hp, handle_t h)
 {
     check(handle_pool_is_valid(hp, h), "Trying to return invalid handle!");
-    hp->handles_da[handle_index(h)] ^= 0x1; // First bit is used flag, XOR it out.
+    hp->arr_handles[handle_index(h)] ^= 0x1; // First bit is used flag, XOR it out.
 }
 
 bool handle_pool_is_valid(handle_pool_t* hp, handle_t h)
@@ -65,6 +65,6 @@ bool handle_pool_is_valid(handle_pool_t* hp, handle_t h)
     return    handle_index(h) < HANDLE_MAX_INDEX
            && handle_used(h)
            && hp->types[handle_type(h)]
-           && handle_index(h) < array_num(hp->handles_da)
-           && hp->handles_da[handle_index(h)] == h;
+           && handle_index(h) < array_num(hp->arr_handles)
+           && hp->arr_handles[handle_index(h)] == h;
 }

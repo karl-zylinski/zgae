@@ -1,8 +1,7 @@
 #pragma once
 
-
 typedef struct handle_pool_t {
-    handle_t* handles_da;
+    handle_t* arr_handles;
     const char* types[128];
 } handle_pool_t;
 

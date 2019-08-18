@@ -208,7 +208,7 @@ static bool parse_array(const char** input, jzon_value_t* output)
         if (!parse_value(input, &value))
             return false;
 
-        array_push(array, value);
+        array_add(array, value);
         skip_whitespace(input);
 
         if (current(input) == ']')

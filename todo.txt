@@ -4,7 +4,7 @@
         * fix writes thing (see vkUpdateDescriptorSets)
 
     * have one constant buffer per swapchain image, i.e. 2 constant buffers per binding
-    * make func to populate constant buffers
+    * make func to populate constant buffers (per field name maybe???? or maybe by idx)
 
     * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do... or maybe just have a source_spirv field and ask renderer which field to pull, like with a SHADER_LANGAUGE_TYPE enum in the renderer
     * in parser, error if > 1 shader of a type
@@ -34,5 +34,4 @@
     like doing nice type checks --- but maybe we should have an enum list for type, so we can do quick check against it?
     so when we init a handle pool we tell it which type it is, and then add subtypessss
 
-- rename: array -> dynamic_array and use da_push prefix and da_variable on actual arrays.
-- dyanmic_array: make array_internal_ensure_min_size func use array_internal_grow with capacity parameter
+- array: make array_internal_ensure_min_size func use array_internal_grow with capacity parameter

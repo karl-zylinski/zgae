@@ -602,7 +602,7 @@ static renderer_resource_handle_t add_resource(handle_pool_t* hp, renderer_resou
 {
     renderer_resource_handle_t h = handle_pool_reserve(hp, res->type);
     res->handle = h;
-    array_set(*da_resources, handle_index(h), *res);
+    array_fill_and_set(*da_resources, handle_index(h), *res);
     return h;
 }
 
@@ -719,7 +719,7 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
 
     // Create vk uniform buffers for our constant buffers
     uint32_t num_constant_buffers = 0;
-    uint32_t* used_bindings = NULL;
+    uint32_t* arr_used_bindings;
 
     for (size_t i = 0; i < pi->shader_stages_num; ++i)
     {
@@ -730,14 +730,14 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
         if (s->constant_buffer.items_num == 0)
             continue;
         
-        for (uint32_t i = 0; i < array_num(used_bindings); ++i)
-            check(used_bindings[i] != s->constant_buffer.binding, "In pipeline there are two shaders with same constant buffer binding num.");
+        for (uint32_t i = 0; i < array_num(arr_used_bindings); ++i)
+            check(arr_used_bindings[i] != s->constant_buffer.binding, "In pipeline there are two shaders with same constant buffer binding num.");
 
-        array_push(used_bindings, s->constant_buffer.binding);
+        array_add(arr_used_bindings, s->constant_buffer.binding);
         num_constant_buffers += 1;
     }
 
-    array_destroy(used_bindings);
+    array_destroy(arr_used_bindings);
     pipeline->constant_buffers = mema_zero(sizeof(VkBuffer) * num_constant_buffers);
     pipeline->constant_buffers_num = 0;
     VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero(sizeof(VkDescriptorSetLayoutBinding) * num_constant_buffers);
