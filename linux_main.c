@@ -6,7 +6,6 @@
 #include "memory.h"
 #include "jzon.h"
 #include "pipeline.h"
-#include "array.h"
 
 void key_pressed(key_t k)
 {
@@ -20,8 +19,6 @@ void key_released(key_t k)
 
 int main()
 {
-
-
     info("Starting ZGAE");
     linux_xcb_window_t* win = linux_xcb_window_create("ZGAE", 800, 600);
 

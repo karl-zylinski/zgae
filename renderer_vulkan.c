@@ -719,7 +719,7 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
 
     // Create vk uniform buffers for our constant buffers
     uint32_t num_constant_buffers = 0;
-    uint32_t* arr_used_bindings;
+    uint32_t* arr_used_bindings = NULL;
 
     for (size_t i = 0; i < pi->shader_stages_num; ++i)
     {
