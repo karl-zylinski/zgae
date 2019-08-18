@@ -1,8 +1,8 @@
 #pragma once
 
-fwd_enum(key_t);
-typedef void(*window_key_pressed_callback_t)(key_t k);
-typedef void(*window_key_released_callback_t)(key_t k);
+fwd_enum(keycode_t);
+typedef void(*window_key_pressed_callback_t)(keycode_t k);
+typedef void(*window_key_released_callback_t)(keycode_t k);
 
 typedef enum window_type_t {
     WINDOW_TYPE_XCB
