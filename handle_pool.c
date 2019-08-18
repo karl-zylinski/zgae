@@ -3,6 +3,12 @@
 #include "array.h"
 #include "str.h"
 #include <string.h>
+#include "memory.h"
+
+typedef struct handle_pool_t {
+    handle_t* arr_handles;
+    const char* types[128];
+} handle_pool_t;
 
 static handle_t construct_handle(size_t handle_index, uint8_t type_index, bool used)
 {
@@ -15,9 +21,9 @@ static handle_t construct_handle(size_t handle_index, uint8_t type_index, bool u
     return h;
 }
 
-void handle_pool_init(handle_pool_t* hp)
+handle_pool_t* handle_pool_create()
 {
-    memset(hp, 0, sizeof(handle_pool_t));
+    return mema_zero(sizeof(handle_pool_t));
 }
 
 void handle_pool_set_type(handle_pool_t* hp, uint8_t type_index, const char* name)
@@ -33,11 +39,12 @@ void handle_pool_destroy(handle_pool_t* hp)
         check(!handle_used(hp->arr_handles[i]), "Found handles in use while destroying handle pool");
 
     array_destroy(hp->arr_handles);
+    memf(hp);
 }
 
 handle_t handle_pool_reserve(handle_pool_t* hp, uint8_t type_index)
 {
-    check(hp->types[type_index], "Trying to reserve handle with invalid index!");
+    check(hp->types[type_index], "Trying to reserve handle with invalid type index!");
 
     for (size_t i = 0; i < array_num(hp->arr_handles); ++i)
     {

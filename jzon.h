@@ -24,11 +24,11 @@ typedef struct jzon_value_t
     };
 } jzon_value_t;
 
-struct jzon_key_value_pair_t {
+typedef struct jzon_key_value_pair_t {
     char* key;
     long long key_hash;
     jzon_value_t val;
-};
+} jzon_key_value_pair_t;
 
 bool jzon_parse(const char* input, jzon_value_t* output);
 void jzon_free(jzon_value_t* val);

@@ -97,7 +97,8 @@ typedef enum key_t
     KEY_F7,
     KEY_F8,
     KEY_F9,
-    KEY_F10,
+    KEY_F10
+    ,
     KEY_F11,
     KEY_F12,
     KEY_F13,

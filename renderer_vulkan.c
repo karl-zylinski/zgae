@@ -3,13 +3,16 @@
 #include "linux_xcb_window.h"
 #include "memory.h"
 #include "debug.h"
-#include "math.h"
+#include "math_types.h"
 #include "window.h"
 #include "handle_pool.h"
 #include "shader.h"
 #include "pipeline.h"
 #include "array.h"
 #include <string.h>
+#include "geometry_types.h"
+
+#define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
 
@@ -17,10 +20,12 @@ typedef struct swapchain_buffer_t
 {
     VkImage image;
     VkImageView view;
+    VkFramebuffer framebuffer;
 } swapchain_buffer_t;
 
 typedef struct depth_buffer_t
 {
+    VkFormat format;
     VkImage image;
     VkImageView view;
     VkDeviceMemory memory;
@@ -30,7 +35,8 @@ typedef enum renderer_resource_type_t
 {
     RENDERER_RESOURCE_TYPE_INVALID,
     RENDERER_RESOURCE_TYPE_SHADER,
-    RENDERER_RESOURCE_TYPE_PIPELINE
+    RENDERER_RESOURCE_TYPE_PIPELINE,
+    RENDERER_RESOURCE_TYPE_GEOMETRY
 } renderer_resource_type_t;
 
 typedef struct shader_t
@@ -42,12 +48,30 @@ typedef struct shader_t
     shader_constant_buffer_t constant_buffer;
 } shader_t;
 
+typedef struct pipeline_constant_buffer_t
+{
+    VkBuffer vk_handle;
+    VkDeviceMemory memory;
+    uint32_t binding;
+    uint32_t size;
+    uint32_t allocated_size;
+} pipeline_constant_buffer_t;
+
 typedef struct pipeline_t
 {
-    VkBuffer* constant_buffers;
+    pipeline_constant_buffer_t* constant_buffers;
+    VkDescriptorSet* descriptor_sets;
+    uint32_t descriptor_sets_num;
     uint32_t constant_buffers_num;
     VkPipeline vk_handle;
+    VkPipelineLayout layout;
 } pipeline_t;
+
+typedef struct geometry_t
+{
+    VkBuffer vertex_buffer;
+    VkDeviceMemory vertex_buffer_memory;
+} geometry_t;
 
 typedef struct renderer_resource_t
 {
@@ -57,6 +81,7 @@ typedef struct renderer_resource_t
     {
         shader_t shader;
         pipeline_t pipeline;
+        geometry_t geometry;
     };
 } renderer_resource_t;
 
@@ -82,7 +107,9 @@ typedef struct renderer_state_t
     VkCommandBuffer graphics_cmd_buffer;
     depth_buffer_t depth_buffer;
     renderer_resource_t* da_resources;
-    handle_pool_t resource_handle_pool;
+    handle_pool_t* resource_handle_pool;
+    VkDescriptorPool descriptor_pool_uniform_buffer;
+    VkRenderPass render_pass;
 } renderer_state_t;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
@@ -148,13 +175,11 @@ static VkCompositeAlphaFlagBitsKHR choose_swapchain_composite_alpha(VkCompositeA
 }
 
 static void create_swapchain(
-    VkSwapchainKHR* out_current_swapchain, swapchain_buffer_t** out_sc_bufs, uint32_t* out_sc_bufs_count, vec2u_t* out_swapchain_size,
-    VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface, VkFormat format,
+    VkSwapchainKHR* out_current_swapchain, swapchain_buffer_t** out_sc_bufs, uint32_t* out_sc_bufs_count, vec2u_t size, const depth_buffer_t* depth_buffer,
+    VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface, VkFormat format, VkRenderPass render_pass,
     uint32_t graphics_queue_family_idx, uint32_t present_queue_family_idx)
 {
-    vec2u_t size = get_surface_size(gpu, surface);
     info("Creating swapchain with size %dx%d", size.x, size.y);
-    *out_swapchain_size = size;
     VkResult res;
 
     VkSurfaceCapabilitiesKHR surface_capabilities;
@@ -231,6 +256,26 @@ static void create_swapchain(
         VERIFY_RES();
     }
 
+
+    VkImageView framebuffer_attachments[2];
+    framebuffer_attachments[1] = depth_buffer->view;
+
+    VkFramebufferCreateInfo fbci = {};
+    fbci.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    fbci.renderPass = render_pass;
+    fbci.attachmentCount = 2;
+    fbci.pAttachments = framebuffer_attachments;
+    fbci.width = size.x;
+    fbci.height = size.y;
+    fbci.layers = 1;
+
+    for (uint32_t i = 0; i < swapchain_image_count; ++i)
+    {
+        framebuffer_attachments[0] = bufs[i].view;
+        res = vkCreateFramebuffer(device, &fbci, NULL, &bufs[i].framebuffer);
+        VERIFY_RES();
+    }
+
     memf(swapchain_images);
     *out_sc_bufs = bufs;
     *out_sc_bufs_count = swapchain_image_count;
@@ -265,11 +310,11 @@ static void create_depth_buffer(depth_buffer_t* out_depth_buffer, VkDevice devic
     destroy_depth_buffer(device, out_depth_buffer);
     info("Creating depth buffer");
     depth_buffer_t depth_buffer = {};
+    depth_buffer.format = VK_FORMAT_D16_UNORM;
 
     VkImageCreateInfo depth_ici = {};
-    const VkFormat depth_format = VK_FORMAT_D16_UNORM;
     VkFormatProperties depth_format_props;
-    vkGetPhysicalDeviceFormatProperties(gpu, depth_format, &depth_format_props);
+    vkGetPhysicalDeviceFormatProperties(gpu, depth_buffer.format, &depth_format_props);
     if (depth_format_props.linearTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
         depth_ici.tiling = VK_IMAGE_TILING_LINEAR;
     else if (depth_format_props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
@@ -279,14 +324,12 @@ static void create_depth_buffer(depth_buffer_t* out_depth_buffer, VkDevice devic
 
     depth_ici.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     depth_ici.imageType = VK_IMAGE_TYPE_2D;
-    depth_ici.format = depth_format;
+    depth_ici.format = depth_buffer.format;
     depth_ici.extent.width = size.x;
     depth_ici.extent.height = size.y;
     depth_ici.extent.depth = 1;
     depth_ici.mipLevels = 1;
     depth_ici.arrayLayers = 1;
-    
-    #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 
     depth_ici.samples = NUM_SAMPLES;
     depth_ici.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -314,7 +357,7 @@ static void create_depth_buffer(depth_buffer_t* out_depth_buffer, VkDevice devic
     VkImageViewCreateInfo depth_ivci = {};
     depth_ivci.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     depth_ivci.image = VK_NULL_HANDLE;
-    depth_ivci.format = depth_format;
+    depth_ivci.format = depth_buffer.format;
     depth_ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     depth_ivci.subresourceRange.levelCount = 1;
     depth_ivci.subresourceRange.layerCount = 1;
@@ -386,10 +429,11 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
 
     check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
     renderer_state_t* rs = mema_zero(sizeof(renderer_state_t));
-    handle_pool_init(&rs->resource_handle_pool);
+    rs->resource_handle_pool = handle_pool_create();
     #define stringify(m) (#m)
-    handle_pool_set_type(&rs->resource_handle_pool, RENDERER_RESOURCE_TYPE_SHADER, stringify(RENDERER_RESOURCE_TYPE_SHADER));
-    handle_pool_set_type(&rs->resource_handle_pool, RENDERER_RESOURCE_TYPE_PIPELINE, stringify(RENDERER_RESOURCE_TYPE_PIPELINE));
+    handle_pool_set_type(rs->resource_handle_pool, RENDERER_RESOURCE_TYPE_SHADER, stringify(RENDERER_RESOURCE_TYPE_SHADER));
+    handle_pool_set_type(rs->resource_handle_pool, RENDERER_RESOURCE_TYPE_PIPELINE, stringify(RENDERER_RESOURCE_TYPE_PIPELINE));
+    handle_pool_set_type(rs->resource_handle_pool, RENDERER_RESOURCE_TYPE_GEOMETRY, stringify(RENDERER_RESOURCE_TYPE_GEOMETRY));
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -520,10 +564,59 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
     rs->surface_format = choose_surface_format(gpu, surface);
     info("Chose surface VkFormat: %d", rs->surface_format);
 
+    rs->swapchain_size = get_surface_size(gpu, surface);
+
+    create_depth_buffer(&rs->depth_buffer, device, gpu, &rs->gpu_memory_properties, rs->swapchain_size);
+
+    info("Creating render pass");
+    VkAttachmentDescription attachments[2];
+    memzero(attachments, sizeof(VkAttachmentDescription) * 2);
+    attachments[0].format = rs->surface_format;
+    attachments[0].samples = NUM_SAMPLES;
+    attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    attachments[1].format = rs->depth_buffer.format;
+    attachments[1].samples = NUM_SAMPLES;
+    attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference color_reference = {};
+    color_reference.attachment = 0;
+    color_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depth_reference = {};
+    depth_reference.attachment = 1;
+    depth_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass = {};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_reference;
+    subpass.pDepthStencilAttachment = &depth_reference;
+
+    VkRenderPassCreateInfo rpci = {};
+    rpci.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    rpci.attachmentCount = 2;
+    rpci.pAttachments = attachments;
+    rpci.subpassCount = 1;
+    rpci.pSubpasses = &subpass;
+
+    res = vkCreateRenderPass(rs->device, &rpci, NULL, &rs->render_pass);
+    VERIFY_RES();
+
     create_swapchain(
-        &rs->swapchain, &rs->swapchain_buffers, &rs->swapchain_buffers_count, &rs->swapchain_size,
-        gpu, device, surface,
-        rs->surface_format, rs->graphics_queue_family_idx, rs->present_queue_family_idx);
+        &rs->swapchain, &rs->swapchain_buffers, &rs->swapchain_buffers_count, rs->swapchain_size, &rs->depth_buffer,
+        gpu, device, surface, rs->surface_format, rs->render_pass,
+        rs->graphics_queue_family_idx, rs->present_queue_family_idx);
 
     info("Creating graphics and present queues");
     vkGetDeviceQueue(device, rs->graphics_queue_family_idx, 0, &rs->graphics_queue);
@@ -547,7 +640,19 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
     res = vkAllocateCommandBuffers(device, &cbai, &rs->graphics_cmd_buffer);
     VERIFY_RES();
 
-    create_depth_buffer(&rs->depth_buffer, device, gpu, &rs->gpu_memory_properties, rs->swapchain_size);
+    info("Creating descriptor pools");
+    VkDescriptorPoolSize dps[1];
+    dps[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    dps[0].descriptorCount = 1;
+
+    VkDescriptorPoolCreateInfo dpci = {};
+    dpci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    dpci.maxSets = 1;
+    dpci.poolSizeCount = 1;
+    dpci.pPoolSizes = dps;
+
+    res = vkCreateDescriptorPool(device, &dpci, NULL, &rs->descriptor_pool_uniform_buffer);
+    VERIFY_RES();
 
     return rs;
 }
@@ -570,6 +675,12 @@ static void destroy_renderer_resources(VkDevice device, handle_pool_t* hp, rende
             case RENDERER_RESOURCE_TYPE_PIPELINE: {
             } break;
 
+            case RENDERER_RESOURCE_TYPE_GEOMETRY: {
+                    geometry_t* g = &rr->geometry;
+                    vkDestroyBuffer(device, g->vertex_buffer, NULL);
+                    vkFreeMemory(device, g->vertex_buffer_memory, NULL);
+            } break;
+
             case RENDERER_RESOURCE_TYPE_INVALID:
                 error("Invalid resource in renderer resource list"); break;
         }
@@ -582,7 +693,7 @@ void renderer_destroy(renderer_state_t* rs)
 {
     info("Destroying Vulkan renderer");
     VkDevice device = rs->device;
-    destroy_renderer_resources(rs->device, &rs->resource_handle_pool, rs->da_resources, array_num(rs->da_resources));
+    destroy_renderer_resources(rs->device, rs->resource_handle_pool, rs->da_resources, array_num(rs->da_resources));
     array_destroy(rs->da_resources);
     vkFreeCommandBuffers(device, rs->graphics_cmd_pool, 1, &rs->graphics_cmd_buffer);
     destroy_depth_buffer(device, &rs->depth_buffer);
@@ -594,7 +705,7 @@ void renderer_destroy(renderer_state_t* rs)
     fptr_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (fptr_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(rs->instance, "vkDestroyDebugUtilsMessengerEXT");
     vkDestroyDebugUtilsMessengerEXT(rs->instance, rs->debug_messenger, NULL);
     vkDestroyInstance(rs->instance, NULL);
-    handle_pool_destroy(&rs->resource_handle_pool);
+    handle_pool_destroy(rs->resource_handle_pool);
     memf(rs);
 }
 
@@ -632,7 +743,7 @@ renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shad
     VkResult res = vkCreateShaderModule(rs->device, &smci, NULL, &shader->module);
     VERIFY_RES();
 
-    return add_resource(&rs->resource_handle_pool, &rs->da_resources, &shader_res);
+    return add_resource(rs->resource_handle_pool, &rs->da_resources, &shader_res);
 }
 
 VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
@@ -717,59 +828,77 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     pvisci.vertexAttributeDescriptionCount = input_layout_num;
     pvisci.pVertexAttributeDescriptions = viad;
 
-    // Create vk uniform buffers for our constant buffers
     uint32_t num_constant_buffers = 0;
     uint32_t* arr_used_bindings = NULL;
-
-    for (size_t i = 0; i < pi->shader_stages_num; ++i)
+    for (size_t shdr_idx = 0; shdr_idx < pi->shader_stages_num; ++shdr_idx)
     {
-        renderer_resource_handle_t rrh = pi->shader_stages[i];
+        renderer_resource_handle_t rrh = pi->shader_stages[shdr_idx];
+        renderer_resource_t* rr = get_resource(rs, rrh);
+        shader_t* s = &rr->shader;
+
+        if (s->constant_buffer.items_num == 0)
+            continue;
+
+        for (uint32_t j = 0; j < array_num(arr_used_bindings); ++j)
+            check(arr_used_bindings[j] != s->constant_buffer.binding, "In pipeline there are two shaders with same constant buffer binding num.");
+        
+        array_add(arr_used_bindings, s->constant_buffer.binding);
+        ++num_constant_buffers;
+    }
+    array_destroy(arr_used_bindings);
+
+    // Create vk uniform buffers for our constant buffers
+    pipeline->constant_buffers = mema(sizeof(pipeline_constant_buffer_t) * num_constant_buffers);
+    pipeline->constant_buffers_num = num_constant_buffers;
+    VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero(sizeof(VkDescriptorSetLayoutBinding) * num_constant_buffers);
+    uint32_t cur_cb_idx = 0;
+
+    for (size_t shdr_idx = 0; shdr_idx < pi->shader_stages_num; ++shdr_idx)
+    {
+        renderer_resource_handle_t rrh = pi->shader_stages[shdr_idx];
         renderer_resource_t* rr = get_resource(rs, rrh);
         shader_t* s = &rr->shader;
 
         if (s->constant_buffer.items_num == 0)
             continue;
         
-        for (uint32_t i = 0; i < array_num(arr_used_bindings); ++i)
-            check(arr_used_bindings[i] != s->constant_buffer.binding, "In pipeline there are two shaders with same constant buffer binding num.");
-
-        array_add(arr_used_bindings, s->constant_buffer.binding);
-        num_constant_buffers += 1;
-    }
-
-    array_destroy(arr_used_bindings);
-    pipeline->constant_buffers = mema_zero(sizeof(VkBuffer) * num_constant_buffers);
-    pipeline->constant_buffers_num = 0;
-    VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero(sizeof(VkDescriptorSetLayoutBinding) * num_constant_buffers);
-
-    for (size_t i = 0; i < pi->shader_stages_num; ++i)
-    {
-        renderer_resource_handle_t rrh = pi->shader_stages[i];
-        renderer_resource_t* rr = get_resource(rs, rrh);
-        shader_t* s = &rr->shader;
-
-        if (s->constant_buffer.items_num == 0)
-            continue;
-
-        uint32_t cb_size = 0;
+        pipeline_constant_buffer_t* cb = pipeline->constant_buffers + cur_cb_idx;
+        cb->binding = s->constant_buffer.binding;
 
         for (uint32_t j = 0; j < s->constant_buffer.items_num; ++j)
-            cb_size += shader_data_type_size(s->constant_buffer.items[j].type);
+            cb->size += shader_data_type_size(s->constant_buffer.items[j].type);
 
         VkBufferCreateInfo cb_bci = {};
         cb_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         cb_bci.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-        cb_bci.size = cb_size;
+        cb_bci.size = cb->size;
         cb_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        res = vkCreateBuffer(rs->device, &cb_bci, NULL, pipeline->constant_buffers + pipeline->constant_buffers_num);
+        res = vkCreateBuffer(rs->device, &cb_bci, NULL, &cb->vk_handle);
         VERIFY_RES();
 
-        constant_buffer_bindings[pipeline->constant_buffers_num].binding = s->constant_buffer.binding;
-        constant_buffer_bindings[pipeline->constant_buffers_num].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        constant_buffer_bindings[pipeline->constant_buffers_num].descriptorCount = 1;
-        constant_buffer_bindings[pipeline->constant_buffers_num].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-        ++pipeline->constant_buffers_num;
+        VkMemoryRequirements uniform_buffer_mem_reqs;
+        vkGetBufferMemoryRequirements(rs->device, cb->vk_handle, &uniform_buffer_mem_reqs);
+
+        VkMemoryAllocateInfo uniform_buffer_mai = {};
+        uniform_buffer_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        uniform_buffer_mai.allocationSize = uniform_buffer_mem_reqs.size;
+        cb->allocated_size = uniform_buffer_mem_reqs.size;
+
+        uniform_buffer_mai.memoryTypeIndex = memory_type_from_properties(uniform_buffer_mem_reqs.memoryTypeBits, &rs->gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        check(uniform_buffer_mai.memoryTypeIndex != (uint32_t)-1, "Failed finding memory type for uniform buffer");
+
+        res = vkAllocateMemory(rs->device, &uniform_buffer_mai, NULL, &cb->memory);
+        VERIFY_RES();
+        res = vkBindBufferMemory(rs->device, cb->vk_handle, cb->memory, 0);
+        VERIFY_RES();
+
+        constant_buffer_bindings[cur_cb_idx].binding = cb->binding;
+        constant_buffer_bindings[cur_cb_idx].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        constant_buffer_bindings[cur_cb_idx].descriptorCount = 1;
+        constant_buffer_bindings[cur_cb_idx].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        ++cur_cb_idx;
     }
 
     VkDescriptorSetLayoutCreateInfo dslci = {};
@@ -781,13 +910,23 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     res = vkCreateDescriptorSetLayout(rs->device, &dslci, NULL, &dsl);
     VERIFY_RES();
 
+    pipeline->descriptor_sets = mema_zero(sizeof(VkDescriptorSet) * num_constant_buffers);
+    pipeline->descriptor_sets_num = num_constant_buffers;
+    VkDescriptorSetAllocateInfo dsai = {};
+    dsai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    dsai.pNext = NULL;
+    dsai.descriptorPool = rs->descriptor_pool_uniform_buffer;
+    dsai.descriptorSetCount = num_constant_buffers;
+    dsai.pSetLayouts = &dsl;
+    res = vkAllocateDescriptorSets(rs->device, &dsai, pipeline->descriptor_sets);
+    VERIFY_RES();
+
     VkPipelineLayoutCreateInfo plci = {};
     plci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     plci.setLayoutCount = 1;
     plci.pSetLayouts = &dsl;
 
-    VkPipelineLayout pl;
-    res = vkCreatePipelineLayout(rs->device, &plci, NULL, &pl);
+    res = vkCreatePipelineLayout(rs->device, &plci, NULL, &pipeline->layout);
     VERIFY_RES();
 
     // TODO: add descriptor sets thingy here, vkUpdateDescriptorSets etc
@@ -906,7 +1045,7 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     // Create actual vk pipeline
     VkGraphicsPipelineCreateInfo pci = {};
     pci.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pci.layout = pl;
+    pci.layout = pipeline->layout;
     pci.pVertexInputState = &pvisci;
     pci.pInputAssemblyState = &piasci;
     pci.pRasterizationState = &prsci;
@@ -918,11 +1057,200 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     pci.pDepthStencilState = &pdssci;
     pci.pStages = pssci;
     pci.stageCount = pi->shader_stages_num;
-    pci.renderPass = NULL;//render_pass;
+    pci.renderPass = rs->render_pass;
     pci.subpass = 0;
 
     res = vkCreateGraphicsPipelines(rs->device, VK_NULL_HANDLE, 1, &pci, NULL, &pipeline->vk_handle);
     VERIFY_RES();
 
-    return add_resource(&rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
+    return add_resource(rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
+}
+
+renderer_resource_handle_t renderer_load_geometry(renderer_state_t* rs, const geometry_vertex_t* vertices, uint32_t vertices_num)
+{
+    renderer_resource_t geometry_res = {};
+    geometry_res.type = RENDERER_RESOURCE_TYPE_GEOMETRY;
+    geometry_t* g = &geometry_res.geometry;
+    VkResult res;
+
+    VkBufferCreateInfo vertex_bci = {};
+    vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    vertex_bci.size = sizeof(geometry_vertex_t) * vertices_num;
+    vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    res = vkCreateBuffer(rs->device, &vertex_bci, NULL, &g->vertex_buffer);
+    VERIFY_RES();
+
+    VkMemoryRequirements vertex_buffer_mr;
+    vkGetBufferMemoryRequirements(rs->device, g->vertex_buffer, &vertex_buffer_mr);
+    VkMemoryAllocateInfo vertex_buffer_mai = {};
+    vertex_buffer_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    vertex_buffer_mai.allocationSize = vertex_buffer_mr.size;
+    vertex_buffer_mai.memoryTypeIndex = memory_type_from_properties(vertex_buffer_mr.memoryTypeBits, &rs->gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    check(vertex_buffer_mai.memoryTypeIndex != (uint32_t)-1, "Couldn't find memory of correct type.");
+
+    res = vkAllocateMemory(rs->device, &vertex_buffer_mai, NULL, &g->vertex_buffer_memory);
+    VERIFY_RES();
+
+    uint8_t* vertex_buffer_memory_data;
+    res = vkMapMemory(rs->device, g->vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
+    VERIFY_RES();
+
+    memcpy(vertex_buffer_memory_data, vertices, sizeof(geometry_vertex_t) * vertices_num);
+
+    vkUnmapMemory(rs->device, g->vertex_buffer_memory);
+
+    res = vkBindBufferMemory(rs->device, g->vertex_buffer, g->vertex_buffer_memory, 0);
+    VERIFY_RES();
+
+    return add_resource(rs->resource_handle_pool, &rs->da_resources, &geometry_res);
+}
+
+void renderer_update_constant_buffer(renderer_state_t* rs, renderer_resource_handle_t pipeline_handle, uint32_t binding, void* data, uint32_t data_size)
+{
+    pipeline_t* pipeline = &get_resource(rs, pipeline_handle)->pipeline;
+    VkResult res;
+
+    pipeline_constant_buffer_t* cb = NULL;
+    uint32_t cb_idx = -1;
+
+    for (uint32_t i = 0; i < pipeline->constant_buffers_num; ++i)
+    {
+        if (pipeline->constant_buffers[i].binding == binding)
+        {
+            cb = pipeline->constant_buffers + i;
+            cb_idx = i;
+            break;
+        }
+    }
+
+    check(cb, "No constant buffer with binding %d in supplied pipeline", binding);
+
+    uint8_t* mapped_uniform_data;
+    res = vkMapMemory(rs->device, cb->memory, 0, cb->allocated_size, 0, (void**)&mapped_uniform_data);
+    VERIFY_RES();
+    memcpy(mapped_uniform_data, data, data_size);
+    vkUnmapMemory(rs->device, cb->memory);
+
+    VkDescriptorBufferInfo dbi = {};
+    dbi.buffer = cb->vk_handle;
+    dbi.range = cb->size;
+
+    VkWriteDescriptorSet write = {};
+    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write.dstSet = pipeline->descriptor_sets[cb_idx];
+    write.descriptorCount = 1;
+    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    write.pBufferInfo = &dbi;
+
+    vkUpdateDescriptorSets(rs->device, 1, &write, 0, NULL);
+}
+
+void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_handle, renderer_resource_handle_t geometry_handle)
+{
+    VkSemaphore image_acquired_semaphore;
+    VkSemaphoreCreateInfo iasci = {};
+    iasci.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkResult res = vkCreateSemaphore(rs->device, &iasci, NULL, &image_acquired_semaphore);
+    VERIFY_RES();
+
+    uint32_t current_buffer;
+    res = vkAcquireNextImageKHR(rs->device, rs->swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &current_buffer);
+    check(res >= 0, "Failed acquiring next swapchain image");
+
+    VkCommandBufferBeginInfo cbbi = {};
+    cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    res = vkBeginCommandBuffer(rs->graphics_cmd_buffer, &cbbi);
+    VERIFY_RES();
+
+    swapchain_buffer_t* scb = &rs->swapchain_buffers[current_buffer];
+    VkRenderPassBeginInfo rpbi = {};
+    rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    rpbi.renderPass = rs->render_pass;
+    rpbi.framebuffer = scb->framebuffer;
+    rpbi.renderArea.extent.width = rs->swapchain_size.x;
+    rpbi.renderArea.extent.height = rs->swapchain_size.y;
+    rpbi.clearValueCount = 2;
+
+
+    VkClearValue clear_values[2];
+    clear_values[0].color.float32[0] = 0.0f;
+    clear_values[0].color.float32[1] = 0.0f;
+    clear_values[0].color.float32[2] = 0.0f;
+    clear_values[0].color.float32[3] = 1.0f;
+    clear_values[1].depthStencil.depth = 1.0f;
+    clear_values[1].depthStencil.stencil = 0;
+
+
+    rpbi.pClearValues = clear_values;
+
+    vkCmdBeginRenderPass(rs->graphics_cmd_buffer, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
+
+    pipeline_t* pipeline = &get_resource(rs, pipeline_handle)->pipeline;
+    vkCmdBindPipeline(rs->graphics_cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->vk_handle);
+
+    vkCmdBindDescriptorSets(rs->graphics_cmd_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->descriptor_sets_num,
+                            pipeline->descriptor_sets, 0, NULL);
+
+    const VkDeviceSize offsets[1] = {0};
+    VkBuffer vertex_buffer = get_resource(rs, geometry_handle)->geometry.vertex_buffer;
+    vkCmdBindVertexBuffers(rs->graphics_cmd_buffer, 0, 1, &vertex_buffer, offsets);
+
+    VkViewport viewport = {};
+    viewport.width = rs->swapchain_size.x;
+    viewport.height = rs->swapchain_size.y;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    viewport.x = 0;
+    viewport.y = 0;
+    vkCmdSetViewport(rs->graphics_cmd_buffer, 0, 1, &viewport);
+
+
+    VkRect2D scissor = {};
+    scissor.extent.width = rs->swapchain_size.x;
+    scissor.extent.height = rs->swapchain_size.y;
+    scissor.offset.x = 0;
+    scissor.offset.y = 0;
+    vkCmdSetScissor(rs->graphics_cmd_buffer, 0, 1, &scissor);
+
+    vkCmdDraw(rs->graphics_cmd_buffer, 12 * 3, 1, 0, 0);
+
+    vkCmdEndRenderPass(rs->graphics_cmd_buffer);
+
+    res = vkEndCommandBuffer(rs->graphics_cmd_buffer);
+    VERIFY_RES();
+
+    VkFenceCreateInfo fci = {};
+    VkFence fence;
+    fci.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    vkCreateFence(rs->device, &fci, NULL, &fence);
+
+    VkPipelineStageFlags psf = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkSubmitInfo si = {}; // can be mupltiple!!
+    si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    si.pWaitDstStageMask = &psf;
+    si.commandBufferCount = 1;
+    si.pCommandBuffers = &rs->graphics_cmd_buffer;
+
+    #define FENCE_TIMEOUT 100000000
+
+    res = vkQueueSubmit(rs->graphics_queue, 1, &si, fence);
+    VERIFY_RES();
+
+    do {
+        res = vkWaitForFences(rs->device, 1, &fence, VK_TRUE, FENCE_TIMEOUT);
+    } while (res == VK_TIMEOUT);
+    VERIFY_RES();
+
+    vkDestroyFence(rs->device, fence, NULL);
+
+    VkPresentInfoKHR pi = {};
+    pi.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    pi.swapchainCount = 1;
+    pi.pSwapchains = &rs->swapchain;
+    pi.pImageIndices = &current_buffer;
+
+    res = vkQueuePresentKHR(rs->present_queue, &pi);
 }

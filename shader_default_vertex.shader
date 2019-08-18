@@ -12,7 +12,7 @@ constant_buffer = {
 input_layout = [
     {
         name = "position"
-        type = "vec3"
+        type = "vec4"
         value = "vertex_position"
     }
     {

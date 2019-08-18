@@ -1,11 +1,8 @@
 #pragma once
 
-typedef struct handle_pool_t {
-    handle_t* arr_handles;
-    const char* types[128];
-} handle_pool_t;
+fwd_struct(handle_pool_t);
 
-void handle_pool_init(handle_pool_t* hp);
+handle_pool_t* handle_pool_create();
 
 // requires type_index < 128
 void handle_pool_set_type(handle_pool_t* hp, uint8_t type_index, const char* name);
