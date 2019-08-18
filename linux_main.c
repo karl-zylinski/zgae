@@ -87,6 +87,7 @@ int main()
     window_callbacks_t wc = {};
     wc.key_pressed_callback = &keyboard_key_pressed;
     wc.key_released_callback = &keyboard_key_released;
+    wc.focus_lost_callback = &keyboard_reset;
     linux_xcb_window_update_callbacks(win, &wc);
 
     renderer_state_t* renderer_state = renderer_create(WINDOW_TYPE_XCB, win);
@@ -103,6 +104,9 @@ int main()
     uint32_t frames = 0;
 
     info("Entering main loop");
+
+    float xpos = 0;
+    float ypos = 0;
 
     while (linux_xcb_window_is_open(win))
     {
@@ -123,15 +127,26 @@ int main()
             frames = 0;
         }
 
-        vec3_t camera_pos = {2.5 + cos(time_since_start()), -4 + sin(time_since_start()), 1.5};
-        quat_t camera_rot = {-0.3333, 0, 0.3333, 0.6667};
+        if (key_is_held(KC_A))
+            xpos -= time_dt();
+        if (key_is_held(KC_D))
+            xpos += time_dt();
+        if (key_is_held(KC_W))
+            ypos += time_dt();
+        if (key_is_held(KC_S))
+            ypos -= time_dt();
+
+        vec3_t camera_pos = {0, -4, 0};//{2.5, -4, 1.5};
+        quat_t camera_rot = quat_identity(); //{-0.3333, 0, 0.3333, 0.6667};
         mat4_t camera_matrix = mat4_from_rotation_and_translation(&camera_rot, &camera_pos);
 
         mat4_t view_matrix = mat4_inverse(&camera_matrix);
 
         mat4_t model_matrix = mat4_identity();
+        model_matrix.w.x = xpos;
+        model_matrix.w.y = ypos;
         mat4_t proj_view_matrix = mat4_mul(&view_matrix, &proj_matrix);
-        mat4_t mvp_matrix = mat4_mul(&proj_view_matrix, &model_matrix);
+        mat4_t mvp_matrix = mat4_mul(&model_matrix, &proj_view_matrix);
 
         renderer_wait_for_new_frame(renderer_state);
         renderer_update_constant_buffer(renderer_state, ph, 0, &mvp_matrix, sizeof(mvp_matrix));

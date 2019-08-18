@@ -3,6 +3,7 @@
 fwd_enum(keycode_t);
 typedef void(*window_key_pressed_callback_t)(keycode_t k);
 typedef void(*window_key_released_callback_t)(keycode_t k);
+typedef void(*window_focus_lost_callback_t)();
 
 typedef enum window_type_t {
     WINDOW_TYPE_XCB
@@ -15,6 +16,7 @@ typedef enum window_open_state_t {
 typedef struct window_callbacks_t {
     window_key_pressed_callback_t key_pressed_callback;
     window_key_released_callback_t key_released_callback;
+    window_focus_lost_callback_t focus_lost_callback;
 } window_callbacks_t;
 
 typedef struct window_state_t {

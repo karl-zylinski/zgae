@@ -144,3 +144,9 @@ mat4_t mat4_inverse(const mat4_t* m)
     result.w.w = (a20 * b03 - a21 * b01 + a22 * b00) * det;
     return result;
 }
+
+quat_t quat_identity()
+{
+    quat_t q = {0, 0, 0, 1};
+    return q;
+}

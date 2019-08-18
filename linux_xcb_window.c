@@ -28,7 +28,11 @@ linux_xcb_window_t* linux_xcb_window_create(const char* title, uint32_t width, u
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
     uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-    uint32_t values[] = {screen->black_pixel,  XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE};
+    uint32_t values[] = { screen->black_pixel, 
+        XCB_EVENT_MASK_EXPOSURE
+        | XCB_EVENT_MASK_KEY_PRESS
+        | XCB_EVENT_MASK_KEY_RELEASE
+        | XCB_EVENT_MASK_FOCUS_CHANGE };
     xcb_create_window(
         w->connection,
         XCB_COPY_FROM_PARENT,
@@ -246,26 +250,34 @@ static bool poll_event(linux_xcb_window_t* w)
             xcb_keycode_t code = ((xcb_key_press_event_t*)evt)->detail;
             w->state.callbacks.key_pressed_callback(xcb_key_to_keycode(code));
             return true;
-        } break;
+        }
         case XCB_KEY_RELEASE: {
-            xcb_keycode_t code = ((xcb_key_release_event_t*)evt)->detail;
+            xcb_key_release_event_t* kr_evt = (xcb_key_release_event_t*)evt;
+            xcb_keycode_t code = kr_evt->detail;
             
-            if (w->evt_queue.next && ((w->evt_queue.next->response_type & ~0x80) == XCB_KEY_PRESS))
+            if (w->evt_queue.next
+                && ((w->evt_queue.next->response_type & ~0x80) == XCB_KEY_PRESS)
+                && ((xcb_key_press_event_t*)w->evt_queue.next)->time == kr_evt->time
+                && ((xcb_key_press_event_t*)w->evt_queue.next)->detail == code)
             {
                 update_event_queue(&w->evt_queue, w->connection);
-                return false;
+                return true;
             }
 
             w->state.callbacks.key_released_callback(xcb_key_to_keycode(code));
             return true;
-        } break;
+        }
+        case XCB_FOCUS_OUT: {
+            w->state.callbacks.focus_lost_callback();
+            return true;
+        }
         case XCB_CLIENT_MESSAGE:
         {
             info("XCB window closed");
             if((*(xcb_client_message_event_t*)evt).data.data32[0] == (*window_deleted_reply).atom)
                 w->state.open_state = WINDOW_OPEN_STATE_CLOSED;
             return true;
-        } break;
+        }
         default: return true;
     }
 }
