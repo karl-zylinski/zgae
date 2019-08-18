@@ -11,6 +11,7 @@
 #include "time.h"
 #include <time.h>
 #include <math.h>
+#include "keyboard.h"
 
 void key_pressed(keycode_t k)
 {
@@ -80,12 +81,12 @@ int main()
 {
     info("Starting ZGAE");
     memory_init();
-    
+    keyboard_init();
     linux_xcb_window_t* win = linux_xcb_window_create("ZGAE", 640, 480);
 
     window_callbacks_t wc = {};
-    wc.key_pressed_callback = &key_pressed;
-    wc.key_released_callback = &key_released;
+    wc.key_pressed_callback = &keyboard_key_pressed;
+    wc.key_released_callback = &keyboard_key_released;
     linux_xcb_window_update_callbacks(win, &wc);
 
     renderer_state_t* renderer_state = renderer_create(WINDOW_TYPE_XCB, win);
@@ -116,7 +117,8 @@ int main()
         {
             float d = time_since_start() - framerate_timer;
             float fps = ((float)frames)/d;
-            info("%f fps", fps);
+            (void)fps;
+            //info("%f fps", fps);
             framerate_timer = time_since_start();
             frames = 0;
         }
@@ -136,6 +138,7 @@ int main()
         linux_xcb_window_process_all_events(win);
         renderer_draw(renderer_state, ph, gh);
         renderer_present(renderer_state);
+        keyboard_end_of_frame();
     }
 
     info("Main loop exited, shutting down");

@@ -18,10 +18,17 @@ if not os.path.isdir("build"):
 
 built_objects = []
 
+extra_flags = [
+    #"-DENABLE_MEMORY_TRACING",
+    "-DENABLE_SLOW_DEBUG_CHECKS"
+]
+
 for in_filename in to_compile:
     object_filename = in_filename[0:-2] + ".o"
     out_filename = "build/" + object_filename
-    compile_error = os.system("clang -c -std=gnu11 -Wall -Wextra -Werror %s -o %s -g -include global_include.h -DENABLE_SLOW_DEBUG_CHECKS -DVK_USE_PLATFORM_XCB_KHR -DENABLE_MEMORY_TRACING -Wno-unused-function" % (in_filename, out_filename))
+
+    extra_flags_str = " ".join(extra_flags)
+    compile_error = os.system("clang -c -std=gnu11 -Wall -Wextra -Werror %s -o %s -g -include global_include.h -DVK_USE_PLATFORM_XCB_KHR %s -Wno-unused-function" % (in_filename, out_filename, extra_flags_str))
 
     if compile_error != 0:
         exit("\nbuild.py exited: compilation error")

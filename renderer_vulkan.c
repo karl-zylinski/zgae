@@ -764,7 +764,6 @@ void renderer_destroy(renderer_state_t* rs)
 
     for (uint32_t i = 0; i < rs->swapchain_buffers_count; i++)
     {
-        //vkDestroyImage(d, rs->swapchain_buffers[i].image, NULL);
         vkDestroyImageView(d, rs->swapchain_buffers[i].view, NULL);
         vkDestroyFramebuffer(d, rs->swapchain_buffers[i].framebuffer, NULL);
     }
