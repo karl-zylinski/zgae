@@ -5,7 +5,7 @@
 #include <execinfo.h>
 #include <stdio.h>
 
-void get_backtrace(uint32_t steps, char*** callstack, uint32_t* num)
+static void get_backtrace(uint32_t steps, char*** callstack, uint32_t* num)
 {
     if (steps > 32)
         steps = 32;
@@ -22,7 +22,6 @@ typedef struct allocation_callstack_t
     void* ptr;
 } allocation_callstack_t;
 
-
 static const uint32_t MAX_ALLOC_CALLSTACKS = 8096;
 static allocation_callstack_t alloc_callstacks[MAX_ALLOC_CALLSTACKS];
 
@@ -31,7 +30,7 @@ void memory_init()
     memzero(alloc_callstacks, sizeof(allocation_callstack_t) * MAX_ALLOC_CALLSTACKS);
 }
 
-void add_allocation_callstack(void* ptr)
+static void add_allocation_callstack(void* ptr)
 {
     for (uint32_t i = 0; i < MAX_ALLOC_CALLSTACKS; ++i)
     {
@@ -47,7 +46,7 @@ void add_allocation_callstack(void* ptr)
     error("Out of memory debug allocation callstacks!");
 }
 
-void remove_allocation_callstack(void* ptr)
+static void remove_allocation_callstack(void* ptr)
 {
     for (uint32_t i = 0; i < MAX_ALLOC_CALLSTACKS; ++i)
     {

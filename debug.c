@@ -5,7 +5,7 @@
 #include <execinfo.h>
 #include <time.h>
 
-void print_current_time()
+static void print_current_time()
 {
     time_t rawtime; time (&rawtime);
     struct tm* lt = localtime(&rawtime);

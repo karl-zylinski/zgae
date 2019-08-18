@@ -286,7 +286,7 @@ static void create_swapchain(
     *out_sc_bufs_count = swapchain_image_count;
 }
 
-uint32_t memory_type_from_properties(uint32_t req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
+static uint32_t memory_type_from_properties(uint32_t req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
 {
     for (uint32_t i = 0; i < memory_properties->memoryTypeCount; ++i)
     {
@@ -299,7 +299,7 @@ uint32_t memory_type_from_properties(uint32_t req_memory_type, const VkPhysicalD
     return -1;
 }
 
-void destroy_depth_buffer(VkDevice device, const depth_buffer_t* depth_buffer)
+static void destroy_depth_buffer(VkDevice device, const depth_buffer_t* depth_buffer)
 {
     if (!depth_buffer->view && !depth_buffer->image && !depth_buffer->memory)
         return;
@@ -815,7 +815,7 @@ renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shad
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &shader_res);
 }
 
-VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
+static VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
 {
     switch(t)
     {
@@ -830,7 +830,7 @@ VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
     return -1;
 }
 
-VkShaderStageFlagBits vk_shader_stage_from_shader_type(shader_type_t t)
+static VkShaderStageFlagBits vk_shader_stage_from_shader_type(shader_type_t t)
 {
     switch(t)
     {

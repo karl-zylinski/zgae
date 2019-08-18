@@ -13,16 +13,6 @@
 #include <math.h>
 #include "keyboard.h"
 
-void key_pressed(keycode_t k)
-{
-    info("pressed: %d", (uint32_t)k);
-}
-
-void key_released(keycode_t k)
-{
-    info("pressed: %d", (uint32_t)k);
-}
-
 #define XYZ1(_x_, _y_, _z_) {(_x_), (_y_), (_z_), 1.f}
 static geometry_vertex_t cube[] = {
     // red face

@@ -6,6 +6,10 @@
 
 - swapchain recreate (check both xcb event and also returncode for from vkAcquireNextImageKHR and vkQueuePresentKHR)
 
+- split renderer into renderer and renderer_backend, with renderer_backend being impleneted as renderer_backend_vulkan
+
+- add library shader compiler or invoke commandline shader compiler (so we can use glsl)
+
 - handles:
     i = index
     t = type --- unique identifier per-pool (have a handle_types_t enum with stuff like HANDLE_TYPE_RENDERER_RESOURCE or HANDLE_TYPE_SCRIPT_RESOURCE (should we then skip the typedeffed renderer_resource_handle_t ?????? or maybe its nice syntactic sugar))
