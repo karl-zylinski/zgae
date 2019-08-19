@@ -1,5 +1,5 @@
 #include "linux_xcb_window.h"
-#include "window.h"
+#include "window_types.h"
 #include "renderer.h"
 #include "keycode_types.h"
 #include "debug.h"

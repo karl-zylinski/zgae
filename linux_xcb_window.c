@@ -3,7 +3,7 @@
 #include <string.h>
 #include "debug.h"
 #include "keycode_types.h"
-#include "window.h"
+#include "window_types.h"
 #include "memory.h"
 #include <stdlib.h>
 
