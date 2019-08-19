@@ -23,3 +23,4 @@ static const handle_t HANDLE_INVALID = -1;
 #define fwd_struct(t) typedef struct t t
 #define fwd_enum(e) typedef enum e e
 #define fwd_handle(h) typedef handle_t h
+#define stringify(m) (#m)

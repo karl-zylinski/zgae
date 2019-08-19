@@ -1,0 +1,10 @@
+#pragma once
+
+typedef enum renderer_resource_type_t
+{
+    RENDERER_RESOURCE_TYPE_INVALID,
+    RENDERER_RESOURCE_TYPE_SHADER,
+    RENDERER_RESOURCE_TYPE_PIPELINE,
+    RENDERER_RESOURCE_TYPE_GEOMETRY,
+    RENDERER_RESOURCE_TYPE_NUM
+} renderer_resource_type_t;

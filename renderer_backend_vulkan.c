@@ -5,12 +5,12 @@
 #include "debug.h"
 #include "math_types.h"
 #include "window_types.h"
-#include "handle_pool.h"
 #include "shader.h"
 #include "pipeline.h"
 #include "array.h"
 #include <string.h>
 #include "geometry_types.h"
+#include "renderer_resource_types.h"
 
 #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
@@ -31,14 +31,6 @@ typedef struct depth_buffer_t
     VkImageView view;
     VkDeviceMemory memory;
 } depth_buffer_t;
-
-typedef enum renderer_resource_type_t
-{
-    RENDERER_RESOURCE_TYPE_INVALID,
-    RENDERER_RESOURCE_TYPE_SHADER,
-    RENDERER_RESOURCE_TYPE_PIPELINE,
-    RENDERER_RESOURCE_TYPE_GEOMETRY
-} renderer_resource_type_t;
 
 typedef struct shader_t
 {
@@ -74,18 +66,6 @@ typedef struct geometry_t
     VkDeviceMemory vertex_buffer_memory;
 } geometry_t;
 
-typedef struct renderer_resource_t
-{
-    renderer_resource_handle_t handle;
-    renderer_resource_type_t type;
-    union
-    {
-        shader_t shader;
-        pipeline_t pipeline;
-        geometry_t geometry;
-    };
-} renderer_resource_t;
-
 typedef struct renderer_backend_state_t
 {
     VkInstance instance;
@@ -112,8 +92,6 @@ typedef struct renderer_backend_state_t
     VkCommandBuffer* graphics_cmd_buffers;
     uint32_t graphics_cmd_buffers_num;
     depth_buffer_t depth_buffer;
-    renderer_resource_t* da_resources;
-    handle_pool_t* resource_handle_pool;
     VkDescriptorPool descriptor_pool_uniform_buffer;
     VkRenderPass render_pass;
 } renderer_backend_state_t;
@@ -534,11 +512,6 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
 
     check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
     renderer_backend_state_t* rbs = mema_zero(sizeof(renderer_backend_state_t));
-    rbs->resource_handle_pool = handle_pool_create();
-    #define stringify(m) (#m)
-    handle_pool_set_type(rbs->resource_handle_pool, RENDERER_RESOURCE_TYPE_SHADER, stringify(RENDERER_RESOURCE_TYPE_SHADER));
-    handle_pool_set_type(rbs->resource_handle_pool, RENDERER_RESOURCE_TYPE_PIPELINE, stringify(RENDERER_RESOURCE_TYPE_PIPELINE));
-    handle_pool_set_type(rbs->resource_handle_pool, RENDERER_RESOURCE_TYPE_GEOMETRY, stringify(RENDERER_RESOURCE_TYPE_GEOMETRY));
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -734,50 +707,46 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     return rbs;
 }
 
-static void destroy_renderer_resources(VkDevice device, handle_pool_t* hp, renderer_resource_t* rrs, size_t rrs_n)
+void renderer_backend_destroy_resource(renderer_backend_state_t* rbs, renderer_resource_type_t type, void* state)
 {
-    for (size_t i = 0; i < rrs_n; ++i)
+    VkDevice device = rbs->device;
+
+    switch(type)
     {
-        renderer_resource_t* rr = rrs + i;
-
-        switch(rr->type)
-        {
-            case RENDERER_RESOURCE_TYPE_SHADER: {
-                shader_t* s = &rr->shader;
-                vkDestroyShaderModule(device, s->module, NULL);
-                memf(s->input_layout);
-                memf(s->constant_buffer.items);
-            } break;
-            
-            case RENDERER_RESOURCE_TYPE_PIPELINE: {
-                pipeline_t* p = &rr->pipeline;
-                for (uint32_t frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
+        case RENDERER_RESOURCE_TYPE_SHADER: {
+            shader_t* s = state;
+            vkDestroyShaderModule(device, s->module, NULL);
+            memf(s->input_layout);
+            memf(s->constant_buffer.items);
+        } break;
+        
+        case RENDERER_RESOURCE_TYPE_PIPELINE: {
+            pipeline_t* p = state;
+            for (uint32_t frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
+            {
+                memf(p->constant_buffer_descriptor_sets[frame_idx]);
+                for (uint32_t cb_idx = 0; cb_idx < p->constant_buffers_num; ++cb_idx)
                 {
-                    memf(p->constant_buffer_descriptor_sets[frame_idx]);
-                    for (uint32_t cb_idx = 0; cb_idx < p->constant_buffers_num; ++cb_idx)
-                    {
-                        vkFreeMemory(device, p->constant_buffers[cb_idx].memory[frame_idx], NULL);
-                        vkDestroyBuffer(device, p->constant_buffers[cb_idx].vk_handle[frame_idx], NULL);
-                    }
+                    vkFreeMemory(device, p->constant_buffers[cb_idx].memory[frame_idx], NULL);
+                    vkDestroyBuffer(device, p->constant_buffers[cb_idx].vk_handle[frame_idx], NULL);
                 }
+            }
 
-                vkDestroyPipelineLayout(device, p->layout, NULL);
-                vkDestroyDescriptorSetLayout(device, p->constant_buffer_descriptor_set_layout, NULL);
-                vkDestroyPipeline(device, p->vk_handle, NULL);
-                memf(p->constant_buffers);
-            } break;
+            vkDestroyPipelineLayout(device, p->layout, NULL);
+            vkDestroyDescriptorSetLayout(device, p->constant_buffer_descriptor_set_layout, NULL);
+            vkDestroyPipeline(device, p->vk_handle, NULL);
+            memf(p->constant_buffers);
+        } break;
 
-            case RENDERER_RESOURCE_TYPE_GEOMETRY: {
-                    geometry_t* g = &rr->geometry;
-                    vkDestroyBuffer(device, g->vertex_buffer, NULL);
-                    vkFreeMemory(device, g->vertex_buffer_memory, NULL);
-            } break;
+        case RENDERER_RESOURCE_TYPE_GEOMETRY: {
+                geometry_t* g = state;
+                vkDestroyBuffer(device, g->vertex_buffer, NULL);
+                vkFreeMemory(device, g->vertex_buffer_memory, NULL);
+        } break;
 
-            case RENDERER_RESOURCE_TYPE_INVALID:
-                error("Invalid resource in renderer resource list"); break;
-        }
-
-        handle_pool_return(hp, rr->handle);
+        case RENDERER_RESOURCE_TYPE_NUM:
+        case RENDERER_RESOURCE_TYPE_INVALID:
+            error("Invalid resource in renderer resource list"); break;
     }
 }
 
@@ -798,10 +767,6 @@ void renderer_backend_destroy(renderer_backend_state_t* rbs)
         vkDestroyFence(d, rbs->image_in_flight_fences[i], NULL);
     }
 
-
-    destroy_renderer_resources(d, rbs->resource_handle_pool, rbs->da_resources, array_num(rbs->da_resources));
-    array_destroy(rbs->da_resources);
-
     destroy_surface_size_dependent_resources(rbs);
     vkDestroyDescriptorPool(d, rbs->descriptor_pool_uniform_buffer, NULL);
 
@@ -813,30 +778,14 @@ void renderer_backend_destroy(renderer_backend_state_t* rbs)
     fptr_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (fptr_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(rbs->instance, "vkDestroyDebugUtilsMessengerEXT");
     vkDestroyDebugUtilsMessengerEXT(rbs->instance, rbs->debug_messenger, NULL);
     vkDestroyInstance(rbs->instance, NULL);
-    handle_pool_destroy(rbs->resource_handle_pool);
+    
     memf(rbs);
 }
 
-static renderer_resource_handle_t add_resource(handle_pool_t* hp, renderer_resource_t** da_resources, renderer_resource_t* res)
-{
-    renderer_resource_handle_t h = handle_pool_reserve(hp, res->type);
-    res->handle = h;
-    array_fill_and_set(*da_resources, handle_index(h), *res);
-    return h;
-}
 
-static renderer_resource_t* get_resource(renderer_backend_state_t* rbs, renderer_resource_handle_t h)
+void* renderer_backend_load_shader(renderer_backend_state_t* rbs, const shader_intermediate_t* si)
 {
-    renderer_resource_t* rr = rbs->da_resources + handle_index(h);
-    check_slow(handle_type(h) == rr->type, "Handle points to resource of wrong type");
-    return rr;
-}
-
-renderer_resource_handle_t renderer_backend_load_shader(renderer_backend_state_t* rbs, const shader_intermediate_t* si)
-{
-    renderer_resource_t shader_res = {};
-    shader_res.type = RENDERER_RESOURCE_TYPE_SHADER;
-    shader_t* shader = &shader_res.shader;
+    shader_t* shader = mema_zero(sizeof(shader_t));
     memcpy_alloc((void**)&shader->input_layout, si->input_layout, sizeof(shader_input_layout_item_t) * si->input_layout_num);
     shader->input_layout_num = si->input_layout_num;
     memcpy_alloc((void**)&shader->constant_buffer.items, si->constant_buffer.items, sizeof(shader_constant_buffer_item_t) * si->constant_buffer.items_num);
@@ -851,7 +800,7 @@ renderer_resource_handle_t renderer_backend_load_shader(renderer_backend_state_t
     VkResult res = vkCreateShaderModule(rbs->device, &smci, NULL, &shader->module);
     VERIFY_RES();
 
-    return add_resource(rbs->resource_handle_pool, &rbs->da_resources, &shader_res);
+    return (void*)shader;
 }
 
 static VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
@@ -882,22 +831,18 @@ static VkShaderStageFlagBits vk_shader_stage_from_shader_type(shader_type_t t)
     return 0;
 }
 
-renderer_resource_handle_t renderer_backend_load_pipeline(renderer_backend_state_t* rbs, const pipeline_intermediate_t* pi)
+void* renderer_backend_load_pipeline(renderer_backend_state_t* rbs, void** shader_stages, uint32_t shader_stages_count)
 {
-    renderer_resource_t pipeline_res = {};
-    pipeline_res.type = RENDERER_RESOURCE_TYPE_PIPELINE;
-    pipeline_t* pipeline = &pipeline_res.pipeline;
+    pipeline_t* pipeline = mema_zero(sizeof(pipeline_t));
     VkResult res;
 
     // First we get all the data we need from the shader stages
     shader_input_layout_item_t* input_layout = NULL;
     uint32_t input_layout_num = 0;
 
-    for (size_t i = 0; i < pi->shader_stages_num; ++i)
+    for (size_t i = 0; i < shader_stages_count; ++i)
     {
-        renderer_resource_handle_t rrh = pi->shader_stages[i];
-        renderer_resource_t* rr = get_resource(rbs, rrh);
-        shader_t* s = &rr->shader;
+        shader_t* s = shader_stages[i];
         if (s->type == SHADER_TYPE_VERTEX)
         {
             check(s->input_layout_num > 0, "Vertex shader missing input layout.");
@@ -938,11 +883,9 @@ renderer_resource_handle_t renderer_backend_load_pipeline(renderer_backend_state
 
     uint32_t num_constant_buffers = 0;
     uint32_t* arr_used_bindings = NULL;
-    for (size_t shdr_idx = 0; shdr_idx < pi->shader_stages_num; ++shdr_idx)
+    for (size_t shdr_idx = 0; shdr_idx < shader_stages_count; ++shdr_idx)
     {
-        renderer_resource_handle_t rrh = pi->shader_stages[shdr_idx];
-        renderer_resource_t* rr = get_resource(rbs, rrh);
-        shader_t* s = &rr->shader;
+        shader_t* s = shader_stages[shdr_idx];
 
         if (s->constant_buffer.items_num == 0)
             continue;
@@ -961,11 +904,9 @@ renderer_resource_handle_t renderer_backend_load_pipeline(renderer_backend_state
     VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero(sizeof(VkDescriptorSetLayoutBinding) * num_constant_buffers);
     uint32_t cur_cb_idx = 0;
 
-    for (size_t shdr_idx = 0; shdr_idx < pi->shader_stages_num; ++shdr_idx)
+    for (size_t shdr_idx = 0; shdr_idx < shader_stages_count; ++shdr_idx)
     {
-        renderer_resource_handle_t rrh = pi->shader_stages[shdr_idx];
-        renderer_resource_t* rr = get_resource(rbs, rrh);
-        shader_t* s = &rr->shader;
+        shader_t* s = shader_stages[shdr_idx];
 
         if (s->constant_buffer.items_num == 0)
             continue;
@@ -1139,13 +1080,11 @@ renderer_resource_handle_t renderer_backend_load_pipeline(renderer_backend_state
 
 
     // Shader stage info
-    VkPipelineShaderStageCreateInfo* pssci = mema_zero(sizeof(VkPipelineShaderStageCreateInfo) * pi->shader_stages_num);
+    VkPipelineShaderStageCreateInfo* pssci = mema_zero(sizeof(VkPipelineShaderStageCreateInfo) * shader_stages_count);
 
-    for (size_t i = 0; i < pi->shader_stages_num; ++i)
+    for (size_t i = 0; i < shader_stages_count; ++i)
     {
-        renderer_resource_handle_t rrh = pi->shader_stages[i];
-        renderer_resource_t* rr = get_resource(rbs, rrh);
-        shader_t* s = &rr->shader;
+        shader_t* s = shader_stages[i];
 
         pssci[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         pssci[i].stage = vk_shader_stage_from_shader_type(s->type);
@@ -1168,7 +1107,7 @@ renderer_resource_handle_t renderer_backend_load_pipeline(renderer_backend_state
     pci.pViewportState = &pvpsci;
     pci.pDepthStencilState = &pdssci;
     pci.pStages = pssci;
-    pci.stageCount = pi->shader_stages_num;
+    pci.stageCount = shader_stages_count;
     pci.renderPass = rbs->render_pass;
     pci.subpass = 0;
 
@@ -1178,14 +1117,12 @@ renderer_resource_handle_t renderer_backend_load_pipeline(renderer_backend_state
     memf(viad);
     memf(pssci);
 
-    return add_resource(rbs->resource_handle_pool, &rbs->da_resources, &pipeline_res);
+    return (void*)pipeline;
 }
 
-renderer_resource_handle_t renderer_backend_load_geometry(renderer_backend_state_t* rbs, const geometry_vertex_t* vertices, uint32_t vertices_num)
+void* renderer_backend_load_geometry(renderer_backend_state_t* rbs, const geometry_vertex_t* vertices, uint32_t vertices_num)
 {
-    renderer_resource_t geometry_res = {};
-    geometry_res.type = RENDERER_RESOURCE_TYPE_GEOMETRY;
-    geometry_t* g = &geometry_res.geometry;
+    geometry_t* g = mema_zero(sizeof(geometry_t));
     VkResult res;
 
     VkBufferCreateInfo vertex_bci = {};
@@ -1219,13 +1156,13 @@ renderer_resource_handle_t renderer_backend_load_geometry(renderer_backend_state
     res = vkBindBufferMemory(rbs->device, g->vertex_buffer, g->vertex_buffer_memory, 0);
     VERIFY_RES();
 
-    return add_resource(rbs->resource_handle_pool, &rbs->da_resources, &geometry_res);
+    return (void*)g;
 }
 
-void renderer_backend_update_constant_buffer(renderer_backend_state_t* rbs, renderer_resource_handle_t pipeline_handle, uint32_t binding, void* data, uint32_t data_size)
+void renderer_backend_update_constant_buffer(renderer_backend_state_t* rbs, void* pipeline_state, uint32_t binding, void* data, uint32_t data_size)
 {
     uint32_t cf = rbs->current_frame;
-    pipeline_t* pipeline = &get_resource(rbs, pipeline_handle)->pipeline;
+    pipeline_t* pipeline = pipeline_state;
     VkResult res;
 
     pipeline_constant_buffer_t* cb = NULL;
@@ -1263,7 +1200,7 @@ void renderer_backend_update_constant_buffer(renderer_backend_state_t* rbs, rend
     vkUpdateDescriptorSets(rbs->device, 1, &write, 0, NULL);
 }
 
-void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_resource_handle_t pipeline_handle, renderer_resource_handle_t geometry_handle)
+void renderer_backend_draw(renderer_backend_state_t* rbs, void* pipeline_state, void* geometry_state)
 {
     uint32_t cf = rbs->current_frame;
     VkResult res;
@@ -1295,14 +1232,14 @@ void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_resource_hand
     rpbi.pClearValues = clear_values;
     vkCmdBeginRenderPass(cmd, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
 
-    pipeline_t* pipeline = &get_resource(rbs, pipeline_handle)->pipeline;
+    pipeline_t* pipeline = pipeline_state;
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->vk_handle);
 
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->constant_buffers_num,
                             pipeline->constant_buffer_descriptor_sets[cf], 0, NULL);
 
     const VkDeviceSize offsets[1] = {0};
-    VkBuffer vertex_buffer = get_resource(rbs, geometry_handle)->geometry.vertex_buffer;
+    VkBuffer vertex_buffer = ((geometry_t*)geometry_state)->vertex_buffer;
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
 
     VkViewport viewport = {};
