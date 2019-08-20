@@ -1,7 +1,6 @@
 #include "debug.h"
 #include <stdio.h>
 #include <stdarg.h>
-#include <stdlib.h>
 #include <execinfo.h>
 #include <time.h>
 

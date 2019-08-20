@@ -5,7 +5,6 @@
 #include "keycode_types.h"
 #include "window_types.h"
 #include "memory.h"
-#include <stdlib.h>
 
 typedef struct xcb_event_queue_t {
     xcb_generic_event_t* prev;

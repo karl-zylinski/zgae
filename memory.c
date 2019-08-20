@@ -1,7 +1,6 @@
 #include "memory.h"
 #include "debug.h"
 #include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 #ifdef ENABLE_MEMORY_TRACING

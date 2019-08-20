@@ -10,7 +10,7 @@
 #include "str.h"
 
 #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
-#define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
+#define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %s)", res)
 
 const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -1240,16 +1240,8 @@ void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_backend_pipel
     VERIFY_RES();
 }
 
-static bool can_present(renderer_backend_state_t* rbs)
-{
-    return rbs->swapchain_buffers_num > 0;
-}
-
 void renderer_backend_present(renderer_backend_state_t* rbs)
 {
-    if (!can_present(rbs))
-        return;
-
     VkResult res;
     uint32_t cf = rbs->current_frame;
 

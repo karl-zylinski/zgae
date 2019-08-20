@@ -112,8 +112,6 @@ int main()
 
     while (linux_xcb_window_is_open(win))
     {
-
-
         float cur_time = get_cur_time_seconds();
         float dt = cur_time - last_frame_time;
         float since_start = cur_time - start_time;
