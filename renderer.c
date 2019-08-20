@@ -46,10 +46,16 @@ typedef enum renderer_resource_type_t
     RENDERER_RESOURCE_TYPE_NUM
 } renderer_resource_type_t;
 
+typedef enum renderer_resource_flag_t
+{
+    RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT = 0x1
+} renderer_resource_flag_t;
+
 typedef struct renderer_resource_t
 {
     renderer_resource_type_t type;
     renderer_resource_handle_t handle;
+    renderer_resource_flag_t flag;
 
     union
     {
@@ -79,22 +85,25 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
     return rs;
 }
 
-static void destroy_resource(renderer_state_t* rs, renderer_resource_t* rr)
+static renderer_resource_t* get_resource(renderer_state_t* rs, renderer_resource_handle_t h)
+{
+    renderer_resource_t* rr = rs->da_resources + handle_index(h);
+    check_slow(handle_type(h) == rr->type, "Handle points to resource of wrong type");
+    return rr;
+}
+
+static void deinit_resource(renderer_state_t* rs, renderer_resource_t* rr)
 {
     switch(rr->type)
     {
         case RENDERER_RESOURCE_TYPE_SHADER: {
             renderer_resource_shader_t* s = &rr->shader;
             renderer_backend_destroy_shader(rs->rbs, s->backend_state);
-            memf(s->source);
-            memf(s->constant_buffer.items);
-            memf(s->input_layout);
         } break;
         
         case RENDERER_RESOURCE_TYPE_PIPELINE: {
             renderer_resource_pipeline_t* p = &rr->pipeline;
             renderer_backend_destroy_pipeline(rs->rbs, p->backend_state);
-            memf(p->shader_stages);
         } break;
 
         case RENDERER_RESOURCE_TYPE_GEOMETRY: {
@@ -105,67 +114,12 @@ static void destroy_resource(renderer_state_t* rs, renderer_resource_t* rr)
         case RENDERER_RESOURCE_TYPE_INVALID:
             error("Invalid resource in renderer resource list"); break;
     }
-
-    handle_pool_return(rs->resource_handle_pool, rr->handle);
 }
 
-static void destroy_all_resources(renderer_state_t* rs)
+
+static renderer_backend_shader_t* shader_init(renderer_state_t* rs, const renderer_resource_shader_t* shader)
 {
-    info("Destroying all renderer resources");
-
-    for (size_t i = 0; i < array_num(rs->da_resources); ++i)
-    {
-        destroy_resource(rs, rs->da_resources + i);
-    }
-}
-
-void renderer_destroy(renderer_state_t* rs)
-{
-    info("Destroying renderer");
-    renderer_backend_wait_until_idle(rs->rbs);
-    destroy_all_resources(rs);
-    array_destroy(rs->da_resources);
-    renderer_backend_destroy(rs->rbs);
-    handle_pool_destroy(rs->resource_handle_pool);
-    memf(rs);
-}
-
-static renderer_resource_handle_t add_resource(handle_pool_t* hp, renderer_resource_t** da_resources, renderer_resource_t* res)
-{
-    renderer_resource_handle_t h = handle_pool_reserve(hp, res->type);
-    res->handle = h;
-    array_fill_and_set(*da_resources, handle_index(h), *res);
-    return h;
-}
-
-static renderer_resource_t* get_resource(renderer_state_t* rs, renderer_resource_handle_t h)
-{
-    renderer_resource_t* rr = rs->da_resources + handle_index(h);
-    check_slow(handle_type(h) == rr->type, "Handle points to resource of wrong type");
-    return rr;
-}
-
-static renderer_backend_shader_t* shader_init(renderer_backend_state_t* rbs, const renderer_resource_shader_t* shader)
-{
-    return renderer_backend_load_shader(rbs, shader->source, shader->source_size);
-}
-
-renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shader_intermediate_t* si)
-{
-    renderer_resource_t shader_res = {};
-    shader_res.type = RENDERER_RESOURCE_TYPE_SHADER;
-    renderer_resource_shader_t* shader = &shader_res.shader;
-    shader->source = mema_copy(si->source, si->source_size);
-    shader->source_size = si->source_size;
-    shader->type = si->type;
-    shader->constant_buffer.items = mema_copy(si->constant_buffer.items, si->constant_buffer.items_num * sizeof(shader_constant_buffer_item_t));
-    shader->constant_buffer.items_num = si->constant_buffer.items_num;
-    shader->constant_buffer.binding = si->constant_buffer.binding;
-    shader->input_layout = mema_copy(si->input_layout, si->input_layout_num * sizeof(shader_input_layout_item_t));
-    shader->input_layout_num = si->input_layout_num;
-    shader->backend_state = shader_init(rs->rbs, shader);
-
-    return add_resource(rs->resource_handle_pool, &rs->da_resources, &shader_res);
+    return renderer_backend_load_shader(rs->rbs, shader->source, shader->source_size);
 }
 
 static renderer_backend_pipeline_t* pipeline_init(renderer_state_t* rs, const renderer_resource_pipeline_t* pipeline)
@@ -223,6 +177,115 @@ static renderer_backend_pipeline_t* pipeline_init(renderer_state_t* rs, const re
     return backend_state;
 }
 
+static void init_resource(renderer_state_t* rs, renderer_resource_t* rr)
+{
+
+    switch(rr->type)
+    {
+        case RENDERER_RESOURCE_TYPE_SHADER: {
+            renderer_resource_shader_t* s = &rr->shader;
+            s->backend_state = shader_init(rs, s);
+        } break;
+        
+        case RENDERER_RESOURCE_TYPE_PIPELINE: {
+            renderer_resource_pipeline_t* p = &rr->pipeline;
+            p->backend_state = pipeline_init(rs, p);
+        } break;
+
+        case RENDERER_RESOURCE_TYPE_GEOMETRY: {
+            //renderer_resource_pipeline_t* g = &rr->geometry;
+            //g->backend_state = renderer_backend_load_geometry(rs->rbs, vertices, vertices_num);
+        } break;
+
+        case RENDERER_RESOURCE_TYPE_NUM:
+        case RENDERER_RESOURCE_TYPE_INVALID:
+            error("Invalid resource in renderer resource list"); break;
+    }
+}
+
+static void destroy_resource(renderer_state_t* rs, renderer_resource_t* rr)
+{
+    deinit_resource(rs, rr);
+
+    switch(rr->type)
+    {
+        case RENDERER_RESOURCE_TYPE_SHADER: {
+            renderer_resource_shader_t* s = &rr->shader;
+            memf(s->source);
+            memf(s->constant_buffer.items);
+            memf(s->input_layout);
+        } break;
+        
+        case RENDERER_RESOURCE_TYPE_PIPELINE: {
+            renderer_resource_pipeline_t* p = &rr->pipeline;
+            memf(p->shader_stages);
+        } break;
+
+        case RENDERER_RESOURCE_TYPE_GEOMETRY: {
+        } break;
+
+        case RENDERER_RESOURCE_TYPE_NUM:
+        case RENDERER_RESOURCE_TYPE_INVALID:
+            error("Invalid resource in renderer resource list"); break;
+    }
+
+    handle_pool_return(rs->resource_handle_pool, rr->handle);
+}
+
+static void reinit_resource(renderer_state_t* rs, renderer_resource_t* rr)
+{
+    deinit_resource(rs, rr);
+    init_resource(rs, rr);
+}
+
+static void destroy_all_resources(renderer_state_t* rs)
+{
+    info("Destroying all renderer resources");
+
+    for (size_t i = 0; i < array_num(rs->da_resources); ++i)
+    {
+        destroy_resource(rs, rs->da_resources + i);
+    }
+}
+
+void renderer_destroy(renderer_state_t* rs)
+{
+    info("Destroying renderer");
+    renderer_backend_wait_until_idle(rs->rbs);
+    destroy_all_resources(rs);
+    array_destroy(rs->da_resources);
+    renderer_backend_destroy(rs->rbs);
+    handle_pool_destroy(rs->resource_handle_pool);
+    memf(rs);
+}
+
+static renderer_resource_handle_t add_resource(handle_pool_t* hp, renderer_resource_t** da_resources, renderer_resource_t* res)
+{
+    renderer_resource_handle_t h = handle_pool_reserve(hp, res->type);
+    res->handle = h;
+    array_fill_and_set(*da_resources, handle_index(h), *res);
+    return h;
+}
+
+renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shader_intermediate_t* si)
+{
+    renderer_resource_t shader_res = {};
+    shader_res.type = RENDERER_RESOURCE_TYPE_SHADER;
+    renderer_resource_shader_t* shader = &shader_res.shader;
+    shader->source = mema_copy(si->source, si->source_size);
+    shader->source_size = si->source_size;
+    shader->type = si->type;
+    shader->constant_buffer.items = mema_copy(si->constant_buffer.items, si->constant_buffer.items_num * sizeof(shader_constant_buffer_item_t));
+    shader->constant_buffer.items_num = si->constant_buffer.items_num;
+    shader->constant_buffer.binding = si->constant_buffer.binding;
+    shader->input_layout = mema_copy(si->input_layout, si->input_layout_num * sizeof(shader_input_layout_item_t));
+    shader->input_layout_num = si->input_layout_num;
+
+    init_resource(rs, &shader_res);
+
+    return add_resource(rs->resource_handle_pool, &rs->da_resources, &shader_res);
+}
+
 renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pipeline_intermediate_t* pi)
 {
     renderer_resource_t pipeline_res = {};
@@ -230,7 +293,10 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     renderer_resource_pipeline_t* pipeline = &pipeline_res.pipeline;
     pipeline->shader_stages = mema_copy(pi->shader_stages, sizeof(renderer_resource_handle_t) * pi->shader_stages_num);
     pipeline->shader_stages_num = pi->shader_stages_num;
-    pipeline->backend_state = pipeline_init(rs, pipeline);
+    pipeline_res.flag = RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT; // TODO, ask backend about this?
+
+    init_resource(rs, &pipeline_res);
+
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
 }
 
@@ -240,7 +306,7 @@ renderer_resource_handle_t renderer_load_geometry(renderer_state_t* rs, const ge
     geometry_res.type = RENDERER_RESOURCE_TYPE_GEOMETRY;
     renderer_resource_geometry_t* geometry = &geometry_res.geometry;
     // TODO: Do init thing like above here, and put vertices and stuff into renderer_resource so we can re-init later.
-
+    init_resource(rs, &geometry_res);
     geometry->backend_state = renderer_backend_load_geometry(rs->rbs, vertices, vertices_num);
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &geometry_res);
 }
@@ -263,4 +329,22 @@ void renderer_update_constant_buffer(renderer_state_t* rs, renderer_resource_han
 void renderer_wait_for_new_frame(renderer_state_t* rs)
 {
     renderer_backend_wait_for_new_frame(rs->rbs);
+}
+
+void renderer_surface_resized(renderer_state_t* rs, uint32_t w, uint32_t h)
+{
+    info("Renderer resizing to %d x %d", w, h);
+    renderer_backend_wait_until_idle(rs->rbs);
+    renderer_backend_surface_rezised(rs->rbs, w, h);
+
+    for (size_t i = 0; i < array_num(rs->da_resources); ++i)
+    {
+        renderer_resource_t* rr = rs->da_resources + i;
+
+        if (rr->flag & RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT)
+        {
+            reinit_resource(rs, rr);
+        }
+    }
+    renderer_backend_wait_until_idle(rs->rbs);
 }

@@ -10,6 +10,7 @@
 #include "array.h"
 #include <string.h>
 #include "geometry_types.h"
+#include "str.h"
 
 #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %d)", res)
@@ -78,7 +79,7 @@ typedef struct renderer_backend_state_t
     VkFence image_in_flight_fences[MAX_FRAMES_IN_FLIGHT];
     VkSemaphore image_available_semaphores[MAX_FRAMES_IN_FLIGHT];
     VkSemaphore render_finished_semaphores[MAX_FRAMES_IN_FLIGHT];
-    uint32_t swapchain_buffers_count;
+    uint32_t swapchain_buffers_num;
     uint32_t graphics_queue_family_idx;
     VkQueue graphics_queue;
     uint32_t present_queue_family_idx;
@@ -101,9 +102,40 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     (void)user_data;
 
     if (severity < VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+    {
         info("(From Vulkan) %s", data->pMessage);
-    else
-        error("(From Vulkan) %s", data->pMessage);
+        return VK_FALSE;
+    }
+
+    static const char* non_errors[] = {
+        "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274",
+        "UNASSIGNED-CoreValidation-DrawState-SwapchainTooManyImages"
+    };
+
+    static const bool non_errors_suppress[] = {
+        false,
+        true
+    };
+
+    static const char* non_errors_reasons[] = {
+        "A race condition between swapchain creation and window resizing happening at arbitrary times makes it impossible to avoid this error. The window will later send a new resize callback, making everything fine.",
+        "Due to Vulkan bug (https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/1670)."
+    };
+
+    int32_t non_error_idx = str_eql_arr(data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
+    if (non_error_idx != -1)
+    {
+        if (non_errors_suppress[non_error_idx])
+            return VK_FALSE;
+
+        info("The next Vulkan message occured as an error in Vulkan, it is hard-coded to not trigger an error with this reason: \"%s\"", non_errors_reasons[non_error_idx]);
+        info("(From Vulkan) %s", data->pMessage);
+        return VK_FALSE;
+    }
+
+    info("Error occured in Vulkan, error message id is: %s", data->pMessageIdName);
+    error("(From Vulkan) %s", data->pMessage);
+
     return VK_FALSE;
 }
 
@@ -154,7 +186,7 @@ static VkCompositeAlphaFlagBitsKHR choose_swapchain_composite_alpha(VkCompositeA
 }
 
 static void create_swapchain(
-    VkSwapchainKHR* out_current_swapchain, swapchain_buffer_t** out_sc_bufs, uint32_t* out_sc_bufs_count, vec2u_t size,
+    VkSwapchainKHR* out_current_swapchain, swapchain_buffer_t** out_sc_bufs, uint32_t* out_sc_bufs_num, vec2u_t size,
     VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface, VkFormat format,
     uint32_t graphics_queue_family_idx, uint32_t present_queue_family_idx)
 {
@@ -211,15 +243,15 @@ static void create_swapchain(
 
     info("Creating %d buffers for swapchain", swapchain_image_count);
     swapchain_buffer_t* old_bufs = *out_sc_bufs;
-    uint32_t old_bufs_count = *out_sc_bufs_count;
+    uint32_t old_bufs_num = *out_sc_bufs_num;
 
-    for (uint32_t i = 0; i < old_bufs_count; i++)
+    for (uint32_t i = 0; i < old_bufs_num; i++)
+    {
         vkDestroyImageView(device, old_bufs[i].view, NULL);
-
-    for (uint32_t i = 0; i < old_bufs_count; i++)
         vkDestroyFramebuffer(device, old_bufs[i].framebuffer, NULL);
+    }
 
-    swapchain_buffer_t* bufs = memra_zero(old_bufs, sizeof(swapchain_buffer_t) * swapchain_image_count);
+    swapchain_buffer_t* bufs = mema_zero(sizeof(swapchain_buffer_t) * swapchain_image_count);
 
     for (uint32_t i = 0; i < swapchain_image_count; ++i)
     {
@@ -240,10 +272,10 @@ static void create_swapchain(
 
     memf(swapchain_images);
     *out_sc_bufs = bufs;
-    *out_sc_bufs_count = swapchain_image_count;
+    *out_sc_bufs_num = swapchain_image_count;
 }
 
-static void create_framebuffers(VkDevice device, swapchain_buffer_t* swapchain_buffers, uint32_t swapchain_buffers_count, const depth_buffer_t* depth_buffer, VkRenderPass render_pass, vec2u_t swapchain_size)
+static void create_framebuffers(VkDevice device, swapchain_buffer_t* swapchain_buffers, uint32_t swapchain_buffers_num, const depth_buffer_t* depth_buffer, VkRenderPass render_pass, vec2u_t swapchain_size)
 {
     VkImageView framebuffer_attachments[2];
     framebuffer_attachments[1] = depth_buffer->view;
@@ -257,7 +289,7 @@ static void create_framebuffers(VkDevice device, swapchain_buffer_t* swapchain_b
     fbci.height = swapchain_size.y;
     fbci.layers = 1;
 
-    for (uint32_t i = 0; i < swapchain_buffers_count; ++i)
+    for (uint32_t i = 0; i < swapchain_buffers_num; ++i)
     {
         framebuffer_attachments[0] = swapchain_buffers[i].view;
         VkResult res = vkCreateFramebuffer(device, &fbci, NULL, &swapchain_buffers[i].framebuffer);
@@ -278,12 +310,13 @@ static uint32_t memory_type_from_properties(uint32_t req_memory_type, const VkPh
     return -1;
 }
 
-static void destroy_depth_buffer(VkDevice device, const depth_buffer_t* depth_buffer)
+static void destroy_depth_buffer(VkDevice device, depth_buffer_t* depth_buffer)
 {
     info("Destroying depth buffer");
     vkDestroyImageView(device, depth_buffer->view, NULL);
     vkDestroyImage(device, depth_buffer->image, NULL);
     vkFreeMemory(device, depth_buffer->memory, NULL);
+    memzero(depth_buffer, sizeof(depth_buffer_t));
 }
 
 static void create_depth_buffer(depth_buffer_t* out_depth_buffer, VkDevice device, VkPhysicalDevice gpu, const VkPhysicalDeviceMemoryProperties* memory_properties, vec2u_t size)
@@ -396,52 +429,61 @@ static void create_renderpass(VkDevice device, VkFormat surface_format, VkFormat
     VERIFY_RES();
 }
 
-static void destroy_surface_size_dependent_resources(renderer_backend_state_t* rbs)
+static void destroy_swapchain(renderer_backend_state_t* rbs)
 {
+    info("Destroying swapchain");
     VkDevice d = rbs->device;
 
-    for (uint32_t i = 0; i < rbs->swapchain_buffers_count; i++)
+    for (uint32_t i = 0; i < rbs->swapchain_buffers_num; i++)
+    {
         vkDestroyImageView(d, rbs->swapchain_buffers[i].view, NULL);
-
-    for (uint32_t i = 0; i < rbs->swapchain_buffers_count; i++)
         vkDestroyFramebuffer(d, rbs->swapchain_buffers[i].framebuffer, NULL);
+    }
 
     memf(rbs->swapchain_buffers);
-    rbs->swapchain_buffers_count = 0;
+    rbs->swapchain_buffers = NULL;
+    rbs->swapchain_buffers_num = 0;
 
     vkDestroySwapchainKHR(d, rbs->swapchain, NULL);
-
-    vkDestroyRenderPass(d, rbs->render_pass, NULL);
-    
-    destroy_depth_buffer(d, &rbs->depth_buffer);
-
     rbs->swapchain = NULL;
+}
+
+static void destroy_renderpass(renderer_backend_state_t* rbs)
+{
+    info("Destroying render pass");
+    VkDevice d = rbs->device;
+    vkDestroyRenderPass(d, rbs->render_pass, NULL);
     rbs->render_pass = NULL;
-    memzero(&rbs->depth_buffer, sizeof(depth_buffer_t));
+}
+
+static void destroy_surface_size_dependent_resources(renderer_backend_state_t* rbs)
+{
+    destroy_swapchain(rbs);
+    destroy_renderpass(rbs);
+    destroy_depth_buffer(rbs->device, &rbs->depth_buffer);
 }
 
 
 static void create_surface_size_dependent_resources(renderer_backend_state_t* rbs)
 {
+
     rbs->swapchain_size = get_surface_size(rbs->gpu, rbs->surface);
-    
     create_depth_buffer(&rbs->depth_buffer, rbs->device, rbs->gpu, &rbs->gpu_memory_properties, rbs->swapchain_size);
 
     create_renderpass(rbs->device, rbs->surface_format, rbs->depth_buffer.format, &rbs->render_pass);
 
     create_swapchain(
-        &rbs->swapchain, &rbs->swapchain_buffers, &rbs->swapchain_buffers_count, rbs->swapchain_size,
+        &rbs->swapchain, &rbs->swapchain_buffers, &rbs->swapchain_buffers_num, rbs->swapchain_size,
         rbs->gpu, rbs->device, rbs->surface, rbs->surface_format,
         rbs->graphics_queue_family_idx, rbs->present_queue_family_idx);
 
-    create_framebuffers(rbs->device, rbs->swapchain_buffers, rbs->swapchain_buffers_count, &rbs->depth_buffer, rbs->render_pass, rbs->swapchain_size);
+    create_framebuffers(rbs->device, rbs->swapchain_buffers, rbs->swapchain_buffers_num, &rbs->depth_buffer, rbs->render_pass, rbs->swapchain_size);
 
+    rbs->current_frame = 0;
 }
-
 
 static void recreate_surface_size_dependent_resources(renderer_backend_state_t* rbs)
 {
-    vkDeviceWaitIdle(rbs->device);
     destroy_surface_size_dependent_resources(rbs);
     create_surface_size_dependent_resources(rbs);
 }
@@ -519,7 +561,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
 
     VkDebugUtilsMessengerCreateInfoEXT debug_ext_ci = {};
     debug_ext_ci.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    debug_ext_ci.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    debug_ext_ci.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     debug_ext_ci.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     debug_ext_ci.pfnUserCallback = vulkan_debug_message_callback;
 
@@ -638,7 +680,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
 
     rbs->surface_format = choose_surface_format(gpu, surface);
     info("Chose surface VkFormat: %d", rbs->surface_format);
-
+    
     create_surface_size_dependent_resources(rbs);
 
     info("Creating graphics and present queues");
@@ -656,7 +698,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     res = vkCreateCommandPool(device, &cpci, NULL, &rbs->graphics_cmd_pool);
     VERIFY_RES();
 
-    rbs->graphics_cmd_buffers_num = rbs->swapchain_buffers_count;
+    rbs->graphics_cmd_buffers_num = rbs->swapchain_buffers_num;
     rbs->graphics_cmd_buffers = mema_zero(sizeof(VkCommandBuffer) * rbs->graphics_cmd_buffers_num);
     VkCommandBufferAllocateInfo cbai = {};
     cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -673,6 +715,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
 
     VkDescriptorPoolCreateInfo dpci = {};
     dpci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    dpci.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     dpci.maxSets = 10;
     dpci.poolSizeCount = 1;
     dpci.pPoolSizes = dps;
@@ -712,11 +755,12 @@ void renderer_backend_destroy_pipeline(renderer_backend_state_t* rbs, renderer_b
 {
     for (uint32_t frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
     {
+        vkFreeDescriptorSets(rbs->device, rbs->descriptor_pool_uniform_buffer, 1, p->constant_buffer_descriptor_sets[frame_idx]);
         memf(p->constant_buffer_descriptor_sets[frame_idx]);
         for (uint32_t cb_idx = 0; cb_idx < p->constant_buffers_num; ++cb_idx)
         {
-            vkFreeMemory(rbs->device, p->constant_buffers[cb_idx].memory[frame_idx], NULL);
             vkDestroyBuffer(rbs->device, p->constant_buffers[cb_idx].vk_handle[frame_idx], NULL);
+            vkFreeMemory(rbs->device, p->constant_buffers[cb_idx].memory[frame_idx], NULL);
         }
     }
 
@@ -1199,8 +1243,16 @@ void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_backend_pipel
     VERIFY_RES();
 }
 
+static bool can_present(renderer_backend_state_t* rbs)
+{
+    return rbs->swapchain_buffers_num > 0;
+}
+
 void renderer_backend_present(renderer_backend_state_t* rbs)
 {
+    if (!can_present(rbs))
+        return;
+
     VkResult res;
     uint32_t cf = rbs->current_frame;
 
@@ -1208,12 +1260,9 @@ void renderer_backend_present(renderer_backend_state_t* rbs)
     res = vkAcquireNextImageKHR(rbs->device, rbs->swapchain, UINT64_MAX, rbs->image_available_semaphores[cf], VK_NULL_HANDLE, &image_index);
 
     if (res == VK_ERROR_OUT_OF_DATE_KHR)
-    {
-        recreate_surface_size_dependent_resources(rbs);
-        return;
-    }
+        return; // Couldn't present due to out of date swapchain, waiting for window resize to propagate.
 
-    check(res >= 0, "Failed acquiring next swapchain image");
+    VERIFY_RES();
 
     VkPipelineStageFlags psf = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo si = {}; // can be mupltiple!!
@@ -1241,10 +1290,7 @@ void renderer_backend_present(renderer_backend_state_t* rbs)
     res = vkQueuePresentKHR(rbs->present_queue, &pi);
 
     if (res == VK_ERROR_OUT_OF_DATE_KHR)
-    {
-        recreate_surface_size_dependent_resources(rbs);
-        return;
-    }
+        return; // Couldn't present due to out of date swapchain, waiting for window resize to propagate.
 
     VERIFY_RES();
 
@@ -1259,4 +1305,12 @@ void renderer_backend_wait_for_new_frame(renderer_backend_state_t* rbs)
 void renderer_backend_wait_until_idle(renderer_backend_state_t* rbs)
 {
     vkDeviceWaitIdle(rbs->device);
+}
+
+void renderer_backend_surface_rezised(renderer_backend_state_t* rbs, uint32_t width, uint32_t height)
+{
+    (void)width;
+    (void)height;
+    info("Renderer backend resizing to %d x %d", width, height);
+    recreate_surface_size_dependent_resources(rbs);
 }

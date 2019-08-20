@@ -34,6 +34,17 @@ bool str_eql(const char* s1, const char* s2)
     return strcmp(s1, s2) == 0;
 }
 
+int32_t str_eql_arr(const char* s, const char** comp_arr, uint32_t comp_arr_num)
+{
+    for (uint32_t i = 0; i < comp_arr_num; ++i)
+    {
+        if (str_eql(s, comp_arr[i]))
+            return i;
+    }
+
+    return -1;
+}
+
 int64_t str_hash(const char* s)
 {
     size_t len = strlen(s);

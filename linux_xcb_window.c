@@ -24,6 +24,8 @@ linux_xcb_window_t* linux_xcb_window_create(const char* title, uint32_t width, u
 {
     linux_xcb_window_t* w = mema_zero(sizeof(linux_xcb_window_t));
     info("Creating XCB window w/ title %s, width %d, height %d", title, width, height);
+    w->state.width = width;
+    w->state.height = height;
     w->connection = xcb_connect(NULL, NULL);
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
@@ -32,7 +34,8 @@ linux_xcb_window_t* linux_xcb_window_create(const char* title, uint32_t width, u
         XCB_EVENT_MASK_EXPOSURE
         | XCB_EVENT_MASK_KEY_PRESS
         | XCB_EVENT_MASK_KEY_RELEASE
-        | XCB_EVENT_MASK_FOCUS_CHANGE };
+        | XCB_EVENT_MASK_FOCUS_CHANGE
+        | XCB_EVENT_MASK_STRUCTURE_NOTIFY };
     xcb_create_window(
         w->connection,
         XCB_COPY_FROM_PARENT,
@@ -288,6 +291,22 @@ static bool poll_event(linux_xcb_window_t* w)
                 w->state.open_state = WINDOW_OPEN_STATE_CLOSED;
             return true;
         }
+        case XCB_CONFIGURE_NOTIFY:
+        {
+            const xcb_configure_notify_event_t *cfg_event = (const xcb_configure_notify_event_t *)evt;
+            if (((cfg_event->width != w->state.width) || (cfg_event->height != w->state.height)))
+            {
+                    uint32_t width = cfg_event->width;
+                    uint32_t height = cfg_event->height;
+                    if (width > 0 && height > 0)
+                    {
+                        info("XCB window resized to %d x %d", width, height);
+                        w->state.width = width;
+                        w->state.height = height;
+                        w->state.callbacks.window_resized_callback(width, height);
+                    }
+            }
+        } return true;
         default: return true;
     }
 }
@@ -310,4 +329,9 @@ uint32_t linux_xcb_window_get_handle(linux_xcb_window_t* w)
 int linux_xcb_window_is_open(linux_xcb_window_t* w)
 {
     return w->state.open_state == WINDOW_OPEN_STATE_OPEN;
+}
+
+const window_state_t* linux_xcb_window_get_state(linux_xcb_window_t* w)
+{
+    return &w->state;
 }

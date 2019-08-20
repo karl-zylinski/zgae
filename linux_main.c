@@ -67,24 +67,36 @@ static float get_cur_time_seconds()
     return (float)secs + ((float)t.tv_nsec)/1000000000.0f;
 }
 
+static bool window_resize_handled = true;
+static float window_resized_at = 0;
+static uint32_t window_resize_w = 0;
+static uint32_t window_resize_h = 0;
+
+static void handle_window_resize(uint32_t w, uint32_t h)
+{
+    window_resize_handled = false;
+    window_resized_at = time_since_start();
+    window_resize_w = w;
+    window_resize_h = h;
+}
+
 int main()
 {
     info("Starting ZGAE");
     memory_init();
     keyboard_init();
     linux_xcb_window_t* win = linux_xcb_window_create("ZGAE", 640, 480);
+    renderer_state_t* rs = renderer_create(WINDOW_TYPE_XCB, win);
 
     window_callbacks_t wc = {};
     wc.key_pressed_callback = &keyboard_key_pressed;
     wc.key_released_callback = &keyboard_key_released;
     wc.focus_lost_callback = &keyboard_reset;
+    wc.window_resized_callback = &handle_window_resize;
     linux_xcb_window_update_callbacks(win, &wc);
 
-    renderer_state_t* renderer_state = renderer_create(WINDOW_TYPE_XCB, win);
-    renderer_resource_handle_t ph = pipeline_load(renderer_state, "pipeline_default.pipeline");
-    renderer_resource_handle_t gh = renderer_load_geometry(renderer_state, cube, sizeof(cube) / sizeof(geometry_vertex_t));
-    
-    mat4_t proj_matrix = mat4_create_projection_matrix((float)640, (float)480);
+    renderer_resource_handle_t ph = pipeline_load(rs, "pipeline_default.pipeline");
+    renderer_resource_handle_t gh = renderer_load_geometry(rs, cube, sizeof(cube) / sizeof(geometry_vertex_t));
 
     info("Starting timers");
     
@@ -100,6 +112,8 @@ int main()
 
     while (linux_xcb_window_is_open(win))
     {
+
+
         float cur_time = get_cur_time_seconds();
         float dt = cur_time - last_frame_time;
         float since_start = cur_time - start_time;
@@ -136,19 +150,29 @@ int main()
         model_matrix.w.x = xpos;
         model_matrix.w.y = ypos;
         model_matrix.x.x = 1 + 0.5*sin(time_since_start());
+
+        const window_state_t* ws = linux_xcb_window_get_state(win);
+        mat4_t proj_matrix = mat4_create_projection_matrix((float)ws->width, (float)ws->height);
         mat4_t proj_view_matrix = mat4_mul(&view_matrix, &proj_matrix);
         mat4_t mvp_matrix = mat4_mul(&model_matrix, &proj_view_matrix);
 
-        renderer_wait_for_new_frame(renderer_state);
-        renderer_update_constant_buffer(renderer_state, ph, 0, &mvp_matrix, sizeof(mvp_matrix));
+        renderer_wait_for_new_frame(rs);
         linux_xcb_window_process_all_events(win);
-        renderer_draw(renderer_state, ph, gh);
-        renderer_present(renderer_state);
+
+        if (window_resize_handled == false && time_since_start() > window_resized_at + 0.5f)
+        {
+            window_resize_handled = true;
+            renderer_surface_resized(rs, window_resize_w, window_resize_h);
+        }
+
+        renderer_update_constant_buffer(rs, ph, 0, &mvp_matrix, sizeof(mvp_matrix));
+        renderer_draw(rs, ph, gh);
+        renderer_present(rs);
         keyboard_end_of_frame();
     }
 
     info("Main loop exited, shutting down");
-    renderer_destroy(renderer_state);
+    renderer_destroy(rs);
     linux_xcb_window_destroy(win);
     memory_check_leaks();
     info("Shutdown finished");

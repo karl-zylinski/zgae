@@ -16,3 +16,4 @@ void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_han
 void renderer_present(renderer_state_t* rs);
 void renderer_update_constant_buffer(renderer_state_t* rs, renderer_resource_handle_t pipeline_handle, uint32_t binding, void* data, uint32_t data_size);
 void renderer_wait_for_new_frame(renderer_state_t* rs);
+void renderer_surface_resized(renderer_state_t* rs, uint32_t w, uint32_t h);

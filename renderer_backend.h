@@ -30,3 +30,4 @@ void renderer_backend_present(renderer_backend_state_t* rbs);
 void renderer_backend_update_constant_buffer(renderer_backend_state_t* rbs, void* pipeline_state, uint32_t binding, void* data, uint32_t data_size);
 void renderer_backend_wait_for_new_frame(renderer_backend_state_t* rbs);
 void renderer_backend_wait_until_idle(renderer_backend_state_t* rbs);
+void renderer_backend_surface_rezised(renderer_backend_state_t* rbs, uint32_t width, uint32_t height);
