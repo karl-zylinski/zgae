@@ -143,8 +143,9 @@ void memory_check_leaks()
     #endif
 }
 
-void memcpy_alloc(void** dest, void* source, size_t s)
+void* mema_copy(void* data, size_t s)
 {
-    *dest = mema(s);
-    memcpy(*dest, source, s);
+    void* p = mema(s);
+    memcpy(p, data, s);
+    return p;
 }

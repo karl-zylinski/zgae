@@ -10,4 +10,4 @@ void memf(void* p);
 void memory_check_leaks();
 void memzero(void* p, size_t s);
 
-void memcpy_alloc(void** dest, void* source, size_t size);
+void* mema_copy(void* data, size_t s);
