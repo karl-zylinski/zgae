@@ -9,8 +9,6 @@
 
 - dont call it "load pipeline" in backend, it... does something else
 
-- swapchain recreate (check both xcb event and also returncode for from vkAcquireNextImageKHR and vkQueuePresentKHR)
-
 - split renderer into renderer and renderer_backend, with renderer_backend being impleneted as renderer_backend_vulkan
 
 - add library shader compiler or invoke commandline shader compiler (so we can use glsl)
