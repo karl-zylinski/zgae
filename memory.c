@@ -143,7 +143,7 @@ void memory_check_leaks()
     #endif
 }
 
-void* mema_copy(void* data, size_t s)
+void* mema_copy(const void* data, size_t s)
 {
     void* p = mema(s);
     memcpy(p, data, s);

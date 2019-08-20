@@ -1,17 +1,18 @@
+### IMPORTANT ###
+
+- indexed drawing, obj loader and zgae shaders
+
+
+### LESS IMPORTANT ###
+
 - shader:
     * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do... or maybe just have a source_spirv field and ask renderer which field to pull, like with a SHADER_LANGAUGE_TYPE enum in the renderer
     * in parser, error if > 1 shader of a type
     * rename "input layout" to "vertex input" or "vertex input layout" everywhere
 
-- indexed drawing
-
-- make renderer.c aware of when it needs to recreate stuff swapchain & co, have it make vulkan do its stuff and then find the pipeline and make it reinit itself (not that you cannot call destroy resource since that kicks out all the data needed for reinit, think of something nice)
-
-- dont call it "load pipeline" in backend, it... does something else
-
-- split renderer into renderer and renderer_backend, with renderer_backend being impleneted as renderer_backend_vulkan
-
 - add library shader compiler or invoke commandline shader compiler (so we can use glsl)
+
+- make script that goes through all files and each include one at a time and tries to run build.py, if it works, then it removes the include. at the end it gives us a list of removed files and respective includes
 
 - make some kind of resource thing, one corresponding to each resource on disk (shader, pipeline etc). remove the intermediate structs nad use those instead, pass them to renderer. have a central resource lut so files arent loaded twice. later maybe we make resource that is compiled into just a struct and then loaded quickly (i.e. shader resource -> compile -> shader -> renderer loads shader, not a shader resource)
 

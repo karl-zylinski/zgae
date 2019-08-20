@@ -1,12 +1,9 @@
 #include <vulkan/vulkan.h>
-#include "renderer.h"
 #include "linux_xcb_window.h"
 #include "memory.h"
 #include "debug.h"
-#include "math_types.h"
 #include "window_types.h"
 #include "shader.h"
-#include "pipeline.h"
 #include "array.h"
 #include <string.h>
 #include "geometry_types.h"
@@ -810,7 +807,7 @@ void renderer_backend_destroy(renderer_backend_state_t* rbs)
     memf(rbs);
 }
 
-renderer_backend_shader_t* renderer_backend_load_shader(renderer_backend_state_t* rbs, const char* source, uint32_t source_size)
+renderer_backend_shader_t* renderer_backend_create_shader(renderer_backend_state_t* rbs, const char* source, uint32_t source_size)
 {
     renderer_backend_shader_t* shader = mema_zero(sizeof(renderer_backend_shader_t));
 
@@ -853,7 +850,7 @@ static VkShaderStageFlagBits vk_shader_stage_from_shader_type(shader_type_t t)
     return 0;
 }
 
-renderer_backend_pipeline_t* renderer_backend_load_pipeline(renderer_backend_state_t* rbs,
+renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_state_t* rbs,
     renderer_backend_shader_t** shader_stages, shader_type_t* shader_stages_types, uint32_t shader_stages_num,
     shader_data_type_t* vertex_input_types, uint32_t vertex_input_types_num,
     uint32_t* constant_buffer_sizes, uint32_t* constant_buffer_binding_indices, uint32_t constant_buffers_num)
@@ -1098,7 +1095,7 @@ renderer_backend_pipeline_t* renderer_backend_load_pipeline(renderer_backend_sta
     return pipeline;
 }
 
-renderer_backend_geometry_t* renderer_backend_load_geometry(renderer_backend_state_t* rbs, const geometry_vertex_t* vertices, uint32_t vertices_num)
+renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_state_t* rbs, const geometry_vertex_t* vertices, uint32_t vertices_num)
 {
     renderer_backend_geometry_t* g = mema_zero(sizeof(renderer_backend_geometry_t));
     VkResult res;
