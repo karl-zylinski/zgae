@@ -2,7 +2,6 @@
 #include "window_types.h"
 #include "renderer_backend.h"
 #include "memory.h"
-#include "renderer_resource_types.h"
 #include "handle_pool.h"
 #include "array.h"
 #include "debug.h"
@@ -37,6 +36,15 @@ typedef struct renderer_resource_geometry_t
     // TODO ADD VERTICEs ETC HERE
     renderer_backend_geometry_t* backend_state;
 } renderer_resource_geometry_t;
+
+typedef enum renderer_resource_type_t
+{
+    RENDERER_RESOURCE_TYPE_INVALID,
+    RENDERER_RESOURCE_TYPE_SHADER,
+    RENDERER_RESOURCE_TYPE_PIPELINE,
+    RENDERER_RESOURCE_TYPE_GEOMETRY,
+    RENDERER_RESOURCE_TYPE_NUM
+} renderer_resource_type_t;
 
 typedef struct renderer_resource_t
 {
