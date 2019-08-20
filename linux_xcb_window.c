@@ -257,6 +257,7 @@ static bool poll_event(linux_xcb_window_t* w)
             xcb_key_release_event_t* kr_evt = (xcb_key_release_event_t*)evt;
             xcb_keycode_t code = kr_evt->detail;
             
+            // This (and the whole queue) is for removing "key repeat"
             if (w->evt_queue.next
                 && ((w->evt_queue.next->response_type & ~0x80) == XCB_KEY_PRESS)
                 && ((xcb_key_press_event_t*)w->evt_queue.next)->time == kr_evt->time
@@ -271,7 +272,13 @@ static bool poll_event(linux_xcb_window_t* w)
         }
         case XCB_FOCUS_OUT:
         {
+            info("XCB window lost focus");
             w->state.callbacks.focus_lost_callback();
+            return true;
+        }
+        case XCB_FOCUS_IN:
+        {
+            info("XCB window gained focus");
             return true;
         }
         case XCB_CLIENT_MESSAGE:
