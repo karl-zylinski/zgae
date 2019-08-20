@@ -3,13 +3,10 @@
 fwd_handle(renderer_resource_handle_t);
 fwd_enum(window_type_t);
 fwd_struct(renderer_backend_state_t);
-fwd_struct(shader_intermediate_t);
-fwd_struct(pipeline_intermediate_t);
 fwd_struct(geometry_vertex_t);
 fwd_struct(renderer_backend_shader_t);
 fwd_struct(renderer_backend_pipeline_t);
 fwd_struct(renderer_backend_geometry_t);
-fwd_enum(renderer_resource_type_t);
 fwd_enum(shader_type_t);
 fwd_enum(shader_data_type_t);
 
