@@ -1210,7 +1210,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
     return mema_copy(&g, sizeof(RendererBackendGeometry));
 }
 
-void renderer_backend_update_constant_buffer(RendererBackendState* rbs, RendererBackendPipeline* pipeline, u32 binding, void* data, u32 data_size)
+void renderer_backend_update_constant_buffer(RendererBackendState* rbs, RendererBackendPipeline* pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1231,7 +1231,7 @@ void renderer_backend_update_constant_buffer(RendererBackendState* rbs, Renderer
     check(cb, "No constant buffer with binding %d in supplied pipeline", binding);
 
     u8* mapped_uniform_data;
-    res = vkMapMemory(rbs->device, cb->memory[cf], 0, cb->allocated_size, 0, (void**)&mapped_uniform_data);
+    res = vkMapMemory(rbs->device, cb->memory[cf], offset, cb->allocated_size, 0, (void**)&mapped_uniform_data);
     VERIFY_RES();
     memcpy(mapped_uniform_data, data, data_size);
     vkUnmapMemory(rbs->device, cb->memory[cf]);
@@ -1390,4 +1390,9 @@ void renderer_backend_surface_resized(RendererBackendState* rbs, u32 width, u32 
     (void)height;
     info("Renderer backend resizing to %d x %d", width, height);
     recreate_surface_size_dependent_resources(rbs);
+}
+
+Vec2u renderer_backend_get_size(RendererBackendState* rbs)
+{
+    return rbs->swapchain_size;
 }

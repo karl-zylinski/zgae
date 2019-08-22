@@ -9,7 +9,7 @@
 #include "shader.h"
 #include "str.h"
 #include "geometry_types.h"
-
+#include "math.h"
 
 typedef struct RendererResourceShader
 {
@@ -330,19 +330,44 @@ RendererResourceHandle renderer_load_geometry(RendererState* rs, const Mesh* mes
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &geometry_res);
 }
 
-void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle geometry_handle)
+static void populate_constant_buffers(RendererState* rs, const RendererResourcePipeline* pl, const Mat4* mvp)
 {
-    renderer_backend_draw(rs->rbs, get_resource(rs, pipeline_handle)->pipeline.backend_state, get_resource(rs, geometry_handle)->geometry.backend_state);
+    for (u32 shdr_idx = 0; shdr_idx < pl->shader_stages_num; ++shdr_idx)
+    {
+        RendererResourceShader* shader = &get_resource(rs, pl->shader_stages[shdr_idx])->shader;
+        u32 offset = 0;
+
+        for (u32 cbi_idx = 0; cbi_idx < shader->constant_buffer.items_num; ++cbi_idx)
+        {
+            ShaderConstantBufferItem* cbi = shader->constant_buffer.items + cbi_idx;
+            if (cbi->auto_value == SHADER_CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL_VIEW_PROJECTION)
+                renderer_backend_update_constant_buffer(rs->rbs, pl->backend_state, shader->constant_buffer.binding, mvp, sizeof(*mvp), offset);
+
+            offset += shader_data_type_size(cbi->type);
+        }
+    }
+}
+
+void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle geometry_handle, const Vec3* cam_pos, const Quat* cam_rot)
+{
+    Mat4 camera_matrix = mat4_from_rotation_and_translation(cam_rot, cam_pos);
+    Mat4 view_matrix = mat4_inverse(&camera_matrix);
+
+    Mat4 model_matrix = mat4_identity();
+
+    Vec2u size = renderer_backend_get_size(rs->rbs);
+    Mat4 proj_matrix = mat4_create_projection_matrix(size.x, size.y);
+    Mat4 proj_view_matrix = mat4_mul(&view_matrix, &proj_matrix);
+    Mat4 mvp_matrix = mat4_mul(&model_matrix, &proj_view_matrix);
+
+    const RendererResourcePipeline* pipeline = &get_resource(rs, pipeline_handle)->pipeline;
+    populate_constant_buffers(rs, pipeline, &mvp_matrix);
+    renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs, geometry_handle)->geometry.backend_state);
 }
 
 void renderer_present(RendererState* rs)
 {
     renderer_backend_present(rs->rbs);
-}
-
-void renderer_update_constant_buffer(RendererState* rs, RendererResourceHandle pipeline_handle, u32 binding, void* data, u32 data_size)
-{
-    renderer_backend_update_constant_buffer(rs->rbs, get_resource(rs, pipeline_handle)->pipeline.backend_state, binding, data, data_size);
 }
 
 void renderer_wait_for_new_frame(RendererState* rs)

@@ -1,4 +1,5 @@
 #pragma once
+#include "math_types.h"
 
 fwd_struct(RendererBackendState);
 fwd_struct(RendererBackendShader);
@@ -25,7 +26,8 @@ void renderer_backend_destroy_geometry(RendererBackendState* rbs, RendererBacken
 
 void renderer_backend_draw(RendererBackendState* rbs, RendererBackendPipeline* pipeline, RendererBackendGeometry* geometry);
 void renderer_backend_present(RendererBackendState* rbs);
-void renderer_backend_update_constant_buffer(RendererBackendState* rbs, void* pipeline_state, u32 binding, void* data, u32 data_size);
+void renderer_backend_update_constant_buffer(RendererBackendState* rbs, void* pipeline_state, u32 binding, const void* data, u32 data_size, u32 offset);
 void renderer_backend_wait_for_new_frame(RendererBackendState* rbs);
 void renderer_backend_wait_until_idle(RendererBackendState* rbs);
 void renderer_backend_surface_resized(RendererBackendState* rbs, u32 width, u32 height);
+Vec2u renderer_backend_get_size(RendererBackendState* rbs);

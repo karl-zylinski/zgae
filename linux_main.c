@@ -83,8 +83,8 @@ int main()
 
     info("Entering main loop");
 
-    f32 xpos = 0;
-    f32 ypos = 0;
+    Quat camera_rot = quat_identity();
+    Vec3 camera_pos = {0, -3, 0};
 
     while (linux_xcb_window_is_open(win))
     {
@@ -106,29 +106,13 @@ int main()
         }
 
         if (key_is_held(KC_A))
-            xpos -= time_dt();
+            camera_pos.x -= time_dt();
         if (key_is_held(KC_D))
-            xpos += time_dt();
+            camera_pos.x += time_dt();
         if (key_is_held(KC_W))
-            ypos += time_dt();
+            camera_pos.y += time_dt();
         if (key_is_held(KC_S))
-            ypos -= time_dt();
-
-        Vec3 camera_pos = {0, -4, 0};//{2.5, -4, 1.5};
-        Quat camera_rot = quat_identity(); //{-0.3333, 0, 0.3333, 0.6667};
-        Mat4 camera_matrix = mat4_from_rotation_and_translation(&camera_rot, &camera_pos);
-
-        Mat4 view_matrix = mat4_inverse(&camera_matrix);
-
-        Mat4 model_matrix = mat4_identity();
-        model_matrix.w.x = xpos;
-        model_matrix.w.y = ypos;
-        model_matrix.x.x = 1 + 0.5*sin(time_since_start());
-
-        const WindowState* ws = linux_xcb_window_get_state(win);
-        Mat4 proj_matrix = mat4_create_projection_matrix((f32)ws->width, (f32)ws->height);
-        Mat4 proj_view_matrix = mat4_mul(&view_matrix, &proj_matrix);
-        Mat4 mvp_matrix = mat4_mul(&model_matrix, &proj_view_matrix);
+            camera_pos.y -= time_dt();
 
         renderer_wait_for_new_frame(rs);
         linux_xcb_window_process_all_events(win);
@@ -139,8 +123,7 @@ int main()
             renderer_surface_resized(rs, window_resize_w, window_resize_h);
         }
 
-        renderer_update_constant_buffer(rs, ph, 0, &mvp_matrix, sizeof(mvp_matrix));
-        renderer_draw(rs, ph, gh);
+        renderer_draw(rs, ph, gh, &camera_pos, &camera_rot);
         renderer_present(rs);
         keyboard_end_of_frame();
     }
