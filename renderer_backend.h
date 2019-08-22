@@ -1,8 +1,5 @@
 #pragma once
 
-fwd_handle(RendererResourceHandle);
-fwd_enum(WindowType);
-fwd_struct(Mesh);
 fwd_struct(RendererBackendState);
 fwd_struct(RendererBackendShader);
 fwd_struct(RendererBackendPipeline);

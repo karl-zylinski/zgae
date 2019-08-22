@@ -1,8 +1,6 @@
 #pragma once
 #include "geometry_types.h"
 
-fwd_struct(Vec3);
-
 typedef struct ObjLoadResult
 {
     bool ok;

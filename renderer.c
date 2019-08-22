@@ -10,10 +10,6 @@
 #include "str.h"
 #include "geometry_types.h"
 
-fwd_struct(RendererBackendState);
-fwd_struct(RendererBackendShader);
-fwd_struct(RendererBackendPipeline);
-fwd_struct(RendererBackendGeometry);
 
 typedef struct RendererResourceShader
 {

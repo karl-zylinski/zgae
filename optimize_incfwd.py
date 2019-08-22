@@ -20,15 +20,16 @@ for f in to_optimize:
     org_filelines = org_fp.readlines()
     org_fp.close()
 
-    includes_at = []
+    lines_to_skip = []
 
     for idx, line in enumerate(org_filelines):
-        if line.strip().startswith("#include"):
-            includes_at.append(idx)
+        sl = line.strip()
+        if sl.startswith("#include") or sl.startswith("fwd_struct") or sl.startswith("fwd_enum") or sl.startswith("fwd_handle"):
+            lines_to_skip.append(idx)
 
     removed_idx = []
 
-    for include_idx in includes_at:
+    for include_idx in lines_to_skip:
         line = org_filelines[include_idx]
 
         if line.strip() == "#include \"%s\"" % (f[:-1] + "h"):
