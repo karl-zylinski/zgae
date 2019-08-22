@@ -1,8 +1,6 @@
 #include "debug.h"
 #include <stdio.h>
-#include <stdarg.h>
 #include <time.h>
-#include "debug_types.h"
 
 static func_get_backtrace_t g_get_backtrace = NULL;
 

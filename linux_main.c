@@ -4,9 +4,7 @@
 #include "keycode_types.h"
 #include "debug.h"
 #include "memory.h"
-#include "jzon.h"
 #include "pipeline.h"
-#include "geometry_types.h"
 #include "math.h"
 #include "time.h"
 #include <time.h>

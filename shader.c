@@ -2,11 +2,9 @@
 #include "jzon.h"
 #include "file.h"
 #include "str.h"
-#include "array.h"
 #include "renderer.h"
 #include "memory.h"
 #include "debug.h"
-#include <stdio.h>
 
 static shader_type_t type_str_to_enum(const char* str)
 {

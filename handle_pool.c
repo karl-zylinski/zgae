@@ -2,7 +2,6 @@
 #include "debug.h"
 #include "array.h"
 #include "str.h"
-#include <string.h>
 #include "memory.h"
 
 typedef struct handle_pool_t {

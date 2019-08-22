@@ -1,7 +1,6 @@
 #include "keyboard.h"
 #include "keycode_types.h"
 #include "memory.h"
-#include "debug.h"
 
 static bool keys_held[KC_NUM];
 static bool keys_went_down[KC_NUM];

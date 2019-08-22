@@ -4,6 +4,74 @@
 		"selected_items":
 		[
 			[
+				"org",
+				"org_filelines"
+			],
+			[
+				"inc",
+				"include_idx"
+			],
+			[
+				"org_F",
+				"org_filelines"
+			],
+			[
+				"org_",
+				"org_fp"
+			],
+			[
+				"sou",
+				"source"
+			],
+			[
+				"aut",
+				"auto_value"
+			],
+			[
+				"input_",
+				"input_layout_num"
+			],
+			[
+				"source",
+				"source_flr"
+			],
+			[
+				"file_load",
+				"file_load_res_t"
+			],
+			[
+				"file_",
+				"file_load_res_t"
+			],
+			[
+				"allo",
+				"alloc_callstacks"
+			],
+			[
+				"callsta",
+				"callstack_num"
+			],
+			[
+				"alloc",
+				"allocation_callstack_t"
+			],
+			[
+				"back",
+				"backtrace_size"
+			],
+			[
+				"get_",
+				"g_get_backtrace"
+			],
+			[
+				"backtra",
+				"backtrace_symbols"
+			],
+			[
+				"funct",
+				"function_calls"
+			],
+			[
 				"geometry",
 				"geometry_index_t"
 			],
@@ -83,7 +151,7 @@
 			"file": "renderer_backend_vulkan.c",
 			"settings":
 			{
-				"buffer_size": 54526,
+				"buffer_size": 54459,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -92,7 +160,142 @@
 			"file": "renderer.c",
 			"settings":
 			{
-				"buffer_size": 13100,
+				"buffer_size": 13225,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "handle_pool.c",
+			"settings":
+			{
+				"buffer_size": 2621,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "handle_pool.h",
+			"settings":
+			{
+				"buffer_size": 396,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "jzon.h",
+			"settings":
+			{
+				"buffer_size": 198,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "jzon.c",
+			"settings":
+			{
+				"buffer_size": 9609,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "jzon_types.h",
+			"settings":
+			{
+				"buffer_size": 703,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "debug.c",
+			"settings":
+			{
+				"buffer_size": 1238,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "debug.h",
+			"settings":
+			{
+				"buffer_size": 627,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "file.h",
+			"settings":
+			{
+				"buffer_size": 112,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "file_types.h",
+			"settings":
+			{
+				"buffer_size": 238,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "global_include.h",
+			"settings":
+			{
+				"buffer_size": 663,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "file.c",
+			"settings":
+			{
+				"buffer_size": 724,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pipeline.c",
+			"settings":
+			{
+				"buffer_size": 1321,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pipeline.h",
+			"settings":
+			{
+				"buffer_size": 158,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pipeline_types.h",
+			"settings":
+			{
+				"buffer_size": 202,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "shader.c",
+			"settings":
+			{
+				"buffer_size": 7670,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -109,8 +312,97 @@
 			"file": "linux_main.c",
 			"settings":
 			{
-				"buffer_size": 4550,
+				"buffer_size": 5023,
 				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "linux_xcb_window.c",
+			"settings":
+			{
+				"buffer_size": 9998,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "linux_xcb_window.h",
+			"settings":
+			{
+				"buffer_size": 731,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "todo.txt",
+			"settings":
+			{
+				"buffer_size": 2361,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "Searching 52 files for \"execinfo\"\n\n/home/karl/Projects/zgae_c/linux_main.c:\n   13  #include <math.h>\n   14  #include \"keyboard.h\"\n   15: #include <execinfo.h>\n   16  \n   17  #define XYZ1(_x_, _y_, _z_) {(_x_), (_y_), (_z_), 1.f}\n\n/home/karl/Projects/zgae_c/memory.c:\n    5  \n    6  #ifdef ENABLE_MEMORY_TRACING\n    7:     #include <execinfo.h>\n    8  \n    9      static void get_backtrace(uint32_t steps, char*** callstack, uint32_t* num)\n\n2 matches across 2 files\n\n\nSearching 52 files for \"LAX\"\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.c:\n 1371  void renderer_backend_wait_for_new_frame(renderer_backend_state_t* rbs)\n 1372  {\n 1373:         error(\"LAX\");\n 1374      vkWaitForFences(rbs->device, 1, &rbs->image_in_flight_fences[rbs->current_frame], VK_TRUE, UINT64_MAX);\n 1375  }\n\n/home/karl/Projects/zgae_c/zgae:\n    <binary>\n\n3 matches across 2 files\n\n\nSearching 52 files for \"file_load\"\n\n/home/karl/Projects/zgae_c/file.c:\n    3  #include \"memory.h\"\n    4  \n    5: bool file_load(const char* filename, void** data, size_t* data_size)\n    6  {\n    7      FILE* file_handle = fopen(filename, \"rb\");\n    .\n   19  }\n   20  \n   21: bool file_load_str(const char* filename, char** data, size_t* str_len)\n   22  {\n   23      FILE* file_handle = fopen(filename, \"rb\");\n\n/home/karl/Projects/zgae_c/file.h:\n    1  #pragma once\n    2  \n    3: bool file_load(const char* filename, void** data, size_t* data_size);\n    4: bool file_load_str(const char* filename, char** data, size_t* str_len);\n\n/home/karl/Projects/zgae_c/pipeline.c:\n   14      char* fd;\n   15      size_t fs;\n   16:     bool file_load_ok = file_load_str(filename, &fd, &fs);\n   17:     ensure(file_load_ok);\n   18      jzon_value_t parsed;\n   19      int parse_res = jzon_parse(fd, &parsed);\n\n/home/karl/Projects/zgae_c/shader.c:\n   78      char* fd;\n   79      size_t fs;\n   80:     bool file_load_ok = file_load_str(filename, &fd, &fs);\n   81:     format_check(file_load_ok, \"File missing\");\n   82      jzon_value_t parsed;\n   83      int parse_res = jzon_parse(fd, &parsed);\n   ..\n  166      format_check(jz_source && jz_source->is_string, \"source missing or not a string\");\n  167  \n  168:     int source_load_ok = file_load(jz_source->string_val, (void**)&si.source, &si.source_size);\n  169      format_check(source_load_ok, \"failed opening shader source %s\", jz_source->string_val);\n  170  \n\n/home/karl/Projects/zgae_c/zgae:\n    <binary>\n\n20 matches across 5 files\n\n\nSearching 53 files for \"stringify\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   24  #define fwd_enum(e) typedef enum e e\n   25  #define fwd_handle(h) typedef handle_t h\n   26: #define stringify(m) (#m)\n\n/home/karl/Projects/zgae_c/renderer.c:\n   84  \n   85      for (renderer_resource_type_t t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)\n   86:         handle_pool_set_type(rs->resource_handle_pool, t, stringify(t));\n   87      \n   88      renderer_backend_state_t* rbs = renderer_backend_create(window_type, window_data);\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.c:\n  859      }\n  860  \n  861:     error(\"VkFormat unknown for shader data type %s\", stringify(t));\n  862      return -1;\n  863  }\n\n3 matches across 3 files\n\n\nSearching 53 files for \"stringify\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   24  #define fwd_enum(e) typedef enum e e\n   25  #define fwd_handle(h) typedef handle_t h\n   26: #define stringify(m) (#m)\n\n/home/karl/Projects/zgae_c/renderer.c:\n   84  \n   85      for (renderer_resource_type_t t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)\n   86:         handle_pool_set_type(rs->resource_handle_pool, t, stringify(t));\n   87      \n   88      renderer_backend_state_t* rbs = renderer_backend_create(window_type, window_data);\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.c:\n  859      }\n  860  \n  861:     error(\"VkFormat unknown for shader data type %s\", stringify(t));\n  862      return -1;\n  863  }\n\n3 matches across 3 files\n\n\nSearching 53 files for \"stringify\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   24  #define fwd_enum(e) typedef enum e e\n   25  #define fwd_handle(h) typedef handle_t h\n   26: #define STRINGIFY(m) (#m)\n   27: #define TO_STIRNG(m) STRINGIFY(m)\n\n/home/karl/Projects/zgae_c/renderer.c:\n   84  \n   85      for (renderer_resource_type_t t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)\n   86:         handle_pool_set_type(rs->resource_handle_pool, t, STRINGIFY(t));\n   87      \n   88      renderer_backend_state_t* rbs = renderer_backend_create(window_type, window_data);\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.c:\n  859      }\n  860  \n  861:     error(\"VkFormat unknown for shader data type %s\", stringify(t));\n  862      return -1;\n  863  }\n\n4 matches across 3 files\n\n\nSearching 53 files for \"STRINGIFY\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   24  #define fwd_enum(e) typedef enum e e\n   25  #define fwd_handle(h) typedef handle_t h\n   26: #define STRINGIFY(m) #m\n   27: #define TOSTRING(m) STRINGIFY(m)\n\n2 matches in 1 file\n\n\nSearching 53 files for \"tostring\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   25  #define fwd_handle(h) typedef handle_t h\n   26  #define STRINGIFY(m) #m\n   27: #define TOSTRING(m) STRINGIFY(m)\n\n1 match in 1 file\n\n\nSearching 53 files for \"TOSTRING\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   25  #define fwd_handle(h) typedef handle_t h\n   26  #define STRINGIFY(m) #m\n   27: #define TOSTRING(m) STRINGIFY(m)\n\n1 match in 1 file\n",
+			"settings":
+			{
+				"buffer_size": 5396,
+				"line_ending": "Unix",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "memory.c",
+			"settings":
+			{
+				"buffer_size": 3227,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "debug_types.h",
+			"settings":
+			{
+				"buffer_size": 123,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "shader.h",
+			"settings":
+			{
+				"buffer_size": 1947,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "time.h",
+			"settings":
+			{
+				"buffer_size": 108,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "optimize_includes.py",
+			"settings":
+			{
+				"buffer_size": 728,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "build.py",
+			"settings":
+			{
+				"buffer_size": 1153,
 				"line_ending": "Unix"
 			}
 		}
@@ -135,7 +427,7 @@
 			]
 		]
 	],
-	"build_varint": "build and run",
+	"build_varint": "",
 	"command_palette":
 	{
 		"height": 0.0,
@@ -183,13 +475,14 @@
 	],
 	"find":
 	{
-		"height": 43.0
+		"height": 44.0
 	},
 	"find_in_files":
 	{
-		"height": 0.0,
+		"height": 116.0,
 		"where_history":
 		[
+			""
 		]
 	},
 	"find_state":
@@ -197,6 +490,16 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"unknown",
+			"jzon_value_t",
+			"TOSTRING",
+			"tostring",
+			"STRINGIFY",
+			"stringify",
+			"sdt",
+			"file_load",
+			"LAX",
+			"execinfo",
 			"1,",
 			", 1)",
 			"indices = ",
@@ -231,7 +534,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 19,
 			"sheets":
 			[
 				{
@@ -240,15 +543,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 54526,
+						"buffer_size": 54459,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								30872,
-								30872
+								616,
+								616
 							]
 						],
 						"settings":
@@ -258,10 +561,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 16997.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -270,15 +573,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 13100,
+						"buffer_size": 13225,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8086,
-								8086
+								2499,
+								2499
 							]
 						],
 						"settings":
@@ -288,14 +591,451 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4676.0,
+						"translation.y": 955.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
 					"buffer": 2,
+					"file": "handle_pool.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2621,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2356,
+								2356
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 861.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 24,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "handle_pool.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 396,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								103,
+								103
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 23,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "jzon.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 198,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								144,
+								144
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 16,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "jzon.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9609,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8268,
+								8268
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 8330.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 17,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "jzon_types.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 703,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								678,
+								678
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 15,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "debug.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1238,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								695,
+								695
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 19,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "debug.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 627,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								439,
+								439
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 18,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "file.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 112,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								56,
+								56
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 22,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "file_types.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 238,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								121,
+								121
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 21,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "global_include.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 663,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								663,
+								663
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 25,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "file.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 724,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								241,
+								241
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 20,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "pipeline.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1321,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1174,
+								1174
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 234.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 14,
+					"file": "pipeline.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 158,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								41,
+								41
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "pipeline_types.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 202,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								54,
+								54
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 16,
+					"file": "shader.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7670,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6658,
+								6658
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3462.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 17,
 					"semi_transient": false,
 					"settings":
 					{
@@ -325,24 +1065,24 @@
 						"translation.y": 17979.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 27,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 18,
 					"file": "linux_main.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4550,
+						"buffer_size": 5023,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3787,
-								3787
+								0,
+								0
 							]
 						],
 						"settings":
@@ -352,10 +1092,516 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2433.0,
+						"translation.y": 1173.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 14,
+					"type": "text"
+				},
+				{
+					"buffer": 19,
+					"file": "linux_xcb_window.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9998,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9778,
+								9778
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 7203.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 20,
+					"file": "linux_xcb_window.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 731,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								353,
+								353
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 21,
+					"file": "todo.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2361,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								144,
+								144
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				},
+				{
+					"buffer": 22,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5396,
+						"regions":
+						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										147,
+										155
+									],
+									[
+										332,
+										340
+									],
+									[
+										661,
+										664
+									],
+									[
+										985,
+										994
+									],
+									[
+										1147,
+										1156
+									],
+									[
+										1352,
+										1361
+									],
+									[
+										1429,
+										1438
+									],
+									[
+										1595,
+										1604
+									],
+									[
+										1610,
+										1619
+									],
+									[
+										1663,
+										1672
+									],
+									[
+										1859,
+										1868
+									],
+									[
+										1874,
+										1883
+									],
+									[
+										1933,
+										1942
+									],
+									[
+										2188,
+										2197
+									],
+									[
+										2630,
+										2639
+									],
+									[
+										2846,
+										2855
+									],
+									[
+										3104,
+										3113
+									],
+									[
+										3366,
+										3375
+									],
+									[
+										3582,
+										3591
+									],
+									[
+										3840,
+										3849
+									],
+									[
+										4102,
+										4111
+									],
+									[
+										4148,
+										4157
+									],
+									[
+										4359,
+										4368
+									],
+									[
+										4617,
+										4626
+									],
+									[
+										4879,
+										4888
+									],
+									[
+										4922,
+										4931
+									],
+									[
+										5132,
+										5140
+									],
+									[
+										5352,
+										5360
+									]
+								],
+								"scope": ""
+							}
+						},
+						"selection":
+						[
+							[
+								5178,
+								5178
+							]
+						],
+						"settings":
+						{
+							"detect_indentation": false,
+							"line_numbers": false,
+							"output_tag": 9,
+							"result_base_dir": "",
+							"result_file_regex": "^([^ \t].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 4048.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 26,
+					"type": "text"
+				},
+				{
+					"buffer": 23,
+					"file": "memory.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3227,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2429,
+								2429
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2346.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 24,
+					"file": "debug_types.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 123,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								123,
+								123
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 31,
+					"type": "text"
+				},
+				{
+					"buffer": 18,
+					"file": "linux_main.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5023,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1369,
+								1369
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 966.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 30,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "debug.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 627,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								211,
+								211
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 28,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "debug.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1238,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1202,
+								1202
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 138.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 29,
+					"type": "text"
+				},
+				{
+					"buffer": 25,
+					"file": "shader.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1947,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1590,
+								1590
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1242.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 26,
+					"file": "time.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 108,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								108,
+								108
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 27,
+					"file": "optimize_includes.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 728,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								623,
+								623
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 28,
+					"file": "build.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1153,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								23,
+								23
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -363,7 +1609,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 31.0
+		"height": 32.0
 	},
 	"input":
 	{
@@ -404,7 +1650,7 @@
 	"project": "zgae.sublime-project",
 	"replace":
 	{
-		"height": 58.0
+		"height": 60.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -414,16 +1660,52 @@
 		"selected_items":
 		[
 			[
+				"bui",
+				"build.py"
+			],
+			[
+				"buil",
+				"build.py"
+			],
+			[
+				"xcb",
+				"linux_xcb_window.c"
+			],
+			[
+				"main",
+				"linux_main.c"
+			],
+			[
+				"shader",
+				"shader.c"
+			],
+			[
+				"jzon",
+				"jzon_types.h"
+			],
+			[
+				"file",
+				"file.c"
+			],
+			[
+				"vu",
+				"renderer_backend_vulkan.c"
+			],
+			[
+				"debug",
+				"debug.h"
+			],
+			[
+				"renderer",
+				"renderer_backend_vulkan.c"
+			],
+			[
 				"rend",
 				"renderer.c"
 			],
 			[
 				"ren",
 				"renderer.c"
-			],
-			[
-				"main",
-				"linux_main.c"
 			],
 			[
 				"backe",

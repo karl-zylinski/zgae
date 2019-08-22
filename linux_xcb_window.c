@@ -1,4 +1,3 @@
-#include "linux_xcb_window.h"
 #include <xcb/xcb.h>
 #include <string.h>
 #include "debug.h"

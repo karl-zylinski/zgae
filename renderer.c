@@ -1,4 +1,3 @@
-#include "renderer.h"
 #include "window_types.h"
 #include "renderer_backend.h"
 #include "memory.h"
@@ -7,7 +6,6 @@
 #include "debug.h"
 #include "pipeline.h"
 #include "shader.h"
-#include "geometry_types.h"
 #include "str.h"
 
 fwd_struct(renderer_backend_state_t);
