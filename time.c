@@ -1,3 +1,4 @@
+#include "time.h"
 
 static float s_time_dt = 0;
 static float s_time_since_start = 0;

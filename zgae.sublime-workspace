@@ -4,12 +4,16 @@
 		"selected_items":
 		[
 			[
-				"org",
-				"org_filelines"
+				"inc",
+				"includes_at"
 			],
 			[
-				"inc",
-				"include_idx"
+				"bui",
+				"build_error"
+			],
+			[
+				"org",
+				"org_filelines"
 			],
 			[
 				"org_F",
@@ -148,171 +152,18 @@
 	"buffers":
 	[
 		{
-			"file": "renderer_backend_vulkan.c",
+			"file": "array.c",
 			"settings":
 			{
-				"buffer_size": 54459,
-				"encoding": "UTF-8",
+				"buffer_size": 2054,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "renderer.c",
+			"file": "build.py",
 			"settings":
 			{
-				"buffer_size": 13225,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_pool.c",
-			"settings":
-			{
-				"buffer_size": 2621,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_pool.h",
-			"settings":
-			{
-				"buffer_size": 396,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "jzon.h",
-			"settings":
-			{
-				"buffer_size": 198,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "jzon.c",
-			"settings":
-			{
-				"buffer_size": 9609,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "jzon_types.h",
-			"settings":
-			{
-				"buffer_size": 703,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "debug.c",
-			"settings":
-			{
-				"buffer_size": 1238,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "debug.h",
-			"settings":
-			{
-				"buffer_size": 627,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "file.h",
-			"settings":
-			{
-				"buffer_size": 112,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "file_types.h",
-			"settings":
-			{
-				"buffer_size": 238,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "global_include.h",
-			"settings":
-			{
-				"buffer_size": 663,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "file.c",
-			"settings":
-			{
-				"buffer_size": 724,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pipeline.c",
-			"settings":
-			{
-				"buffer_size": 1321,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pipeline.h",
-			"settings":
-			{
-				"buffer_size": 158,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "pipeline_types.h",
-			"settings":
-			{
-				"buffer_size": 202,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "shader.c",
-			"settings":
-			{
-				"buffer_size": 7670,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "\n\n#define GLFW_INCLUDE_VULKAN\n#include <GLFW/glfw3.h>\n\n#include <glm/glm.hpp>\n\n#include <iostream>\n#include <fstream>\n#include <stdexcept>\n#include <algorithm>\n#include <vector>\n#include <cstring>\n#include <cstdlib>\n#include <array>\n#include <optional>\n#include <set>\n\nconst int WIDTH = 800;\nconst int HEIGHT = 600;\n\nconst int MAX_FRAMES_IN_FLIGHT = 2;\n\nconst std::vector<const char*> validationLayers = {\n    \"VK_LAYER_KHRONOS_validation\"\n};\n\nconst std::vector<const char*> deviceExtensions = {\n    VK_KHR_SWAPCHAIN_EXTENSION_NAME\n};\n\n#ifdef NDEBUG\nconst bool enableValidationLayers = false;\n#else\nconst bool enableValidationLayers = true;\n#endif\n\nVkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {\n    auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, \"vkCreateDebugUtilsMessengerEXT\");\n    if (func != nullptr) {\n        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);\n    } else {\n        return VK_ERROR_EXTENSION_NOT_PRESENT;\n    }\n}\n\nvoid DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {\n    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, \"vkDestroyDebugUtilsMessengerEXT\");\n    if (func != nullptr) {\n        func(instance, debugMessenger, pAllocator);\n    }\n}\n\nstruct QueueFamilyIndices {\n    std::optional<uint32_t> graphicsFamily;\n    std::optional<uint32_t> presentFamily;\n\n    bool isComplete() {\n        return graphicsFamily.has_value() && presentFamily.has_value();\n    }\n};\n\nstruct SwapChainSupportDetails {\n    VkSurfaceCapabilitiesKHR capabilities;\n    std::vector<VkSurfaceFormatKHR> formats;\n    std::vector<VkPresentModeKHR> presentModes;\n};\n\nstruct Vertex {\n    glm::vec2 pos;\n    glm::vec3 color;\n\n    static VkVertexInputBindingDescription getBindingDescription() {\n        VkVertexInputBindingDescription bindingDescription = {};\n        bindingDescription.binding = 0;\n        bindingDescription.stride = sizeof(Vertex);\n        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;\n\n        return bindingDescription;\n    }\n\n    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {\n        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};\n\n        attributeDescriptions[0].binding = 0;\n        attributeDescriptions[0].location = 0;\n        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;\n        attributeDescriptions[0].offset = offsetof(Vertex, pos);\n\n        attributeDescriptions[1].binding = 0;\n        attributeDescriptions[1].location = 1;\n        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;\n        attributeDescriptions[1].offset = offsetof(Vertex, color);\n\n        return attributeDescriptions;\n    }\n};\n\nconst std::vector<Vertex> vertices = {\n    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},\n    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},\n    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},\n    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}\n};\n\nconst std::vector<uint16_t> indices = {\n    0, 1, 2, 2, 3, 0\n};\n\nclass HelloTriangleApplication {\npublic:\n    void run() {\n        initWindow();\n        initVulkan();\n        mainLoop();\n        cleanup();\n    }\n\nprivate:\n    GLFWwindow* window;\n\n    VkInstance instance;\n    VkDebugUtilsMessengerEXT debugMessenger;\n    VkSurfaceKHR surface;\n\n    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;\n    VkDevice device;\n\n    VkQueue graphicsQueue;\n    VkQueue presentQueue;\n\n    VkSwapchainKHR swapChain;\n    std::vector<VkImage> swapChainImages;\n    VkFormat swapChainImageFormat;\n    VkExtent2D swapChainExtent;\n    std::vector<VkImageView> swapChainImageViews;\n    std::vector<VkFramebuffer> swapChainFramebuffers;\n\n    VkRenderPass renderPass;\n    VkPipelineLayout pipelineLayout;\n    VkPipeline graphicsPipeline;\n\n    VkCommandPool commandPool;\n\n    VkBuffer vertexBuffer;\n    VkDeviceMemory vertexBufferMemory;\n    VkBuffer indexBuffer;\n    VkDeviceMemory indexBufferMemory;\n\n    std::vector<VkCommandBuffer> commandBuffers;\n\n    std::vector<VkSemaphore> imageAvailableSemaphores;\n    std::vector<VkSemaphore> renderFinishedSemaphores;\n    std::vector<VkFence> inFlightFences;\n    size_t currentFrame = 0;\n\n    bool framebufferResized = false;\n\n    void initWindow() {\n        glfwInit();\n\n        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);\n\n        window = glfwCreateWindow(WIDTH, HEIGHT, \"Vulkan\", nullptr, nullptr);\n        glfwSetWindowUserPointer(window, this);\n        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);\n    }\n\n    static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {\n        auto app = reinterpret_cast<HelloTriangleApplication*>(glfwGetWindowUserPointer(window));\n        app->framebufferResized = true;\n    }\n\n    void initVulkan() {\n        createInstance();\n        setupDebugMessenger();\n        createSurface();\n        pickPhysicalDevice();\n        createLogicalDevice();\n        createSwapChain();\n        createImageViews();\n        createRenderPass();\n        createGraphicsPipeline();\n        createFramebuffers();\n        createCommandPool();\n        createVertexBuffer();\n        createIndexBuffer();\n        createCommandBuffers();\n        createSyncObjects();\n    }\n\n    void mainLoop() {\n        while (!glfwWindowShouldClose(window)) {\n            glfwPollEvents();\n            drawFrame();\n        }\n\n        vkDeviceWaitIdle(device);\n    }\n\n    void cleanupSwapChain() {\n        for (auto framebuffer : swapChainFramebuffers) {\n            vkDestroyFramebuffer(device, framebuffer, nullptr);\n        }\n\n        vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());\n\n        vkDestroyPipeline(device, graphicsPipeline, nullptr);\n        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);\n        vkDestroyRenderPass(device, renderPass, nullptr);\n\n        for (auto imageView : swapChainImageViews) {\n            vkDestroyImageView(device, imageView, nullptr);\n        }\n\n        vkDestroySwapchainKHR(device, swapChain, nullptr);\n    }\n\n    void cleanup() {\n        cleanupSwapChain();\n\n        vkDestroyBuffer(device, indexBuffer, nullptr);\n        vkFreeMemory(device, indexBufferMemory, nullptr);\n\n        vkDestroyBuffer(device, vertexBuffer, nullptr);\n        vkFreeMemory(device, vertexBufferMemory, nullptr);\n\n        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {\n            vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);\n            vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);\n            vkDestroyFence(device, inFlightFences[i], nullptr);\n        }\n\n        vkDestroyCommandPool(device, commandPool, nullptr);\n\n        vkDestroyDevice(device, nullptr);\n\n        if (enableValidationLayers) {\n            DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);\n        }\n\n        vkDestroySurfaceKHR(instance, surface, nullptr);\n        vkDestroyInstance(instance, nullptr);\n\n        glfwDestroyWindow(window);\n\n        glfwTerminate();\n    }\n\n    void recreateSwapChain() {\n        int width = 0, height = 0;\n        while (width == 0 || height == 0) {\n            glfwGetFramebufferSize(window, &width, &height);\n            glfwWaitEvents();\n        }\n\n        vkDeviceWaitIdle(device);\n\n        cleanupSwapChain();\n\n        createSwapChain();\n        createImageViews();\n        createRenderPass();\n        createGraphicsPipeline();\n        createFramebuffers();\n        createCommandBuffers();\n    }\n\n    void createInstance() {\n        if (enableValidationLayers && !checkValidationLayerSupport()) {\n            throw std::runtime_error(\"validation layers requested, but not available!\");\n        }\n\n        VkApplicationInfo appInfo = {};\n        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;\n        appInfo.pApplicationName = \"Hello Triangle\";\n        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);\n        appInfo.pEngineName = \"No Engine\";\n        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);\n        appInfo.apiVersion = VK_API_VERSION_1_0;\n\n        VkInstanceCreateInfo createInfo = {};\n        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;\n        createInfo.pApplicationInfo = &appInfo;\n\n        auto extensions = getRequiredExtensions();\n        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());\n        createInfo.ppEnabledExtensionNames = extensions.data();\n\n        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;\n        if (enableValidationLayers) {\n            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());\n            createInfo.ppEnabledLayerNames = validationLayers.data();\n\n            populateDebugMessengerCreateInfo(debugCreateInfo);\n            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;\n        } else {\n            createInfo.enabledLayerCount = 0;\n\n            createInfo.pNext = nullptr;\n        }\n\n        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create instance!\");\n        }\n    }\n\n    void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {\n        createInfo = {};\n        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;\n        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;\n        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;\n        createInfo.pfnUserCallback = debugCallback;\n    }\n\n    void setupDebugMessenger() {\n        if (!enableValidationLayers) return;\n\n        VkDebugUtilsMessengerCreateInfoEXT createInfo;\n        populateDebugMessengerCreateInfo(createInfo);\n\n        if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to set up debug messenger!\");\n        }\n    }\n\n    void createSurface() {\n        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create window surface!\");\n        }\n    }\n\n    void pickPhysicalDevice() {\n        uint32_t deviceCount = 0;\n        vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);\n\n        if (deviceCount == 0) {\n            throw std::runtime_error(\"failed to find GPUs with Vulkan support!\");\n        }\n\n        std::vector<VkPhysicalDevice> devices(deviceCount);\n        vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());\n\n        for (const auto& device : devices) {\n            if (isDeviceSuitable(device)) {\n                physicalDevice = device;\n                break;\n            }\n        }\n\n        if (physicalDevice == VK_NULL_HANDLE) {\n            throw std::runtime_error(\"failed to find a suitable GPU!\");\n        }\n    }\n\n    void createLogicalDevice() {\n        QueueFamilyIndices indices = findQueueFamilies(physicalDevice);\n\n        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;\n        std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};\n\n        float queuePriority = 1.0f;\n        for (uint32_t queueFamily : uniqueQueueFamilies) {\n            VkDeviceQueueCreateInfo queueCreateInfo = {};\n            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;\n            queueCreateInfo.queueFamilyIndex = queueFamily;\n            queueCreateInfo.queueCount = 1;\n            queueCreateInfo.pQueuePriorities = &queuePriority;\n            queueCreateInfos.push_back(queueCreateInfo);\n        }\n\n        VkPhysicalDeviceFeatures deviceFeatures = {};\n\n        VkDeviceCreateInfo createInfo = {};\n        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;\n\n        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());\n        createInfo.pQueueCreateInfos = queueCreateInfos.data();\n\n        createInfo.pEnabledFeatures = &deviceFeatures;\n\n        createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());\n        createInfo.ppEnabledExtensionNames = deviceExtensions.data();\n\n        if (enableValidationLayers) {\n            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());\n            createInfo.ppEnabledLayerNames = validationLayers.data();\n        } else {\n            createInfo.enabledLayerCount = 0;\n        }\n\n        if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create logical device!\");\n        }\n\n        vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);\n        vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);\n    }\n\n    void createSwapChain() {\n        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);\n\n        VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);\n        VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);\n        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);\n\n        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;\n        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {\n            imageCount = swapChainSupport.capabilities.maxImageCount;\n        }\n\n        VkSwapchainCreateInfoKHR createInfo = {};\n        createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;\n        createInfo.surface = surface;\n\n        createInfo.minImageCount = imageCount;\n        createInfo.imageFormat = surfaceFormat.format;\n        createInfo.imageColorSpace = surfaceFormat.colorSpace;\n        createInfo.imageExtent = extent;\n        createInfo.imageArrayLayers = 1;\n        createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;\n\n        QueueFamilyIndices indices = findQueueFamilies(physicalDevice);\n        uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};\n\n        if (indices.graphicsFamily != indices.presentFamily) {\n            createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;\n            createInfo.queueFamilyIndexCount = 2;\n            createInfo.pQueueFamilyIndices = queueFamilyIndices;\n        } else {\n            createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;\n        }\n\n        createInfo.preTransform = swapChainSupport.capabilities.currentTransform;\n        createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;\n        createInfo.presentMode = presentMode;\n        createInfo.clipped = VK_TRUE;\n\n        if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create swap chain!\");\n        }\n\n        vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);\n        swapChainImages.resize(imageCount);\n        vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());\n\n        swapChainImageFormat = surfaceFormat.format;\n        swapChainExtent = extent;\n    }\n\n    void createImageViews() {\n        swapChainImageViews.resize(swapChainImages.size());\n\n        for (size_t i = 0; i < swapChainImages.size(); i++) {\n            VkImageViewCreateInfo createInfo = {};\n            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;\n            createInfo.image = swapChainImages[i];\n            createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;\n            createInfo.format = swapChainImageFormat;\n            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;\n            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;\n            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;\n            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;\n            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;\n            createInfo.subresourceRange.baseMipLevel = 0;\n            createInfo.subresourceRange.levelCount = 1;\n            createInfo.subresourceRange.baseArrayLayer = 0;\n            createInfo.subresourceRange.layerCount = 1;\n\n            if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {\n                throw std::runtime_error(\"failed to create image views!\");\n            }\n        }\n    }\n\n    void createRenderPass() {\n        VkAttachmentDescription colorAttachment = {};\n        colorAttachment.format = swapChainImageFormat;\n        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;\n        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;\n        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;\n        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;\n        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;\n        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;\n        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;\n\n        VkAttachmentReference colorAttachmentRef = {};\n        colorAttachmentRef.attachment = 0;\n        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;\n\n        VkSubpassDescription subpass = {};\n        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;\n        subpass.colorAttachmentCount = 1;\n        subpass.pColorAttachments = &colorAttachmentRef;\n\n        VkSubpassDependency dependency = {};\n        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;\n        dependency.dstSubpass = 0;\n        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;\n        dependency.srcAccessMask = 0;\n        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;\n        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;\n\n        VkRenderPassCreateInfo renderPassInfo = {};\n        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;\n        renderPassInfo.attachmentCount = 1;\n        renderPassInfo.pAttachments = &colorAttachment;\n        renderPassInfo.subpassCount = 1;\n        renderPassInfo.pSubpasses = &subpass;\n        renderPassInfo.dependencyCount = 1;\n        renderPassInfo.pDependencies = &dependency;\n\n        if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create render pass!\");\n        }\n    }\n\n    void createGraphicsPipeline() {\n        auto vertShaderCode = readFile(\"shaders/vert.spv\");\n        auto fragShaderCode = readFile(\"shaders/frag.spv\");\n\n        VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);\n        VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);\n\n        VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};\n        vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;\n        vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;\n        vertShaderStageInfo.module = vertShaderModule;\n        vertShaderStageInfo.pName = \"main\";\n\n        VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};\n        fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;\n        fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;\n        fragShaderStageInfo.module = fragShaderModule;\n        fragShaderStageInfo.pName = \"main\";\n\n        VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};\n\n        VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};\n        vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;\n\n        auto bindingDescription = Vertex::getBindingDescription();\n        auto attributeDescriptions = Vertex::getAttributeDescriptions();\n\n        vertexInputInfo.vertexBindingDescriptionCount = 1;\n        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());\n        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;\n        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();\n\n        VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};\n        inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;\n        inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;\n        inputAssembly.primitiveRestartEnable = VK_FALSE;\n\n        VkViewport viewport = {};\n        viewport.x = 0.0f;\n        viewport.y = 0.0f;\n        viewport.width = (float) swapChainExtent.width;\n        viewport.height = (float) swapChainExtent.height;\n        viewport.minDepth = 0.0f;\n        viewport.maxDepth = 1.0f;\n\n        VkRect2D scissor = {};\n        scissor.offset = {0, 0};\n        scissor.extent = swapChainExtent;\n\n        VkPipelineViewportStateCreateInfo viewportState = {};\n        viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;\n        viewportState.viewportCount = 1;\n        viewportState.pViewports = &viewport;\n        viewportState.scissorCount = 1;\n        viewportState.pScissors = &scissor;\n\n        VkPipelineRasterizationStateCreateInfo rasterizer = {};\n        rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;\n        rasterizer.depthClampEnable = VK_FALSE;\n        rasterizer.rasterizerDiscardEnable = VK_FALSE;\n        rasterizer.polygonMode = VK_POLYGON_MODE_FILL;\n        rasterizer.lineWidth = 1.0f;\n        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;\n        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;\n        rasterizer.depthBiasEnable = VK_FALSE;\n\n        VkPipelineMultisampleStateCreateInfo multisampling = {};\n        multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;\n        multisampling.sampleShadingEnable = VK_FALSE;\n        multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;\n\n        VkPipelineColorBlendAttachmentState colorBlendAttachment = {};\n        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;\n        colorBlendAttachment.blendEnable = VK_FALSE;\n\n        VkPipelineColorBlendStateCreateInfo colorBlending = {};\n        colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;\n        colorBlending.logicOpEnable = VK_FALSE;\n        colorBlending.logicOp = VK_LOGIC_OP_COPY;\n        colorBlending.attachmentCount = 1;\n        colorBlending.pAttachments = &colorBlendAttachment;\n        colorBlending.blendConstants[0] = 0.0f;\n        colorBlending.blendConstants[1] = 0.0f;\n        colorBlending.blendConstants[2] = 0.0f;\n        colorBlending.blendConstants[3] = 0.0f;\n\n        VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};\n        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;\n        pipelineLayoutInfo.setLayoutCount = 0;\n        pipelineLayoutInfo.pushConstantRangeCount = 0;\n\n        if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create pipeline layout!\");\n        }\n\n        VkGraphicsPipelineCreateInfo pipelineInfo = {};\n        pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;\n        pipelineInfo.stageCount = 2;\n        pipelineInfo.pStages = shaderStages;\n        pipelineInfo.pVertexInputState = &vertexInputInfo;\n        pipelineInfo.pInputAssemblyState = &inputAssembly;\n        pipelineInfo.pViewportState = &viewportState;\n        pipelineInfo.pRasterizationState = &rasterizer;\n        pipelineInfo.pMultisampleState = &multisampling;\n        pipelineInfo.pColorBlendState = &colorBlending;\n        pipelineInfo.layout = pipelineLayout;\n        pipelineInfo.renderPass = renderPass;\n        pipelineInfo.subpass = 0;\n        pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;\n\n        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create graphics pipeline!\");\n        }\n\n        vkDestroyShaderModule(device, fragShaderModule, nullptr);\n        vkDestroyShaderModule(device, vertShaderModule, nullptr);\n    }\n\n    void createFramebuffers() {\n        swapChainFramebuffers.resize(swapChainImageViews.size());\n\n        for (size_t i = 0; i < swapChainImageViews.size(); i++) {\n            VkImageView attachments[] = {\n                swapChainImageViews[i]\n            };\n\n            VkFramebufferCreateInfo framebufferInfo = {};\n            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;\n            framebufferInfo.renderPass = renderPass;\n            framebufferInfo.attachmentCount = 1;\n            framebufferInfo.pAttachments = attachments;\n            framebufferInfo.width = swapChainExtent.width;\n            framebufferInfo.height = swapChainExtent.height;\n            framebufferInfo.layers = 1;\n\n            if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {\n                throw std::runtime_error(\"failed to create framebuffer!\");\n            }\n        }\n    }\n\n    void createCommandPool() {\n        QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);\n\n        VkCommandPoolCreateInfo poolInfo = {};\n        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;\n        poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();\n\n        if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create graphics command pool!\");\n        }\n    }\n\n    void createVertexBuffer() {\n        VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();\n\n        VkBuffer stagingBuffer;\n        VkDeviceMemory stagingBufferMemory;\n        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);\n\n        void* data;\n        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);\n            memcpy(data, vertices.data(), (size_t) bufferSize);\n        vkUnmapMemory(device, stagingBufferMemory);\n\n        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);\n\n        copyBuffer(stagingBuffer, vertexBuffer, bufferSize);\n\n        vkDestroyBuffer(device, stagingBuffer, nullptr);\n        vkFreeMemory(device, stagingBufferMemory, nullptr);\n    }\n\n    void createIndexBuffer() {\n        VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();\n\n        VkBuffer stagingBuffer;\n        VkDeviceMemory stagingBufferMemory;\n        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);\n\n        void* data;\n        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);\n            memcpy(data, indices.data(), (size_t) bufferSize);\n        vkUnmapMemory(device, stagingBufferMemory);\n\n        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);\n\n        copyBuffer(stagingBuffer, indexBuffer, bufferSize);\n\n        vkDestroyBuffer(device, stagingBuffer, nullptr);\n        vkFreeMemory(device, stagingBufferMemory, nullptr);\n    }\n\n    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {\n        VkBufferCreateInfo bufferInfo = {};\n        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;\n        bufferInfo.size = size;\n        bufferInfo.usage = usage;\n        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;\n\n        if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create buffer!\");\n        }\n\n        VkMemoryRequirements memRequirements;\n        vkGetBufferMemoryRequirements(device, buffer, &memRequirements);\n\n        VkMemoryAllocateInfo allocInfo = {};\n        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;\n        allocInfo.allocationSize = memRequirements.size;\n        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);\n\n        if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to allocate buffer memory!\");\n        }\n\n        vkBindBufferMemory(device, buffer, bufferMemory, 0);\n    }\n\n    void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {\n        VkCommandBufferAllocateInfo allocInfo = {};\n        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;\n        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;\n        allocInfo.commandPool = commandPool;\n        allocInfo.commandBufferCount = 1;\n\n        VkCommandBuffer commandBuffer;\n        vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);\n\n        VkCommandBufferBeginInfo beginInfo = {};\n        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;\n        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;\n\n        vkBeginCommandBuffer(commandBuffer, &beginInfo);\n\n        VkBufferCopy copyRegion = {};\n        copyRegion.size = size;\n        vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);\n\n        vkEndCommandBuffer(commandBuffer);\n\n        VkSubmitInfo submitInfo = {};\n        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;\n        submitInfo.commandBufferCount = 1;\n        submitInfo.pCommandBuffers = &commandBuffer;\n\n        vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);\n        vkQueueWaitIdle(graphicsQueue);\n\n        vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);\n    }\n\n    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {\n        VkPhysicalDeviceMemoryProperties memProperties;\n        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);\n\n        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {\n            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {\n                return i;\n            }\n        }\n\n        throw std::runtime_error(\"failed to find suitable memory type!\");\n    }\n\n    void createCommandBuffers() {\n        commandBuffers.resize(swapChainFramebuffers.size());\n\n        VkCommandBufferAllocateInfo allocInfo = {};\n        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;\n        allocInfo.commandPool = commandPool;\n        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;\n        allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();\n\n        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to allocate command buffers!\");\n        }\n\n        for (size_t i = 0; i < commandBuffers.size(); i++) {\n            VkCommandBufferBeginInfo beginInfo = {};\n            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;\n\n            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {\n                throw std::runtime_error(\"failed to begin recording command buffer!\");\n            }\n\n            VkRenderPassBeginInfo renderPassInfo = {};\n            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;\n            renderPassInfo.renderPass = renderPass;\n            renderPassInfo.framebuffer = swapChainFramebuffers[i];\n            renderPassInfo.renderArea.offset = {0, 0};\n            renderPassInfo.renderArea.extent = swapChainExtent;\n\n            VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};\n            renderPassInfo.clearValueCount = 1;\n            renderPassInfo.pClearValues = &clearColor;\n\n            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);\n\n                vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);\n\n                VkBuffer vertexBuffers[] = {vertexBuffer};\n                VkDeviceSize offsets[] = {0};\n                vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);\n\n                vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT16);\n\n                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);\n\n            vkCmdEndRenderPass(commandBuffers[i]);\n\n            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {\n                throw std::runtime_error(\"failed to record command buffer!\");\n            }\n        }\n    }\n\n    void createSyncObjects() {\n        imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);\n        renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);\n        inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);\n\n        VkSemaphoreCreateInfo semaphoreInfo = {};\n        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;\n\n        VkFenceCreateInfo fenceInfo = {};\n        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;\n        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;\n\n        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {\n            if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||\n                vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||\n                vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {\n                throw std::runtime_error(\"failed to create synchronization objects for a frame!\");\n            }\n        }\n    }\n\n    void drawFrame() {\n        vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());\n\n        uint32_t imageIndex;\n        VkResult result = vkAcquireNextImageKHR(device, swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);\n\n        if (result == VK_ERROR_OUT_OF_DATE_KHR) {\n            recreateSwapChain();\n            return;\n        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {\n            throw std::runtime_error(\"failed to acquire swap chain image!\");\n        }\n\n        VkSubmitInfo submitInfo = {};\n        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;\n\n        VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};\n        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};\n        submitInfo.waitSemaphoreCount = 1;\n        submitInfo.pWaitSemaphores = waitSemaphores;\n        submitInfo.pWaitDstStageMask = waitStages;\n\n        submitInfo.commandBufferCount = 1;\n        submitInfo.pCommandBuffers = &commandBuffers[imageIndex];\n\n        VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};\n        submitInfo.signalSemaphoreCount = 1;\n        submitInfo.pSignalSemaphores = signalSemaphores;\n\n        vkResetFences(device, 1, &inFlightFences[currentFrame]);\n\n        if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to submit draw command buffer!\");\n        }\n\n        VkPresentInfoKHR presentInfo = {};\n        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;\n\n        presentInfo.waitSemaphoreCount = 1;\n        presentInfo.pWaitSemaphores = signalSemaphores;\n\n        VkSwapchainKHR swapChains[] = {swapChain};\n        presentInfo.swapchainCount = 1;\n        presentInfo.pSwapchains = swapChains;\n\n        presentInfo.pImageIndices = &imageIndex;\n\n        result = vkQueuePresentKHR(presentQueue, &presentInfo);\n\n        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {\n            framebufferResized = false;\n            recreateSwapChain();\n        } else if (result != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to present swap chain image!\");\n        }\n\n        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;\n    }\n\n    VkShaderModule createShaderModule(const std::vector<char>& code) {\n        VkShaderModuleCreateInfo createInfo = {};\n        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;\n        createInfo.codeSize = code.size();\n        createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());\n\n        VkShaderModule shaderModule;\n        if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {\n            throw std::runtime_error(\"failed to create shader module!\");\n        }\n\n        return shaderModule;\n    }\n\n    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {\n        for (const auto& availableFormat : availableFormats) {\n            if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {\n                return availableFormat;\n            }\n        }\n\n        return availableFormats[0];\n    }\n\n    VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {\n        for (const auto& availablePresentMode : availablePresentModes) {\n            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {\n                return availablePresentMode;\n            }\n        }\n\n        return VK_PRESENT_MODE_FIFO_KHR;\n    }\n\n    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {\n        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {\n            return capabilities.currentExtent;\n        } else {\n            int width, height;\n            glfwGetFramebufferSize(window, &width, &height);\n\n            VkExtent2D actualExtent = {\n                static_cast<uint32_t>(width),\n                static_cast<uint32_t>(height)\n            };\n\n            actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));\n            actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));\n\n            return actualExtent;\n        }\n    }\n\n    SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) {\n        SwapChainSupportDetails details;\n\n        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);\n\n        uint32_t formatCount;\n        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);\n\n        if (formatCount != 0) {\n            details.formats.resize(formatCount);\n            vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());\n        }\n\n        uint32_t presentModeCount;\n        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);\n\n        if (presentModeCount != 0) {\n            details.presentModes.resize(presentModeCount);\n            vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());\n        }\n\n        return details;\n    }\n\n    bool isDeviceSuitable(VkPhysicalDevice device) {\n        QueueFamilyIndices indices = findQueueFamilies(device);\n\n        bool extensionsSupported = checkDeviceExtensionSupport(device);\n\n        bool swapChainAdequate = false;\n        if (extensionsSupported) {\n            SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);\n            swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();\n        }\n\n        return indices.isComplete() && extensionsSupported && swapChainAdequate;\n    }\n\n    bool checkDeviceExtensionSupport(VkPhysicalDevice device) {\n        uint32_t extensionCount;\n        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);\n\n        std::vector<VkExtensionProperties> availableExtensions(extensionCount);\n        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());\n\n        std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());\n\n        for (const auto& extension : availableExtensions) {\n            requiredExtensions.erase(extension.extensionName);\n        }\n\n        return requiredExtensions.empty();\n    }\n\n    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {\n        QueueFamilyIndices indices;\n\n        uint32_t queueFamilyCount = 0;\n        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);\n\n        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);\n        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());\n\n        int i = 0;\n        for (const auto& queueFamily : queueFamilies) {\n            if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {\n                indices.graphicsFamily = i;\n            }\n\n            VkBool32 presentSupport = false;\n            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);\n\n            if (queueFamily.queueCount > 0 && presentSupport) {\n                indices.presentFamily = i;\n            }\n\n            if (indices.isComplete()) {\n                break;\n            }\n\n            i++;\n        }\n\n        return indices;\n    }\n\n    std::vector<const char*> getRequiredExtensions() {\n        uint32_t glfwExtensionCount = 0;\n        const char** glfwExtensions;\n        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);\n\n        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);\n\n        if (enableValidationLayers) {\n            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);\n        }\n\n        return extensions;\n    }\n\n    bool checkValidationLayerSupport() {\n        uint32_t layerCount;\n        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);\n\n        std::vector<VkLayerProperties> availableLayers(layerCount);\n        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());\n\n        for (const char* layerName : validationLayers) {\n            bool layerFound = false;\n\n            for (const auto& layerProperties : availableLayers) {\n                if (strcmp(layerName, layerProperties.layerName) == 0) {\n                    layerFound = true;\n                    break;\n                }\n            }\n\n            if (!layerFound) {\n                return false;\n            }\n        }\n\n        return true;\n    }\n\n    static std::vector<char> readFile(const std::string& filename) {\n        std::ifstream file(filename, std::ios::ate | std::ios::binary);\n\n        if (!file.is_open()) {\n            throw std::runtime_error(\"failed to open file!\");\n        }\n\n        size_t fileSize = (size_t) file.tellg();\n        std::vector<char> buffer(fileSize);\n\n        file.seekg(0);\n        file.read(buffer.data(), fileSize);\n\n        file.close();\n\n        return buffer;\n    }\n\n    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {\n        std::cerr << \"validation layer: \" << pCallbackData->pMessage << std::endl;\n\n        return VK_FALSE;\n    }\n};\n\nint main() {\n    HelloTriangleApplication app;\n\n    try {\n        app.run();\n    } catch (const std::exception& e) {\n        std::cerr << e.what() << std::endl;\n        return EXIT_FAILURE;\n    }\n\n    return EXIT_SUCCESS;\n}\n\n",
-			"settings":
-			{
-				"buffer_size": 44263,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "linux_main.c",
-			"settings":
-			{
-				"buffer_size": 5023,
+				"buffer_size": 1210,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -322,70 +173,14 @@
 			"settings":
 			{
 				"buffer_size": 9998,
-				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "linux_xcb_window.h",
+			"file": "time.c",
 			"settings":
 			{
-				"buffer_size": 731,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "todo.txt",
-			"settings":
-			{
-				"buffer_size": 2361,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "Searching 52 files for \"execinfo\"\n\n/home/karl/Projects/zgae_c/linux_main.c:\n   13  #include <math.h>\n   14  #include \"keyboard.h\"\n   15: #include <execinfo.h>\n   16  \n   17  #define XYZ1(_x_, _y_, _z_) {(_x_), (_y_), (_z_), 1.f}\n\n/home/karl/Projects/zgae_c/memory.c:\n    5  \n    6  #ifdef ENABLE_MEMORY_TRACING\n    7:     #include <execinfo.h>\n    8  \n    9      static void get_backtrace(uint32_t steps, char*** callstack, uint32_t* num)\n\n2 matches across 2 files\n\n\nSearching 52 files for \"LAX\"\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.c:\n 1371  void renderer_backend_wait_for_new_frame(renderer_backend_state_t* rbs)\n 1372  {\n 1373:         error(\"LAX\");\n 1374      vkWaitForFences(rbs->device, 1, &rbs->image_in_flight_fences[rbs->current_frame], VK_TRUE, UINT64_MAX);\n 1375  }\n\n/home/karl/Projects/zgae_c/zgae:\n    <binary>\n\n3 matches across 2 files\n\n\nSearching 52 files for \"file_load\"\n\n/home/karl/Projects/zgae_c/file.c:\n    3  #include \"memory.h\"\n    4  \n    5: bool file_load(const char* filename, void** data, size_t* data_size)\n    6  {\n    7      FILE* file_handle = fopen(filename, \"rb\");\n    .\n   19  }\n   20  \n   21: bool file_load_str(const char* filename, char** data, size_t* str_len)\n   22  {\n   23      FILE* file_handle = fopen(filename, \"rb\");\n\n/home/karl/Projects/zgae_c/file.h:\n    1  #pragma once\n    2  \n    3: bool file_load(const char* filename, void** data, size_t* data_size);\n    4: bool file_load_str(const char* filename, char** data, size_t* str_len);\n\n/home/karl/Projects/zgae_c/pipeline.c:\n   14      char* fd;\n   15      size_t fs;\n   16:     bool file_load_ok = file_load_str(filename, &fd, &fs);\n   17:     ensure(file_load_ok);\n   18      jzon_value_t parsed;\n   19      int parse_res = jzon_parse(fd, &parsed);\n\n/home/karl/Projects/zgae_c/shader.c:\n   78      char* fd;\n   79      size_t fs;\n   80:     bool file_load_ok = file_load_str(filename, &fd, &fs);\n   81:     format_check(file_load_ok, \"File missing\");\n   82      jzon_value_t parsed;\n   83      int parse_res = jzon_parse(fd, &parsed);\n   ..\n  166      format_check(jz_source && jz_source->is_string, \"source missing or not a string\");\n  167  \n  168:     int source_load_ok = file_load(jz_source->string_val, (void**)&si.source, &si.source_size);\n  169      format_check(source_load_ok, \"failed opening shader source %s\", jz_source->string_val);\n  170  \n\n/home/karl/Projects/zgae_c/zgae:\n    <binary>\n\n20 matches across 5 files\n\n\nSearching 53 files for \"stringify\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   24  #define fwd_enum(e) typedef enum e e\n   25  #define fwd_handle(h) typedef handle_t h\n   26: #define stringify(m) (#m)\n\n/home/karl/Projects/zgae_c/renderer.c:\n   84  \n   85      for (renderer_resource_type_t t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)\n   86:         handle_pool_set_type(rs->resource_handle_pool, t, stringify(t));\n   87      \n   88      renderer_backend_state_t* rbs = renderer_backend_create(window_type, window_data);\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.c:\n  859      }\n  860  \n  861:     error(\"VkFormat unknown for shader data type %s\", stringify(t));\n  862      return -1;\n  863  }\n\n3 matches across 3 files\n\n\nSearching 53 files for \"stringify\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   24  #define fwd_enum(e) typedef enum e e\n   25  #define fwd_handle(h) typedef handle_t h\n   26: #define stringify(m) (#m)\n\n/home/karl/Projects/zgae_c/renderer.c:\n   84  \n   85      for (renderer_resource_type_t t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)\n   86:         handle_pool_set_type(rs->resource_handle_pool, t, stringify(t));\n   87      \n   88      renderer_backend_state_t* rbs = renderer_backend_create(window_type, window_data);\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.c:\n  859      }\n  860  \n  861:     error(\"VkFormat unknown for shader data type %s\", stringify(t));\n  862      return -1;\n  863  }\n\n3 matches across 3 files\n\n\nSearching 53 files for \"stringify\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   24  #define fwd_enum(e) typedef enum e e\n   25  #define fwd_handle(h) typedef handle_t h\n   26: #define STRINGIFY(m) (#m)\n   27: #define TO_STIRNG(m) STRINGIFY(m)\n\n/home/karl/Projects/zgae_c/renderer.c:\n   84  \n   85      for (renderer_resource_type_t t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)\n   86:         handle_pool_set_type(rs->resource_handle_pool, t, STRINGIFY(t));\n   87      \n   88      renderer_backend_state_t* rbs = renderer_backend_create(window_type, window_data);\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.c:\n  859      }\n  860  \n  861:     error(\"VkFormat unknown for shader data type %s\", stringify(t));\n  862      return -1;\n  863  }\n\n4 matches across 3 files\n\n\nSearching 53 files for \"STRINGIFY\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   24  #define fwd_enum(e) typedef enum e e\n   25  #define fwd_handle(h) typedef handle_t h\n   26: #define STRINGIFY(m) #m\n   27: #define TOSTRING(m) STRINGIFY(m)\n\n2 matches in 1 file\n\n\nSearching 53 files for \"tostring\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   25  #define fwd_handle(h) typedef handle_t h\n   26  #define STRINGIFY(m) #m\n   27: #define TOSTRING(m) STRINGIFY(m)\n\n1 match in 1 file\n\n\nSearching 53 files for \"TOSTRING\"\n\n/home/karl/Projects/zgae_c/global_include.h:\n   25  #define fwd_handle(h) typedef handle_t h\n   26  #define STRINGIFY(m) #m\n   27: #define TOSTRING(m) STRINGIFY(m)\n\n1 match in 1 file\n",
-			"settings":
-			{
-				"buffer_size": 5396,
-				"line_ending": "Unix",
-				"name": "Find Results",
-				"scratch": true
-			}
-		},
-		{
-			"file": "memory.c",
-			"settings":
-			{
-				"buffer_size": 3227,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "debug_types.h",
-			"settings":
-			{
-				"buffer_size": 123,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "shader.h",
-			"settings":
-			{
-				"buffer_size": 1947,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "time.h",
-			"settings":
-			{
-				"buffer_size": 108,
-				"encoding": "UTF-8",
+				"buffer_size": 301,
 				"line_ending": "Unix"
 			}
 		},
@@ -393,16 +188,8 @@
 			"file": "optimize_includes.py",
 			"settings":
 			{
-				"buffer_size": 728,
+				"buffer_size": 1507,
 				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "build.py",
-			"settings":
-			{
-				"buffer_size": 1153,
 				"line_ending": "Unix"
 			}
 		}
@@ -459,13 +246,39 @@
 	],
 	"file_history":
 	[
+		"/home/karl/Projects/zgae_c/time.c",
+		"/home/karl/Projects/zgae_c/linux_xcb_window.c",
+		"/home/karl/Projects/zgae_c/optimize_includes.py",
+		"/home/karl/Projects/zgae_c/renderer_backend_vulkan.c",
+		"/home/karl/Projects/zgae_c/renderer.c",
+		"/home/karl/Projects/zgae_c/handle_pool.c",
+		"/home/karl/Projects/zgae_c/handle_pool.h",
+		"/home/karl/Projects/zgae_c/jzon.h",
+		"/home/karl/Projects/zgae_c/jzon.c",
+		"/home/karl/Projects/zgae_c/jzon_types.h",
+		"/home/karl/Projects/zgae_c/debug.c",
+		"/home/karl/Projects/zgae_c/debug.h",
+		"/home/karl/Projects/zgae_c/file.h",
+		"/home/karl/Projects/zgae_c/file_types.h",
+		"/home/karl/Projects/zgae_c/global_include.h",
+		"/home/karl/Projects/zgae_c/file.c",
+		"/home/karl/Projects/zgae_c/pipeline.c",
+		"/home/karl/Projects/zgae_c/pipeline.h",
+		"/home/karl/Projects/zgae_c/pipeline_types.h",
+		"/home/karl/Projects/zgae_c/shader.c",
+		"/home/karl/Projects/zgae_c/linux_main.c",
+		"/home/karl/Projects/zgae_c/linux_xcb_window.h",
+		"/home/karl/Projects/zgae_c/todo.txt",
+		"/home/karl/Projects/zgae_c/memory.c",
+		"/home/karl/Projects/zgae_c/debug_types.h",
+		"/home/karl/Projects/zgae_c/shader.h",
+		"/home/karl/Projects/zgae_c/time.h",
+		"/home/karl/Projects/zgae_c/build.py",
 		"/home/karl/Projects/zgae_c/str.h",
 		"/home/karl/Projects/zgae_c/str.c",
 		"/home/karl/Projects/zgae_c/memory.h",
 		"/home/karl/Projects/zgae_c/geometry_types.h",
-		"/home/karl/Projects/zgae_c/linux_main.c",
 		"/home/karl/Projects/zgae_c/renderer.h",
-		"/home/karl/Projects/zgae_c/renderer.c",
 		"/home/karl/Projects/zgae_c/renderer_backend.h",
 		"/home/karl/Projects/zgae_c/zgae.sublime-project",
 		"/home/karl/Projects/zgae_c/build_py.sublime-build",
@@ -475,7 +288,7 @@
 	],
 	"find":
 	{
-		"height": 44.0
+		"height": 32.0
 	},
 	"find_in_files":
 	{
@@ -490,6 +303,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"break",
 			"unknown",
 			"jzon_value_t",
 			"TOSTRING",
@@ -534,24 +348,24 @@
 	"groups":
 	[
 		{
-			"selected": 19,
+			"selected": 4,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "renderer_backend_vulkan.c",
+					"file": "array.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 54459,
+						"buffer_size": 2054,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								616,
-								616
+								77,
+								77
 							]
 						],
 						"settings":
@@ -559,1013 +373,6 @@
 							"syntax": "Packages/C++/C.sublime-syntax",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "renderer.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 13225,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2499,
-								2499
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 955.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "handle_pool.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2621,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2356,
-								2356
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 861.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 24,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "handle_pool.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 396,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								103,
-								103
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 23,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "jzon.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 198,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								144,
-								144
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 16,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "jzon.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9609,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								8268,
-								8268
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 8330.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 17,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "jzon_types.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 703,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								678,
-								678
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 15,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "debug.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1238,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								695,
-								695
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 19,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "debug.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 627,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								439,
-								439
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 18,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "file.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 112,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								56,
-								56
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 22,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "file_types.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 238,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								121,
-								121
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 21,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "global_include.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 663,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								663,
-								663
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 25,
-					"type": "text"
-				},
-				{
-					"buffer": 12,
-					"file": "file.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 724,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								241,
-								241
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 20,
-					"type": "text"
-				},
-				{
-					"buffer": 13,
-					"file": "pipeline.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1321,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1174,
-								1174
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 234.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "pipeline.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 158,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								41,
-								41
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 15,
-					"file": "pipeline_types.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 202,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								54,
-								54
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 16,
-					"file": "shader.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7670,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6658,
-								6658
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3462.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 17,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 44263,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								32854,
-								32854
-							],
-							[
-								32958,
-								32958
-							]
-						],
-						"settings":
-						{
-							"auto_name": "",
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 17979.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 27,
-					"type": "text"
-				},
-				{
-					"buffer": 18,
-					"file": "linux_main.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5023,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1173.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 14,
-					"type": "text"
-				},
-				{
-					"buffer": 19,
-					"file": "linux_xcb_window.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9998,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9778,
-								9778
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 7203.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 20,
-					"file": "linux_xcb_window.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 731,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								353,
-								353
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				},
-				{
-					"buffer": 21,
-					"file": "todo.txt",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2361,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								144,
-								144
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 22,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5396,
-						"regions":
-						{
-							"match":
-							{
-								"flags": 112,
-								"regions":
-								[
-									[
-										147,
-										155
-									],
-									[
-										332,
-										340
-									],
-									[
-										661,
-										664
-									],
-									[
-										985,
-										994
-									],
-									[
-										1147,
-										1156
-									],
-									[
-										1352,
-										1361
-									],
-									[
-										1429,
-										1438
-									],
-									[
-										1595,
-										1604
-									],
-									[
-										1610,
-										1619
-									],
-									[
-										1663,
-										1672
-									],
-									[
-										1859,
-										1868
-									],
-									[
-										1874,
-										1883
-									],
-									[
-										1933,
-										1942
-									],
-									[
-										2188,
-										2197
-									],
-									[
-										2630,
-										2639
-									],
-									[
-										2846,
-										2855
-									],
-									[
-										3104,
-										3113
-									],
-									[
-										3366,
-										3375
-									],
-									[
-										3582,
-										3591
-									],
-									[
-										3840,
-										3849
-									],
-									[
-										4102,
-										4111
-									],
-									[
-										4148,
-										4157
-									],
-									[
-										4359,
-										4368
-									],
-									[
-										4617,
-										4626
-									],
-									[
-										4879,
-										4888
-									],
-									[
-										4922,
-										4931
-									],
-									[
-										5132,
-										5140
-									],
-									[
-										5352,
-										5360
-									]
-								],
-								"scope": ""
-							}
-						},
-						"selection":
-						[
-							[
-								5178,
-								5178
-							]
-						],
-						"settings":
-						{
-							"detect_indentation": false,
-							"line_numbers": false,
-							"output_tag": 9,
-							"result_base_dir": "",
-							"result_file_regex": "^([^ \t].*):$",
-							"result_line_regex": "^ +([0-9]+):",
-							"scroll_past_end": true,
-							"syntax": "Packages/Default/Find Results.hidden-tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 4048.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 26,
-					"type": "text"
-				},
-				{
-					"buffer": 23,
-					"file": "memory.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3227,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2429,
-								2429
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2346.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 24,
-					"file": "debug_types.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 123,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								123,
-								123
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 31,
-					"type": "text"
-				},
-				{
-					"buffer": 18,
-					"file": "linux_main.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5023,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1369,
-								1369
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 966.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 30,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "debug.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 627,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								211,
-								211
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 28,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "debug.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1238,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1202,
-								1202
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 138.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 29,
-					"type": "text"
-				},
-				{
-					"buffer": 25,
-					"file": "shader.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1947,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1590,
-								1590
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1242.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 26,
-					"file": "time.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 108,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								108,
-								108
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 27,
-					"file": "optimize_includes.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 728,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								623,
-								623
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1575,20 +382,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 28,
+					"buffer": 1,
 					"file": "build.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1153,
+						"buffer_size": 1210,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								23,
-								23
+								375,
+								394
 							]
 						],
 						"settings":
@@ -1601,7 +408,95 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "linux_xcb_window.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9998,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								116,
+								116
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
 					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "time.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 301,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								124,
+								124
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "optimize_includes.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1507,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								45,
+								45
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -1659,6 +554,10 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"linux_xc",
+				"linux_xcb_window.c"
+			],
 			[
 				"bui",
 				"build.py"

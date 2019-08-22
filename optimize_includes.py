@@ -31,7 +31,7 @@ for f in to_optimize:
     for include_idx in includes_at:
         line = org_filelines[include_idx]
 
-        if line.strip() == "#include \"%s\"" % (f[:-1] + ".h"):
+        if line.strip() == "#include \"%s\"" % (f[:-1] + "h"):
             continue
 
         test_file = "".join(org_filelines[:include_idx] + org_filelines[include_idx+1:])
@@ -39,7 +39,7 @@ for f in to_optimize:
         write_fp.write(test_file)
         write_fp.close()
 
-        build_error = os.system("./build.py > /dev/null 2>&1")
+        build_error = os.system("./build.py stop_on_first_error > /dev/null 2>&1")
 
         if build_error == 0:
             removed_idx.append(include_idx)

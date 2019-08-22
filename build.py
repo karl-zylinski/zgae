@@ -23,6 +23,9 @@ extra_flags = [
     "-DENABLE_SLOW_DEBUG_CHECKS"
 ]
 
+if "stop_on_first_error" in sys.argv:
+    extra_flags.append("-Wfatal-errors")
+
 for in_filename in to_compile:
     object_filename = in_filename[0:-2] + ".o"
     out_filename = "build/" + object_filename
@@ -42,5 +45,7 @@ linker_error = os.system("clang %s -rdynamic -o zgae -lrt -lm -lxcb -lvulkan" % 
 if linker_error != 0:
     exit("\nbuild.py exited: linker error")
 
-if len(sys.argv) > 1 and sys.argv[1] == "run":
+if "run" in sys.argv:
     os.system("./zgae")
+
+
