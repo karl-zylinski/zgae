@@ -998,7 +998,7 @@ RendererBackendPipeline* renderer_backend_create_pipeline(RendererBackendState* 
     prsci.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     prsci.polygonMode = VK_POLYGON_MODE_FILL;
     prsci.cullMode = VK_CULL_MODE_BACK_BIT;
-    prsci.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    prsci.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     prsci.depthClampEnable = VK_FALSE;
     prsci.rasterizerDiscardEnable = VK_FALSE;
     prsci.depthBiasEnable = VK_FALSE;
@@ -1231,7 +1231,7 @@ void renderer_backend_update_constant_buffer(RendererBackendState* rbs, Renderer
     check(cb, "No constant buffer with binding %d in supplied pipeline", binding);
 
     u8* mapped_uniform_data;
-    res = vkMapMemory(rbs->device, cb->memory[cf], offset, cb->allocated_size, 0, (void**)&mapped_uniform_data);
+    res = vkMapMemory(rbs->device, cb->memory[cf], offset, cb->allocated_size - offset, 0, (void**)&mapped_uniform_data);
     VERIFY_RES();
     memcpy(mapped_uniform_data, data, data_size);
     vkUnmapMemory(rbs->device, cb->memory[cf]);

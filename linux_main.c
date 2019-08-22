@@ -113,6 +113,10 @@ int main()
             camera_pos.y += time_dt();
         if (key_is_held(KC_S))
             camera_pos.y -= time_dt();
+        if (key_is_held(KC_R))
+            camera_pos.z += time_dt();
+        if (key_is_held(KC_F))
+            camera_pos.z -= time_dt();
 
         renderer_wait_for_new_frame(rs);
         linux_xcb_window_process_all_events(win);

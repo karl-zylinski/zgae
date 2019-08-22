@@ -330,7 +330,7 @@ RendererResourceHandle renderer_load_geometry(RendererState* rs, const Mesh* mes
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &geometry_res);
 }
 
-static void populate_constant_buffers(RendererState* rs, const RendererResourcePipeline* pl, const Mat4* mvp)
+static void populate_constant_buffers(RendererState* rs, const RendererResourcePipeline* pl, const Mat4* model_matrix, const Mat4* mvp_matrix)
 {
     for (u32 shdr_idx = 0; shdr_idx < pl->shader_stages_num; ++shdr_idx)
     {
@@ -340,8 +340,12 @@ static void populate_constant_buffers(RendererState* rs, const RendererResourceP
         for (u32 cbi_idx = 0; cbi_idx < shader->constant_buffer.items_num; ++cbi_idx)
         {
             ShaderConstantBufferItem* cbi = shader->constant_buffer.items + cbi_idx;
+
+            if (cbi->auto_value == SHADER_CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL)
+                renderer_backend_update_constant_buffer(rs->rbs, pl->backend_state, shader->constant_buffer.binding, model_matrix, sizeof(*model_matrix), offset);
+
             if (cbi->auto_value == SHADER_CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL_VIEW_PROJECTION)
-                renderer_backend_update_constant_buffer(rs->rbs, pl->backend_state, shader->constant_buffer.binding, mvp, sizeof(*mvp), offset);
+                renderer_backend_update_constant_buffer(rs->rbs, pl->backend_state, shader->constant_buffer.binding, mvp_matrix, sizeof(*mvp_matrix), offset);
 
             offset += shader_data_type_size(cbi->type);
         }
@@ -361,7 +365,7 @@ void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, Re
     Mat4 mvp_matrix = mat4_mul(&model_matrix, &proj_view_matrix);
 
     const RendererResourcePipeline* pipeline = &get_resource(rs, pipeline_handle)->pipeline;
-    populate_constant_buffers(rs, pipeline, &mvp_matrix);
+    populate_constant_buffers(rs, pipeline, &model_matrix, &mvp_matrix);
     renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs, geometry_handle)->geometry.backend_state);
 }
 
