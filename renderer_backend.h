@@ -1,7 +1,5 @@
 #pragma once
 
-#include "geometry_types.h"
-
 fwd_handle(renderer_resource_handle_t);
 fwd_enum(window_type_t);
 fwd_struct(renderer_backend_state_t);
