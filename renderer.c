@@ -234,6 +234,7 @@ static void destroy_resource(renderer_state_t* rs, renderer_resource_t* rr)
         case RENDERER_RESOURCE_TYPE_GEOMETRY: {
             renderer_resource_geometry_t* g = &rr->geometry;
             memf(g->vertices);
+            memf(g->indices);
         } break;
 
         case RENDERER_RESOURCE_TYPE_NUM:

@@ -797,6 +797,8 @@ void renderer_backend_destroy_geometry(renderer_backend_state_t* rbs, renderer_b
 {
     vkDestroyBuffer(rbs->device, g->vertex_buffer, NULL);
     vkFreeMemory(rbs->device, g->vertex_buffer_memory, NULL);
+    vkDestroyBuffer(rbs->device, g->index_buffer, NULL);
+    vkFreeMemory(rbs->device, g->index_buffer_memory, NULL);
     memf(g);
 }
 
