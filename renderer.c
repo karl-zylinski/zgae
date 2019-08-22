@@ -1,3 +1,4 @@
+#include "renderer.h"
 #include "window_types.h"
 #include "renderer_backend.h"
 #include "memory.h"
