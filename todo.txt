@@ -2,17 +2,24 @@
 
 - move input layout into pipeline file etc
     * rename "input layout" to "vertex input" or "vertex input layout" everywhere
+    * make sure constant buffer updating is purdy
+
+- add render world and draw_world or sumth
 
 
 ### LESS IMPORTANT ###
+
+- rename shader.c and pipeline.c to ##-intermediate.c
+
+- rewrite obj loader, its ugly
 
 - make first-person flying camera (see avatar.lua)
 
 - combine linux_main and linux_xcb_window into main_linux_xcb_vulkan
 
-- shader:
-    * make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do... or maybe just have a source_spirv field and ask renderer which field to pull, like with a SHADER_LANGAUGE_TYPE enum in the renderer
-    * in parser, error if > 1 shader of a type
+- make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do... or maybe just have a source_spirv field and ask renderer which field to pull, like with a SHADER_LANGAUGE_TYPE enum in the renderer
+
+- in shader in parser, error if > 1 shader of a type
 
 - add library shader compiler or invoke commandline shader compiler (so we can use glsl)
 

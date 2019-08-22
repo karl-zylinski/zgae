@@ -11,7 +11,7 @@
         void* ptr;
     } AllocationCallstack;
 
-    static const u32 MAX_ALLOC_CALLSTACKS = 8096;
+    #define MAX_ALLOC_CALLSTACKS 8096
     static AllocationCallstack alloc_callstacks[MAX_ALLOC_CALLSTACKS];
 
     static void add_allocation_callstack(void* ptr)
@@ -85,12 +85,14 @@ void* mema_zero(sizet s)
 
 void* memra(void* cur, sizet s)
 {
-    void* p = realloc(cur, s);
-
     #ifdef ENABLE_MEMORY_TRACING
         if (cur)
             remove_allocation_callstack(cur, false);
+    #endif
 
+    void* p = realloc(cur, s);
+
+    #ifdef ENABLE_MEMORY_TRACING
         if (p)
             add_allocation_callstack(p);
     #endif
@@ -107,12 +109,12 @@ void* memra_zero(void* cur, sizet s)
 
 void memf(void* p)
 {
-    free(p);
-
     #ifdef ENABLE_MEMORY_TRACING
         if (p)
             remove_allocation_callstack(p, true);
     #endif
+        
+    free(p);
 }
 
 void memory_check_leaks()

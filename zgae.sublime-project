@@ -9,12 +9,16 @@
         {
             "name": "zgae",
             "shell_cmd": "./build.py",
-            "file_regex": "(\\S*?):(\\d+):(\\d+): (error.*|fatal error.*)",
+            "file_regex": "(\\S*?):(\\d+):(\\d+): (error.*|fatal error.*|warning.*)",
 
             "variants": [
                 {
                     "name": "build and run",
                     "shell_cmd": "./build.py run",
+                },
+                {
+                    "name": "static code analysis",
+                    "shell_cmd": "scan-build ./build.py static_analysis",
                 }
             ]
         }

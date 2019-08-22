@@ -25,7 +25,7 @@ typedef struct ArrayHeader
 #define array_copy_data(a) (array_internal_copy_data(a, sizeof((*a))))
 #define array_insert(a, item, idx) \
     array_full(a) ? a = array_internal_grow(a, sizeof(*a)) : 0, \
-    (a)[array_internal_make_insert_room(a, idx, sizeof(*(a)))] = item
+    (a)[array_internal_make_insert_room(a, idx, sizeof((*a)))] = item
 
 #define array_destroy(a) ((a) ? array_internal_destroy(a) : 0)
 

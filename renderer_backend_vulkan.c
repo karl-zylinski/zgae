@@ -11,7 +11,7 @@
 #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %s)", res)
 
-const u32 MAX_FRAMES_IN_FLIGHT = 2;
+#define MAX_FRAMES_IN_FLIGHT 2
 
 typedef struct SwapchainBuffer
 {

@@ -5,6 +5,7 @@
 
 ArrayHeader* array_internal_header(const void* arr)
 {
+    check(arr, "NULL arr passed");
     ArrayHeader* h = (ArrayHeader *)((char *)(arr) - sizeof(ArrayHeader));
     check_slow(h->marker == ARRAY_MARKER, "Trying to use array_* functions on non-array.");
     return h;
@@ -40,6 +41,8 @@ void* array_internal_copy_data(void *arr, sizet item_size)
 
 sizet array_internal_make_insert_room(void* arr, sizet idx, sizet item_size)
 {
+    check(arr, "NULL arr passed");
+
     if (idx == array_num(arr))
     {
         ++(array_internal_header(arr)->num);

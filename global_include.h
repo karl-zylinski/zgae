@@ -11,6 +11,8 @@
 // t = type index (se handle_pool.h, max 128 types!!)
 // u = used
 
+#define ANALYZER_NORETURN __attribute__((analyzer_noreturn))
+
 typedef uint32_t Handle;
 static const Handle HANDLE_INVALID = -1;
 #define handle_index(h) (h >> 8)
