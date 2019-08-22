@@ -12,6 +12,7 @@
 #include <time.h>
 #include <math.h>
 #include "keyboard.h"
+#include <execinfo.h>
 
 #define XYZ1(_x_, _y_, _z_) {(_x_), (_y_), (_z_), 1.f}
 
@@ -47,9 +48,25 @@ static void handle_window_resize(uint32_t w, uint32_t h)
     window_resize_h = h;
 }
 
+static backtrace_t get_backtrace(uint32_t backtrace_size)
+{
+    if (backtrace_size > 32)
+        backtrace_size = 32;
+
+    static void* backtraces[32];
+    size_t bt_size = backtrace(backtraces, backtrace_size);
+    const char** bt_symbols = (const char**)backtrace_symbols(backtraces, bt_size);
+    backtrace_t bt = {
+        .function_calls = bt_symbols,
+        .function_calls_num = bt_size
+    };
+    return bt;
+}
+
 int main()
 {
     info("Starting ZGAE");
+    debug_init(get_backtrace);
     memory_init();
     keyboard_init();
     linux_xcb_window_t* win = linux_xcb_window_create("ZGAE", 640, 480);

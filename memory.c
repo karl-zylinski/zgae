@@ -4,21 +4,9 @@
 #include <stdio.h>
 
 #ifdef ENABLE_MEMORY_TRACING
-    #include <execinfo.h>
-
-    static void get_backtrace(uint32_t steps, char*** callstack, uint32_t* num)
-    {
-        if (steps > 32)
-            steps = 32;
-
-        void* backtraces[32];
-        *num = backtrace(backtraces, steps);
-        *callstack = backtrace_symbols(backtraces, *num);
-    }
-
     typedef struct allocation_callstack_t 
     {
-        char** callstack;
+        const char** callstack;
         uint32_t callstack_num;
         void* ptr;
     } allocation_callstack_t;
@@ -32,9 +20,15 @@
         {
             if (alloc_callstacks[i].ptr == NULL)
             {
-                allocation_callstack_t* ac = alloc_callstacks + i;
-                get_backtrace(10, &ac->callstack, &ac->callstack_num);
-                ac->ptr = ptr;
+                backtrace_t bt = debug_get_backtrace(10);
+
+                allocation_callstack_t ac = {
+                    .callstack = bt.function_calls,
+                    .callstack_num = bt.function_calls_num,
+                    .ptr = ptr
+                };
+
+                alloc_callstacks[i] = ac;
                 return;
             }
         }
@@ -135,8 +129,6 @@ void memory_check_leaks()
                     fprintf(stderr, "%s", alloc_callstacks[ac_idx].callstack[cidx]);
                     fprintf(stderr, "\n");
                 }
-
-                error("Exiting.");
             }
         }
     #endif
