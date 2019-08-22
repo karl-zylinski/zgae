@@ -6,30 +6,30 @@
 #include "window_types.h"
 #include "memory.h"
 
-typedef struct xcb_event_queue_t {
+typedef struct XcbEventQueue {
     xcb_generic_event_t* prev;
     xcb_generic_event_t* current;
     xcb_generic_event_t* next;
-} xcb_event_queue_t;
+} XcbEventQueue;
 
-typedef struct linux_xcb_window_t {
+typedef struct XcbWindow {
     xcb_connection_t* connection;
-    xcb_event_queue_t evt_queue;
-    uint32_t handle;
-    window_state_t state;
-} linux_xcb_window_t;
+    XcbEventQueue evt_queue;
+    u32 handle;
+    WindowState state;
+} XcbWindow;
 
-linux_xcb_window_t* linux_xcb_window_create(const char* title, uint32_t width, uint32_t height)
+XcbWindow* linux_xcb_window_create(const char* title, u32 width, u32 height)
 {
-    linux_xcb_window_t* w = mema_zero(sizeof(linux_xcb_window_t));
+    XcbWindow* w = mema_zero(sizeof(XcbWindow));
     info("Creating XCB window w/ title %s, width %d, height %d", title, width, height);
     w->state.width = width;
     w->state.height = height;
     w->connection = xcb_connect(NULL, NULL);
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
-    uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-    uint32_t values[] = { screen->black_pixel, 
+    u32 mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+    u32 values[] = { screen->black_pixel, 
         XCB_EVENT_MASK_EXPOSURE
         | XCB_EVENT_MASK_KEY_PRESS
         | XCB_EVENT_MASK_KEY_RELEASE
@@ -69,7 +69,7 @@ linux_xcb_window_t* linux_xcb_window_create(const char* title, uint32_t width, u
     return w;
 }
 
-void linux_xcb_window_destroy(linux_xcb_window_t* w)
+void linux_xcb_window_destroy(XcbWindow* w)
 {
     info("Destroying XCB window");
     xcb_destroy_window(w->connection, w->handle);
@@ -77,14 +77,14 @@ void linux_xcb_window_destroy(linux_xcb_window_t* w)
     memf(w);
 }
 
-void linux_xcb_window_update_callbacks(linux_xcb_window_t* w, const window_callbacks_t* wc)
+void linux_xcb_window_update_callbacks(XcbWindow* w, const WindowCallbacks* wc)
 {
     w->state.callbacks = *wc;
 }
 
-static keycode_t xcb_key_to_keycode(xcb_keycode_t code)
+static KeyCode xcb_key_to_keycode(xcb_keycode_t code)
 {
-    static keycode_t codes[] = {
+    static KeyCode codes[] = {
         KC_UNKNOWN, // 0
         KC_UNKNOWN, // 1
         KC_UNKNOWN, // 2
@@ -215,15 +215,15 @@ static keycode_t xcb_key_to_keycode(xcb_keycode_t code)
         KC_UNKNOWN, // 127
     };
 
-    uint32_t num_codes = sizeof(codes)/sizeof(keycode_t);
+    u32 num_codes = sizeof(codes)/sizeof(KeyCode);
 
-    if ((uint32_t)code > num_codes)
+    if ((u32)code > num_codes)
         return KC_UNKNOWN;
 
-    return codes[(uint32_t)code];
+    return codes[(u32)code];
 }
 
-static void update_event_queue(xcb_event_queue_t* q, xcb_connection_t* c)
+static void update_event_queue(XcbEventQueue* q, xcb_connection_t* c)
 {
     free(q->prev);
     q->prev = q->current;
@@ -231,7 +231,7 @@ static void update_event_queue(xcb_event_queue_t* q, xcb_connection_t* c)
     q->next = xcb_poll_for_event(c);
 }
 
-static bool poll_event(linux_xcb_window_t* w)
+static bool poll_event(XcbWindow* w)
 {
     update_event_queue(&w->evt_queue, w->connection);
     xcb_generic_event_t* evt = w->evt_queue.current;
@@ -249,7 +249,7 @@ static bool poll_event(linux_xcb_window_t* w)
         {
             xcb_keycode_t code = ((xcb_key_press_event_t*)evt)->detail;
 
-            keycode_t kc = xcb_key_to_keycode(code);
+            KeyCode kc = xcb_key_to_keycode(code);
             
             if (kc == KC_UNKNOWN)
                 info("Unknown key pressed: %d", code);
@@ -272,7 +272,7 @@ static bool poll_event(linux_xcb_window_t* w)
                 return true;
             }
 
-            keycode_t kc = xcb_key_to_keycode(code);
+            KeyCode kc = xcb_key_to_keycode(code);
             
             if (kc == KC_UNKNOWN)
                 info("Unknown key pressed: %d", code);
@@ -303,8 +303,8 @@ static bool poll_event(linux_xcb_window_t* w)
             const xcb_configure_notify_event_t *cfg_event = (const xcb_configure_notify_event_t *)evt;
             if (((cfg_event->width != w->state.width) || (cfg_event->height != w->state.height)))
             {
-                    uint32_t width = cfg_event->width;
-                    uint32_t height = cfg_event->height;
+                    u32 width = cfg_event->width;
+                    u32 height = cfg_event->height;
                     if (width > 0 && height > 0)
                     {
                         info("XCB window resized to %d x %d", width, height);
@@ -318,27 +318,27 @@ static bool poll_event(linux_xcb_window_t* w)
     }
 }
 
-void linux_xcb_window_process_all_events(linux_xcb_window_t* w)
+void linux_xcb_window_process_all_events(XcbWindow* w)
 {
     while(poll_event(w));
 }
 
-xcb_connection_t* linux_xcb_window_get_connection(const linux_xcb_window_t* w)
+xcb_connection_t* linux_xcb_window_get_connection(const XcbWindow* w)
 {
     return w->connection;
 }
 
-uint32_t linux_xcb_window_get_handle(const linux_xcb_window_t* w)
+u32 linux_xcb_window_get_handle(const XcbWindow* w)
 {
     return w->handle;
 }
 
-bool linux_xcb_window_is_open(const linux_xcb_window_t* w)
+bool linux_xcb_window_is_open(const XcbWindow* w)
 {
     return w->state.open_state == WINDOW_OPEN_STATE_OPEN;
 }
 
-const window_state_t* linux_xcb_window_get_state(const linux_xcb_window_t* w)
+const WindowState* linux_xcb_window_get_state(const XcbWindow* w)
 {
     return &w->state;
 }

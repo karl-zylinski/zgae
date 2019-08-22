@@ -9,7 +9,7 @@
         {
             "name": "zgae",
             "shell_cmd": "./build.py",
-            "file_regex": "(\\S*?):(\\d+):(\\d+): (error.*)",
+            "file_regex": "(\\S*?):(\\d+):(\\d+): (error.*|fatal error.*)",
 
             "variants": [
                 {

@@ -1,15 +1,15 @@
 #include "math.h"
 #include <math.h>
 
-mat4_t mat4_create_projection_matrix(float bb_width, float bb_height)
+Mat4 mat4_create_projection_matrix(f32 bb_width, f32 bb_height)
 {
-    float near_plane = 0.01f;
-    float far_plane = 1000.0f;
-    float fov = 75.0f;
-    float aspect = bb_width / bb_height;
-    float y_scale = 1.0f / tanf((PI / 180.0f) * fov / 2);
-    float x_scale = y_scale / aspect;
-    mat4_t proj = {
+    f32 near_plane = 0.01f;
+    f32 far_plane = 1000.0f;
+    f32 fov = 75.0f;
+    f32 aspect = bb_width / bb_height;
+    f32 y_scale = 1.0f / tanf((PI / 180.0f) * fov / 2);
+    f32 x_scale = y_scale / aspect;
+    Mat4 proj = {
         {x_scale, 0, 0, 0},
         {0, 0, far_plane/(far_plane-near_plane), 1},
         {0, -y_scale, 0, 0},
@@ -18,9 +18,9 @@ mat4_t mat4_create_projection_matrix(float bb_width, float bb_height)
     return proj;
 }
 
-mat4_t mat4_identity()
+Mat4 mat4_identity()
 {
-    const mat4_t i = {
+    const Mat4 i = {
         {1, 0, 0, 0},
         {0, 1, 0, 0},
         {0, 0, 1, 0},
@@ -30,9 +30,9 @@ mat4_t mat4_identity()
     return i;
 }
 
-mat4_t mat4_from_rotation_and_translation(const quat_t* q, const vec3_t* t)
+Mat4 mat4_from_rotation_and_translation(const Quat* q, const Vec3* t)
 {
-    const float x = q->x, y = q->y, z = q->z, w = q->w,
+    const f32 x = q->x, y = q->y, z = q->z, w = q->w,
         x2 = x + x,
         y2 = y + y,
         z2 = z + z,
@@ -47,7 +47,7 @@ mat4_t mat4_from_rotation_and_translation(const quat_t* q, const vec3_t* t)
         wy = w * y2,
         wz = w * z2;
 
-    mat4_t out = {};
+    Mat4 out = {};
     out.x.x = 1 - (yy + zz);
     out.x.y = xy + wz;
     out.x.z = xz - wy;
@@ -67,9 +67,9 @@ mat4_t mat4_from_rotation_and_translation(const quat_t* q, const vec3_t* t)
     return out;
 }
 
-mat4_t mat4_mul(const mat4_t* m1, const mat4_t* m2)
+Mat4 mat4_mul(const Mat4* m1, const Mat4* m2)
 {
-    mat4_t product =
+    Mat4 product =
     {
         {
             m1->x.x * m2->x.x + m1->x.y * m2->y.x + m1->x.z * m2->z.x + m1->x.w * m2->w.x,
@@ -101,10 +101,10 @@ mat4_t mat4_mul(const mat4_t* m1, const mat4_t* m2)
 }
 
 
-mat4_t mat4_inverse(const mat4_t* m)
+Mat4 mat4_inverse(const Mat4* m)
 {
     const float* a = &m->x.x;
-    float a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
+    f32 a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
         a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7],
         a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11],
         a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15],
@@ -123,9 +123,9 @@ mat4_t mat4_inverse(const mat4_t* m)
         b11 = a22 * a33 - a23 * a32;
 
     // Calculate the determinant
-    float det = 1.0f / (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
+    f32 det = 1.0f / (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
 
-    mat4_t result;
+    Mat4 result;
     result.x.x = (a11 * b11 - a12 * b10 + a13 * b09) * det;
     result.x.y = (a02 * b10 - a01 * b11 - a03 * b09) * det;
     result.x.z = (a31 * b05 - a32 * b04 + a33 * b03) * det;
@@ -145,8 +145,8 @@ mat4_t mat4_inverse(const mat4_t* m)
     return result;
 }
 
-quat_t quat_identity()
+Quat quat_identity()
 {
-    quat_t q = {0, 0, 0, 1};
+    Quat q = {0, 0, 0, 1};
     return q;
 }

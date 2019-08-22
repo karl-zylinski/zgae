@@ -11,57 +11,57 @@
 #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %s)", res)
 
-const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+const u32 MAX_FRAMES_IN_FLIGHT = 2;
 
-typedef struct swapchain_buffer_t
+typedef struct SwapchainBuffer
 {
     VkImage image;
     VkImageView view;
     VkFramebuffer framebuffer;
-} swapchain_buffer_t;
+} SwapchainBuffer;
 
-typedef struct depth_buffer_t
+typedef struct DepthBuffer
 {
     VkFormat format;
     VkImage image;
     VkImageView view;
     VkDeviceMemory memory;
-} depth_buffer_t;
+} DepthBuffer;
 
-typedef struct renderer_backend_shader_t
+typedef struct RendererBackendShader
 {
     VkShaderModule module;
-} renderer_backend_shader_t;
+} RendererBackendShader;
 
-typedef struct pipeline_constant_buffer_t
+typedef struct PipelineConstantBuffer
 {
     VkBuffer vk_handle[MAX_FRAMES_IN_FLIGHT];
     VkDeviceMemory memory[MAX_FRAMES_IN_FLIGHT];
-    uint32_t binding;
-    uint32_t size;
-    uint32_t allocated_size;
-} pipeline_constant_buffer_t;
+    u32 binding;
+    u32 size;
+    u32 allocated_size;
+} PipelineConstantBuffer;
 
-typedef struct renderer_backend_pipeline_t
+typedef struct RendererBackendPipeline
 {
-    pipeline_constant_buffer_t* constant_buffers;
+    PipelineConstantBuffer* constant_buffers;
     VkDescriptorSet* constant_buffer_descriptor_sets[MAX_FRAMES_IN_FLIGHT];
     VkDescriptorSetLayout constant_buffer_descriptor_set_layout;
-    uint32_t constant_buffers_num;
+    u32 constant_buffers_num;
     VkPipeline vk_handle;
     VkPipelineLayout layout;
-} renderer_backend_pipeline_t;
+} RendererBackendPipeline;
 
-typedef struct renderer_backend_geometry_t
+typedef struct RendererBackendGeometry
 {
     VkBuffer vertex_buffer;
     VkBuffer index_buffer;
     VkDeviceMemory vertex_buffer_memory;
     VkDeviceMemory index_buffer_memory;
-    geometry_index_t indices_num;
-} renderer_backend_geometry_t;
+    GeometryIndex indices_num;
+} RendererBackendGeometry;
 
-typedef struct renderer_backend_state_t
+typedef struct RendererBackendState
 {
     VkInstance instance;
     VkDebugUtilsMessengerEXT debug_messenger;
@@ -72,24 +72,24 @@ typedef struct renderer_backend_state_t
     VkPhysicalDeviceMemoryProperties gpu_memory_properties;
     VkDevice device;
     VkSwapchainKHR swapchain;
-    vec2u_t swapchain_size;
-    uint32_t current_frame;
-    swapchain_buffer_t* swapchain_buffers;
+    Vec2u swapchain_size;
+    u32 current_frame;
+    SwapchainBuffer* swapchain_buffers;
     VkFence image_in_flight_fences[MAX_FRAMES_IN_FLIGHT];
     VkSemaphore image_available_semaphores[MAX_FRAMES_IN_FLIGHT];
     VkSemaphore render_finished_semaphores[MAX_FRAMES_IN_FLIGHT];
-    uint32_t swapchain_buffers_num;
-    uint32_t graphics_queue_family_idx;
+    u32 swapchain_buffers_num;
+    u32 graphics_queue_family_idx;
     VkQueue graphics_queue;
-    uint32_t present_queue_family_idx;
+    u32 present_queue_family_idx;
     VkQueue present_queue;
     VkCommandPool graphics_cmd_pool;
     VkCommandBuffer* graphics_cmd_buffers;
-    uint32_t graphics_cmd_buffers_num;
-    depth_buffer_t depth_buffer;
+    u32 graphics_cmd_buffers_num;
+    DepthBuffer depth_buffer;
     VkDescriptorPool descriptor_pool_uniform_buffer;
     VkRenderPass render_pass;
-} renderer_backend_state_t;
+} RendererBackendState;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -121,7 +121,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
         "Due to Vulkan bug (https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/1670)."
     };
 
-    int32_t non_error_idx = str_eql_arr(data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
+    i32 non_error_idx = str_eql_arr(data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
 
     if (non_error_idx != -1)
     {
@@ -139,26 +139,26 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     return VK_FALSE;
 }
 
-static vec2u_t get_surface_size(VkPhysicalDevice gpu, VkSurfaceKHR surface)
+static Vec2u get_surface_size(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 {
     VkSurfaceCapabilitiesKHR surface_capabilities;
     VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surface_capabilities);
     VERIFY_RES();
-    check(surface_capabilities.currentExtent.width != (uint32_t)-1, "Couldn't get surface size");
-    vec2u_t size = {surface_capabilities.currentExtent.width, surface_capabilities.currentExtent.height};
+    check(surface_capabilities.currentExtent.width != (u32)-1, "Couldn't get surface size");
+    Vec2u size = {surface_capabilities.currentExtent.width, surface_capabilities.currentExtent.height};
     return size;
 }
 
 static VkPresentModeKHR choose_swapchain_present_mode(VkPhysicalDevice gpu, VkSurfaceKHR surface) {
     VkResult res;
-    uint32_t present_modes_count;
+    u32 present_modes_count;
     res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, NULL);
     VERIFY_RES();
     VkPresentModeKHR* present_modes = mema(present_modes_count * sizeof(VkPresentModeKHR));
     res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, present_modes);
     VERIFY_RES();
 
-    for (uint32_t i = 0; i < present_modes_count; ++i)
+    for (u32 i = 0; i < present_modes_count; ++i)
     {
         if (present_modes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
         {
@@ -186,9 +186,9 @@ static VkCompositeAlphaFlagBitsKHR choose_swapchain_composite_alpha(VkCompositeA
 }
 
 static void create_swapchain(
-    VkSwapchainKHR* out_current_swapchain, swapchain_buffer_t** out_sc_bufs, uint32_t* out_sc_bufs_num, vec2u_t size,
+    VkSwapchainKHR* out_current_swapchain, SwapchainBuffer** out_sc_bufs, u32* out_sc_bufs_num, Vec2u size,
     VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface, VkFormat format,
-    uint32_t graphics_queue_family_idx, uint32_t present_queue_family_idx)
+    u32 graphics_queue_family_idx, u32 present_queue_family_idx)
 {
     info("Creating swapchain with size %dx%d", size.x, size.y);
     VkResult res;
@@ -219,7 +219,7 @@ static void create_swapchain(
     scci.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     scci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    uint32_t queue_family_indicies[] = {graphics_queue_family_idx, present_queue_family_idx};
+    u32 queue_family_indicies[] = {graphics_queue_family_idx, present_queue_family_idx};
 
     if (queue_family_indicies[0] != queue_family_indicies[1])
     {
@@ -233,7 +233,7 @@ static void create_swapchain(
     VERIFY_RES();
     *out_current_swapchain = swapchain;
 
-    uint32_t swapchain_image_count;
+    u32 swapchain_image_count;
     res = vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, NULL);
     VERIFY_RES();
     check(swapchain_image_count > 0, "Swapchain contains no images");
@@ -242,18 +242,18 @@ static void create_swapchain(
     VERIFY_RES();
 
     info("Creating %d buffers for swapchain", swapchain_image_count);
-    swapchain_buffer_t* old_bufs = *out_sc_bufs;
-    uint32_t old_bufs_num = *out_sc_bufs_num;
+    SwapchainBuffer* old_bufs = *out_sc_bufs;
+    u32 old_bufs_num = *out_sc_bufs_num;
 
-    for (uint32_t i = 0; i < old_bufs_num; i++)
+    for (u32 i = 0; i < old_bufs_num; i++)
     {
         vkDestroyImageView(device, old_bufs[i].view, NULL);
         vkDestroyFramebuffer(device, old_bufs[i].framebuffer, NULL);
     }
 
-    swapchain_buffer_t* bufs = mema_zero(sizeof(swapchain_buffer_t) * swapchain_image_count);
+    SwapchainBuffer* bufs = mema_zero(sizeof(SwapchainBuffer) * swapchain_image_count);
 
-    for (uint32_t i = 0; i < swapchain_image_count; ++i)
+    for (u32 i = 0; i < swapchain_image_count; ++i)
     {
         bufs[i].image = swapchain_images[i];
 
@@ -275,7 +275,7 @@ static void create_swapchain(
     *out_sc_bufs_num = swapchain_image_count;
 }
 
-static void create_framebuffers(VkDevice device, swapchain_buffer_t* swapchain_buffers, uint32_t swapchain_buffers_num, const depth_buffer_t* depth_buffer, VkRenderPass render_pass, vec2u_t swapchain_size)
+static void create_framebuffers(VkDevice device, SwapchainBuffer* swapchain_buffers, u32 swapchain_buffers_num, const DepthBuffer* depth_buffer, VkRenderPass render_pass, Vec2u swapchain_size)
 {
     VkImageView framebuffer_attachments[2];
     framebuffer_attachments[1] = depth_buffer->view;
@@ -289,7 +289,7 @@ static void create_framebuffers(VkDevice device, swapchain_buffer_t* swapchain_b
     fbci.height = swapchain_size.y;
     fbci.layers = 1;
 
-    for (uint32_t i = 0; i < swapchain_buffers_num; ++i)
+    for (u32 i = 0; i < swapchain_buffers_num; ++i)
     {
         framebuffer_attachments[0] = swapchain_buffers[i].view;
         VkResult res = vkCreateFramebuffer(device, &fbci, NULL, &swapchain_buffers[i].framebuffer);
@@ -297,9 +297,9 @@ static void create_framebuffers(VkDevice device, swapchain_buffer_t* swapchain_b
     }
 }
 
-static uint32_t memory_type_from_properties(uint32_t req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
+static u32 memory_type_from_properties(u32 req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
 {
-    for (uint32_t i = 0; i < memory_properties->memoryTypeCount; ++i)
+    for (u32 i = 0; i < memory_properties->memoryTypeCount; ++i)
     {
         if ((req_memory_type & (1 << i)) && (memory_properties->memoryTypes[i].propertyFlags & memory_requirement_mask) == memory_requirement_mask)
         {
@@ -310,19 +310,19 @@ static uint32_t memory_type_from_properties(uint32_t req_memory_type, const VkPh
     return -1;
 }
 
-static void destroy_depth_buffer(VkDevice device, depth_buffer_t* depth_buffer)
+static void destroy_depth_buffer(VkDevice device, DepthBuffer* depth_buffer)
 {
     info("Destroying depth buffer");
     vkDestroyImageView(device, depth_buffer->view, NULL);
     vkDestroyImage(device, depth_buffer->image, NULL);
     vkFreeMemory(device, depth_buffer->memory, NULL);
-    memzero(depth_buffer, sizeof(depth_buffer_t));
+    memzero(depth_buffer, sizeof(DepthBuffer));
 }
 
-static void create_depth_buffer(depth_buffer_t* out_depth_buffer, VkDevice device, VkPhysicalDevice gpu, const VkPhysicalDeviceMemoryProperties* memory_properties, vec2u_t size)
+static void create_depth_buffer(DepthBuffer* out_depth_buffer, VkDevice device, VkPhysicalDevice gpu, const VkPhysicalDeviceMemoryProperties* memory_properties, Vec2u size)
 {
     info("Creating depth buffer");
-    depth_buffer_t depth_buffer = {};
+    DepthBuffer depth_buffer = {};
     depth_buffer.format = VK_FORMAT_D16_UNORM;
 
     VkImageCreateInfo depth_ici = {};
@@ -361,7 +361,7 @@ static void create_depth_buffer(depth_buffer_t* out_depth_buffer, VkDevice devic
     depth_mai.allocationSize = depth_mem_reqs.size;
     depth_mai.memoryTypeIndex = memory_type_from_properties(depth_mem_reqs.memoryTypeBits, memory_properties, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    check(depth_mai.memoryTypeIndex != (uint32_t)-1, "Failed to find memory type for depth buffer");
+    check(depth_mai.memoryTypeIndex != (u32)-1, "Failed to find memory type for depth buffer");
     res = vkAllocateMemory(device, &depth_mai, NULL, &depth_buffer.memory);
     VERIFY_RES();
     res = vkBindImageMemory(device, depth_buffer.image, depth_buffer.memory, 0);
@@ -429,12 +429,12 @@ static void create_renderpass(VkDevice device, VkFormat surface_format, VkFormat
     VERIFY_RES();
 }
 
-static void destroy_swapchain(renderer_backend_state_t* rbs)
+static void destroy_swapchain(RendererBackendState* rbs)
 {
     info("Destroying swapchain");
     VkDevice d = rbs->device;
 
-    for (uint32_t i = 0; i < rbs->swapchain_buffers_num; i++)
+    for (u32 i = 0; i < rbs->swapchain_buffers_num; i++)
     {
         vkDestroyImageView(d, rbs->swapchain_buffers[i].view, NULL);
         vkDestroyFramebuffer(d, rbs->swapchain_buffers[i].framebuffer, NULL);
@@ -448,7 +448,7 @@ static void destroy_swapchain(renderer_backend_state_t* rbs)
     rbs->swapchain = NULL;
 }
 
-static void destroy_renderpass(renderer_backend_state_t* rbs)
+static void destroy_renderpass(RendererBackendState* rbs)
 {
     info("Destroying render pass");
     VkDevice d = rbs->device;
@@ -456,7 +456,7 @@ static void destroy_renderpass(renderer_backend_state_t* rbs)
     rbs->render_pass = NULL;
 }
 
-static void destroy_surface_size_dependent_resources(renderer_backend_state_t* rbs)
+static void destroy_surface_size_dependent_resources(RendererBackendState* rbs)
 {
     destroy_swapchain(rbs);
     destroy_renderpass(rbs);
@@ -464,7 +464,7 @@ static void destroy_surface_size_dependent_resources(renderer_backend_state_t* r
 }
 
 
-static void create_surface_size_dependent_resources(renderer_backend_state_t* rbs)
+static void create_surface_size_dependent_resources(RendererBackendState* rbs)
 {
 
     rbs->swapchain_size = get_surface_size(rbs->gpu, rbs->surface);
@@ -482,7 +482,7 @@ static void create_surface_size_dependent_resources(renderer_backend_state_t* rb
     rbs->current_frame = 0;
 }
 
-static void recreate_surface_size_dependent_resources(renderer_backend_state_t* rbs)
+static void recreate_surface_size_dependent_resources(RendererBackendState* rbs)
 {
     destroy_surface_size_dependent_resources(rbs);
     create_surface_size_dependent_resources(rbs);
@@ -491,7 +491,7 @@ static void recreate_surface_size_dependent_resources(renderer_backend_state_t* 
 static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 {
     VkResult res;
-    uint32_t num_supported_surface_formats;
+    u32 num_supported_surface_formats;
     res = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &num_supported_surface_formats, NULL);
     VERIFY_RES();
     VkSurfaceFormatKHR* supported_surface_formats = mema(num_supported_surface_formats * sizeof(VkSurfaceFormatKHR));
@@ -507,7 +507,7 @@ static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface
 
     check(num_supported_surface_formats > 0, "No supported surface formats found");
 
-    for (uint32_t i = 0; i < num_supported_surface_formats; ++i)
+    for (u32 i = 0; i < num_supported_surface_formats; ++i)
     {
         if (supported_surface_formats[i].format == VK_FORMAT_R8G8B8A8_UNORM)
         {
@@ -521,14 +521,14 @@ static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface
     return format;
 }
 
-static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32_t num_gpus)
+static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, u32 num_gpus)
 {
     check(num_gpus > 0, "Trying to select among 0 GPUs");
 
     if (num_gpus == 1)
         return gpus[0];
 
-    for (uint32_t i = 0; i < num_gpus; ++i)
+    for (u32 i = 0; i < num_gpus; ++i)
     {
         VkPhysicalDeviceProperties gpu_properties;
         vkGetPhysicalDeviceProperties(gpus[i], &gpu_properties);
@@ -543,12 +543,12 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, uint32_t num_gpus)
 typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
 
-renderer_backend_state_t* renderer_backend_create(window_type_t window_type, void* window_data)
+RendererBackendState* renderer_backend_create(WindowType window_type, void* window_data)
 {
     info("Creating Vulkan renderer");
 
     check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
-    renderer_backend_state_t* rbs = mema_zero(sizeof(renderer_backend_state_t));
+    RendererBackendState* rbs = mema_zero(sizeof(RendererBackendState));
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -560,14 +560,14 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     ai.apiVersion = VK_API_VERSION_1_0;
 
     const char* validation_layer_name = "VK_LAYER_LUNARG_standard_validation";
-    uint32_t available_layers_num;
+    u32 available_layers_num;
     res = vkEnumerateInstanceLayerProperties(&available_layers_num, NULL);
     VERIFY_RES();
     VkLayerProperties* available_layers = mema(sizeof(VkLayerProperties) * available_layers_num);
     res = vkEnumerateInstanceLayerProperties(&available_layers_num, available_layers);
     VERIFY_RES();
     bool validation_layer_available = false;
-    for (uint32_t i = 0; i < available_layers_num; ++i)
+    for (u32 i = 0; i < available_layers_num; ++i)
     {
         if (str_eql(validation_layer_name, available_layers[i].layerName))
         {
@@ -604,7 +604,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     VERIFY_RES();
 
     info("Creating XCB Vulkan surface");
-    linux_xcb_window_t* win = window_data;
+    XcbWindow* win = window_data;
     VkXcbSurfaceCreateInfoKHR xcbci = {};
     xcbci.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
     xcbci.connection = linux_xcb_window_get_connection(win);
@@ -614,7 +614,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     VkSurfaceKHR surface = rbs->surface;
 
     info("Selecting GPU and fetching properties");
-    uint32_t num_available_gpus = 0;
+    u32 num_available_gpus = 0;
     res = vkEnumeratePhysicalDevices(instance, &num_available_gpus, NULL);
     check(res == VK_SUCCESS || res == VK_INCOMPLETE, "Failed enumerating GPUs");
     check(num_available_gpus > 0, "No GPUS found");
@@ -629,13 +629,13 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     info("Selected GPU %s", rbs->gpu_properties.deviceName);
 
     info("Finding GPU graphics and present queue families");
-    uint32_t queue_family_count = 0;
+    u32 queue_family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, NULL);
     VkQueueFamilyProperties* queue_family_props = mema(sizeof(VkQueueFamilyProperties) * queue_family_count);
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, queue_family_props);
     
     VkBool32* queues_with_present_support = mema(queue_family_count * sizeof(VkBool32));
-    for (uint32_t i = 0; i < queue_family_count; ++i)
+    for (u32 i = 0; i < queue_family_count; ++i)
     {
         res = vkGetPhysicalDeviceSurfaceSupportKHR(gpu, i, surface, &queues_with_present_support[i]);
         VERIFY_RES();
@@ -646,7 +646,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
 
     // We first try to find a queue family with both graphics and present capabilities,
     // if it fails we try to look for two separate queue families
-    for (uint32_t i = 0; i < queue_family_count; ++i)
+    for (u32 i = 0; i < queue_family_count; ++i)
     {
         if (queue_family_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
@@ -660,10 +660,10 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
             }
         }
     }
-    check(rbs->graphics_queue_family_idx != (uint32_t)-1, "Couldn't find graphics queue family");
-    if (rbs->present_queue_family_idx == (uint32_t)-1)
+    check(rbs->graphics_queue_family_idx != (u32)-1, "Couldn't find graphics queue family");
+    if (rbs->present_queue_family_idx == (u32)-1)
     {
-        for (uint32_t i = 0; i < queue_family_count; ++i)
+        for (u32 i = 0; i < queue_family_count; ++i)
         {
             if (queues_with_present_support[i] == VK_TRUE)
             {
@@ -673,7 +673,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
             }
         }
     }
-    check(rbs->present_queue_family_idx != (uint32_t)-1, "Couldn't find present queue family");
+    check(rbs->present_queue_family_idx != (u32)-1, "Couldn't find present queue family");
     memf(queues_with_present_support);
     memf(queue_family_props);
 
@@ -682,7 +682,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     dqci.queueFamilyIndex = rbs->graphics_queue_family_idx;
     dqci.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     dqci.queueCount = 1;
-    float queue_priorities[] = {0.0};
+    f32 queue_priorities[] = {0.0};
     dqci.pQueuePriorities = queue_priorities;
 
     const char* const device_extensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
@@ -751,7 +751,7 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     fci.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fci.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         res = vkCreateSemaphore(device, &iasci, NULL, &rbs->image_available_semaphores[i]);
         VERIFY_RES();
@@ -764,19 +764,19 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     return rbs;
 }
 
-void renderer_backend_destroy_shader(renderer_backend_state_t* rbs, renderer_backend_shader_t* s)
+void renderer_backend_destroy_shader(RendererBackendState* rbs, RendererBackendShader* s)
 {
     vkDestroyShaderModule(rbs->device, s->module, NULL);
     memf(s);
 }
 
-void renderer_backend_destroy_pipeline(renderer_backend_state_t* rbs, renderer_backend_pipeline_t* p)
+void renderer_backend_destroy_pipeline(RendererBackendState* rbs, RendererBackendPipeline* p)
 {
-    for (uint32_t frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
+    for (u32 frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
     {
         vkFreeDescriptorSets(rbs->device, rbs->descriptor_pool_uniform_buffer, 1, p->constant_buffer_descriptor_sets[frame_idx]);
         memf(p->constant_buffer_descriptor_sets[frame_idx]);
-        for (uint32_t cb_idx = 0; cb_idx < p->constant_buffers_num; ++cb_idx)
+        for (u32 cb_idx = 0; cb_idx < p->constant_buffers_num; ++cb_idx)
         {
             vkDestroyBuffer(rbs->device, p->constant_buffers[cb_idx].vk_handle[frame_idx], NULL);
             vkFreeMemory(rbs->device, p->constant_buffers[cb_idx].memory[frame_idx], NULL);
@@ -790,7 +790,7 @@ void renderer_backend_destroy_pipeline(renderer_backend_state_t* rbs, renderer_b
     memf(p);
 }
 
-void renderer_backend_destroy_geometry(renderer_backend_state_t* rbs, renderer_backend_geometry_t* g)
+void renderer_backend_destroy_geometry(RendererBackendState* rbs, RendererBackendGeometry* g)
 {
     vkDestroyBuffer(rbs->device, g->vertex_buffer, NULL);
     vkFreeMemory(rbs->device, g->vertex_buffer_memory, NULL);
@@ -799,18 +799,18 @@ void renderer_backend_destroy_geometry(renderer_backend_state_t* rbs, renderer_b
     memf(g);
 }
 
-void renderer_backend_destroy(renderer_backend_state_t* rbs)
+void renderer_backend_destroy(RendererBackendState* rbs)
 {
     info("Destroying Vulkan renderer backend");
 
     VkDevice d = rbs->device;
 
-    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         vkWaitForFences(d, 1, &rbs->image_in_flight_fences[i], VK_TRUE, UINT64_MAX);
     }
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    for (sizet i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(d, rbs->render_finished_semaphores[i], NULL);
         vkDestroySemaphore(d, rbs->image_available_semaphores[i], NULL);
         vkDestroyFence(d, rbs->image_in_flight_fences[i], NULL);
@@ -831,13 +831,13 @@ void renderer_backend_destroy(renderer_backend_state_t* rbs)
     memf(rbs);
 }
 
-renderer_backend_shader_t* renderer_backend_create_shader(renderer_backend_state_t* rbs, const char* source, uint32_t source_size)
+RendererBackendShader* renderer_backend_create_shader(RendererBackendState* rbs, const char* source, u32 source_size)
 {
-    renderer_backend_shader_t* shader = mema_zero(sizeof(renderer_backend_shader_t));
+    RendererBackendShader* shader = mema_zero(sizeof(RendererBackendShader));
 
     VkShaderModuleCreateInfo smci = {};
     smci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    smci.pCode = (uint32_t*)source;
+    smci.pCode = (u32*)source;
     smci.codeSize = source_size;
 
     VkResult res = vkCreateShaderModule(rbs->device, &smci, NULL, &shader->module);
@@ -846,7 +846,7 @@ renderer_backend_shader_t* renderer_backend_create_shader(renderer_backend_state
     return shader;
 }
 
-static VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
+static VkFormat vk_format_from_shader_data_type(ShaderDataType t)
 {
     switch(t)
     {
@@ -861,7 +861,7 @@ static VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
     return -1;
 }
 
-static VkShaderStageFlagBits vk_shader_stage_from_shader_type(shader_type_t t)
+static VkShaderStageFlagBits vk_shader_stage_from_shader_type(ShaderType t)
 {
     switch(t)
     {
@@ -870,23 +870,23 @@ static VkShaderStageFlagBits vk_shader_stage_from_shader_type(shader_type_t t)
         default: break;
     }
 
-    error("Trying to get VkShaderStageFlagBits from shader_type_t, but type isn't mapped.");
+    error("Trying to get VkShaderStageFlagBits from ShaderType, but type isn't mapped.");
     return 0;
 }
 
-renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_state_t* rbs,
-    renderer_backend_shader_t** shader_stages, shader_type_t* shader_stages_types, uint32_t shader_stages_num,
-    shader_data_type_t* vertex_input_types, uint32_t vertex_input_types_num,
-    uint32_t* constant_buffer_sizes, uint32_t* constant_buffer_binding_indices, uint32_t constant_buffers_num)
+RendererBackendPipeline* renderer_backend_create_pipeline(RendererBackendState* rbs,
+    RendererBackendShader** shader_stages, ShaderType* shader_stages_types, u32 shader_stages_num,
+    ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
+    u32* constant_buffer_sizes, u32* constant_buffer_binding_indices, u32 constant_buffers_num)
 {
-    renderer_backend_pipeline_t* pipeline = mema_zero(sizeof(renderer_backend_pipeline_t));
+    RendererBackendPipeline* pipeline = mema_zero(sizeof(RendererBackendPipeline));
     VkResult res;
 
     // Create vk descriptors that describe the input to vertex shader and the stride of the vertex data.
     VkVertexInputAttributeDescription* viad = mema_zero(sizeof(VkVertexInputAttributeDescription) * vertex_input_types_num);
 
-    uint32_t layout_offset = 0;
-    for (uint32_t i = 0; i < vertex_input_types_num; ++i)
+    u32 layout_offset = 0;
+    for (u32 i = 0; i < vertex_input_types_num; ++i)
     {
         viad[i].binding = 0;
         viad[i].location = i;
@@ -895,7 +895,7 @@ renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_s
         layout_offset += shader_data_type_size(vertex_input_types[i]);
     }
 
-    uint32_t stride = layout_offset;
+    u32 stride = layout_offset;
 
     VkVertexInputBindingDescription vibd = {};
     vibd.binding = 0;
@@ -910,13 +910,13 @@ renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_s
     pvisci.pVertexAttributeDescriptions = viad;
 
     // Create vk uniform buffers for our constant buffers
-    pipeline->constant_buffers = mema(sizeof(pipeline_constant_buffer_t) * constant_buffers_num);
+    pipeline->constant_buffers = mema(sizeof(PipelineConstantBuffer) * constant_buffers_num);
     pipeline->constant_buffers_num = constant_buffers_num;
     VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero(sizeof(VkDescriptorSetLayoutBinding) * constant_buffers_num);
 
-    for (size_t cb_idx = 0; cb_idx < constant_buffers_num; ++cb_idx)
+    for (sizet cb_idx = 0; cb_idx < constant_buffers_num; ++cb_idx)
     {
-        pipeline_constant_buffer_t* cb = pipeline->constant_buffers + cb_idx;
+        PipelineConstantBuffer* cb = pipeline->constant_buffers + cb_idx;
         cb->binding = constant_buffer_binding_indices[cb_idx];
         cb->size = constant_buffer_sizes[cb_idx];
 
@@ -926,7 +926,7 @@ renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_s
         cb_bci.size = cb->size;
         cb_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
             res = vkCreateBuffer(rbs->device, &cb_bci, NULL, &cb->vk_handle[i]);
             VERIFY_RES();
@@ -940,7 +940,7 @@ renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_s
             cb->allocated_size = uniform_buffer_mem_reqs.size;
 
             uniform_buffer_mai.memoryTypeIndex = memory_type_from_properties(uniform_buffer_mem_reqs.memoryTypeBits, &rbs->gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-            check(uniform_buffer_mai.memoryTypeIndex != (uint32_t)-1, "Failed finding memory type for uniform buffer");
+            check(uniform_buffer_mai.memoryTypeIndex != (u32)-1, "Failed finding memory type for uniform buffer");
 
             res = vkAllocateMemory(rbs->device, &uniform_buffer_mai, NULL, &cb->memory[i]);
             VERIFY_RES();
@@ -964,7 +964,7 @@ renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_s
 
     memf(constant_buffer_bindings);
 
-    for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         pipeline->constant_buffer_descriptor_sets[i] = mema_zero(sizeof(VkDescriptorSet) * constant_buffers_num);
         VkDescriptorSetAllocateInfo dsai = {};
@@ -1083,7 +1083,7 @@ renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_s
     // Shader stage info
     VkPipelineShaderStageCreateInfo* pssci = mema_zero(sizeof(VkPipelineShaderStageCreateInfo) * shader_stages_num);
 
-    for (size_t i = 0; i < shader_stages_num; ++i)
+    for (sizet i = 0; i < shader_stages_num; ++i)
     {
         pssci[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         pssci[i].stage = vk_shader_stage_from_shader_type(shader_stages_types[i]);
@@ -1119,7 +1119,7 @@ renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_s
     return pipeline;
 }
 
-renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_state_t* rbs, const geometry_vertex_t* vertices, uint32_t vertices_num, const geometry_index_t* indices, uint32_t indices_num)
+RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* rbs, const GeometryVertex* vertices, u32 vertices_num, const GeometryIndex* indices, u32 indices_num)
 {
     VkResult res;
 
@@ -1132,7 +1132,7 @@ renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_s
         VkBufferCreateInfo vertex_bci = {};
         vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        vertex_bci.size = sizeof(geometry_vertex_t) * vertices_num;
+        vertex_bci.size = sizeof(GeometryVertex) * vertices_num;
         vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &vertex_bci, NULL, &vertex_buffer);
@@ -1144,16 +1144,16 @@ renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_s
         vertex_buffer_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         vertex_buffer_mai.allocationSize = vertex_buffer_mr.size;
         vertex_buffer_mai.memoryTypeIndex = memory_type_from_properties(vertex_buffer_mr.memoryTypeBits, &rbs->gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        check(vertex_buffer_mai.memoryTypeIndex != (uint32_t)-1, "Couldn't find memory of correct type.");
+        check(vertex_buffer_mai.memoryTypeIndex != (u32)-1, "Couldn't find memory of correct type.");
     
         res = vkAllocateMemory(rbs->device, &vertex_buffer_mai, NULL, &vertex_buffer_memory);
         VERIFY_RES();
     
-        uint8_t* vertex_buffer_memory_data;
+        u8* vertex_buffer_memory_data;
         res = vkMapMemory(rbs->device, vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(vertex_buffer_memory_data, vertices, sizeof(geometry_vertex_t) * vertices_num);
+        memcpy(vertex_buffer_memory_data, vertices, sizeof(GeometryVertex) * vertices_num);
     
         vkUnmapMemory(rbs->device, vertex_buffer_memory);
     
@@ -1170,7 +1170,7 @@ renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_s
         VkBufferCreateInfo index_bci = {};
         index_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         index_bci.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        index_bci.size = sizeof(geometry_index_t) * indices_num;
+        index_bci.size = sizeof(GeometryIndex) * indices_num;
         index_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &index_bci, NULL, &index_buffer);
@@ -1182,16 +1182,16 @@ renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_s
         index_buffer_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         index_buffer_mai.allocationSize = index_buffer_mr.size;
         index_buffer_mai.memoryTypeIndex = memory_type_from_properties(index_buffer_mr.memoryTypeBits, &rbs->gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        check(index_buffer_mai.memoryTypeIndex != (uint32_t)-1, "Couldn't find memory of correct type.");
+        check(index_buffer_mai.memoryTypeIndex != (u32)-1, "Couldn't find memory of correct type.");
     
         res = vkAllocateMemory(rbs->device, &index_buffer_mai, NULL, &index_buffer_memory);
         VERIFY_RES();
     
-        uint8_t* index_buffer_memory_data;
+        u8* index_buffer_memory_data;
         res = vkMapMemory(rbs->device, index_buffer_memory, 0, index_buffer_mr.size, 0, (void**)&index_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(index_buffer_memory_data, indices, sizeof(geometry_index_t) * indices_num);
+        memcpy(index_buffer_memory_data, indices, sizeof(GeometryIndex) * indices_num);
     
         vkUnmapMemory(rbs->device, index_buffer_memory);
     
@@ -1199,7 +1199,7 @@ renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_s
         VERIFY_RES();
     }
 
-    renderer_backend_geometry_t g = {
+    RendererBackendGeometry g = {
         .vertex_buffer = vertex_buffer,
         .vertex_buffer_memory = vertex_buffer_memory,
         .index_buffer = index_buffer,
@@ -1207,18 +1207,18 @@ renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_s
         .indices_num = indices_num
     };
 
-    return mema_copy(&g, sizeof(renderer_backend_geometry_t));
+    return mema_copy(&g, sizeof(RendererBackendGeometry));
 }
 
-void renderer_backend_update_constant_buffer(renderer_backend_state_t* rbs, renderer_backend_pipeline_t* pipeline, uint32_t binding, void* data, uint32_t data_size)
+void renderer_backend_update_constant_buffer(RendererBackendState* rbs, RendererBackendPipeline* pipeline, u32 binding, void* data, u32 data_size)
 {
-    uint32_t cf = rbs->current_frame;
+    u32 cf = rbs->current_frame;
     VkResult res;
 
-    pipeline_constant_buffer_t* cb = NULL;
-    uint32_t cb_idx = -1;
+    PipelineConstantBuffer* cb = NULL;
+    u32 cb_idx = -1;
 
-    for (uint32_t i = 0; i < pipeline->constant_buffers_num; ++i)
+    for (u32 i = 0; i < pipeline->constant_buffers_num; ++i)
     {
         if (pipeline->constant_buffers[i].binding == binding)
         {
@@ -1230,7 +1230,7 @@ void renderer_backend_update_constant_buffer(renderer_backend_state_t* rbs, rend
 
     check(cb, "No constant buffer with binding %d in supplied pipeline", binding);
 
-    uint8_t* mapped_uniform_data;
+    u8* mapped_uniform_data;
     res = vkMapMemory(rbs->device, cb->memory[cf], 0, cb->allocated_size, 0, (void**)&mapped_uniform_data);
     VERIFY_RES();
     memcpy(mapped_uniform_data, data, data_size);
@@ -1250,9 +1250,18 @@ void renderer_backend_update_constant_buffer(renderer_backend_state_t* rbs, rend
     vkUpdateDescriptorSets(rbs->device, 1, &write, 0, NULL);
 }
 
-void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_backend_pipeline_t* pipeline, renderer_backend_geometry_t* geometry)
+static VkIndexType get_index_type(GeometryIndex gi)
 {
-    uint32_t cf = rbs->current_frame;
+    switch(sizeof(gi))
+    {
+        case 2: return VK_INDEX_TYPE_UINT16;
+        default: error("Implement me!"); return 0;
+    }
+}
+
+void renderer_backend_draw(RendererBackendState* rbs, RendererBackendPipeline* pipeline, RendererBackendGeometry* geometry)
+{
+    u32 cf = rbs->current_frame;
     VkResult res;
     VkCommandBufferBeginInfo cbbi = {};
     
@@ -1261,7 +1270,7 @@ void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_backend_pipel
     res = vkBeginCommandBuffer(cmd, &cbbi);
     VERIFY_RES();
 
-    swapchain_buffer_t* scb = &rbs->swapchain_buffers[cf];
+    SwapchainBuffer* scb = &rbs->swapchain_buffers[cf];
 
     VkClearValue clear_values[2];
     clear_values[0].color.float32[0] = 0.0f;
@@ -1290,7 +1299,7 @@ void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_backend_pipel
     const VkDeviceSize offsets[1] = {0};
     VkBuffer vertex_buffer = geometry->vertex_buffer;
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
-    vkCmdBindIndexBuffer(cmd, geometry->index_buffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindIndexBuffer(cmd, geometry->index_buffer, 0, get_index_type(0));
 
 
     VkViewport viewport = {};
@@ -1318,13 +1327,13 @@ void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_backend_pipel
     VERIFY_RES();
 }
 
-void renderer_backend_present(renderer_backend_state_t* rbs)
+void renderer_backend_present(RendererBackendState* rbs)
 {
     VkResult res;
-    uint32_t cf = rbs->current_frame;
+    u32 cf = rbs->current_frame;
 
-    uint32_t image_index;
-    uint32_t timeout = 100000000; // 0.1 s
+    u32 image_index;
+    u32 timeout = 100000000; // 0.1 s
     res = vkAcquireNextImageKHR(rbs->device, rbs->swapchain, timeout, rbs->image_available_semaphores[cf], VK_NULL_HANDLE, &image_index);
 
     if (res == VK_ERROR_OUT_OF_DATE_KHR)
@@ -1365,17 +1374,17 @@ void renderer_backend_present(renderer_backend_state_t* rbs)
     rbs->current_frame = (rbs->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void renderer_backend_wait_for_new_frame(renderer_backend_state_t* rbs)
+void renderer_backend_wait_for_new_frame(RendererBackendState* rbs)
 {
     vkWaitForFences(rbs->device, 1, &rbs->image_in_flight_fences[rbs->current_frame], VK_TRUE, UINT64_MAX);
 }
 
-void renderer_backend_wait_until_idle(renderer_backend_state_t* rbs)
+void renderer_backend_wait_until_idle(RendererBackendState* rbs)
 {
     vkDeviceWaitIdle(rbs->device);
 }
 
-void renderer_backend_surface_resized(renderer_backend_state_t* rbs, uint32_t width, uint32_t height)
+void renderer_backend_surface_resized(RendererBackendState* rbs, u32 width, u32 height)
 {
     (void)width;
     (void)height;

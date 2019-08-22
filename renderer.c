@@ -9,99 +9,99 @@
 #include "shader.h"
 #include "str.h"
 
-fwd_struct(renderer_backend_state_t);
-fwd_struct(renderer_backend_shader_t);
-fwd_struct(renderer_backend_pipeline_t);
-fwd_struct(renderer_backend_geometry_t);
+fwd_struct(RendererBackendState);
+fwd_struct(RendererBackendShader);
+fwd_struct(RendererBackendPipeline);
+fwd_struct(RendererBackendGeometry);
 
-typedef struct renderer_resource_shader_t
+typedef struct RendererResourceShader
 {
     char* source;
-    uint64_t source_size;
-    shader_type_t type;
-    shader_constant_buffer_t constant_buffer;
-    shader_input_layout_item_t* input_layout;
-    uint32_t input_layout_num;
-    renderer_backend_shader_t* backend_state;
-} renderer_resource_shader_t;
+    u64 source_size;
+    ShaderType type;
+    ShaderConstantBuffer constant_buffer;
+    ShaderInputLayoutItem* input_layout;
+    u32 input_layout_num;
+    RendererBackendShader* backend_state;
+} RendererResourceShader;
 
-typedef struct renderer_resource_pipeline_t
+typedef struct RendererResourcePipeline
 {
-    renderer_resource_handle_t* shader_stages;
-    uint32_t shader_stages_num;
-    renderer_backend_pipeline_t* backend_state;
-} renderer_resource_pipeline_t;
+    RendererResourceHandle* shader_stages;
+    u32 shader_stages_num;
+    RendererBackendPipeline* backend_state;
+} RendererResourcePipeline;
 
-typedef struct renderer_resource_geometry_t
+typedef struct RendererResourceGeometry
 {
-    geometry_vertex_t* vertices;
-    geometry_index_t* indices;
-    uint32_t vertices_num;
-    uint32_t indices_num;
-    renderer_backend_geometry_t* backend_state;
-} renderer_resource_geometry_t;
+    GeometryVertex* vertices;
+    GeometryIndex* indices;
+    u32 vertices_num;
+    u32 indices_num;
+    RendererBackendGeometry* backend_state;
+} RendererResourceGeometry;
 
-typedef enum renderer_resource_type_t
+typedef enum RendererResourceType
 {
     RENDERER_RESOURCE_TYPE_INVALID,
     RENDERER_RESOURCE_TYPE_SHADER,
     RENDERER_RESOURCE_TYPE_PIPELINE,
     RENDERER_RESOURCE_TYPE_GEOMETRY,
     RENDERER_RESOURCE_TYPE_NUM
-} renderer_resource_type_t;
+} RendererResourceType;
 
-static const char* renderer_resource_type_names[] =
+static const char* renderer_resouce_type_names[] =
 {
     "invalid", "shader", "pipeline", "geometry"
 };
 
-typedef enum renderer_resource_flag_t
+typedef enum RendererResourceFlag
 {
     RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT = 0x1
-} renderer_resource_flag_t;
+} RendererResourceFlag;
 
-typedef struct renderer_resource_t
+typedef struct RendererResource
 {
-    renderer_resource_type_t type;
-    renderer_resource_handle_t handle;
-    renderer_resource_flag_t flag;
+    RendererResourceType type;
+    RendererResourceHandle handle;
+    RendererResourceFlag flag;
 
     union
     {
-        renderer_resource_shader_t shader;
-        renderer_resource_pipeline_t pipeline;
-        renderer_resource_geometry_t geometry;
+        RendererResourceShader shader;
+        RendererResourcePipeline pipeline;
+        RendererResourceGeometry geometry;
     };
-} renderer_resource_t;
+} RendererResource;
 
-typedef struct renderer_state_t
+typedef struct RendererState
 {
-    renderer_backend_state_t* rbs;
-    renderer_resource_t* da_resources;
-    handle_pool_t* resource_handle_pool;
-} renderer_state_t;
+    RendererBackendState* rbs;
+    RendererResource* da_resources;
+    HandlePool* resource_handle_pool;
+} RendererState;
 
-renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
+RendererState* renderer_create(WindowType window_type, void* window_data)
 {
-    renderer_state_t* rs = mema_zero(sizeof(renderer_state_t));
+    RendererState* rs = mema_zero(sizeof(RendererState));
     rs->resource_handle_pool = handle_pool_create();
 
-    for (renderer_resource_type_t t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)
-        handle_pool_set_type(rs->resource_handle_pool, t, renderer_resource_type_names[t]);
+    for (RendererResourceType t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)
+        handle_pool_set_type(rs->resource_handle_pool, t, renderer_resouce_type_names[t]);
     
-    renderer_backend_state_t* rbs = renderer_backend_create(window_type, window_data);
+    RendererBackendState* rbs = renderer_backend_create(window_type, window_data);
     rs->rbs = rbs;
     return rs;
 }
 
-static renderer_resource_t* get_resource(renderer_state_t* rs, renderer_resource_handle_t h)
+static RendererResource* get_resource(RendererState* rs, RendererResourceHandle h)
 {
-    renderer_resource_t* rr = rs->da_resources + handle_index(h);
+    RendererResource* rr = rs->da_resources + handle_index(h);
     check_slow(handle_type(h) == rr->type, "Handle points to resource of wrong type");
     return rr;
 }
 
-static void deinit_resource(renderer_state_t* rs, renderer_resource_t* rr)
+static void deinit_resource(RendererState* rs, RendererResource* rr)
 {
     switch(rr->type)
     {
@@ -123,23 +123,23 @@ static void deinit_resource(renderer_state_t* rs, renderer_resource_t* rr)
     }
 }
 
-static renderer_backend_shader_t* shader_init(renderer_state_t* rs, const renderer_resource_shader_t* shader)
+static RendererBackendShader* shader_init(RendererState* rs, const RendererResourceShader* shader)
 {
     return renderer_backend_create_shader(rs->rbs, shader->source, shader->source_size);
 }
 
-static renderer_backend_pipeline_t* pipeline_init(renderer_state_t* rs, const renderer_resource_pipeline_t* pipeline)
+static RendererBackendPipeline* pipeline_init(RendererState* rs, const RendererResourcePipeline* pipeline)
 {
-    renderer_backend_shader_t** backend_shader_stages = mema(sizeof(renderer_backend_shader_t*) * pipeline->shader_stages_num);
-    shader_type_t* backend_shader_types = mema(sizeof(shader_type_t) * pipeline->shader_stages_num);
-    shader_data_type_t* vertex_input_types = NULL;
-    uint32_t vertex_input_types_num = 0;
-    uint32_t* da_constant_buffer_sizes = NULL;
-    uint32_t* da_constant_buffer_binding_indices = NULL;
+    RendererBackendShader** backend_shader_stages = mema(sizeof(RendererBackendShader*) * pipeline->shader_stages_num);
+    ShaderType* backend_shader_types = mema(sizeof(ShaderType) * pipeline->shader_stages_num);
+    ShaderDataType* vertex_input_types = NULL;
+    u32 vertex_input_types_num = 0;
+    u32* da_constant_buffer_sizes = NULL;
+    u32* da_constant_buffer_binding_indices = NULL;
 
-    for (uint32_t shdr_idx = 0; shdr_idx < pipeline->shader_stages_num; ++shdr_idx)
+    for (u32 shdr_idx = 0; shdr_idx < pipeline->shader_stages_num; ++shdr_idx)
     {
-        renderer_resource_shader_t* shader = &get_resource(rs, pipeline->shader_stages[shdr_idx])->shader;
+        RendererResourceShader* shader = &get_resource(rs, pipeline->shader_stages[shdr_idx])->shader;
         backend_shader_stages[shdr_idx] = shader->backend_state;
         backend_shader_types[shdr_idx] = shader->type;
 
@@ -147,17 +147,17 @@ static renderer_backend_pipeline_t* pipeline_init(renderer_state_t* rs, const re
         {
             check(!vertex_input_types, "Pipeline contains multiple shader that specify vertex shader inputs");
             vertex_input_types_num = shader->input_layout_num;
-            vertex_input_types = mema(sizeof(shader_data_type_t) * vertex_input_types_num);
+            vertex_input_types = mema(sizeof(ShaderDataType) * vertex_input_types_num);
 
-            for (uint32_t ipt_idx = 0; ipt_idx < vertex_input_types_num; ++ipt_idx)
+            for (u32 ipt_idx = 0; ipt_idx < vertex_input_types_num; ++ipt_idx)
                 vertex_input_types[ipt_idx] = shader->input_layout[ipt_idx].type;
         }
 
         if (shader->constant_buffer.items_num > 0)
         {
-            uint32_t s = 0;
+            u32 s = 0;
 
-            for (uint32_t cb_item_idx = 0; cb_item_idx < shader->constant_buffer.items_num; ++cb_item_idx)
+            for (u32 cb_item_idx = 0; cb_item_idx < shader->constant_buffer.items_num; ++cb_item_idx)
                 s += shader_data_type_size(shader->constant_buffer.items[cb_item_idx].type);
 
             array_add(da_constant_buffer_sizes, s);
@@ -165,11 +165,11 @@ static renderer_backend_pipeline_t* pipeline_init(renderer_state_t* rs, const re
         }
     }
 
-    uint32_t constant_buffers_num = array_num(da_constant_buffer_sizes);
+    u32 constant_buffers_num = array_num(da_constant_buffer_sizes);
 
     check(vertex_input_types, "Pipeline has no shader that specifies vertex inputs");
 
-    renderer_backend_pipeline_t* backend_state = renderer_backend_create_pipeline(
+    RendererBackendPipeline* backend_state = renderer_backend_create_pipeline(
         rs->rbs, backend_shader_stages, backend_shader_types, pipeline->shader_stages_num,
         vertex_input_types, vertex_input_types_num,
         da_constant_buffer_sizes, da_constant_buffer_binding_indices, constant_buffers_num);
@@ -183,27 +183,27 @@ static renderer_backend_pipeline_t* pipeline_init(renderer_state_t* rs, const re
     return backend_state;
 }
 
-static renderer_backend_geometry_t* geometry_init(renderer_state_t* rs, const renderer_resource_geometry_t* g)
+static RendererBackendGeometry* geometry_init(RendererState* rs, const RendererResourceGeometry* g)
 {
     return renderer_backend_create_geometry(rs->rbs, g->vertices, g->vertices_num, g->indices, g->indices_num);
 }
 
-static void init_resource(renderer_state_t* rs, renderer_resource_t* rr)
+static void init_resource(RendererState* rs, RendererResource* rr)
 {
     switch(rr->type)
     {
         case RENDERER_RESOURCE_TYPE_SHADER: {
-            renderer_resource_shader_t* s = &rr->shader;
+            RendererResourceShader* s = &rr->shader;
             s->backend_state = shader_init(rs, s);
         } break;
         
         case RENDERER_RESOURCE_TYPE_PIPELINE: {
-            renderer_resource_pipeline_t* p = &rr->pipeline;
+            RendererResourcePipeline* p = &rr->pipeline;
             p->backend_state = pipeline_init(rs, p);
         } break;
 
         case RENDERER_RESOURCE_TYPE_GEOMETRY: {
-            renderer_resource_geometry_t* g = &rr->geometry;
+            RendererResourceGeometry* g = &rr->geometry;
             g->backend_state = geometry_init(rs, g);
         } break;
 
@@ -213,30 +213,30 @@ static void init_resource(renderer_state_t* rs, renderer_resource_t* rr)
     }
 }
 
-static void destroy_resource(renderer_state_t* rs, renderer_resource_t* rr)
+static void destroy_resource(RendererState* rs, RendererResource* rr)
 {
     deinit_resource(rs, rr);
 
     switch(rr->type)
     {
         case RENDERER_RESOURCE_TYPE_SHADER: {
-            renderer_resource_shader_t* s = &rr->shader;
+            RendererResourceShader* s = &rr->shader;
             memf(s->source);
             memf(s->constant_buffer.items);
 
-            for (uint32_t i = 0; i < s->input_layout_num; ++i)
+            for (u32 i = 0; i < s->input_layout_num; ++i)
                 memf(s->input_layout[i].name);
 
             memf(s->input_layout);
         } break;
         
         case RENDERER_RESOURCE_TYPE_PIPELINE: {
-            renderer_resource_pipeline_t* p = &rr->pipeline;
+            RendererResourcePipeline* p = &rr->pipeline;
             memf(p->shader_stages);
         } break;
 
         case RENDERER_RESOURCE_TYPE_GEOMETRY: {
-            renderer_resource_geometry_t* g = &rr->geometry;
+            RendererResourceGeometry* g = &rr->geometry;
             memf(g->vertices);
             memf(g->indices);
         } break;
@@ -249,21 +249,21 @@ static void destroy_resource(renderer_state_t* rs, renderer_resource_t* rr)
     handle_pool_return(rs->resource_handle_pool, rr->handle);
 }
 
-static void reinit_resource(renderer_state_t* rs, renderer_resource_t* rr)
+static void reinit_resource(RendererState* rs, RendererResource* rr)
 {
     deinit_resource(rs, rr);
     init_resource(rs, rr);
 }
 
-static void destroy_all_resources(renderer_state_t* rs)
+static void destroy_all_resources(RendererState* rs)
 {
     info("Destroying all renderer resources");
 
-    for (size_t i = 0; i < array_num(rs->da_resources); ++i)
+    for (sizet i = 0; i < array_num(rs->da_resources); ++i)
         destroy_resource(rs, rs->da_resources + i);
 }
 
-void renderer_destroy(renderer_state_t* rs)
+void renderer_destroy(RendererState* rs)
 {
     info("Destroying renderer");
     renderer_backend_wait_until_idle(rs->rbs);
@@ -274,29 +274,29 @@ void renderer_destroy(renderer_state_t* rs)
     memf(rs);
 }
 
-static renderer_resource_handle_t add_resource(handle_pool_t* hp, renderer_resource_t** da_resources, renderer_resource_t* res)
+static RendererResourceHandle add_resource(HandlePool* hp, RendererResource** da_resources, RendererResource* res)
 {
-    renderer_resource_handle_t h = handle_pool_reserve(hp, res->type);
+    RendererResourceHandle h = handle_pool_reserve(hp, res->type);
     res->handle = h;
     array_fill_and_set(*da_resources, handle_index(h), *res);
     return h;
 }
 
-renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shader_intermediate_t* si)
+RendererResourceHandle renderer_load_shader(RendererState* rs, const ShaderIntermediate* si)
 {
-    renderer_resource_t shader_res = {};
+    RendererResource shader_res = {};
     shader_res.type = RENDERER_RESOURCE_TYPE_SHADER;
-    renderer_resource_shader_t* shader = &shader_res.shader;
+    RendererResourceShader* shader = &shader_res.shader;
     shader->source = mema_copy(si->source, si->source_size);
     shader->source_size = si->source_size;
     shader->type = si->type;
-    shader->constant_buffer.items = mema_copy(si->constant_buffer.items, si->constant_buffer.items_num * sizeof(shader_constant_buffer_item_t));
+    shader->constant_buffer.items = mema_copy(si->constant_buffer.items, si->constant_buffer.items_num * sizeof(ShaderConstantBufferItem));
     shader->constant_buffer.items_num = si->constant_buffer.items_num;
     shader->constant_buffer.binding = si->constant_buffer.binding;
-    shader->input_layout = mema_copy(si->input_layout, si->input_layout_num * sizeof(shader_input_layout_item_t));
+    shader->input_layout = mema_copy(si->input_layout, si->input_layout_num * sizeof(ShaderInputLayoutItem));
     shader->input_layout_num = si->input_layout_num;
 
-    for (uint32_t i = 0; i < shader->input_layout_num; ++i)
+    for (u32 i = 0; i < shader->input_layout_num; ++i)
         shader->input_layout[i].name = str_copy(shader->input_layout[i].name);
 
     init_resource(rs, &shader_res);
@@ -304,12 +304,12 @@ renderer_resource_handle_t renderer_load_shader(renderer_state_t* rs, const shad
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &shader_res);
 }
 
-renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pipeline_intermediate_t* pi)
+RendererResourceHandle renderer_load_pipeline(RendererState* rs, const PipelineIntermediate* pi)
 {
-    renderer_resource_t pipeline_res = {};
+    RendererResource pipeline_res = {};
     pipeline_res.type = RENDERER_RESOURCE_TYPE_PIPELINE;
-    renderer_resource_pipeline_t* pipeline = &pipeline_res.pipeline;
-    pipeline->shader_stages = mema_copy(pi->shader_stages, sizeof(renderer_resource_handle_t) * pi->shader_stages_num);
+    RendererResourcePipeline* pipeline = &pipeline_res.pipeline;
+    pipeline->shader_stages = mema_copy(pi->shader_stages, sizeof(RendererResourceHandle) * pi->shader_stages_num);
     pipeline->shader_stages_num = pi->shader_stages_num;
     pipeline_res.flag = RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT; // TODO, ask backend about this?
 
@@ -318,16 +318,16 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
 }
 
-renderer_resource_handle_t renderer_load_geometry(renderer_state_t* rs, const geometry_vertex_t* vertices, uint32_t vertices_num, const geometry_index_t* indices, uint32_t indices_num)
+RendererResourceHandle renderer_load_geometry(RendererState* rs, const GeometryVertex* vertices, u32 vertices_num, const GeometryIndex* indices, u32 indices_num)
 {
-    renderer_resource_geometry_t g = {
-        .vertices = mema_copy(vertices, sizeof(geometry_vertex_t) * vertices_num),
+    RendererResourceGeometry g = {
+        .vertices = mema_copy(vertices, sizeof(GeometryVertex) * vertices_num),
         .vertices_num = vertices_num,
-        .indices = mema_copy(indices, sizeof(geometry_index_t) * indices_num),
+        .indices = mema_copy(indices, sizeof(GeometryIndex) * indices_num),
         .indices_num = indices_num
     };
 
-    renderer_resource_t geometry_res = {
+    RendererResource geometry_res = {
         .type = RENDERER_RESOURCE_TYPE_GEOMETRY,
         .geometry = g
     };
@@ -336,35 +336,35 @@ renderer_resource_handle_t renderer_load_geometry(renderer_state_t* rs, const ge
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &geometry_res);
 }
 
-void renderer_draw(renderer_state_t* rs, renderer_resource_handle_t pipeline_handle, renderer_resource_handle_t geometry_handle)
+void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle geometry_handle)
 {
     renderer_backend_draw(rs->rbs, get_resource(rs, pipeline_handle)->pipeline.backend_state, get_resource(rs, geometry_handle)->geometry.backend_state);
 }
 
-void renderer_present(renderer_state_t* rs)
+void renderer_present(RendererState* rs)
 {
     renderer_backend_present(rs->rbs);
 }
 
-void renderer_update_constant_buffer(renderer_state_t* rs, renderer_resource_handle_t pipeline_handle, uint32_t binding, void* data, uint32_t data_size)
+void renderer_update_constant_buffer(RendererState* rs, RendererResourceHandle pipeline_handle, u32 binding, void* data, u32 data_size)
 {
     renderer_backend_update_constant_buffer(rs->rbs, get_resource(rs, pipeline_handle)->pipeline.backend_state, binding, data, data_size);
 }
 
-void renderer_wait_for_new_frame(renderer_state_t* rs)
+void renderer_wait_for_new_frame(RendererState* rs)
 {
     renderer_backend_wait_for_new_frame(rs->rbs);
 }
 
-void renderer_surface_resized(renderer_state_t* rs, uint32_t w, uint32_t h)
+void renderer_surface_resized(RendererState* rs, u32 w, u32 h)
 {
     info("Renderer resizing to %d x %d", w, h);
     renderer_backend_wait_until_idle(rs->rbs);
     renderer_backend_surface_resized(rs->rbs, w, h);
 
-    for (size_t i = 0; i < array_num(rs->da_resources); ++i)
+    for (sizet i = 0; i < array_num(rs->da_resources); ++i)
     {
-        renderer_resource_t* rr = rs->da_resources + i;
+        RendererResource* rr = rs->da_resources + i;
 
         if (rr->flag & RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT)
             reinit_resource(rs, rr);

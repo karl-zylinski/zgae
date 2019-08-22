@@ -1,7 +1,9 @@
 #pragma once
 
-typedef struct backtrace_t
+typedef struct Backtrace
 {
     const char** function_calls;
-    uint32_t function_calls_num;
-} backtrace_t;
+    u32 function_calls_num;
+} Backtrace;
+
+typedef Backtrace(*FuncGetBacktrace)(u32 num_frames);

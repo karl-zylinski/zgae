@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 
-static func_get_backtrace_t g_get_backtrace = NULL;
+static FuncGetBacktrace g_get_backtrace = NULL;
 
 static void print_current_time()
 {
@@ -20,7 +20,7 @@ void debug_error(const char* msg, ...)
     print_current_time();
     check(g_get_backtrace, "Please run debug_init with function that returns backtraces as parameter.");
 
-    backtrace_t bt = g_get_backtrace(3);
+    Backtrace bt = g_get_backtrace(3);
     fprintf(stderr, "ERROR IN %s --- ", bt.function_calls[2]);
     free(bt.function_calls);
     
@@ -42,12 +42,12 @@ void debug_info(const char* msg, ...)
     va_end(args);
 }
 
-void debug_init(func_get_backtrace_t get_backtrace)
+void debug_init(FuncGetBacktrace get_backtrace)
 {
     g_get_backtrace = get_backtrace;
 }
 
-backtrace_t debug_get_backtrace(uint32_t size)
+Backtrace debug_get_backtrace(u32 size)
 {
     return g_get_backtrace(size);
 }

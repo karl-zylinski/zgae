@@ -1,31 +1,31 @@
 #pragma once
 
-typedef struct vec2u_t
+typedef struct Vec2u
 {
-    uint32_t x, y;
-} vec2u_t;
+    u32 x, y;
+} Vec2u;
 
-typedef struct vec3_t
+typedef struct Vec3
 {
-    float x, y, z;
-} vec3_t;
+    f32 x, y, z;
+} Vec3;
 
-typedef struct vec4_t
+typedef struct Vec4
 {
-    float x, y, z, w;
-} vec4_t;
+    f32 x, y, z, w;
+} Vec4;
 
-typedef struct color_t
+typedef struct Color
 {
-    float r, g, b, a;
-} color_t;
+    f32 r, g, b, a;
+} Color;
 
-typedef struct
+typedef struct Quat
 {
-    float x, y, z, w;
-} quat_t;
+    f32 x, y, z, w;
+} Quat;
 
-typedef struct mat4_t
+typedef struct Mat4
 {
-    vec4_t x, y, z, w;
-} mat4_t;
+    Vec4 x, y, z, w;
+} Mat4;

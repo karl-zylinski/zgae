@@ -1,8 +1,8 @@
 #pragma once
 
-fwd_struct(jzon_key_value_pair_t);
+fwd_struct(JzonKeyValuePair);
 
-typedef struct jzon_value_t
+typedef struct JzonValue
 {
     bool is_string : 1;
     bool is_int : 1;
@@ -11,26 +11,26 @@ typedef struct jzon_value_t
     bool is_array : 1;
     bool is_bool : 1;
     bool is_null : 1;
-    uint64_t size;
+    u64 size;
 
     union
     {
         char* string_val;
-        int64_t int_val;
+        i64 int_val;
         bool bool_val;
-        float float_val;
-        jzon_key_value_pair_t* table_val;
-        struct jzon_value_t* array_val;
+        f32 float_val;
+        JzonKeyValuePair* table_val;
+        struct JzonValue* array_val;
     };
-} jzon_value_t;
+} JzonValue;
 
-typedef struct jzon_key_value_pair_t {
+typedef struct JzonKeyValuePair {
     char* key;
-    long long key_hash;
-    jzon_value_t val;
-} jzon_key_value_pair_t;
+    hash64 key_hash;
+    JzonValue val;
+} JzonKeyValuePair;
 
-typedef struct jzon_parse_result_t {
+typedef struct JzonParseResult {
     bool ok;
-    jzon_value_t output;
-} jzon_parse_result_t;
+    JzonValue output;
+} JzonParseResult;

@@ -4,25 +4,25 @@
 #include <stdio.h>
 
 #ifdef ENABLE_MEMORY_TRACING
-    typedef struct allocation_callstack_t 
+    typedef struct AllocationCallstack 
     {
         const char** callstack;
-        uint32_t callstack_num;
+        u32 callstack_num;
         void* ptr;
-    } allocation_callstack_t;
+    } AllocationCallstack;
 
-    static const uint32_t MAX_ALLOC_CALLSTACKS = 8096;
-    static allocation_callstack_t alloc_callstacks[MAX_ALLOC_CALLSTACKS];
+    static const u32 MAX_ALLOC_CALLSTACKS = 8096;
+    static AllocationCallstack alloc_callstacks[MAX_ALLOC_CALLSTACKS];
 
     static void add_allocation_callstack(void* ptr)
     {
-        for (uint32_t i = 0; i < MAX_ALLOC_CALLSTACKS; ++i)
+        for (u32 i = 0; i < MAX_ALLOC_CALLSTACKS; ++i)
         {
             if (alloc_callstacks[i].ptr == NULL)
             {
-                backtrace_t bt = debug_get_backtrace(10);
+                Backtrace bt = debug_get_backtrace(10);
 
-                allocation_callstack_t ac = {
+                AllocationCallstack ac = {
                     .callstack = bt.function_calls,
                     .callstack_num = bt.function_calls_num,
                     .ptr = ptr
@@ -38,13 +38,13 @@
 
     static void remove_allocation_callstack(void* ptr, bool must_be_present)
     {
-        for (uint32_t i = 0; i < MAX_ALLOC_CALLSTACKS; ++i)
+        for (u32 i = 0; i < MAX_ALLOC_CALLSTACKS; ++i)
         {
             if (alloc_callstacks[i].ptr == ptr)
             {
-                allocation_callstack_t* ac = alloc_callstacks + i;
+                AllocationCallstack* ac = alloc_callstacks + i;
                 free(ac->callstack);
-                memzero(ac, sizeof(allocation_callstack_t));
+                memzero(ac, sizeof(AllocationCallstack));
                 return;
             }
         }
@@ -57,16 +57,16 @@
 void memory_init()
 {
     #ifdef ENABLE_MEMORY_TRACING
-        memzero(alloc_callstacks, sizeof(allocation_callstack_t) * MAX_ALLOC_CALLSTACKS);
+        memzero(alloc_callstacks, sizeof(AllocationCallstack) * MAX_ALLOC_CALLSTACKS);
     #endif
 }
 
-void memzero(void* p, size_t s)
+void memzero(void* p, sizet s)
 {
     memset(p, 0, s);
 }
 
-void* mema(size_t s)
+void* mema(sizet s)
 {
     void* p = malloc(s);
     #ifdef ENABLE_MEMORY_TRACING
@@ -76,14 +76,14 @@ void* mema(size_t s)
     return p;
 }
 
-void* mema_zero(size_t s)
+void* mema_zero(sizet s)
 {
     void* p = mema(s);
     memzero(p, s);
     return p;
 }
 
-void* memra(void* cur, size_t s)
+void* memra(void* cur, sizet s)
 {
     void* p = realloc(cur, s);
 
@@ -98,7 +98,7 @@ void* memra(void* cur, size_t s)
     return p;
 }
 
-void* memra_zero(void* cur, size_t s)
+void* memra_zero(void* cur, sizet s)
 {
     void* p = memra(cur, s);
     memzero(p, s);
@@ -118,13 +118,13 @@ void memf(void* p)
 void memory_check_leaks()
 {
     #ifdef ENABLE_MEMORY_TRACING
-        for (uint32_t ac_idx = 0; ac_idx < MAX_ALLOC_CALLSTACKS; ++ac_idx)
+        for (u32 ac_idx = 0; ac_idx < MAX_ALLOC_CALLSTACKS; ++ac_idx)
         {
             if (alloc_callstacks[ac_idx].ptr != NULL)
             {
                 fprintf(stderr, "MEMORY LEAK, backtrace: \n");
 
-                for (uint32_t cidx = 2; cidx < alloc_callstacks[ac_idx].callstack_num; ++cidx)
+                for (u32 cidx = 2; cidx < alloc_callstacks[ac_idx].callstack_num; ++cidx)
                 {
                     fprintf(stderr, "%s", alloc_callstacks[ac_idx].callstack[cidx]);
                     fprintf(stderr, "\n");
@@ -134,7 +134,7 @@ void memory_check_leaks()
     #endif
 }
 
-void* mema_copy(const void* data, size_t s)
+void* mema_copy(const void* data, sizet s)
 {
     void* p = mema(s);
     memcpy(p, data, s);

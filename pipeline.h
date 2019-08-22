@@ -1,6 +1,6 @@
 #pragma once
 #include "pipeline_types.h"
 
-fwd_struct(renderer_state_t);
+fwd_struct(RendererState);
 
-renderer_resource_handle_t pipeline_load(renderer_state_t* rs, const char* filename);
+RendererResourceHandle pipeline_load(RendererState* rs, const char* filename);

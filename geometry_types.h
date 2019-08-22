@@ -1,9 +1,9 @@
 #pragma once
 #include "math_types.h"
 
-typedef struct geometry_vertex_t {
-    vec4_t coords;
-    vec4_t color;
-} geometry_vertex_t;
+typedef struct GeometryVertex {
+    Vec4 coords;
+    Vec4 color;
+} GeometryVertex;
 
-typedef uint16_t geometry_index_t;
+typedef u16 GeometryIndex;

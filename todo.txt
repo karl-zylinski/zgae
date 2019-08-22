@@ -18,7 +18,7 @@
 
 - handles:
     i = index
-    t = type --- unique identifier per-pool (have a handle_types_t enum with stuff like HANDLE_TYPE_RENDERER_RESOURCE or HANDLE_TYPE_SCRIPT_RESOURCE (should we then skip the typedeffed renderer_resource_handle_t ?????? or maybe its nice syntactic sugar))
+    t = type --- unique identifier per-pool (have a handle_types_t enum with stuff like HANDLE_TYPE_RENDERER_RESOURCE or HANDLE_TYPE_SCRIPT_RESOURCE (should we then skip the typedeffed RendererResourceHandle ?????? or maybe its nice syntactic sugar))
     s = subtype --- added to pool, i.e. renderer_resource_type_t which has values like RENDERER_RESOURCE_TYPE_SHADER or SCRIPT_RESOURCE_ENTITY
     u = used
 
