@@ -378,11 +378,18 @@ static bool parse_value(const char** input, jzon_value_t* output)
     }
 }
 
-bool jzon_parse(const char* input, jzon_value_t* output)
+jzon_parse_result_t jzon_parse(const char* input)
 {
-    memset(output, 0, sizeof(jzon_value_t));
+    jzon_value_t output = {};
     skip_whitespace(&input);
-    return parse_table(&input, output, true);
+    bool ok = parse_table(&input, &output, true);
+
+    jzon_parse_result_t pr = {
+        .ok = ok,
+        .output = output
+    };
+
+    return pr;
 }
 
 void jzon_free(jzon_value_t* val)
@@ -410,7 +417,7 @@ void jzon_free(jzon_value_t* val)
     }
 }
 
-jzon_value_t* jzon_get(jzon_value_t* table, const char* key)
+const jzon_value_t* jzon_get(const jzon_value_t* table, const char* key)
 {
     if (!table->is_table)
         return NULL;

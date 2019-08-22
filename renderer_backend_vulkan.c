@@ -122,9 +122,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
         "Due to Vulkan bug (https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/1670)."
     };
 
-    //int32_t non_error_idx = str_eql_arr(data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
-    (void)non_errors;
-    int32_t non_error_idx = -1;
+    int32_t non_error_idx = str_eql_arr(data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
 
     if (non_error_idx != -1)
     {
@@ -860,7 +858,7 @@ static VkFormat vk_format_from_shader_data_type(shader_data_type_t t)
         case SHADER_DATA_TYPE_INVALID: break;
     }
 
-    error("VkFormat unknown for shader data type %s", stringify(t));
+    error("VkFormat unknown for shader data type %d", t);
     return -1;
 }
 

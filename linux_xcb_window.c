@@ -217,11 +217,8 @@ static keycode_t xcb_key_to_keycode(xcb_keycode_t code)
 
     uint32_t num_codes = sizeof(codes)/sizeof(keycode_t);
 
-    if ((uint32_t)code > num_codes || codes[(uint32_t)code] == KC_UNKNOWN)
-    {
-        info("Unkown key pressed: %d", code);
+    if ((uint32_t)code > num_codes)
         return KC_UNKNOWN;
-    }
 
     return codes[(uint32_t)code];
 }
@@ -251,7 +248,13 @@ static bool poll_event(linux_xcb_window_t* w)
         case XCB_KEY_PRESS:
         {
             xcb_keycode_t code = ((xcb_key_press_event_t*)evt)->detail;
-            w->state.callbacks.key_pressed_callback(xcb_key_to_keycode(code));
+
+            keycode_t kc = xcb_key_to_keycode(code);
+            
+            if (kc == KC_UNKNOWN)
+                info("Unknown key pressed: %d", code);
+
+            w->state.callbacks.key_pressed_callback(kc);
             return true;
         }
         case XCB_KEY_RELEASE:
@@ -269,7 +272,12 @@ static bool poll_event(linux_xcb_window_t* w)
                 return true;
             }
 
-            w->state.callbacks.key_released_callback(xcb_key_to_keycode(code));
+            keycode_t kc = xcb_key_to_keycode(code);
+            
+            if (kc == KC_UNKNOWN)
+                info("Unknown key pressed: %d", code);
+
+            w->state.callbacks.key_released_callback(kc);
             return true;
         }
         case XCB_FOCUS_OUT:
@@ -315,22 +323,22 @@ void linux_xcb_window_process_all_events(linux_xcb_window_t* w)
     while(poll_event(w));
 }
 
-xcb_connection_t* linux_xcb_window_get_connection(linux_xcb_window_t* w)
+xcb_connection_t* linux_xcb_window_get_connection(const linux_xcb_window_t* w)
 {
     return w->connection;
 }
 
-uint32_t linux_xcb_window_get_handle(linux_xcb_window_t* w)
+uint32_t linux_xcb_window_get_handle(const linux_xcb_window_t* w)
 {
     return w->handle;
 }
 
-int linux_xcb_window_is_open(linux_xcb_window_t* w)
+bool linux_xcb_window_is_open(const linux_xcb_window_t* w)
 {
     return w->state.open_state == WINDOW_OPEN_STATE_OPEN;
 }
 
-const window_state_t* linux_xcb_window_get_state(linux_xcb_window_t* w)
+const window_state_t* linux_xcb_window_get_state(const linux_xcb_window_t* w)
 {
     return &w->state;
 }

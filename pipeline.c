@@ -11,16 +11,13 @@ renderer_resource_handle_t pipeline_load(renderer_state_t* rs, const char* filen
     info("Loading pipeline from %s", filename);
     pipeline_intermediate_t pi = {};
     #define ensure(expr) if (!(expr)) return HANDLE_INVALID
-    char* fd;
-    size_t fs;
-    bool file_load_ok = file_load_str(filename, &fd, &fs);
-    ensure(file_load_ok);
-    jzon_value_t parsed;
-    int parse_res = jzon_parse(fd, &parsed);
-    ensure(parse_res && parsed.is_table);
-    memf(fd);
+    file_load_result_t flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
+    ensure(flr.ok);
+    jzon_parse_result_t jpr = jzon_parse(flr.data);
+    ensure(jpr.ok && jpr.output.is_table);
+    memf(flr.data);
 
-    jzon_value_t* jz_ss_arr = jzon_get(&parsed, "shader_stages");
+    const jzon_value_t* jz_ss_arr = jzon_get(&jpr.output, "shader_stages");
     ensure(jz_ss_arr && jz_ss_arr->is_array);
     pi.shader_stages_num = (unsigned)jz_ss_arr->size;
     pi.shader_stages = mema_zero(sizeof(shader_intermediate_t) * pi.shader_stages_num);
@@ -33,7 +30,7 @@ renderer_resource_handle_t pipeline_load(renderer_state_t* rs, const char* filen
         ensure(pi.shader_stages[i] != HANDLE_INVALID);
     }
 
-    jzon_free(&parsed);
+    jzon_free(&jpr.output);
     renderer_resource_handle_t p = renderer_load_pipeline(rs, &pi);
     ensure(p != HANDLE_INVALID);
     memf(pi.shader_stages);

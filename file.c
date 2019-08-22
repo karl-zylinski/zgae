@@ -2,35 +2,31 @@
 #include <stdio.h>
 #include "memory.h"
 
-bool file_load(const char* filename, void** data, size_t* data_size)
+file_load_result_t file_load(const char* filename, file_load_mode_t mode)
 {
     FILE* file_handle = fopen(filename, "rb");
 
     if (file_handle == NULL)
-        return false;
+    {
+        file_load_result_t r = {.ok = false};
+        return r;
+    }
 
     fseek(file_handle, 0, SEEK_END);
-    *data_size = ftell(file_handle);
+    size_t s = ftell(file_handle);
     fseek(file_handle, 0, SEEK_SET);
-    *data = mema(*data_size);
-    fread(*data, 1, *data_size, file_handle);
+    void* d = mema(s + (mode == FILE_LOAD_MODE_NULL_TERMINATED ? 1 : 0));
+    fread(d, 1, s, file_handle);
     fclose(file_handle);
-    return true;
-}
 
-bool file_load_str(const char* filename, char** data, size_t* str_len)
-{
-    FILE* file_handle = fopen(filename, "rb");
+    if (mode == FILE_LOAD_MODE_NULL_TERMINATED)
+        ((char*)d)[s] = '\0';
 
-    if (file_handle == NULL)
-        return false;
+    file_load_result_t r = {
+        .ok = true,
+        .data = d,
+        .data_size = s
+    };
 
-    fseek(file_handle, 0, SEEK_END);
-    (*str_len) = ftell(file_handle);
-    fseek(file_handle, 0, SEEK_SET);
-    *data = mema((*str_len) + 1);
-    fread(*data, 1, *str_len, file_handle);
-    (*data)[*str_len] = '\0';
-    fclose(file_handle);
-    return true;
+    return r;
 }

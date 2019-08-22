@@ -22,8 +22,8 @@ void debug_error(const char* msg, ...)
     print_current_time();
     check(g_get_backtrace, "Please run debug_init with function that returns backtraces as parameter.");
 
-    backtrace_t bt = g_get_backtrace(2);
-    fprintf(stderr, "ERROR IN %s --- ", bt.function_calls[1]);
+    backtrace_t bt = g_get_backtrace(3);
+    fprintf(stderr, "ERROR IN %s --- ", bt.function_calls[2]);
     free(bt.function_calls);
     
     va_list args;

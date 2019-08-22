@@ -51,6 +51,11 @@ typedef enum renderer_resource_type_t
     RENDERER_RESOURCE_TYPE_NUM
 } renderer_resource_type_t;
 
+static const char* renderer_resource_type_names[] =
+{
+    "invalid", "shader", "pipeline", "geometry"
+};
+
 typedef enum renderer_resource_flag_t
 {
     RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT = 0x1
@@ -83,7 +88,7 @@ renderer_state_t* renderer_create(window_type_t window_type, void* window_data)
     rs->resource_handle_pool = handle_pool_create();
 
     for (renderer_resource_type_t t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)
-        handle_pool_set_type(rs->resource_handle_pool, t, stringify(t));
+        handle_pool_set_type(rs->resource_handle_pool, t, renderer_resource_type_names[t]);
     
     renderer_backend_state_t* rbs = renderer_backend_create(window_type, window_data);
     rs->rbs = rbs;
