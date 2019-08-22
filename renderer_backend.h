@@ -2,6 +2,7 @@
 
 fwd_handle(RendererResourceHandle);
 fwd_enum(WindowType);
+fwd_struct(Mesh);
 fwd_struct(RendererBackendState);
 fwd_struct(RendererBackendShader);
 fwd_struct(RendererBackendPipeline);
@@ -19,7 +20,7 @@ RendererBackendPipeline* renderer_backend_create_pipeline(RendererBackendState* 
     ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
     u32* constant_buffer_sizes, u32* constant_buffer_binding_f, u32 constant_buffers_num);
 
-RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* rbs, const GeometryVertex* vertices, u32 vertices_num, const GeometryIndex* indices, u32 indices_num);
+RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* rbs, const Mesh* mesh);
 
 void renderer_backend_destroy_shader(RendererBackendState* rbs, RendererBackendShader* s);
 void renderer_backend_destroy_pipeline(RendererBackendState* rbs, RendererBackendPipeline* p);

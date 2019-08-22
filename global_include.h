@@ -16,6 +16,7 @@ static const Handle HANDLE_INVALID = -1;
 #define handle_index(h) (h >> 8)
 #define handle_type(h) ((h & 0xff) >> 1)
 #define handle_used(h) (h & 0x1)
+#define SMALL_NUMBER 0.00001f
 
 typedef uint8_t u8;
 typedef uint16_t u16;

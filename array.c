@@ -3,7 +3,7 @@
 #include <string.h>
 #include "debug.h"
 
-ArrayHeader* array_internal_header(void* arr)
+ArrayHeader* array_internal_header(const void* arr)
 {
     ArrayHeader* h = (ArrayHeader *)((char *)(arr) - sizeof(ArrayHeader));
     check_slow(h->marker == ARRAY_MARKER, "Trying to use array_* functions on non-array.");
@@ -32,7 +32,7 @@ void* array_internal_copy_data(void *arr, sizet item_size)
    if (!arr)
       return NULL;
 
-   u64 s = array_num(arr) * item_size;
+   sizet s = array_num(arr) * item_size;
    void* d = mema(s);
    memcpy(d, arr, s);
    return d;

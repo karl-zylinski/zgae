@@ -22,14 +22,14 @@ typedef struct ArrayHeader
 
 #define array_full(a) (array_cap(a) == array_num(a))
 
-#define array_copy_data(a) (array_internal_copy_data(a, sizeof(*(a))))
+#define array_copy_data(a) (array_internal_copy_data(a, sizeof((*a))))
 #define array_insert(a, item, idx) \
     array_full(a) ? a = array_internal_grow(a, sizeof(*a)) : 0, \
     (a)[array_internal_make_insert_room(a, idx, sizeof(*(a)))] = item
 
 #define array_destroy(a) ((a) ? array_internal_destroy(a) : 0)
 
-ArrayHeader* array_internal_header(void* arr);
+ArrayHeader* array_internal_header(const void* arr);
 void* array_internal_grow(void* arr, sizet item_size);
 void* array_internal_copy_data(void *arr, sizet item_size);
 sizet array_internal_make_insert_room(void* arr, sizet idx, sizet item_size);

@@ -150,3 +150,23 @@ Quat quat_identity()
     Quat q = {0, 0, 0, 1};
     return q;
 }
+
+bool f32_almost_eql(f32 f1, f32 f2)
+{
+    return fabs(f2 - f1) < SMALL_NUMBER;
+}
+
+bool vec2_almost_eql(const Vec2* v1, const Vec2* v2)
+{
+    return f32_almost_eql(v1->x, v2->x) && f32_almost_eql(v1->y, v2->y);
+}
+
+bool vec3_almost_eql(const Vec3* v1, const Vec3* v2)
+{
+    return f32_almost_eql(v1->x, v2->x) && f32_almost_eql(v1->y, v2->y) && f32_almost_eql(v1->z, v2->z);
+}
+
+bool vec4_almost_eql(const Vec4* v1, const Vec4* v2)
+{
+    return f32_almost_eql(v1->x, v2->x) && f32_almost_eql(v1->y, v2->y) && f32_almost_eql(v1->z, v2->z) && f32_almost_eql(v1->w, v2->w);
+}

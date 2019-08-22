@@ -6,4 +6,4 @@ typedef struct Backtrace
     u32 function_calls_num;
 } Backtrace;
 
-typedef Backtrace(*FuncGetBacktrace)(u32 num_frames);
+typedef Backtrace(*GetBacktraceCallback)(u32 num_frames);

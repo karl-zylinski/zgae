@@ -1,9 +1,9 @@
 #pragma once
 
-typedef struct Vec2u
+typedef struct Vec2
 {
-    u32 x, y;
-} Vec2u;
+    f32 x, y;
+} Vec2;
 
 typedef struct Vec3
 {
@@ -19,6 +19,11 @@ typedef struct Color
 {
     f32 r, g, b, a;
 } Color;
+
+typedef struct Vec2u
+{
+    u32 x, y;
+} Vec2u;
 
 typedef struct Quat
 {

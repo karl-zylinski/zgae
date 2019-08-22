@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 
-static FuncGetBacktrace g_get_backtrace = NULL;
+static GetBacktraceCallback g_get_backtrace = NULL;
 
 static void print_current_time()
 {
@@ -42,7 +42,7 @@ void debug_info(const char* msg, ...)
     va_end(args);
 }
 
-void debug_init(FuncGetBacktrace get_backtrace)
+void debug_init(GetBacktraceCallback get_backtrace)
 {
     g_get_backtrace = get_backtrace;
 }

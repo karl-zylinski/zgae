@@ -1,7 +1,7 @@
 #pragma once
 #include "debug_types.h"
 
-void debug_init(FuncGetBacktrace get_backtrace);
+void debug_init(GetBacktraceCallback get_backtrace);
 void debug_error(const char* msg, ...);
 void debug_info(const char* msg, ...);
 Backtrace debug_get_backtrace(u32 size);

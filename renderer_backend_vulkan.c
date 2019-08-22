@@ -1119,7 +1119,7 @@ RendererBackendPipeline* renderer_backend_create_pipeline(RendererBackendState* 
     return pipeline;
 }
 
-RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* rbs, const GeometryVertex* vertices, u32 vertices_num, const GeometryIndex* indices, u32 indices_num)
+RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* rbs, const Mesh* m)
 {
     VkResult res;
 
@@ -1132,7 +1132,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         VkBufferCreateInfo vertex_bci = {};
         vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        vertex_bci.size = sizeof(GeometryVertex) * vertices_num;
+        vertex_bci.size = sizeof(GeometryVertex) * m->vertices_num;
         vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &vertex_bci, NULL, &vertex_buffer);
@@ -1153,7 +1153,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         res = vkMapMemory(rbs->device, vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(vertex_buffer_memory_data, vertices, sizeof(GeometryVertex) * vertices_num);
+        memcpy(vertex_buffer_memory_data, m->vertices, sizeof(GeometryVertex) * m->vertices_num);
     
         vkUnmapMemory(rbs->device, vertex_buffer_memory);
     
@@ -1170,7 +1170,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         VkBufferCreateInfo index_bci = {};
         index_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         index_bci.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        index_bci.size = sizeof(GeometryIndex) * indices_num;
+        index_bci.size = sizeof(GeometryIndex) * m->indices_num;
         index_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &index_bci, NULL, &index_buffer);
@@ -1191,7 +1191,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         res = vkMapMemory(rbs->device, index_buffer_memory, 0, index_buffer_mr.size, 0, (void**)&index_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(index_buffer_memory_data, indices, sizeof(GeometryIndex) * indices_num);
+        memcpy(index_buffer_memory_data, m->indices, sizeof(GeometryIndex) * m->indices_num);
     
         vkUnmapMemory(rbs->device, index_buffer_memory);
     
@@ -1204,7 +1204,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         .vertex_buffer_memory = vertex_buffer_memory,
         .index_buffer = index_buffer,
         .index_buffer_memory = index_buffer_memory,
-        .indices_num = indices_num
+        .indices_num = m->indices_num
     };
 
     return mema_copy(&g, sizeof(RendererBackendGeometry));

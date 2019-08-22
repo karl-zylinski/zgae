@@ -8,6 +8,7 @@
 #include "pipeline.h"
 #include "shader.h"
 #include "str.h"
+#include "geometry_types.h"
 
 fwd_struct(RendererBackendState);
 fwd_struct(RendererBackendShader);
@@ -34,10 +35,7 @@ typedef struct RendererResourcePipeline
 
 typedef struct RendererResourceGeometry
 {
-    GeometryVertex* vertices;
-    GeometryIndex* indices;
-    u32 vertices_num;
-    u32 indices_num;
+    Mesh mesh;
     RendererBackendGeometry* backend_state;
 } RendererResourceGeometry;
 
@@ -185,7 +183,7 @@ static RendererBackendPipeline* pipeline_init(RendererState* rs, const RendererR
 
 static RendererBackendGeometry* geometry_init(RendererState* rs, const RendererResourceGeometry* g)
 {
-    return renderer_backend_create_geometry(rs->rbs, g->vertices, g->vertices_num, g->indices, g->indices_num);
+    return renderer_backend_create_geometry(rs->rbs, &g->mesh);
 }
 
 static void init_resource(RendererState* rs, RendererResource* rr)
@@ -237,8 +235,8 @@ static void destroy_resource(RendererState* rs, RendererResource* rr)
 
         case RENDERER_RESOURCE_TYPE_GEOMETRY: {
             RendererResourceGeometry* g = &rr->geometry;
-            memf(g->vertices);
-            memf(g->indices);
+            memf(g->mesh.vertices);
+            memf(g->mesh.indices);
         } break;
 
         case RENDERER_RESOURCE_TYPE_NUM:
@@ -318,14 +316,14 @@ RendererResourceHandle renderer_load_pipeline(RendererState* rs, const PipelineI
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
 }
 
-RendererResourceHandle renderer_load_geometry(RendererState* rs, const GeometryVertex* vertices, u32 vertices_num, const GeometryIndex* indices, u32 indices_num)
+RendererResourceHandle renderer_load_geometry(RendererState* rs, const Mesh* mesh)
 {
     RendererResourceGeometry g = {
-        .vertices = mema_copy(vertices, sizeof(GeometryVertex) * vertices_num),
-        .vertices_num = vertices_num,
-        .indices = mema_copy(indices, sizeof(GeometryIndex) * indices_num),
-        .indices_num = indices_num
+        .mesh = *mesh
     };
+
+    g.mesh.vertices = mema_copy(g.mesh.vertices, sizeof(GeometryVertex) * g.mesh.vertices_num);
+    g.mesh.indices = mema_copy(g.mesh.indices, sizeof(GeometryIndex) * g.mesh.indices_num);
 
     RendererResource geometry_res = {
         .type = RENDERER_RESOURCE_TYPE_GEOMETRY,

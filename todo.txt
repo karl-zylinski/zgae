@@ -2,6 +2,8 @@
 
 - indexed drawing, obj loader and zgae shaders
 
+- feed renderer camera settings, so it can make matrices and autoload those into cbs
+
 
 ### LESS IMPORTANT ###
 

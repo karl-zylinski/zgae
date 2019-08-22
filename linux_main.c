@@ -11,19 +11,9 @@
 #include <math.h>
 #include "keyboard.h"
 #include <execinfo.h>
+#include "obj_loader.h"
 
 #define XYZ1(_x_, _y_, _z_) {(_x_), (_y_), (_z_), 1.f}
-
-const GeometryIndex indices[] = {
-    0, 1, 2, 2, 3, 0
-};
-
-static GeometryVertex vertices[] = {
-    {XYZ1(-0.5f, 0, 0.5f), XYZ1(1.f, 0.f, 0.f)},
-    {XYZ1(0.5f, 0, 0.5f), XYZ1(0.f, 1.f, 0.f)},
-    {XYZ1(0.5f, 0, -0.5f), XYZ1(0.f, 0.f, 1.f)},
-    {XYZ1(-0.5f, 0, -0.5f), XYZ1(1.f, 0.f, 0.f)}
-};
 
 static f32 get_cur_time_seconds()
 {
@@ -78,7 +68,11 @@ int main()
     linux_xcb_window_update_callbacks(win, &wc);
 
     RendererResourceHandle ph = pipeline_load(rs, "pipeline_default.pipeline");
-    RendererResourceHandle gh = renderer_load_geometry(rs, vertices, sizeof(vertices) / sizeof(GeometryVertex), indices, sizeof(indices) / sizeof(GeometryIndex));
+    ObjLoadResult olr = obj_load("box.wobj");
+    check(olr.ok, "Failed loading obj");
+    RendererResourceHandle gh = renderer_load_geometry(rs, &olr.mesh);
+    memf(olr.mesh.vertices);
+    memf(olr.mesh.indices);
 
     info("Starting timers");
     
