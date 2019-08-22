@@ -1,0 +1,22 @@
+{
+    "folders":
+    [
+        {
+            "path": "."
+        }
+    ],
+    "build_systems": [
+        {
+            "name": "zgae",
+            "shell_cmd": "./build.py run",
+            "file_regex": "(\\S*?):(\\d+):(\\d+): (error.*)",
+
+            "variants": [
+                {
+                    "name": "build and run",
+                    "shell_cmd": "./build.py run",
+                }
+            ]
+        }
+    ]
+}

@@ -36,7 +36,9 @@ typedef struct renderer_resource_pipeline_t
 typedef struct renderer_resource_geometry_t
 {
     geometry_vertex_t* vertices;
+    geometry_index_t* indices;
     uint32_t vertices_num;
+    uint32_t indices_num;
     renderer_backend_geometry_t* backend_state;
 } renderer_resource_geometry_t;
 
@@ -179,7 +181,7 @@ static renderer_backend_pipeline_t* pipeline_init(renderer_state_t* rs, const re
 
 static renderer_backend_geometry_t* geometry_init(renderer_state_t* rs, const renderer_resource_geometry_t* g)
 {
-    return renderer_backend_create_geometry(rs->rbs, g->vertices, g->vertices_num);
+    return renderer_backend_create_geometry(rs->rbs, g->vertices, g->vertices_num, g->indices, g->indices_num);
 }
 
 static void init_resource(renderer_state_t* rs, renderer_resource_t* rr)
@@ -311,16 +313,21 @@ renderer_resource_handle_t renderer_load_pipeline(renderer_state_t* rs, const pi
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
 }
 
-renderer_resource_handle_t renderer_load_geometry(renderer_state_t* rs, const geometry_vertex_t* vertices, uint32_t vertices_num)
+renderer_resource_handle_t renderer_load_geometry(renderer_state_t* rs, const geometry_vertex_t* vertices, uint32_t vertices_num, const geometry_index_t* indices, uint32_t indices_num)
 {
-    renderer_resource_t geometry_res = {};
-    geometry_res.type = RENDERER_RESOURCE_TYPE_GEOMETRY;
-    renderer_resource_geometry_t* geometry = &geometry_res.geometry;
-    geometry->vertices = mema_copy(vertices, sizeof(geometry_vertex_t) * vertices_num);
-    geometry->vertices_num = vertices_num;
+    renderer_resource_geometry_t g = {
+        .vertices = mema_copy(vertices, sizeof(geometry_vertex_t) * vertices_num),
+        .vertices_num = vertices_num,
+        .indices = mema_copy(indices, sizeof(geometry_index_t) * indices_num),
+        .indices_num = indices_num
+    };
+
+    renderer_resource_t geometry_res = {
+        .type = RENDERER_RESOURCE_TYPE_GEOMETRY,
+        .geometry = g
+    };
 
     init_resource(rs, &geometry_res);
-
     return add_resource(rs->resource_handle_pool, &rs->da_resources, &geometry_res);
 }
 
@@ -348,7 +355,7 @@ void renderer_surface_resized(renderer_state_t* rs, uint32_t w, uint32_t h)
 {
     info("Renderer resizing to %d x %d", w, h);
     renderer_backend_wait_until_idle(rs->rbs);
-    renderer_backend_surface_rezised(rs->rbs, w, h);
+    renderer_backend_surface_resized(rs->rbs, w, h);
 
     for (size_t i = 0; i < array_num(rs->da_resources); ++i)
     {

@@ -14,49 +14,16 @@
 #include "keyboard.h"
 
 #define XYZ1(_x_, _y_, _z_) {(_x_), (_y_), (_z_), 1.f}
-static geometry_vertex_t cube[] = {
-    // red face
-    {XYZ1(-1, -1, 1), XYZ1(1.f, 0.f, 0.f)},
-    {XYZ1(-1, 1, 1), XYZ1(1.f, 0.f, 0.f)},
-    {XYZ1(1, -1, 1), XYZ1(1.f, 0.f, 0.f)},
-    {XYZ1(1, -1, 1), XYZ1(1.f, 0.f, 0.f)},
-    {XYZ1(-1, 1, 1), XYZ1(1.f, 0.f, 0.f)},
-    {XYZ1(1, 1, 1), XYZ1(1.f, 0.f, 0.f)},
-    // green face
-    {XYZ1(-1, -1, -1), XYZ1(0.f, 1.f, 0.f)},
-    {XYZ1(1, -1, -1), XYZ1(0.f, 1.f, 0.f)},
-    {XYZ1(-1, 1, -1), XYZ1(0.f, 1.f, 0.f)},
-    {XYZ1(-1, 1, -1), XYZ1(0.f, 1.f, 0.f)},
-    {XYZ1(1, -1, -1), XYZ1(0.f, 1.f, 0.f)},
-    {XYZ1(1, 1, -1), XYZ1(0.f, 1.f, 0.f)},
-    // blue face
-    {XYZ1(-1, 1, 1), XYZ1(0.f, 0.f, 1.f)},
-    {XYZ1(-1, -1, 1), XYZ1(0.f, 0.f, 1.f)},
-    {XYZ1(-1, 1, -1), XYZ1(0.f, 0.f, 1.f)},
-    {XYZ1(-1, 1, -1), XYZ1(0.f, 0.f, 1.f)},
-    {XYZ1(-1, -1, 1), XYZ1(0.f, 0.f, 1.f)},
-    {XYZ1(-1, -1, -1), XYZ1(0.f, 0.f, 1.f)},
-    // yellow face
-    {XYZ1(1, 1, 1), XYZ1(1.f, 1.f, 0.f)},
-    {XYZ1(1, 1, -1), XYZ1(1.f, 1.f, 0.f)},
-    {XYZ1(1, -1, 1), XYZ1(1.f, 1.f, 0.f)},
-    {XYZ1(1, -1, 1), XYZ1(1.f, 1.f, 0.f)},
-    {XYZ1(1, 1, -1), XYZ1(1.f, 1.f, 0.f)},
-    {XYZ1(1, -1, -1), XYZ1(1.f, 1.f, 0.f)},
-    // magenta face
-    {XYZ1(1, 1, 1), XYZ1(1.f, 0.f, 1.f)},
-    {XYZ1(-1, 1, 1), XYZ1(1.f, 0.f, 1.f)},
-    {XYZ1(1, 1, -1), XYZ1(1.f, 0.f, 1.f)},
-    {XYZ1(1, 1, -1), XYZ1(1.f, 0.f, 1.f)},
-    {XYZ1(-1, 1, 1), XYZ1(1.f, 0.f, 1.f)},
-    {XYZ1(-1, 1, -1), XYZ1(1.f, 0.f, 1.f)},
-    // cyan face
-    {XYZ1(1, -1, 1), XYZ1(0.f, 1.f, 1.f)},
-    {XYZ1(1, -1, -1), XYZ1(0.f, 1.f, 1.f)},
-    {XYZ1(-1, -1, 1), XYZ1(0.f, 1.f, 1.f)},
-    {XYZ1(-1, -1, 1), XYZ1(0.f, 1.f, 1.f)},
-    {XYZ1(1, -1, -1), XYZ1(0.f, 1.f, 1.f)},
-    {XYZ1(-1, -1, -1), XYZ1(0.f, 1.f, 1.f)},
+
+const geometry_index_t indices[] = {
+    0, 1, 2, 2, 3, 0
+};
+
+static geometry_vertex_t vertices[] = {
+    {XYZ1(-0.5f, 0, 0.5f), XYZ1(1.f, 0.f, 0.f)},
+    {XYZ1(0.5f, 0, 0.5f), XYZ1(0.f, 1.f, 0.f)},
+    {XYZ1(0.5f, 0, -0.5f), XYZ1(0.f, 0.f, 1.f)},
+    {XYZ1(-0.5f, 0, -0.5f), XYZ1(1.f, 0.f, 0.f)}
 };
 
 static float get_cur_time_seconds()
@@ -96,7 +63,7 @@ int main()
     linux_xcb_window_update_callbacks(win, &wc);
 
     renderer_resource_handle_t ph = pipeline_load(rs, "pipeline_default.pipeline");
-    renderer_resource_handle_t gh = renderer_load_geometry(rs, cube, sizeof(cube) / sizeof(geometry_vertex_t));
+    renderer_resource_handle_t gh = renderer_load_geometry(rs, vertices, sizeof(vertices) / sizeof(geometry_vertex_t), indices, sizeof(indices)/sizeof(geometry_index_t));
 
     info("Starting timers");
     

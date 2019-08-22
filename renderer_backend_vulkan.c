@@ -56,7 +56,10 @@ typedef struct renderer_backend_pipeline_t
 typedef struct renderer_backend_geometry_t
 {
     VkBuffer vertex_buffer;
+    VkBuffer index_buffer;
     VkDeviceMemory vertex_buffer_memory;
+    VkDeviceMemory index_buffer_memory;
+    geometry_index_t indices_num;
 } renderer_backend_geometry_t;
 
 typedef struct renderer_backend_state_t
@@ -119,7 +122,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
         "Due to Vulkan bug (https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/1670)."
     };
 
-    int32_t non_error_idx = str_eql_arr(data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
+    //int32_t non_error_idx = str_eql_arr(data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
+    (void)non_errors;
+    int32_t non_error_idx = -1;
+
     if (non_error_idx != -1)
     {
         if (non_errors_suppress[non_error_idx])
@@ -556,13 +562,32 @@ renderer_backend_state_t* renderer_backend_create(window_type_t window_type, voi
     ai.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     ai.apiVersion = VK_API_VERSION_1_0;
 
+    const char* validation_layer_name = "VK_LAYER_LUNARG_standard_validation";
+    uint32_t available_layers_num;
+    res = vkEnumerateInstanceLayerProperties(&available_layers_num, NULL);
+    VERIFY_RES();
+    VkLayerProperties* available_layers = mema(sizeof(VkLayerProperties) * available_layers_num);
+    res = vkEnumerateInstanceLayerProperties(&available_layers_num, available_layers);
+    VERIFY_RES();
+    bool validation_layer_available = false;
+    for (uint32_t i = 0; i < available_layers_num; ++i)
+    {
+        if (str_eql(validation_layer_name, available_layers[i].layerName))
+        {
+            validation_layer_available = true;
+            break;
+        }
+    }
+    memf(available_layers);
+
+    check(validation_layer_available, "Validation layer not available!");
     VkDebugUtilsMessengerCreateInfoEXT debug_ext_ci = {};
     debug_ext_ci.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     debug_ext_ci.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     debug_ext_ci.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     debug_ext_ci.pfnUserCallback = vulkan_debug_message_callback;
 
-    const char* const validation_layers[] = {"VK_LAYER_KHRONOS_validation"};
+    const char* const validation_layers[] = {validation_layer_name};
     const char* const extensions[] = {VK_EXT_DEBUG_UTILS_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_XCB_SURFACE_EXTENSION_NAME};
     
     VkInstanceCreateInfo ici = {};
@@ -1095,43 +1120,95 @@ renderer_backend_pipeline_t* renderer_backend_create_pipeline(renderer_backend_s
     return pipeline;
 }
 
-renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_state_t* rbs, const geometry_vertex_t* vertices, uint32_t vertices_num)
+renderer_backend_geometry_t* renderer_backend_create_geometry(renderer_backend_state_t* rbs, const geometry_vertex_t* vertices, uint32_t vertices_num, const geometry_index_t* indices, uint32_t indices_num)
 {
-    renderer_backend_geometry_t* g = mema_zero(sizeof(renderer_backend_geometry_t));
     VkResult res;
 
-    VkBufferCreateInfo vertex_bci = {};
-    vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    vertex_bci.size = sizeof(geometry_vertex_t) * vertices_num;
-    vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    res = vkCreateBuffer(rbs->device, &vertex_bci, NULL, &g->vertex_buffer);
-    VERIFY_RES();
+    // Vertexbuffer
+    VkBuffer vertex_buffer;
+    VkDeviceMemory vertex_buffer_memory;
 
-    VkMemoryRequirements vertex_buffer_mr;
-    vkGetBufferMemoryRequirements(rbs->device, g->vertex_buffer, &vertex_buffer_mr);
-    VkMemoryAllocateInfo vertex_buffer_mai = {};
-    vertex_buffer_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    vertex_buffer_mai.allocationSize = vertex_buffer_mr.size;
-    vertex_buffer_mai.memoryTypeIndex = memory_type_from_properties(vertex_buffer_mr.memoryTypeBits, &rbs->gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    check(vertex_buffer_mai.memoryTypeIndex != (uint32_t)-1, "Couldn't find memory of correct type.");
+    {
+        VkBufferCreateInfo vertex_bci = {};
+        vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        vertex_bci.size = sizeof(geometry_vertex_t) * vertices_num;
+        vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    
+        res = vkCreateBuffer(rbs->device, &vertex_bci, NULL, &vertex_buffer);
+        VERIFY_RES();
+    
+        VkMemoryRequirements vertex_buffer_mr;
+        vkGetBufferMemoryRequirements(rbs->device, vertex_buffer, &vertex_buffer_mr);
+        VkMemoryAllocateInfo vertex_buffer_mai = {};
+        vertex_buffer_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        vertex_buffer_mai.allocationSize = vertex_buffer_mr.size;
+        vertex_buffer_mai.memoryTypeIndex = memory_type_from_properties(vertex_buffer_mr.memoryTypeBits, &rbs->gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        check(vertex_buffer_mai.memoryTypeIndex != (uint32_t)-1, "Couldn't find memory of correct type.");
+    
+        res = vkAllocateMemory(rbs->device, &vertex_buffer_mai, NULL, &vertex_buffer_memory);
+        VERIFY_RES();
+    
+        uint8_t* vertex_buffer_memory_data;
+        res = vkMapMemory(rbs->device, vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
+        VERIFY_RES();
+    
+        memcpy(vertex_buffer_memory_data, vertices, sizeof(geometry_vertex_t) * vertices_num);
+    
+        vkUnmapMemory(rbs->device, vertex_buffer_memory);
+    
+        res = vkBindBufferMemory(rbs->device, vertex_buffer, vertex_buffer_memory, 0);
+        VERIFY_RES();
+    }
 
-    res = vkAllocateMemory(rbs->device, &vertex_buffer_mai, NULL, &g->vertex_buffer_memory);
-    VERIFY_RES();
 
-    uint8_t* vertex_buffer_memory_data;
-    res = vkMapMemory(rbs->device, g->vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
-    VERIFY_RES();
+    // Indexbuffer
 
-    memcpy(vertex_buffer_memory_data, vertices, sizeof(geometry_vertex_t) * vertices_num);
+    VkBuffer index_buffer;
+    VkDeviceMemory index_buffer_memory;
+    {
+        VkBufferCreateInfo index_bci = {};
+        index_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        index_bci.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+        index_bci.size = sizeof(geometry_index_t) * indices_num;
+        index_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    
+        res = vkCreateBuffer(rbs->device, &index_bci, NULL, &index_buffer);
+        VERIFY_RES();
 
-    vkUnmapMemory(rbs->device, g->vertex_buffer_memory);
+        VkMemoryRequirements index_buffer_mr;
+        vkGetBufferMemoryRequirements(rbs->device, index_buffer, &index_buffer_mr);
+        VkMemoryAllocateInfo index_buffer_mai = {};
+        index_buffer_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        index_buffer_mai.allocationSize = index_buffer_mr.size;
+        index_buffer_mai.memoryTypeIndex = memory_type_from_properties(index_buffer_mr.memoryTypeBits, &rbs->gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        check(index_buffer_mai.memoryTypeIndex != (uint32_t)-1, "Couldn't find memory of correct type.");
+    
+        res = vkAllocateMemory(rbs->device, &index_buffer_mai, NULL, &index_buffer_memory);
+        VERIFY_RES();
+    
+        uint8_t* index_buffer_memory_data;
+        res = vkMapMemory(rbs->device, index_buffer_memory, 0, index_buffer_mr.size, 0, (void**)&index_buffer_memory_data);
+        VERIFY_RES();
+    
+        memcpy(index_buffer_memory_data, indices, sizeof(geometry_index_t) * indices_num);
+    
+        vkUnmapMemory(rbs->device, index_buffer_memory);
+    
+        res = vkBindBufferMemory(rbs->device, index_buffer, index_buffer_memory, 0);
+        VERIFY_RES();
+    }
 
-    res = vkBindBufferMemory(rbs->device, g->vertex_buffer, g->vertex_buffer_memory, 0);
-    VERIFY_RES();
+    renderer_backend_geometry_t g = {
+        .vertex_buffer = vertex_buffer,
+        .vertex_buffer_memory = vertex_buffer_memory,
+        .index_buffer = index_buffer,
+        .index_buffer_memory = index_buffer_memory,
+        .indices_num = indices_num
+    };
 
-    return g;
+    return mema_copy(&g, sizeof(renderer_backend_geometry_t));
 }
 
 void renderer_backend_update_constant_buffer(renderer_backend_state_t* rbs, renderer_backend_pipeline_t* pipeline, uint32_t binding, void* data, uint32_t data_size)
@@ -1214,6 +1291,8 @@ void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_backend_pipel
     const VkDeviceSize offsets[1] = {0};
     VkBuffer vertex_buffer = geometry->vertex_buffer;
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
+    vkCmdBindIndexBuffer(cmd, geometry->index_buffer, 0, VK_INDEX_TYPE_UINT16);
+
 
     VkViewport viewport = {};
     viewport.width = rbs->swapchain_size.x;
@@ -1232,7 +1311,7 @@ void renderer_backend_draw(renderer_backend_state_t* rbs, renderer_backend_pipel
     scissor.offset.y = 0;
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-    vkCmdDraw(cmd, 12 * 3, 1, 0, 0);
+    vkCmdDrawIndexed(cmd, geometry->indices_num, 1, 0, 0, 0);
 
     vkCmdEndRenderPass(cmd);
 
@@ -1246,7 +1325,8 @@ void renderer_backend_present(renderer_backend_state_t* rbs)
     uint32_t cf = rbs->current_frame;
 
     uint32_t image_index;
-    res = vkAcquireNextImageKHR(rbs->device, rbs->swapchain, UINT64_MAX, rbs->image_available_semaphores[cf], VK_NULL_HANDLE, &image_index);
+    uint32_t timeout = 100000000; // 0.1 s
+    res = vkAcquireNextImageKHR(rbs->device, rbs->swapchain, timeout, rbs->image_available_semaphores[cf], VK_NULL_HANDLE, &image_index);
 
     if (res == VK_ERROR_OUT_OF_DATE_KHR)
         return; // Couldn't present due to out of date swapchain, waiting for window resize to propagate.
@@ -1296,7 +1376,7 @@ void renderer_backend_wait_until_idle(renderer_backend_state_t* rbs)
     vkDeviceWaitIdle(rbs->device);
 }
 
-void renderer_backend_surface_rezised(renderer_backend_state_t* rbs, uint32_t width, uint32_t height)
+void renderer_backend_surface_resized(renderer_backend_state_t* rbs, uint32_t width, uint32_t height)
 {
     (void)width;
     (void)height;
