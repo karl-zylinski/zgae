@@ -39,7 +39,6 @@ void handle_pool_destroy(handle_pool_t* hp)
 
 void handle_pool_set_type(handle_pool_t* hp, uint8_t type_index, const char* name)
 {
-    info(name);
     check(type_index < HANDLE_MAX_TYPE_INDEX, "Trying to set type for type index");
     check(!hp->types[type_index], "Handle type already in use!");
     hp->types[type_index] = str_copy(name);

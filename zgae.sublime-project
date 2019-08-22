@@ -8,7 +8,7 @@
     "build_systems": [
         {
             "name": "zgae",
-            "shell_cmd": "./build.py run",
+            "shell_cmd": "./build.py",
             "file_regex": "(\\S*?):(\\d+):(\\d+): (error.*)",
 
             "variants": [
