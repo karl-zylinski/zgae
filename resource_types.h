@@ -3,7 +3,6 @@
 #include "shader_resource_types.h"
 #include "pipeline_resource_types.h"
 
-fwd_handle(ResourceHandle);
 fwd_handle(RendererResourceHandle);
 
 typedef enum ResourceType

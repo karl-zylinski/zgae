@@ -1,10 +1,6 @@
 #pragma once
 
-#include "shader_resource_types.h"
 
-fwd_handle(RendererResourceHandle);
-fwd_enum(ShaderDataType);
-fwd_handle(ResourceHandle);
 
 typedef enum ConstantBufferAutoValue
 {

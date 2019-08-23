@@ -4,11 +4,9 @@
 #include "keycode_types.h"
 #include "debug.h"
 #include "memory.h"
-#include "shader_resource_types.h"
 #include "math.h"
 #include "time.h"
 #include <time.h>
-#include <math.h>
 #include "keyboard.h"
 #include <execinfo.h>
 #include "obj_loader.h"

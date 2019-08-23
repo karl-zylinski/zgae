@@ -1,6 +1,5 @@
 #pragma once
 
-fwd_handle(RendererResourceHandle);
 
 typedef enum ShaderType
 {

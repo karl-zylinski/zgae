@@ -6,8 +6,6 @@ fwd_struct(RendererState);
 fwd_struct(Mesh);
 fwd_struct(Vec3);
 fwd_struct(Quat);
-fwd_struct(PipelineResource);
-fwd_struct(ShaderResource);
 fwd_handle(ResourceHandle);
 
 RendererState* renderer_create(WindowType window_type, void* window_data);

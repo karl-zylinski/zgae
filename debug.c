@@ -1,7 +1,6 @@
 #include "debug.h"
 #include <stdio.h>
 #include <time.h>
-#include <stdarg.h>
 
 static GetBacktraceCallback g_get_backtrace = NULL;
 

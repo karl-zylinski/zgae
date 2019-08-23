@@ -6,10 +6,8 @@
 #include "array.h"
 #include "debug.h"
 #include "shader_resource.h"
-#include "str.h"
 #include "geometry_types.h"
 #include "math.h"
-#include <string.h>
 #include "resource_store.h"
 #include "resource_types.h"
 

@@ -4,6 +4,8 @@
 
 - add render world and draw_world or sumth
 
+- stop using strings, keep only hashes!
+
 ### LESS IMPORTANT ###
 
 - put renderer on own thread

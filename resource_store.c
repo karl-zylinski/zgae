@@ -1,7 +1,6 @@
 #include "resource_store.h"
 #include "resource_types.h"
 #include "handle_pool.h"
-#include "shader_resource.h"
 #include "path.h"
 #include "str.h"
 #include "debug.h"
