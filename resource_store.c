@@ -11,6 +11,58 @@
 static HandlePool* g_hp = NULL;
 static Resource* da_resources = NULL;
 
+typedef struct ResourceFilenameMapping
+{
+    hash64 name_hash;
+    ResourceHandle handle;
+} ResourceFilenameMapping;
+
+ResourceFilenameMapping* g_mapping = NULL;
+
+static sizet find_mapping_insertion_idx(hash64 name_hash)
+{
+    if (array_num(g_mapping) == 0)
+        return 0;
+
+    for (sizet i = 0; i < array_num(g_mapping); ++i)
+    {
+        if (g_mapping[i].name_hash > name_hash)
+            return i;
+    }
+
+    return array_num(g_mapping);
+}
+
+static ResourceHandle mapping_get(hash64 name_hash)
+{
+    if (array_num(g_mapping) == 0)
+        return HANDLE_INVALID;
+
+    sizet mz = array_num(g_mapping);
+    sizet first = 0;
+    sizet last = mz - 1;
+    sizet middle = (first + last) / 2;
+
+    while (first <= last)
+    {
+        if (g_mapping[middle].name_hash < name_hash)
+            first = middle + 1;
+        else if (g_mapping[middle].name_hash == name_hash)
+            return g_mapping[middle].handle;
+        else
+        {
+            if (middle == 0)
+                break;
+
+            last = middle - 1;
+        }
+
+        middle = (first + last) / 2;
+    }
+
+    return HANDLE_INVALID;
+}
+
 static const char* resource_type_names[] = {
     "invalid",
     "shader",
@@ -36,6 +88,12 @@ void resource_store_init()
 
 ResourceHandle resource_load(const char* filename)
 {
+    hash64 name_hash = str_hash(filename);
+    ResourceHandle existing = mapping_get(name_hash);
+
+    if (existing != HANDLE_INVALID)
+        return existing;
+
     const char* ext = path_ext(filename);
     ResourceType type = resource_type_from_str(ext);
     Resource r = { .type = type };
@@ -54,6 +112,8 @@ ResourceHandle resource_load(const char* filename)
     ResourceHandle h = handle_pool_reserve(g_hp, r.type);
     r.handle = h;
     array_fill_and_set(da_resources, handle_index(h), r);
+    ResourceFilenameMapping rfm = {.handle = h, .name_hash = name_hash};
+    array_insert(g_mapping, rfm, find_mapping_insertion_idx(name_hash));
     return h;
 }
 
