@@ -1,16 +1,12 @@
 ### IMPORTANT ###
 
-- move input layout into pipeline file etc
-    * rename "input layout" to "vertex input" or "vertex input layout" everywhere
-    * make sure constant buffer updating is purdy
+- fix "what to do" shutdown msg (resource_store.c)
 
 - add render world and draw_world or sumth
 
 ### LESS IMPORTANT ###
 
 - put renderer on own thread
-
-- look at functions and maybe inline those that are just called once
 
 - alpha support (something else than VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
 

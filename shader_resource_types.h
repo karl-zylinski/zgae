@@ -23,5 +23,4 @@ typedef struct ShaderResource
     char* source;
     u64 source_size;
     ShaderType type;
-    RendererResourceHandle rrh;
 } ShaderResource;

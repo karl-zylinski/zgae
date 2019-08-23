@@ -376,20 +376,7 @@ ResourceHandle resource_load(const char* filename)
     array_fill_and_set(da_resources, handle_index(h), r);
     ResourceFilenameMapping rfm = {.handle = h, .name_hash = name_hash};
     array_insert(g_mapping, rfm, find_mapping_insertion_idx(name_hash));
-
-    switch(type)
-    {
-        case RESOURCE_TYPE_SHADER: {
-            da_resources[handle_index(h)].shader.rrh = renderer_load_shader(g_rs, h);
-        } break;
-
-        case RESOURCE_TYPE_PIPELINE: {
-            da_resources[handle_index(h)].pipeline.rrh = renderer_load_pipeline(g_rs, h);
-        } break;
-
-        default: break;
-    }
-
+    da_resources[handle_index(h)].rrh = renderer_create_renderer_resource(g_rs, h);
     return h;
 }
 

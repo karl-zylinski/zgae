@@ -4,6 +4,7 @@
 #include "pipeline_resource_types.h"
 
 fwd_handle(ResourceHandle);
+fwd_handle(RendererResourceHandle);
 
 typedef enum ResourceType
 {
@@ -18,6 +19,7 @@ typedef struct Resource
     hash64 name_hash;
     ResourceType type;
     ResourceHandle handle;
+    RendererResourceHandle rrh;
 
     union
     {

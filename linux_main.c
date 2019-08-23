@@ -15,8 +15,6 @@
 #include "resource_store.h"
 #include "resource_types.h"
 
-#define XYZ1(_x_, _y_, _z_) {(_x_), (_y_), (_z_), 1.f}
-
 static f32 get_cur_time_seconds()
 {
     struct timespec t;
@@ -71,7 +69,7 @@ int main()
     linux_xcb_window_update_callbacks(win, &wc);
 
     ResourceHandle prh = resource_load("pipeline_default.pipeline");
-    RendererResourceHandle ph = renderer_load_pipeline(rs, prh);
+    RendererResourceHandle ph = resource_lookup(prh)->rrh;
     ObjLoadResult olr = obj_load("box.wobj");
     check(olr.ok, "Failed loading obj");
     RendererResourceHandle gh = renderer_load_geometry(rs, &olr.mesh);

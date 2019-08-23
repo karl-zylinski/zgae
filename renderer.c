@@ -127,10 +127,10 @@ static RendererBackendPipeline* pipeline_init(RendererState* rs, RendererResourc
     ShaderType* backend_shader_types = mema(sizeof(ShaderType) * pr->shader_stages_num);
     for (u32 shdr_idx = 0; shdr_idx < pr->shader_stages_num; ++shdr_idx)
     {
-        const ShaderResource* sr = &resource_lookup(pr->shader_stages[shdr_idx])->shader;
-        RendererResourceShader* srr = &get_resource(rs, sr->rrh)->shader;
+        const Resource* shader_resource = resource_lookup(pr->shader_stages[shdr_idx]);
+        RendererResourceShader* srr = &get_resource(rs, shader_resource->rrh)->shader;
         backend_shader_stages[shdr_idx] = srr->backend_state;
-        backend_shader_types[shdr_idx] = sr->type;
+        backend_shader_types[shdr_idx] = shader_resource->shader.type;
     }
 
     ShaderDataType* vertex_input_types = mema(sizeof(ShaderDataType) * pr->vertex_input_num);
@@ -227,19 +227,16 @@ static void reinit_resource(RendererState* rs, RendererResource* rr)
     init_resource(rs, rr);
 }
 
-static void destroy_all_resources(RendererState* rs)
-{
-    info("Destroying all renderer resources");
-
-    for (sizet i = 0; i < array_num(rs->da_resources); ++i)
-        destroy_resource(rs, rs->da_resources + i);
-}
 
 void renderer_destroy(RendererState* rs)
 {
     info("Destroying renderer");
     renderer_backend_wait_until_idle(rs->rbs);
-    destroy_all_resources(rs);
+    
+    info("Destroying all renderer resources");
+    for (sizet i = 0; i < array_num(rs->da_resources); ++i)
+        destroy_resource(rs, rs->da_resources + i);
+
     array_destroy(rs->da_resources);
     renderer_backend_destroy(rs->rbs);
     handle_pool_destroy(rs->resource_handle_pool);
@@ -254,27 +251,31 @@ static RendererResourceHandle add_resource(HandlePool* hp, RendererResource** da
     return h;
 }
 
-RendererResourceHandle renderer_load_shader(RendererState* rs, ResourceHandle shader_handle)
+RendererResourceHandle renderer_create_renderer_resource(RendererState* rs, ResourceHandle resource_handle)
 {
-    RendererResource shader_res = {
-        .type = RENDERER_RESOURCE_TYPE_SHADER,
-        .shader.res = shader_handle
-    };
+    const Resource* r = resource_lookup(resource_handle);
+    check(r, "Trying to create renderer resource for invalid resource");
 
-    init_resource(rs, &shader_res);
-    return add_resource(rs->resource_handle_pool, &rs->da_resources, &shader_res);
-}
+    RendererResource rr = {};
 
-RendererResourceHandle renderer_load_pipeline(RendererState* rs, ResourceHandle pipeline_handle)
-{
-    RendererResource pipeline_res = {
-        .type = RENDERER_RESOURCE_TYPE_PIPELINE,
-        .flag = RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT,
-        .pipeline.res = pipeline_handle
-    };
+    switch(r->type)
+    {
+        case RESOURCE_TYPE_SHADER: {
+            rr.type = RENDERER_RESOURCE_TYPE_SHADER;
+            rr.shader.res = resource_handle;
+        } break;
 
-    init_resource(rs, &pipeline_res);
-    return add_resource(rs->resource_handle_pool, &rs->da_resources, &pipeline_res);
+        case RESOURCE_TYPE_PIPELINE: {
+            rr.type = RENDERER_RESOURCE_TYPE_PIPELINE;
+            rr.flag = RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT;
+            rr.pipeline.res = resource_handle;
+        } break;
+
+        default: error("Implement me!"); break;
+    }
+
+    init_resource(rs, &rr);
+    return add_resource(rs->resource_handle_pool, &rs->da_resources, &rr);
 }
 
 RendererResourceHandle renderer_load_geometry(RendererState* rs, const Mesh* mesh)
