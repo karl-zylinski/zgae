@@ -4,6 +4,7 @@
 
 fwd_handle(RendererResourceHandle);
 fwd_enum(ShaderDataType);
+fwd_handle(ResourceHandle);
 
 typedef enum ConstantBufferAutoValue
 {
@@ -46,7 +47,7 @@ typedef struct ConstantBuffer
 
 typedef struct PipelineResource
 {
-    ShaderResource* shader_stages;
+    ResourceHandle* shader_stages;
     ConstantBuffer* constant_buffers;
     VertexInputField* vertex_input;
     u32 shader_stages_num;

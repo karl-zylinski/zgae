@@ -13,6 +13,8 @@
 #include "keyboard.h"
 #include <execinfo.h>
 #include "obj_loader.h"
+#include "resource_store.h"
+#include "resource_types.h"
 
 #define XYZ1(_x_, _y_, _z_) {(_x_), (_y_), (_z_), 1.f}
 
@@ -56,6 +58,7 @@ int main()
 {
     info("Starting ZGAE");
     debug_init(get_backtrace);
+    resource_store_init();
     memory_init();
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
@@ -68,8 +71,9 @@ int main()
     wc.window_resized_callback = &handle_window_resize;
     linux_xcb_window_update_callbacks(win, &wc);
 
-    PipelineResource pr = pipeline_resource_load("pipeline_default.pipeline");
-    RendererResourceHandle ph = renderer_load_pipeline(rs, &pr);
+    ResourceHandle prh = resource_load("pipeline_default.pipeline");
+    const PipelineResource* pr = &resource_lookup(prh)->pipeline;
+    RendererResourceHandle ph = renderer_load_pipeline(rs, pr);
     ObjLoadResult olr = obj_load("box.wobj");
     check(olr.ok, "Failed loading obj");
     RendererResourceHandle gh = renderer_load_geometry(rs, &olr.mesh);

@@ -11,6 +11,8 @@
 #include "geometry_types.h"
 #include "math.h"
 #include <string.h>
+#include "resource_store.h"
+#include "resource_types.h"
 
 typedef struct RendererResourceShader
 {
@@ -125,7 +127,8 @@ static RendererBackendPipeline* pipeline_init(RendererState* rs, RendererResourc
     ShaderType* backend_shader_types = mema(sizeof(ShaderType) * pipeline->pr.shader_stages_num);
     for (u32 shdr_idx = 0; shdr_idx < pipeline->pr.shader_stages_num; ++shdr_idx)
     {
-        RendererResourceHandle shdr_handl = renderer_load_shader(rs, &pipeline->pr.shader_stages[shdr_idx]);
+        const Resource* sr = resource_lookup(pipeline->pr.shader_stages[shdr_idx]);
+        RendererResourceHandle shdr_handl = renderer_load_shader(rs, &sr->shader);
         RendererResourceShader* shader = &get_resource(rs, shdr_handl)->shader;
         backend_shader_stages[shdr_idx] = shader->backend_state;
         backend_shader_types[shdr_idx] = shader->sr.type;
@@ -221,9 +224,6 @@ static void destroy_resource(RendererState* rs, RendererResource* rr)
             for (u32 i = 0; i < p->pr.vertex_input_num; ++i)
                 memf(p->pr.vertex_input[i].name);
             memf(p->pr.vertex_input);
-
-            for (u32 i = 0; i < p->pr.shader_stages_num; ++i)
-                memf(p->pr.shader_stages[i].source);
             memf(p->pr.shader_stages);
 
         } break;
@@ -293,9 +293,6 @@ RendererResourceHandle renderer_load_pipeline(RendererState* rs, const PipelineR
     RendererResourcePipeline* pipeline = &pipeline_res.pipeline;
     pipeline->pr = *pr;
     mema_repln(pipeline->pr.shader_stages, pipeline->pr.shader_stages_num);
-
-    for (u32 i = 0; i < pipeline->pr.shader_stages_num; ++i)
-        mema_repln(pipeline->pr.shader_stages[i].source, pipeline->pr.shader_stages[i].source_size);
 
     mema_repln(pipeline->pr.constant_buffers, pipeline->pr.constant_buffers_num);
     for (u32 i = 0; i < pipeline->pr.constant_buffers_num; ++i)

@@ -43,3 +43,4 @@ typedef i64 hash64;
 #define fwd_struct(t) typedef struct t t
 #define fwd_enum(e) typedef enum e e
 #define fwd_handle(h) typedef Handle h
+#define arrnum(a) sizeof(a)/sizeof(a[0])

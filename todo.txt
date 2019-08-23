@@ -6,8 +6,9 @@
 
 - add render world and draw_world or sumth
 
-
 ### LESS IMPORTANT ###
+
+- put renderer on own thread
 
 - look at functions and maybe inline those that are just called once
 

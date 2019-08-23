@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "renderer.h"
 #include "str.h"
+#include "resource_store.h"
 
 static ShaderDataType shader_data_type_str_to_enum(const char* str)
 {
@@ -79,7 +80,7 @@ PipelineResource pipeline_resource_load(const char* filename)
     {
         const JzonValue* jz_shader_stage = jz_shader_stages->array_val + shdr_idx;
         ensure(jz_shader_stage->is_string);
-        pr.shader_stages[shdr_idx] = shader_resource_load(jz_shader_stage->string_val);
+        pr.shader_stages[shdr_idx] = resource_load(jz_shader_stage->string_val);
     }
 
     const JzonValue* jz_constant_buffers = jzon_get(&jpr.output, "constant_buffers");
