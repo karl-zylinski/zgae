@@ -381,6 +381,9 @@ ResourceHandle resource_load(const char* filename)
 
 const Resource* resource_lookup(ResourceHandle h)
 {
+    if (!handle_pool_is_valid(g_hp, h))
+        return NULL;
+
     return da_resources + handle_index(h);
 }
 

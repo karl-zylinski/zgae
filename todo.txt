@@ -6,6 +6,8 @@
 
 - stop using strings, keep only hashes!
 
+- put generation in handles, must have it to make sure that a resource hasn't been put into another's place... 64 bit handle with generation, type and subtype? (see "handles" below)
+
 ### LESS IMPORTANT ###
 
 - put renderer on own thread
