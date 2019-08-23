@@ -8,11 +8,12 @@ fwd_struct(Vec3);
 fwd_struct(Quat);
 fwd_struct(PipelineResource);
 fwd_struct(ShaderResource);
+fwd_handle(ResourceHandle);
 
 RendererState* renderer_create(WindowType window_type, void* window_data);
 void renderer_destroy(RendererState* rs);
-RendererResourceHandle renderer_load_shader(RendererState* rs, const ShaderResource* sr);
-RendererResourceHandle renderer_load_pipeline(RendererState* rs, const PipelineResource* pi);
+RendererResourceHandle renderer_load_shader(RendererState* rs, ResourceHandle shader_handle);
+RendererResourceHandle renderer_load_pipeline(RendererState* rs, ResourceHandle pipeline_handle);
 RendererResourceHandle renderer_load_geometry(RendererState* rs, const Mesh* mesh);
 void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle geometry_handle, const Vec3* cam_pos, const Quat* cam_rot);
 void renderer_present(RendererState* rs);

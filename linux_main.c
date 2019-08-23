@@ -72,8 +72,7 @@ int main()
     linux_xcb_window_update_callbacks(win, &wc);
 
     ResourceHandle prh = resource_load("pipeline_default.pipeline");
-    const PipelineResource* pr = &resource_lookup(prh)->pipeline;
-    RendererResourceHandle ph = renderer_load_pipeline(rs, pr);
+    RendererResourceHandle ph = renderer_load_pipeline(rs, prh);
     ObjLoadResult olr = obj_load("box.wobj");
     check(olr.ok, "Failed loading obj");
     RendererResourceHandle gh = renderer_load_geometry(rs, &olr.mesh);
