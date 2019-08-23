@@ -2,3 +2,44 @@ shader_stages = [
     "shader_default_vertex.shader"
     "shader_default_fragment.shader"
 ]
+
+constant_buffers = [
+    {
+        binding = 0
+        fields = [
+            {
+                name = "mvp"
+                type = "mat4"
+                value = "mat_model_view_projection"
+            },
+            {
+                name = "model"
+                type = "mat4"
+                value = "mat_model"
+            }
+        ]
+    }
+]
+
+vertex_input = [
+    {
+        name = "position"
+        type = "vec3"
+        value = "position"
+    }
+    {
+        name = "normal"
+        type = "vec3"
+        value = "normal"
+    }
+    {
+        name = "color"
+        type = "vec4"
+        value = "color"
+    }
+    {
+        name = "texcoord"
+        type = "vec2"
+        value = "texcoord"
+    }
+]

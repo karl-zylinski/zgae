@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "debug.h"
 #include "window_types.h"
-#include "shader.h"
+#include "shader_resource.h"
 #include <string.h>
 #include "geometry_types.h"
 #include "str.h"

@@ -4,7 +4,8 @@
 #include "keycode_types.h"
 #include "debug.h"
 #include "memory.h"
-#include "pipeline.h"
+#include "shader_resource_types.h"
+#include "pipeline_resource.h"
 #include "math.h"
 #include "time.h"
 #include <time.h>
@@ -67,7 +68,8 @@ int main()
     wc.window_resized_callback = &handle_window_resize;
     linux_xcb_window_update_callbacks(win, &wc);
 
-    RendererResourceHandle ph = pipeline_load(rs, "pipeline_default.pipeline");
+    PipelineResource pr = pipeline_resource_load("pipeline_default.pipeline");
+    RendererResourceHandle ph = renderer_load_pipeline(rs, &pr);
     ObjLoadResult olr = obj_load("box.wobj");
     check(olr.ok, "Failed loading obj");
     RendererResourceHandle gh = renderer_load_geometry(rs, &olr.mesh);
