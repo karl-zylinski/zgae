@@ -14,7 +14,7 @@
             "variants": [
                 {
                     "name": "build and run",
-                    "shell_cmd": "./build.py run",
+                    "shell_cmd": "./build.py && gnome-terminal -- lldb zgae -o r",
                 },
                 {
                     "name": "static code analysis",

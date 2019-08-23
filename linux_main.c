@@ -5,7 +5,6 @@
 #include "debug.h"
 #include "memory.h"
 #include "shader_resource_types.h"
-#include "pipeline_resource.h"
 #include "math.h"
 #include "time.h"
 #include <time.h>
@@ -58,11 +57,11 @@ int main()
 {
     info("Starting ZGAE");
     debug_init(get_backtrace);
-    resource_store_init();
     memory_init();
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
     RendererState* rs = renderer_create(WINDOW_TYPE_XCB, win);
+    resource_store_init(rs);
 
     WindowCallbacks wc = {};
     wc.key_pressed_callback = &keyboard_key_pressed;
@@ -140,6 +139,7 @@ int main()
     info("Main loop exited, shutting down");
     renderer_destroy(rs);
     linux_xcb_window_destroy(win);
+    resource_store_destroy();
     memory_check_leaks();
     info("Shutdown finished");
     return 0;

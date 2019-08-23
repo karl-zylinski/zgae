@@ -53,4 +53,5 @@ typedef struct PipelineResource
     u32 shader_stages_num;
     u32 vertex_input_num;
     u32 constant_buffers_num;
+    RendererResourceHandle rrh;
 } PipelineResource;

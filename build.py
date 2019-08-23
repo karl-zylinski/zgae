@@ -59,7 +59,5 @@ if stop_on_error and linker_error != 0:
 os.system("glslc -fshader-stage=frag shader_default_fragment.glsl -o shader_default_fragment.spv")
 os.system("glslc -fshader-stage=vertex shader_default_vertex.glsl -o shader_default_vertex.spv")
 
-if "run" in sys.argv:
-    os.system("./zgae")
 
 

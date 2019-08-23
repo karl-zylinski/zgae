@@ -1,5 +1,7 @@
 #pragma once
 
+fwd_handle(RendererResourceHandle);
+
 typedef enum ShaderType
 {
     SHADER_TYPE_INVALID,
@@ -21,4 +23,5 @@ typedef struct ShaderResource
     char* source;
     u64 source_size;
     ShaderType type;
+    RendererResourceHandle rrh;
 } ShaderResource;

@@ -6,7 +6,6 @@
 #include "array.h"
 #include "debug.h"
 #include "shader_resource.h"
-#include "pipeline_resource.h"
 #include "str.h"
 #include "geometry_types.h"
 #include "math.h"
@@ -129,8 +128,7 @@ static RendererBackendPipeline* pipeline_init(RendererState* rs, RendererResourc
     for (u32 shdr_idx = 0; shdr_idx < pr->shader_stages_num; ++shdr_idx)
     {
         const ShaderResource* sr = &resource_lookup(pr->shader_stages[shdr_idx])->shader;
-        RendererResourceHandle shdr_handl = renderer_load_shader(rs, pr->shader_stages[shdr_idx]); // TODO DO SOMETHING ABOUT THIS
-        RendererResourceShader* srr = &get_resource(rs, shdr_handl)->shader;
+        RendererResourceShader* srr = &get_resource(rs, sr->rrh)->shader;
         backend_shader_stages[shdr_idx] = srr->backend_state;
         backend_shader_types[shdr_idx] = sr->type;
     }

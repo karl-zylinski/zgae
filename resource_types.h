@@ -15,6 +15,7 @@ typedef enum ResourceType
 
 typedef struct Resource
 {
+    hash64 name_hash;
     ResourceType type;
     ResourceHandle handle;
 
