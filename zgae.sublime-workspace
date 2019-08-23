@@ -4,6 +4,70 @@
 		"selected_items":
 		[
 			[
+				"prese",
+				"present_modes"
+			],
+			[
+				"stat",
+				"static_analysis"
+			],
+			[
+				"out_",
+				"out_position"
+			],
+			[
+				"mvp",
+				"mvp_matrix"
+			],
+			[
+				"backend",
+				"backend_state"
+			],
+			[
+				"cbi",
+				"cbi_idx"
+			],
+			[
+				"constant",
+				"constant_buffer"
+			],
+			[
+				"ConstantBUffer",
+				"ShaderConstantBufferItem"
+			],
+			[
+				"con",
+				"constant_buffer"
+			],
+			[
+				"shader_stages",
+				"shader_stages_num"
+			],
+			[
+				"RendererRes",
+				"RendererResourcePipeline"
+			],
+			[
+				"camera",
+				"camera_pos"
+			],
+			[
+				"Geometr",
+				"GeometryIndex"
+			],
+			[
+				"PA",
+				"PARSE_MODE_ONLY_VERTICES"
+			],
+			[
+				"Geome",
+				"GeometryIndex"
+			],
+			[
+				"Geom",
+				"GeometryVertex"
+			],
+			[
 				"inc",
 				"includes_at"
 			],
@@ -152,10 +216,44 @@
 	"buffers":
 	[
 		{
-			"file": "array.c",
+			"file": "renderer.c",
 			"settings":
 			{
-				"buffer_size": 2054,
+				"buffer_size": 13790,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "pipeline.c",
+			"settings":
+			{
+				"buffer_size": 1285,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "shader.h",
+			"settings":
+			{
+				"buffer_size": 1798,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "shader_default_vertex.glsl",
+			"settings":
+			{
+				"buffer_size": 821,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "shader_default_fragment.glsl",
+			"settings":
+			{
+				"buffer_size": 567,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
@@ -163,33 +261,214 @@
 			"file": "build.py",
 			"settings":
 			{
-				"buffer_size": 1210,
+				"buffer_size": 1731,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "linux_xcb_window.c",
+			"file": "zgae.sublime-project",
 			"settings":
 			{
-				"buffer_size": 9998,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "time.c",
-			"settings":
-			{
-				"buffer_size": 301,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "optimize_includes.py",
-			"settings":
-			{
-				"buffer_size": 1507,
+				"buffer_size": 614,
 				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "memory.c",
+			"settings":
+			{
+				"buffer_size": 3208,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "linux_main.c",
+			"settings":
+			{
+				"buffer_size": 4033,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "shader_default_vertex.shader",
+			"settings":
+			{
+				"buffer_size": 723,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "obj_loader.c",
+			"settings":
+			{
+				"buffer_size": 6760,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "Searching 59 files for \"            {\nrenderer_update_constant_buffer\" (case sensitive)\n\n0 matches",
+			"settings":
+			{
+				"buffer_size": 98,
+				"line_ending": "Unix",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "renderer_backend_vulkan.c",
+			"settings":
+			{
+				"buffer_size": 53201,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "renderer.h",
+			"settings":
+			{
+				"buffer_size": 1069,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "jzon.c",
+			"settings":
+			{
+				"buffer_size": 9497,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "array.h",
+			"settings":
+			{
+				"buffer_size": 1362,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "debug.c",
+			"settings":
+			{
+				"buffer_size": 1204,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "array.c",
+			"settings":
+			{
+				"buffer_size": 2083,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "debug.h",
+			"settings":
+			{
+				"buffer_size": 576,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "str.c",
+			"settings":
+			{
+				"buffer_size": 1685,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "time.h",
+			"settings":
+			{
+				"buffer_size": 104,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "todo.txt",
+			"settings":
+			{
+				"buffer_size": 2508,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "file_types.h",
+			"settings":
+			{
+				"buffer_size": 221,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "file.h",
+			"settings":
+			{
+				"buffer_size": 104,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "renderer_backend.h",
+			"settings":
+			{
+				"buffer_size": 1849,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/karl/Projects/zgae/shader_default.hlsl",
+			"settings":
+			{
+				"buffer_size": 1061,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/karl/Projects/zgae/game/main.lua",
+			"settings":
+			{
+				"buffer_size": 1917,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/karl/Projects/zgae/game/avatar.lua",
+			"settings":
+			{
+				"buffer_size": 1116,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "global_include.h",
+			"settings":
+			{
+				"buffer_size": 1003,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/karl/Projects/zgae/renderer_direct3d.h",
+			"settings":
+			{
+				"buffer_size": 2691,
 				"line_ending": "Unix"
 			}
 		}
@@ -212,9 +491,29 @@
 				"zgae",
 				"build and run"
 			]
+		],
+		[
+			[
+				[
+					"zgae",
+					""
+				],
+				[
+					"zgae",
+					"build and run"
+				],
+				[
+					"zgae",
+					"static code analysis"
+				]
+			],
+			[
+				"zgae",
+				"build and run"
+			]
 		]
 	],
-	"build_varint": "",
+	"build_varint": "build and run",
 	"command_palette":
 	{
 		"height": 0.0,
@@ -246,41 +545,69 @@
 	],
 	"file_history":
 	[
-		"/home/karl/Projects/zgae_c/time.c",
-		"/home/karl/Projects/zgae_c/linux_xcb_window.c",
-		"/home/karl/Projects/zgae_c/optimize_includes.py",
 		"/home/karl/Projects/zgae_c/renderer_backend_vulkan.c",
-		"/home/karl/Projects/zgae_c/renderer.c",
-		"/home/karl/Projects/zgae_c/handle_pool.c",
-		"/home/karl/Projects/zgae_c/handle_pool.h",
-		"/home/karl/Projects/zgae_c/jzon.h",
-		"/home/karl/Projects/zgae_c/jzon.c",
-		"/home/karl/Projects/zgae_c/jzon_types.h",
-		"/home/karl/Projects/zgae_c/debug.c",
-		"/home/karl/Projects/zgae_c/debug.h",
-		"/home/karl/Projects/zgae_c/file.h",
-		"/home/karl/Projects/zgae_c/file_types.h",
+		"/home/karl/Projects/zgae_c/obj_loader.h",
+		"/home/karl/Projects/zgae_c/obj_loader_types.h",
+		"/home/karl/Projects/zgae_c/renderer_backend.h",
+		"/home/karl/Projects/zgae/renderer_direct3d.h",
+		"/home/karl/Projects/zgae/renderer_direct3d.cpp",
+		"/home/karl/Projects/zgae/render_world.h",
+		"/home/karl/Projects/zgae_c/optimize_incfwd.py",
+		"/home/karl/Projects/zgae_c/renderer.h",
+		"/home/karl/Projects/zgae_c/todo.txt",
+		"/home/karl/Projects/zgae/shader_default.hlsl",
+		"/home/karl/Projects/zgae_c/geometry_types.h",
+		"/home/karl/Projects/zgae_c/shader.c",
+		"/home/karl/Projects/zgae_c/shader_default_vertex.shader",
+		"/home/karl/Projects/zgae_c/linux_main.c",
+		"/home/karl/Projects/zgae_c/box.wobj",
+		"/home/karl/Projects/zgae_c/obj_loader.c",
+		"/home/karl/Projects/zgae_c/array.h",
+		"/home/karl/Projects/zgae_c/array.c",
+		"/home/karl/Projects/zgae_c/math.c",
 		"/home/karl/Projects/zgae_c/global_include.h",
+		"/home/karl/Projects/zgae_c/shader_default_vertex.glsl",
+		"/home/karl/Projects/zgae_c/file_types.h",
+		"/home/karl/Projects/zgae_c/math.h",
+		"/home/karl/Projects/zgae_c/math_types.h",
+		"/home/karl/Projects/zgae/obj.h",
+		"/home/karl/Projects/zgae/obj.cpp",
+		"/home/karl/Projects/zgae/math.h",
+		"/home/karl/Projects/zgae/math.cpp",
+		"/home/karl/Projects/zgae/types.h",
+		"/home/karl/Projects/zgae_c/file.h",
+		"/home/karl/Projects/zgae/mesh.h",
+		"/home/karl/Projects/zgae_c/shader.h",
+		"/home/karl/Projects/zgae_c/build.py",
+		"/home/karl/Projects/zgae_c/debug_types.h",
+		"/home/karl/Projects/zgae_c/memory.c",
+		"/home/karl/Projects/zgae_c/memory.h",
 		"/home/karl/Projects/zgae_c/file.c",
 		"/home/karl/Projects/zgae_c/pipeline.c",
 		"/home/karl/Projects/zgae_c/pipeline.h",
 		"/home/karl/Projects/zgae_c/pipeline_types.h",
-		"/home/karl/Projects/zgae_c/shader.c",
-		"/home/karl/Projects/zgae_c/linux_main.c",
-		"/home/karl/Projects/zgae_c/linux_xcb_window.h",
-		"/home/karl/Projects/zgae_c/todo.txt",
-		"/home/karl/Projects/zgae_c/memory.c",
-		"/home/karl/Projects/zgae_c/debug_types.h",
-		"/home/karl/Projects/zgae_c/shader.h",
-		"/home/karl/Projects/zgae_c/time.h",
-		"/home/karl/Projects/zgae_c/build.py",
-		"/home/karl/Projects/zgae_c/str.h",
 		"/home/karl/Projects/zgae_c/str.c",
-		"/home/karl/Projects/zgae_c/memory.h",
-		"/home/karl/Projects/zgae_c/geometry_types.h",
-		"/home/karl/Projects/zgae_c/renderer.h",
-		"/home/karl/Projects/zgae_c/renderer_backend.h",
+		"/home/karl/Projects/zgae_c/zgae",
+		"/home/karl/Projects/zgae_c/str.h",
+		"/home/karl/Projects/zgae_c/window_types.h",
+		"/home/karl/Projects/zgae_c/debug.h",
+		"/home/karl/Projects/zgae_c/debug.c",
 		"/home/karl/Projects/zgae_c/zgae.sublime-project",
+		"/home/karl/Projects/zgae_c/handle_pool.c",
+		"/home/karl/Projects/zgae_c/jzon.c",
+		"/home/karl/Projects/zgae_c/jzon.h",
+		"/home/karl/Projects/zgae_c/jzon_types.h",
+		"/home/karl/Projects/zgae_c/keycode_types.h",
+		"/home/karl/Projects/zgae_c/renderer.c",
+		"/home/karl/Projects/zgae_c/keyboard.h",
+		"/home/karl/Projects/zgae_c/keyboard.c",
+		"/home/karl/Projects/zgae_c/handle_pool.h",
+		"/home/karl/Projects/zgae_c/linux_xcb_window.c",
+		"/home/karl/Projects/zgae_c/linux_xcb_window.h",
+		"/home/karl/Projects/zgae_c/time.c",
+		"/home/karl/Projects/zgae_c/time.h",
+		"/home/karl/Projects/zgae_c/optimize_includes.py",
+		"/home/karl/Projects/zgae_c/geometry.h",
 		"/home/karl/Projects/zgae_c/build_py.sublime-build",
 		"/home/karl/Desktop/hei.txt",
 		"/home/karl/.config/gtk-3.0/gtk.css",
@@ -288,49 +615,151 @@
 	],
 	"find":
 	{
-		"height": 32.0
+		"height": 43.0
 	},
 	"find_in_files":
 	{
 		"height": 116.0,
 		"where_history":
 		[
+			"",
+			"sizet",
 			""
 		]
 	},
 	"find_state":
 	{
-		"case_sensitive": false,
+		"case_sensitive": true,
 		"find_history":
 		[
-			"break",
-			"unknown",
+			"choose_surface_format",
+			"create_framebuffers",
+			"choose_swapchain_composite_alpha",
+			"choose_swap",
+			"choose_swapchain_present_mode",
+			"get_surface_size",
+			"choose_surface_format",
+			"sumth",
+			"current_frame",
+			"vk_handle",
+			") ",
+			"in",
+			" out",
+			"out ",
+			"out",
+			"outColor",
+			"out_",
+			"out_world_position",
+			"out_position",
+			".",
+			"myBufferVals",
+			"create_pipe",
+			"model",
+			"projection",
+			"            {\nrenderer_update_constant_buffer",
+			"}\n",
+			"i",
+			"includes_at",
+			"obj",
+			"renderer_backend_create_geometry",
+			"f32_almost_equal",
+			"almost_equal",
+			"f.",
+			"Color",
+			"equal",
+			".",
+			"almost_eq",
+			"v2.",
+			"v1.",
+			"nullptr",
+			"array_size",
+			"unsigned",
+			"unsigned char",
+			"zfree",
+			"unsigned",
+			"array_push",
+			"RendererResourceTypeNames",
+			"Handle",
+			"uint32",
+			"RendererResourceype_names",
+			"Vecu",
+			"Vec2",
+			"window_open_state_t",
+			"window_focus_lost_callback_t",
+			"window_resized_callback_t",
+			"window_key_released_callback_t",
+			"window_key_pressed_callback_t",
+			"s_time_since_start",
+			"s_time_dt",
+			"shader_constant_buffer_t",
+			"shader_input_layout_item_t",
+			"shader_input_layout_value_t",
+			"shader_constant_buffer_item_t",
+			"shader_constant_buffer_auto_value_t",
+			"pipeline_constant_buffer_t",
+			"depth_buffer_t",
+			"swapchain_buffer_t",
+			"shader_data_type_t",
+			"shader_type_t",
+			"renderer_resource_t",
+			"renderer_resource_flag_t",
+			"renderer_resource_type_t",
+			"renderer_resource_geometry_t",
+			"renderer_resource_pipeline_t",
+			"renderer_resource_shader_t",
+			"array_header_t",
+			"renderer_backend_geometry_t",
+			"renderer_backend_pipeline_t",
+			"renderer_backend_shader_t",
+			"renderer_backend_state_t",
+			"shader_intermediate_t",
+			"window_type_t",
+			"pipeline_intermediate_t",
+			"renderer_resource_handle_t",
+			"renderer_state_t",
+			"allocation_callstack_t",
+			"color_t",
+			"vec4_t",
+			"vec3_t",
+			"vec2u_t",
+			"quat_t",
+			"mat4_t",
+			"xcb_event_queue_t",
+			"window_state_t",
+			"XcbConnection",
+			"window_callbacks_t",
+			"xcb_connection_t",
+			"linux_xcb_window_t",
+			"xcb_KeyCode",
+			"keycode_t",
+			"(float",
+			" float ",
+			"float ",
+			"float",
+			"i64",
+			"jzon_parse_result_t",
+			"jzon_key_value_pair_t",
 			"jzon_value_t",
-			"TOSTRING",
-			"tostring",
-			"STRINGIFY",
-			"stringify",
-			"sdt",
-			"file_load",
-			"LAX",
-			"execinfo",
-			"1,",
-			", 1)",
-			"indices = ",
-			"memcpy",
-			"vertex_buffer_memory",
-			"vertex_buffer_memory_data",
-			"vertex_buffer_mai",
-			"vertex_bci",
-			"vertex_buffer",
-			"vertex_bci",
-			"vertex_buffer_mr",
-			"indexbuffer",
-			"indices",
-			"geometry_t",
-			"VK_LAYER_LUNARG_standard_validation",
-			"prinyg",
-			"instance"
+			"jzon_key_value_pair_t",
+			"geometry_vertex_t",
+			"geometry_index_t",
+			"handle_pool_t",
+			"geometry_index_t",
+			"geometry_vertex_t",
+			"handle_pool_t",
+			"geometry_index_t",
+			"geometry_vertex_t",
+			"float",
+			"int64_t",
+			"int32_t",
+			"int16_t",
+			"int8_t",
+			"uint64_t",
+			"uint32_t",
+			"uint8_t",
+			"handle_pool_t",
+			"size_t",
+			"file_load_result_t"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -338,6 +767,54 @@
 		"regex": false,
 		"replace_history":
 		[
+			"Vec2u",
+			"Vecu",
+			"WindowOpenState",
+			"WindowFocusLostCallback",
+			"WindowResizedCallback",
+			"WindowKeyReleasedCallback",
+			"WindowKeyPressedCallback",
+			"ShaderConstantBuffer",
+			"ShaderInputLayoutItem",
+			"ShaderInputLayoutValue",
+			"ShaderConstantBufferItem",
+			"ShaderConstantBufferAutoValue",
+			"ShaderDataType",
+			"ShaderType",
+			"RendererBackendGeometry",
+			"RendererBackendPipeline",
+			"RendererBackendShader",
+			"RendererBackendState",
+			"ShaderIntermediate",
+			"WindowType",
+			"PipelineIntermediate",
+			"RendererResourceHandle",
+			"RendererState",
+			"Color",
+			"Vec4",
+			"Vec3",
+			"Vec2",
+			"Quat",
+			"Mat4",
+			"WindowState",
+			"xcb_connection_t",
+			"WindowCallbacks",
+			"XcbConnection",
+			"XcbWindow",
+			"KeyCode",
+			"(f32",
+			" f32 ",
+			"JzonParseResult",
+			"JzonValue",
+			"i64",
+			"i32",
+			"i16",
+			"i8",
+			"u64",
+			"u32",
+			"u8",
+			"sizet",
+			""
 		],
 		"reverse": false,
 		"show_context": true,
@@ -348,24 +825,55 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 22,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "array.c",
+					"file": "renderer.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2054,
+						"buffer_size": 13790,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								77,
-								77
+								7615,
+								7615
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6135.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 27,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "pipeline.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1285,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1241,
+								1241
 							]
 						],
 						"settings":
@@ -378,24 +886,141 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 26,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "build.py",
+					"buffer": 2,
+					"file": "shader.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1210,
+						"buffer_size": 1798,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								375,
-								394
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 14,
+					"type": "text"
+				},
+				{
+					"buffer": 0,
+					"file": "renderer.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 13790,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11877,
+								11877
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 7117.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 31,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "shader_default_vertex.glsl",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 821,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								125,
+								125
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Shader Syntax (GLSL HLSL Cg)/OpenGL SL.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "shader_default_fragment.glsl",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 567,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								567,
+								567
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Shader Syntax (GLSL HLSL Cg)/OpenGL SL.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "build.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1731,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1486,
+								1486
 							]
 						],
 						"settings":
@@ -408,16 +1033,698 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "zgae.sublime-project",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 614,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								534,
+								534
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 16,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "memory.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3208,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2518,
+								2518
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1059.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 20,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "linux_main.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4033,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2672,
+								2672
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 594.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "shader_default_vertex.shader",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 723,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								264,
+								264
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 25,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "obj_loader.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6760,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5555,
+								5555
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4158.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 32,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 98,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"detect_indentation": false,
+							"line_numbers": false,
+							"output_tag": 1,
+							"result_base_dir": "",
+							"result_file_regex": "^([^ \t].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 33,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "renderer_backend_vulkan.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 53201,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9815,
+								9833
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5866.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "renderer.h",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 1069,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 14,
+					"file": "jzon.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9497,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5443,
+								5443
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5239.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 17,
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "array.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1362,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								896,
+								896
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 16,
+					"file": "debug.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1204,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								836,
+								836
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 17,
+					"file": "array.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2083,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1129,
+								1129
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				},
+				{
+					"buffer": 18,
+					"file": "debug.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 576,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								416,
+								416
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 19,
+					"file": "str.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1685,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1598,
+								1598
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1323.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 19,
+					"type": "text"
+				},
+				{
+					"buffer": 20,
+					"file": "time.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 104,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 24,
+					"type": "text"
+				},
+				{
+					"buffer": 21,
+					"file": "todo.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2508,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								332,
+								332
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 22,
+					"file": "file_types.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 221,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								163,
+								163
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 23,
+					"file": "file.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 104,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 24,
+					"file": "renderer_backend.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1849,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1418,
+								1418
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 132.0,
+						"zoom_level": 1.0
+					},
 					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "linux_xcb_window.c",
+					"file": "shader.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 9998,
+						"buffer_size": 1798,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								251,
+								251
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 308.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 28,
+					"type": "text"
+				},
+				{
+					"buffer": 25,
+					"file": "/home/karl/Projects/zgae/shader_default.hlsl",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1061,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								656,
+								656
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Shader Syntax (GLSL HLSL Cg)/High Level SL.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 30,
+					"type": "text"
+				},
+				{
+					"buffer": 26,
+					"file": "/home/karl/Projects/zgae/game/main.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1917,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1047,
+								1047
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 726.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 29,
+					"type": "text"
+				},
+				{
+					"buffer": 27,
+					"file": "/home/karl/Projects/zgae/game/avatar.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1116,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								150,
+								150
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 23,
+					"type": "text"
+				},
+				{
+					"buffer": 28,
+					"file": "global_include.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1003,
 						"regions":
 						{
 						},
@@ -430,32 +1737,60 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/C++/C.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 22,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "time.c",
+					"buffer": 5,
+					"file": "build.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 301,
+						"buffer_size": 1731,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								124,
-								124
+								367,
+								367
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 330.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 21,
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "array.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1362,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								211,
+								211
 							]
 						],
 						"settings":
@@ -466,37 +1801,37 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 18,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "optimize_includes.py",
+					"buffer": 29,
+					"file": "/home/karl/Projects/zgae/renderer_direct3d.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1507,
+						"buffer_size": 2691,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								45,
-								45
+								2245,
+								2245
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Python/Python.sublime-syntax",
+							"syntax": "Packages/C++/C.sublime-syntax",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 792.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 15,
 					"type": "text"
 				}
 			]
@@ -504,11 +1839,11 @@
 	],
 	"incremental_find":
 	{
-		"height": 32.0
+		"height": 31.0
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 43.0
 	},
 	"layout":
 	{
@@ -535,7 +1870,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 258.0
+		"height": 565.0
 	},
 	"output.find_results":
 	{
@@ -545,7 +1880,7 @@
 	"project": "zgae.sublime-project",
 	"replace":
 	{
-		"height": 60.0
+		"height": 58.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -555,12 +1890,156 @@
 		"selected_items":
 		[
 			[
-				"linux_xc",
-				"linux_xcb_window.c"
+				"tod",
+				"todo.txt"
+			],
+			[
+				"toto",
+				"todo.txt"
+			],
+			[
+				"file",
+				"file.h"
+			],
+			[
+				"zgae",
+				"zgae.sublime-project"
+			],
+			[
+				"jzon",
+				"jzon.c"
 			],
 			[
 				"bui",
 				"build.py"
+			],
+			[
+				"arr",
+				"array.h"
+			],
+			[
+				"glob",
+				"global_include.h"
+			],
+			[
+				"",
+				"zgae.sublime-project"
+			],
+			[
+				"render",
+				"renderer.c"
+			],
+			[
+				"renderer",
+				"renderer_backend_vulkan.c"
+			],
+			[
+				"render_b",
+				"renderer_backend_vulkan.c"
+			],
+			[
+				"obj",
+				"obj_loader.c"
+			],
+			[
+				"bac",
+				"renderer_backend.h"
+			],
+			[
+				"shader",
+				"shader.h"
+			],
+			[
+				"back",
+				"renderer_backend_vulkan.c"
+			],
+			[
+				"ren",
+				"renderer.c"
+			],
+			[
+				"rendeer",
+				"renderer_backend_vulkan.c"
+			],
+			[
+				"main",
+				"linux_main.c"
+			],
+			[
+				"renderr",
+				"renderer_backend.h"
+			],
+			[
+				"objloader",
+				"obj_loader_types.h"
+			],
+			[
+				"opti",
+				"optimize_includes.py"
+			],
+			[
+				"mesh",
+				"geometry_types.h"
+			],
+			[
+				"li",
+				"linux_main.c"
+			],
+			[
+				"geo",
+				"geometry_types.h"
+			],
+			[
+				"ol",
+				"obj_loader_types.h"
+			],
+			[
+				"globa",
+				"global_include.h"
+			],
+			[
+				"fi",
+				"file_types.h"
+			],
+			[
+				"geome",
+				"geometry_types.h"
+			],
+			[
+				"math.",
+				"math.c"
+			],
+			[
+				"math",
+				"math.h"
+			],
+			[
+				"goe",
+				"geometry_types.h"
+			],
+			[
+				"load",
+				"obj_loader_types.h"
+			],
+			[
+				"arra",
+				"array.h"
+			],
+			[
+				"vulkan",
+				"renderer_backend_vulkan.c"
+			],
+			[
+				"de",
+				"debug.h"
+			],
+			[
+				"poo",
+				"handle_pool.c"
+			],
+			[
+				"linux_xc",
+				"linux_xcb_window.c"
 			],
 			[
 				"buil",
@@ -571,22 +2050,6 @@
 				"linux_xcb_window.c"
 			],
 			[
-				"main",
-				"linux_main.c"
-			],
-			[
-				"shader",
-				"shader.c"
-			],
-			[
-				"jzon",
-				"jzon_types.h"
-			],
-			[
-				"file",
-				"file.c"
-			],
-			[
 				"vu",
 				"renderer_backend_vulkan.c"
 			],
@@ -595,24 +2058,12 @@
 				"debug.h"
 			],
 			[
-				"renderer",
-				"renderer_backend_vulkan.c"
-			],
-			[
 				"rend",
-				"renderer.c"
-			],
-			[
-				"ren",
 				"renderer.c"
 			],
 			[
 				"backe",
 				"renderer_backend_vulkan.c"
-			],
-			[
-				"geo",
-				"geometry_types.h"
 			],
 			[
 				"m",

@@ -139,52 +139,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     return VK_FALSE;
 }
 
-static Vec2u get_surface_size(VkPhysicalDevice gpu, VkSurfaceKHR surface)
-{
-    VkSurfaceCapabilitiesKHR surface_capabilities;
-    VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surface_capabilities);
-    VERIFY_RES();
-    check(surface_capabilities.currentExtent.width != (u32)-1, "Couldn't get surface size");
-    Vec2u size = {surface_capabilities.currentExtent.width, surface_capabilities.currentExtent.height};
-    return size;
-}
-
-static VkPresentModeKHR choose_swapchain_present_mode(VkPhysicalDevice gpu, VkSurfaceKHR surface) {
-    VkResult res;
-    u32 present_modes_count;
-    res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, NULL);
-    VERIFY_RES();
-    VkPresentModeKHR* present_modes = mema(present_modes_count * sizeof(VkPresentModeKHR));
-    res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, present_modes);
-    VERIFY_RES();
-
-    for (u32 i = 0; i < present_modes_count; ++i)
-    {
-        if (present_modes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
-        {
-            memf(present_modes);
-            return present_modes[i];
-        }
-    }
-
-    memf(present_modes);
-    return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-static VkCompositeAlphaFlagBitsKHR choose_swapchain_composite_alpha(VkCompositeAlphaFlagsKHR alpha_flags)
-{
-    if (alpha_flags & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
-        return VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-
-    if (alpha_flags & VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR)
-        return VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
-
-    if (alpha_flags & VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR)
-        return VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
-
-    return VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
-}
-
 static void create_swapchain(
     VkSwapchainKHR* out_current_swapchain, SwapchainBuffer** out_sc_bufs, u32* out_sc_bufs_num, Vec2u size,
     VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface, VkFormat format,
@@ -202,6 +156,24 @@ static void create_swapchain(
         ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
         : surface_capabilities.currentTransform;
 
+
+    // Choose present mode
+    u32 present_modes_count;
+    res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, NULL);
+    VERIFY_RES();
+    VkPresentModeKHR* present_modes = mema(present_modes_count * sizeof(VkPresentModeKHR));
+    res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, present_modes);
+    VERIFY_RES();
+    VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR; 
+    for (u32 i = 0; i < present_modes_count; ++i)
+    {
+        if (present_modes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+            present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+    }
+    memf(present_modes);
+
+
+    // Create swapchain
     VkSwapchainCreateInfoKHR scci = {};
     scci.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     scci.surface = surface;
@@ -210,9 +182,9 @@ static void create_swapchain(
     scci.imageExtent.width = size.x;
     scci.imageExtent.height = size.y;
     scci.preTransform = pre_transform;
-    scci.compositeAlpha = choose_swapchain_composite_alpha(surface_capabilities.supportedCompositeAlpha);
+    scci.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     scci.imageArrayLayers = 1;
-    scci.presentMode = choose_swapchain_present_mode(gpu, surface);
+    scci.presentMode = present_mode;
     scci.oldSwapchain = *out_current_swapchain;
     scci.clipped = 1;
     scci.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
@@ -463,11 +435,15 @@ static void destroy_surface_size_dependent_resources(RendererBackendState* rbs)
     destroy_depth_buffer(rbs->device, &rbs->depth_buffer);
 }
 
-
 static void create_surface_size_dependent_resources(RendererBackendState* rbs)
 {
-
-    rbs->swapchain_size = get_surface_size(rbs->gpu, rbs->surface);
+    VkSurfaceCapabilitiesKHR surface_capabilities;
+    VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(rbs->gpu, rbs->surface, &surface_capabilities);
+    VERIFY_RES();
+    check(surface_capabilities.currentExtent.width != (u32)-1, "Couldn't get surface size");
+    rbs->swapchain_size.x = surface_capabilities.currentExtent.width;
+    rbs->swapchain_size.y = surface_capabilities.currentExtent.height;
+    
     create_depth_buffer(&rbs->depth_buffer, rbs->device, rbs->gpu, &rbs->gpu_memory_properties, rbs->swapchain_size);
 
     create_renderpass(rbs->device, rbs->surface_format, rbs->depth_buffer.format, &rbs->render_pass);

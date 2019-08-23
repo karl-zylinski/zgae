@@ -9,6 +9,10 @@
 
 ### LESS IMPORTANT ###
 
+- look at functions and maybe inline those that are just called once
+
+- alpha support (something else than VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
+
 - rename shader.c and pipeline.c to ##-intermediate.c
 
 - rewrite obj loader, its ugly
