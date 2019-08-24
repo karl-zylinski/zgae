@@ -16,8 +16,6 @@
 
 - alpha support (something else than VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
 
-- rename shader.c and pipeline.c to ##-intermediate.c
-
 - rewrite obj loader, its ugly
 
 - make first-person flying camera (see avatar.lua)
@@ -30,6 +28,6 @@
 
 - add library shader compiler or invoke commandline shader compiler (so we can use glsl)
 
-- make some kind of resource thing, one corresponding to each resource on disk (shader, pipeline etc). remove the intermediate structs nad use those instead, pass them to renderer. have a central resource lut so files arent loaded twice. later maybe we make resource that is compiled into just a struct and then loaded quickly (i.e. shader resource -> compile -> shader -> renderer loads shader, not a shader resource)
+- make resource that is compiled into just a struct and then loaded quickly (data compiler)
 
 - array: make array_internal_ensure_min_size func use array_internal_grow with capacity parameter
