@@ -12,6 +12,8 @@
 
 - magical central place where handle pools are registered with names and stuff and then we can give it a handle and it will tell us type and subtype information (with string names!!) from it. wow such types
 
+- tidy up array.h (look at nothings impl), think about name again 
+
 - put renderer on own thread
 
 - alpha support (something else than VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
@@ -30,4 +32,4 @@
 
 - make resource that is compiled into just a struct and then loaded quickly (data compiler)
 
-- array: make array_internal_ensure_min_size func use array_internal_grow with capacity parameter
+- array: make array_internal_ensure_min_size func use array_internal_grow with capacity parameter! i.e. grow will then make it at least as big as the supplied value, maybe bigger (geometric growth)
