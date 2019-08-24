@@ -6,11 +6,11 @@
 
 - stop using strings, keep only hashes!
 
-- put generation in handles, must have it to make sure that a resource hasn't been put into another's place... 64 bit handle with generation, type and subtype? (see "handles" below)
-
 - remove union from Resource (just do void* + cast? perhaps with type enum or macro that takes type and does cast etc)
 
 ### LESS IMPORTANT ###
+
+- magical central place where handle pools are registered with names and stuff and then we can give it a handle and it will tell us type and subtype information (with string names!!) from it. wow such types
 
 - put renderer on own thread
 
@@ -31,21 +31,5 @@
 - add library shader compiler or invoke commandline shader compiler (so we can use glsl)
 
 - make some kind of resource thing, one corresponding to each resource on disk (shader, pipeline etc). remove the intermediate structs nad use those instead, pass them to renderer. have a central resource lut so files arent loaded twice. later maybe we make resource that is compiled into just a struct and then loaded quickly (i.e. shader resource -> compile -> shader -> renderer loads shader, not a shader resource)
-
-- handles:
-    i = index
-    t = type --- unique identifier per-pool (have a handle_types_t enum with stuff like HANDLE_TYPE_RENDERER_RESOURCE or HANDLE_TYPE_SCRIPT_RESOURCE (should we then skip the typedeffed RendererResourceHandle ?????? or maybe its nice syntactic sugar))
-    s = subtype --- added to pool, i.e. renderer_resource_type_t which has values like RENDERER_RESOURCE_TYPE_SHADER or SCRIPT_RESOURCE_ENTITY
-    u = used
-
-    iiiiiiii iiiiiiii iiiiiiii iiiiiiii ttttssss ssssssss gggggggg gggggggg
-
-    or perhaps (maybe go with this, we can change later if we want to)
-
-    iiiiiiii iiiiiiii iiiitttt sssssssu
-
-    then we can, from a handle, find any type and and the subtype and thus tell the scripting thing what we actually have,
-    like doing nice type checks --- but maybe we should have an enum list for type, so we can do quick check against it?
-    so when we init a handle pool we tell it which type it is, and then add subtypessss
 
 - array: make array_internal_ensure_min_size func use array_internal_grow with capacity parameter
