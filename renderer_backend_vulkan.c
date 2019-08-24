@@ -787,7 +787,7 @@ void renderer_backend_destroy(RendererBackendState* rbs)
         vkWaitForFences(d, 1, &rbs->image_in_flight_fences[i], VK_TRUE, UINT64_MAX);
     }
 
-    for (sizet i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(d, rbs->render_finished_semaphores[i], NULL);
         vkDestroySemaphore(d, rbs->image_available_semaphores[i], NULL);
         vkDestroyFence(d, rbs->image_in_flight_fences[i], NULL);
@@ -891,7 +891,7 @@ RendererBackendPipeline* renderer_backend_create_pipeline(RendererBackendState* 
     pipeline->constant_buffers_num = constant_buffers_num;
     VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero(sizeof(VkDescriptorSetLayoutBinding) * constant_buffers_num);
 
-    for (sizet cb_idx = 0; cb_idx < constant_buffers_num; ++cb_idx)
+    for (size_t cb_idx = 0; cb_idx < constant_buffers_num; ++cb_idx)
     {
         PipelineConstantBuffer* cb = pipeline->constant_buffers + cb_idx;
         cb->binding = constant_buffer_binding_indices[cb_idx];
@@ -1060,7 +1060,7 @@ RendererBackendPipeline* renderer_backend_create_pipeline(RendererBackendState* 
     // Shader stage info
     VkPipelineShaderStageCreateInfo* pssci = mema_zero(sizeof(VkPipelineShaderStageCreateInfo) * shader_stages_num);
 
-    for (sizet i = 0; i < shader_stages_num; ++i)
+    for (size_t i = 0; i < shader_stages_num; ++i)
     {
         pssci[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         pssci[i].stage = vk_shader_stage_from_shader_type(shader_stages_types[i]);

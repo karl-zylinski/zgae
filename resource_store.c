@@ -22,12 +22,12 @@ typedef struct ResourceFilenameMapping
 
 ResourceFilenameMapping* g_mapping = NULL;
 
-static sizet find_mapping_insertion_idx(hash64 name_hash)
+static size_t find_mapping_insertion_idx(hash64 name_hash)
 {
     if (array_num(g_mapping) == 0)
         return 0;
 
-    for (sizet i = 0; i < array_num(g_mapping); ++i)
+    for (size_t i = 0; i < array_num(g_mapping); ++i)
     {
         if (g_mapping[i].name_hash > name_hash)
             return i;
@@ -36,15 +36,15 @@ static sizet find_mapping_insertion_idx(hash64 name_hash)
     return array_num(g_mapping);
 }
 
-static sizet mapping_get_idx(hash64 name_hash)
+static size_t mapping_get_idx(hash64 name_hash)
 {
     if (array_num(g_mapping) == 0)
         return -1;
 
-    sizet mz = array_num(g_mapping);
-    sizet first = 0;
-    sizet last = mz - 1;
-    sizet middle = (first + last) / 2;
+    size_t mz = array_num(g_mapping);
+    size_t first = 0;
+    size_t last = mz - 1;
+    size_t middle = (first + last) / 2;
 
     while (first <= last)
     {
@@ -68,9 +68,9 @@ static sizet mapping_get_idx(hash64 name_hash)
 
 static ResourceHandle mapping_get(hash64 name_hash)
 {
-    sizet idx = mapping_get_idx(name_hash);
+    size_t idx = mapping_get_idx(name_hash);
 
-    if (idx == (sizet)-1)
+    if (idx == (size_t)-1)
         return HANDLE_INVALID;
 
     return g_mapping[idx].handle;
@@ -78,9 +78,9 @@ static ResourceHandle mapping_get(hash64 name_hash)
 
 static void mapping_remove(hash64 name_hash)
 {
-    sizet idx = mapping_get_idx(name_hash);
+    size_t idx = mapping_get_idx(name_hash);
 
-    if (idx == (sizet)-1)
+    if (idx == (size_t)-1)
         return;
 
     info("Implment me, leave holes? What do...");
@@ -103,11 +103,11 @@ void resource_store_init(RendererState* rs)
 {
     check(!g_hp && !g_rs, "resource_store_init probably run twice");
 
-    g_hp = handle_pool_create();
+    g_hp = handle_pool_create(0, "ResourceHandle");
     g_rs = rs;
 
-    for (ResourceType t = 1; t < RESOURCE_TYPE_NUM; ++t)
-        handle_pool_set_type(g_hp, t, resource_type_names[t]);
+    for (ResourceType s = 1; s < RESOURCE_TYPE_NUM; ++s)
+        handle_pool_set_subtype(g_hp, s, resource_type_names[s]);
 }
 
 static void resource_destroy_internal(const Resource* r)
@@ -148,7 +148,7 @@ static void resource_destroy_internal(const Resource* r)
 
 void resource_store_destroy()
 {
-    for (sizet i = 0; i < array_num(da_resources); ++i)
+    for (size_t i = 0; i < array_num(da_resources); ++i)
         resource_destroy_internal(da_resources + i);
 
     array_destroy(da_resources);
@@ -370,7 +370,7 @@ ResourceHandle resource_load(const char* filename)
         default: error("Implement me!"); break;
     }
 
-    ResourceHandle h = handle_pool_reserve(g_hp, r.type);
+    ResourceHandle h = handle_pool_borrow(g_hp, r.type);
     r.handle = h;
     array_fill_and_set(da_resources, handle_index(h), r);
     ResourceFilenameMapping rfm = {.handle = h, .name_hash = name_hash};

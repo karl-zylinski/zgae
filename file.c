@@ -13,7 +13,7 @@ FileLoadResult file_load(const char* filename, FileLoadMode mode)
     }
 
     fseek(file_handle, 0, SEEK_END);
-    sizet s = ftell(file_handle);
+    size_t s = ftell(file_handle);
     fseek(file_handle, 0, SEEK_SET);
     void* d = mema(s + (mode == FILE_LOAD_MODE_NULL_TERMINATED ? 1 : 0));
     fread(d, 1, s, file_handle);

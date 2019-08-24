@@ -5,20 +5,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-// each handle is of this format (bits):
-// iiiiiiii iiiiiiii iiiiiiii tttttttu
-// i = index
-// t = type index (se handle_pool.h, max 128 types!!)
-// u = used
 
-#define ANALYZER_NORETURN __attribute__((analyzer_noreturn))
-
-typedef uint32_t Handle;
-static const Handle HANDLE_INVALID = -1;
-#define handle_index(h) (h >> 8)
-#define handle_type(h) ((h & 0xff) >> 1)
-#define handle_used(h) (h & 0x1)
-#define SMALL_NUMBER 0.00001f
+// Basic types
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -33,14 +21,47 @@ typedef int64_t i64;
 typedef float f32;
 typedef double f64;
 
-typedef size_t sizet;
-
 typedef i64 hash64;
 
-#define HANDLE_MAX_INDEX 16777216
-#define HANDLE_MAX_TYPE_INDEX 128
+
+// Handles
+
+// each handle is of this format (bits):
+// iiiiiiii iiiiiiii iiiiiiii iiiiiiii ttttssss ssssssss gggggggg gggggggg
+// i = index
+// t = pool type (ex ResoruceHandle, RendererResourceHandle, etc!)
+// s = subtype (ex RendererResourcShader etc)
+// g = generation, bumped every time the slot changes in the pool (for checking if the handle is dead etc)
+
+typedef u64 Handle;
+static const Handle HANDLE_INVALID = -1;
+#define handle_index(h) (h >> 32)
+#define handle_type(h) ((h & 0xffffffff) >> 28)
+#define handle_subtype(h) ((h & 0xfffffff) >> 16)
+#define handle_generation(h) (h & 0xffff)
+
+#define HANDLE_MAX_INDEX 0xffffffff
+#define HANDLE_MAX_TYPE_INDEX 0xf
+#define HANDLE_MAX_SUBTYPE_INDEX 0xfff
+#define HANDLE_MAX_GENERATION 0xffff
+
+#define SMALL_NUMBER 0.00001f
+
+
+// Forward declaration helpers
 
 #define fwd_struct(t) typedef struct t t
 #define fwd_enum(e) typedef enum e e
 #define fwd_handle(h) typedef Handle h
 #define arrnum(a) sizeof(a)/sizeof(a[0])
+
+
+// Clang static analyser stuff
+
+#define ANALYZER_NORETURN __attribute__((analyzer_noreturn))
+
+
+// Misc
+
+#define STRINGIFY(x) #x
+#define TO_STRING(x) STRINGIFY(x)

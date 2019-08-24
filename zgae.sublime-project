@@ -19,6 +19,10 @@
                 {
                     "name": "static code analysis",
                     "shell_cmd": "scan-build ./build.py static_analysis",
+                },
+                {
+                    "name": "build and run tests",
+                    "shell_cmd": "./build.py tests && gnome-terminal -- lldb tests -o r",
                 }
             ]
         }

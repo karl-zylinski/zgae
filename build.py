@@ -6,12 +6,22 @@ import sys
 all_files = os.listdir(".")
 to_compile = []
 
+entry_files = ["linux_main.c", "tests.c"]
+
 for f in all_files:
     if not os.path.isfile(f):
         continue
 
-    if f.endswith(".c"):
+    if f.endswith(".c") and f not in entry_files:
         to_compile.append(f)
+
+output = "zgae"
+
+if "tests" in sys.argv:
+    to_compile.append("tests.c")
+    output = "tests"
+else:
+    to_compile.append("linux_main.c")
 
 if not os.path.isdir("build"):
     os.mkdir("build")
@@ -51,7 +61,7 @@ if static_analysis:
     exit("static analysis done")
 
 linker_input_str = " ".join(built_objects)
-linker_error = os.system("%s %s -rdynamic -o zgae -lrt -lm -lxcb -lvulkan" % (compiler, linker_input_str))
+linker_error = os.system("%s %s -rdynamic -o %s -lrt -lm -lxcb -lvulkan" % (compiler, linker_input_str, output))
 
 if stop_on_error and linker_error != 0:
     exit("\nbuild.py exited: linker error")

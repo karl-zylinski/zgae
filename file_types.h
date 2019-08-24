@@ -3,7 +3,7 @@
 typedef struct FileLoadResult {
     bool ok;
     void* data;
-    sizet data_size;
+    size_t data_size;
 } FileLoadResult;
 
 typedef enum FileLoadMode {

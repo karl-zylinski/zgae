@@ -72,10 +72,10 @@ typedef struct RendererState
 RendererState* renderer_create(WindowType window_type, void* window_data)
 {
     RendererState* rs = mema_zero(sizeof(RendererState));
-    rs->resource_handle_pool = handle_pool_create();
+    rs->resource_handle_pool = handle_pool_create(1, "RendererResourceHandle");
 
-    for (RendererResourceType t = 1; t < RENDERER_RESOURCE_TYPE_NUM; ++t)
-        handle_pool_set_type(rs->resource_handle_pool, t, renderer_resouce_type_names[t]);
+    for (RendererResourceType s = 1; s < RENDERER_RESOURCE_TYPE_NUM; ++s)
+        handle_pool_set_subtype(rs->resource_handle_pool, s, renderer_resouce_type_names[s]);
     
     RendererBackendState* rbs = renderer_backend_create(window_type, window_data);
     rs->rbs = rbs;
@@ -85,7 +85,7 @@ RendererState* renderer_create(WindowType window_type, void* window_data)
 static RendererResource* get_resource(RendererState* rs, RendererResourceHandle h)
 {
     RendererResource* rr = rs->da_resources + handle_index(h);
-    check_slow(handle_type(h) == rr->type, "Handle points to resource of wrong type");
+    check_slow(handle_subtype(h) == rr->type, "Handle points to resource of wrong type");
     return rr;
 }
 
@@ -232,7 +232,7 @@ void renderer_destroy(RendererState* rs)
     renderer_backend_wait_until_idle(rs->rbs);
     
     info("Destroying all renderer resources");
-    for (sizet i = 0; i < array_num(rs->da_resources); ++i)
+    for (size_t i = 0; i < array_num(rs->da_resources); ++i)
         destroy_resource(rs, rs->da_resources + i);
 
     array_destroy(rs->da_resources);
@@ -243,7 +243,7 @@ void renderer_destroy(RendererState* rs)
 
 static RendererResourceHandle add_resource(HandlePool* hp, RendererResource** da_resources, RendererResource* res)
 {
-    RendererResourceHandle h = handle_pool_reserve(hp, res->type);
+    RendererResourceHandle h = handle_pool_borrow(hp, res->type);
     res->handle = h;
     array_fill_and_set(*da_resources, handle_index(h), *res);
     return h;
@@ -360,7 +360,7 @@ void renderer_surface_resized(RendererState* rs, u32 w, u32 h)
     renderer_backend_wait_until_idle(rs->rbs);
     renderer_backend_surface_resized(rs->rbs, w, h);
 
-    for (sizet i = 0; i < array_num(rs->da_resources); ++i)
+    for (size_t i = 0; i < array_num(rs->da_resources); ++i)
     {
         RendererResource* rr = rs->da_resources + i;
 

@@ -40,7 +40,7 @@ static Backtrace get_backtrace(u32 backtrace_size)
         backtrace_size = 32;
 
     static void* backtraces[32];
-    sizet bt_size = backtrace(backtraces, backtrace_size);
+    size_t bt_size = backtrace(backtraces, backtrace_size);
     const char** bt_symbols = (const char**)backtrace_symbols(backtraces, bt_size);
     Backtrace bt = {
         .function_calls = bt_symbols,
@@ -98,9 +98,9 @@ int main()
         if (time_since_start() > (framerate_timer + 2))
         {
             f32 d = time_since_start() - framerate_timer;
-            f32 fps = ((f32)frames)/d;
-            (void)fps;
-            //info("%f fps", fps);
+            f32 ft = d/((f32)frames);
+            (void)ft;
+            //info("%f ms", ft*1000.0f);
             framerate_timer = time_since_start();
             frames = 0;
         }

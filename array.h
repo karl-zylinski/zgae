@@ -5,8 +5,8 @@
 typedef struct ArrayHeader
 {
     u32 marker;
-    sizet num;
-    sizet cap;
+    size_t num;
+    size_t cap;
 } ArrayHeader;
 
 #define array_num(a) ((a) ? array_internal_header(a)->num : 0)
@@ -29,9 +29,12 @@ typedef struct ArrayHeader
 
 #define array_destroy(a) ((a) ? array_internal_destroy(a) : 0)
 
+#define array_last(a) (a[array_num(a) - 1])
+#define array_pop(a) (array_num(a) > 0 ? --array_internal_header(a)->num : 0)
+
 ArrayHeader* array_internal_header(const void* arr);
-void* array_internal_grow(void* arr, sizet item_size);
-void* array_internal_copy_data(void *arr, sizet item_size);
-sizet array_internal_make_insert_room(void* arr, sizet idx, sizet item_size);
-void* array_internal_ensure_min_num(void* arr, sizet num, sizet item_size);
+void* array_internal_grow(void* arr, size_t item_size);
+void* array_internal_copy_data(void *arr, size_t item_size);
+size_t array_internal_make_insert_room(void* arr, size_t idx, size_t item_size);
+void* array_internal_ensure_min_num(void* arr, size_t num, size_t item_size);
 void array_internal_destroy(void* arr);

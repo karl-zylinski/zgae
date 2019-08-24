@@ -11,10 +11,10 @@ ArrayHeader* array_internal_header(const void* arr)
     return h;
 }
 
-void* array_internal_grow(void* arr, sizet item_size)
+void* array_internal_grow(void* arr, size_t item_size)
 {
-    sizet old_cap = array_cap(arr);
-    sizet new_cap = old_cap == 0 ? 1 : old_cap*2;
+    size_t old_cap = array_cap(arr);
+    size_t new_cap = old_cap == 0 ? 1 : old_cap*2;
     ArrayHeader* new_h = memra(arr ? array_internal_header(arr) : 0, sizeof(ArrayHeader) + new_cap*item_size);
 
     if (!arr)
@@ -28,18 +28,18 @@ void* array_internal_grow(void* arr, sizet item_size)
     return (void*)((u8*)new_h + sizeof(ArrayHeader));
 }
 
-void* array_internal_copy_data(void *arr, sizet item_size)
+void* array_internal_copy_data(void *arr, size_t item_size)
 {
    if (!arr)
       return NULL;
 
-   sizet s = array_num(arr) * item_size;
+   size_t s = array_num(arr) * item_size;
    void* d = mema(s);
    memcpy(d, arr, s);
    return d;
 }
 
-sizet array_internal_make_insert_room(void* arr, sizet idx, sizet item_size)
+size_t array_internal_make_insert_room(void* arr, size_t idx, size_t item_size)
 {
     check(arr, "NULL arr passed");
 
@@ -54,14 +54,14 @@ sizet array_internal_make_insert_room(void* arr, sizet idx, sizet item_size)
     return idx;
 }
 
-void* array_internal_ensure_min_num(void* arr, sizet size, sizet item_size)
+void* array_internal_ensure_min_num(void* arr, size_t size, size_t item_size)
 {
     if (size <= array_num(arr))
         return arr;
 
     if (size > array_cap(arr))
     {
-        sizet new_cap = size;
+        size_t new_cap = size;
         ArrayHeader* new_h = memra(arr ? array_internal_header(arr) : 0, sizeof(ArrayHeader) + new_cap*item_size);
 
         if (!arr)

@@ -16,7 +16,7 @@ static char current(const char** input)
 
 static bool is_str(const char* input, const char* str)
 {
-    sizet len = strlen(str);
+    size_t len = strlen(str);
 
     for (unsigned i = 0; i < len; ++i)
     {
@@ -427,9 +427,9 @@ const JzonValue* jzon_get(const JzonValue* table, const char* key)
     
     i64 key_hash = str_hash(key);
 
-    sizet first = 0;
-    sizet last = table->size - 1;
-    sizet middle = (first + last) / 2;
+    size_t first = 0;
+    size_t last = table->size - 1;
+    size_t middle = (first + last) / 2;
 
     while (first <= last)
     {

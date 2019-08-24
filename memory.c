@@ -61,12 +61,12 @@ void memory_init()
     #endif
 }
 
-void memzero(void* p, sizet s)
+void memzero(void* p, size_t s)
 {
     memset(p, 0, s);
 }
 
-void* mema(sizet s)
+void* mema(size_t s)
 {
     void* p = malloc(s);
     #ifdef ENABLE_MEMORY_TRACING
@@ -76,14 +76,14 @@ void* mema(sizet s)
     return p;
 }
 
-void* mema_zero(sizet s)
+void* mema_zero(size_t s)
 {
     void* p = mema(s);
     memzero(p, s);
     return p;
 }
 
-void* memra(void* cur, sizet s)
+void* memra(void* cur, size_t s)
 {
     #ifdef ENABLE_MEMORY_TRACING
         if (cur)
@@ -100,7 +100,7 @@ void* memra(void* cur, sizet s)
     return p;
 }
 
-void* memra_zero(void* cur, sizet s)
+void* memra_zero(void* cur, size_t s)
 {
     void* p = memra(cur, s);
     memzero(p, s);
@@ -136,7 +136,7 @@ void memory_check_leaks()
     #endif
 }
 
-void* mema_copy(const void* data, sizet s)
+void* mema_copy(const void* data, size_t s)
 {
     void* p = mema(s);
     memcpy(p, data, s);

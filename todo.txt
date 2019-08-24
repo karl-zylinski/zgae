@@ -8,6 +8,8 @@
 
 - put generation in handles, must have it to make sure that a resource hasn't been put into another's place... 64 bit handle with generation, type and subtype? (see "handles" below)
 
+- remove union from Resource (just do void* + cast? perhaps with type enum or macro that takes type and does cast etc)
+
 ### LESS IMPORTANT ###
 
 - put renderer on own thread
@@ -36,7 +38,7 @@
     s = subtype --- added to pool, i.e. renderer_resource_type_t which has values like RENDERER_RESOURCE_TYPE_SHADER or SCRIPT_RESOURCE_ENTITY
     u = used
 
-    iiiiiiii iiiiiiii iiiiiiii iiiiiiii iiiiiiii tttttttt ssssssss sssssssu
+    iiiiiiii iiiiiiii iiiiiiii iiiiiiii ttttssss ssssssss gggggggg gggggggg
 
     or perhaps (maybe go with this, we can change later if we want to)
 
