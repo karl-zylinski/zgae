@@ -1,5 +1,5 @@
 #pragma once
-#include "geometry_types.h"
+#include "mesh_types.h"
 
 typedef struct ObjLoadResult
 {

@@ -11,7 +11,7 @@ fwd_handle(ResourceHandle);
 RendererState* renderer_create(WindowType window_type, void* window_data);
 void renderer_destroy(RendererState* rs);
 RendererResourceHandle renderer_resource_load(RendererState* rs, const char* filename);
-void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle geometry_handle, const Vec3* cam_pos, const Quat* cam_rot);
+void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle mesh_handle, const Vec3* cam_pos, const Quat* cam_rot);
 void renderer_present(RendererState* rs);
 void renderer_update_constant_buffer(RendererState* rs, RendererResourceHandle pipeline_handle, u32 binding, void* data, u32 data_size);
 void renderer_wait_for_new_frame(RendererState* rs);

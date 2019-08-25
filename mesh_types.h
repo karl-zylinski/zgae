@@ -1,18 +1,18 @@
 #pragma once
 #include "math_types.h"
 
-typedef struct GeometryVertex {
+typedef struct MeshVertex {
     Vec3 position;
     Vec3 normal;
     Vec4 color;
     Vec2 texcoord;
-} GeometryVertex;
+} MeshVertex;
 
-typedef u16 GeometryIndex;
+typedef u16 MeshIndex;
 
 typedef struct Mesh {
-    GeometryVertex* vertices;
-    GeometryIndex* indices;
+    MeshVertex* vertices;
+    MeshIndex* indices;
     u32 vertices_num;
     u32 indices_num;
 } Mesh;

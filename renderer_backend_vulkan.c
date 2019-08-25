@@ -4,7 +4,7 @@
 #include "debug.h"
 #include "window_types.h"
 #include <string.h>
-#include "geometry_types.h"
+#include "mesh_types.h"
 #include "str.h"
 #include "renderer_resource_types.h"
 #include "renderer_resource.h"
@@ -53,14 +53,14 @@ typedef struct RendererBackendPipeline
     VkPipelineLayout layout;
 } RendererBackendPipeline;
 
-typedef struct RendererBackendGeometry
+typedef struct RendererBackendMesh
 {
     VkBuffer vertex_buffer;
     VkBuffer index_buffer;
     VkDeviceMemory vertex_buffer_memory;
     VkDeviceMemory index_buffer_memory;
-    GeometryIndex indices_num;
-} RendererBackendGeometry;
+    MeshIndex indices_num;
+} RendererBackendMesh;
 
 typedef struct RendererBackendState
 {
@@ -767,7 +767,7 @@ void renderer_backend_destroy_pipeline(RendererBackendState* rbs, RendererBacken
     memf(p);
 }
 
-void renderer_backend_destroy_geometry(RendererBackendState* rbs, RendererBackendGeometry* g)
+void renderer_backend_destroy_mesh(RendererBackendState* rbs, RendererBackendMesh* g)
 {
     vkDestroyBuffer(rbs->device, g->vertex_buffer, NULL);
     vkFreeMemory(rbs->device, g->vertex_buffer_memory, NULL);
@@ -1096,7 +1096,7 @@ RendererBackendPipeline* renderer_backend_create_pipeline(RendererBackendState* 
     return pipeline;
 }
 
-RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* rbs, const Mesh* m)
+RendererBackendMesh* renderer_backend_create_mesh(RendererBackendState* rbs, const Mesh* m)
 {
     VkResult res;
 
@@ -1109,7 +1109,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         VkBufferCreateInfo vertex_bci = {};
         vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        vertex_bci.size = sizeof(GeometryVertex) * m->vertices_num;
+        vertex_bci.size = sizeof(MeshVertex) * m->vertices_num;
         vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &vertex_bci, NULL, &vertex_buffer);
@@ -1130,7 +1130,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         res = vkMapMemory(rbs->device, vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(vertex_buffer_memory_data, m->vertices, sizeof(GeometryVertex) * m->vertices_num);
+        memcpy(vertex_buffer_memory_data, m->vertices, sizeof(MeshVertex) * m->vertices_num);
     
         vkUnmapMemory(rbs->device, vertex_buffer_memory);
     
@@ -1147,7 +1147,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         VkBufferCreateInfo index_bci = {};
         index_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         index_bci.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        index_bci.size = sizeof(GeometryIndex) * m->indices_num;
+        index_bci.size = sizeof(MeshIndex) * m->indices_num;
         index_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &index_bci, NULL, &index_buffer);
@@ -1168,7 +1168,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         res = vkMapMemory(rbs->device, index_buffer_memory, 0, index_buffer_mr.size, 0, (void**)&index_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(index_buffer_memory_data, m->indices, sizeof(GeometryIndex) * m->indices_num);
+        memcpy(index_buffer_memory_data, m->indices, sizeof(MeshIndex) * m->indices_num);
     
         vkUnmapMemory(rbs->device, index_buffer_memory);
     
@@ -1176,7 +1176,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         VERIFY_RES();
     }
 
-    RendererBackendGeometry g = {
+    RendererBackendMesh g = {
         .vertex_buffer = vertex_buffer,
         .vertex_buffer_memory = vertex_buffer_memory,
         .index_buffer = index_buffer,
@@ -1184,7 +1184,7 @@ RendererBackendGeometry* renderer_backend_create_geometry(RendererBackendState* 
         .indices_num = m->indices_num
     };
 
-    return mema_copy(&g, sizeof(RendererBackendGeometry));
+    return mema_copy(&g, sizeof(RendererBackendMesh));
 }
 
 void renderer_backend_update_constant_buffer(RendererBackendState* rbs, RendererBackendPipeline* pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
@@ -1227,7 +1227,7 @@ void renderer_backend_update_constant_buffer(RendererBackendState* rbs, Renderer
     vkUpdateDescriptorSets(rbs->device, 1, &write, 0, NULL);
 }
 
-static VkIndexType get_index_type(GeometryIndex gi)
+static VkIndexType get_index_type(MeshIndex gi)
 {
     switch(sizeof(gi))
     {
@@ -1236,7 +1236,7 @@ static VkIndexType get_index_type(GeometryIndex gi)
     }
 }
 
-void renderer_backend_draw(RendererBackendState* rbs, RendererBackendPipeline* pipeline, RendererBackendGeometry* geometry)
+void renderer_backend_draw(RendererBackendState* rbs, RendererBackendPipeline* pipeline, RendererBackendMesh* mesh)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1274,9 +1274,9 @@ void renderer_backend_draw(RendererBackendState* rbs, RendererBackendPipeline* p
                             pipeline->constant_buffer_descriptor_sets[cf], 0, NULL);
 
     const VkDeviceSize offsets[1] = {0};
-    VkBuffer vertex_buffer = geometry->vertex_buffer;
+    VkBuffer vertex_buffer = mesh->vertex_buffer;
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
-    vkCmdBindIndexBuffer(cmd, geometry->index_buffer, 0, get_index_type(0));
+    vkCmdBindIndexBuffer(cmd, mesh->index_buffer, 0, get_index_type(0));
 
 
     VkViewport viewport = {};
@@ -1296,7 +1296,7 @@ void renderer_backend_draw(RendererBackendState* rbs, RendererBackendPipeline* p
     scissor.offset.y = 0;
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-    vkCmdDrawIndexed(cmd, geometry->indices_num, 1, 0, 0, 0);
+    vkCmdDrawIndexed(cmd, mesh->indices_num, 1, 0, 0, 0);
 
     vkCmdEndRenderPass(cmd);
 

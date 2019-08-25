@@ -144,11 +144,11 @@ static ParsedData parse(char* data, unsigned data_size, ParseMode mode)
     return pd;
 }
 
-static int get_existing_vertex(const GeometryVertex* vertices, const GeometryVertex* v1)
+static int get_existing_vertex(const MeshVertex* vertices, const MeshVertex* v1)
 {
     for (unsigned i = 0; i < array_num(vertices); ++i)
     {
-        const GeometryVertex* v2 = vertices + i;
+        const MeshVertex* v2 = vertices + i;
 
         if (vec3_almost_eql(&v1->position, &v2->position)
             && vec3_almost_eql(&v1->normal, &v2->normal)
@@ -162,9 +162,9 @@ static int get_existing_vertex(const GeometryVertex* vertices, const GeometryVer
     return -1;
 }
 
-static void add_vertex_to_mesh(GeometryVertex** vertices, GeometryIndex** indices, const Vec3* pos, const Vec3* normal, const Vec2* texcoord, const Vec4* c)
+static void add_vertex_to_mesh(MeshVertex** vertices, MeshIndex** indices, const Vec3* pos, const Vec3* normal, const Vec2* texcoord, const Vec4* c)
 {
-    GeometryVertex v = {
+    MeshVertex v = {
         .position = *pos,
         .normal = *normal,
         .texcoord = *texcoord,
@@ -195,8 +195,8 @@ ObjLoadResult obj_load(const char* filename)
 
     ParsedData pd = parse(flr.data, flr.data_size, PARSE_MODE_ALL);
     memf(flr.data);
-    GeometryVertex* vertices = NULL;
-    GeometryIndex* indices = NULL;
+    MeshVertex* vertices = NULL;
+    MeshIndex* indices = NULL;
 
     for (u32 i = 0; i < array_num(pd.faces); ++i)
     {

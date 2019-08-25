@@ -7,7 +7,7 @@
 #include "debug.h"
 #include "renderer_resource_types.h"
 #include "renderer_resource.h"
-#include "geometry_types.h"
+#include "mesh_types.h"
 #include "math.h"
 #include "str.h"
 #include "handle_hash_map.h"
@@ -38,7 +38,7 @@ typedef struct PipelineRendererResource
 typedef struct MeshRendererResource
 {
     Mesh mesh;
-    RendererBackendGeometry* backend_state;
+    RendererBackendMesh* backend_state;
 } MeshRendererResource;
 
 static const char* renderer_resource_type_names[] =
@@ -105,18 +105,13 @@ static void deinit_resource(RendererState* rs, RendererResourceHandle h)
         } break;
 
         case RENDERER_RESOURCE_TYPE_MESH: {
-            renderer_backend_destroy_geometry(rs->rbs, get_resource(rs->arr_resources, MeshRendererResource, h)->backend_state);
+            renderer_backend_destroy_mesh(rs->rbs, get_resource(rs->arr_resources, MeshRendererResource, h)->backend_state);
         } break;
 
         case RENDERER_RESOURCE_TYPE_NUM:
         case RENDERER_RESOURCE_TYPE_INVALID:
             error("Invalid resource in renderer resource list"); break;
     }
-}
-
-static RendererBackendGeometry* geometry_init(RendererState* rs, const MeshRendererResource* g)
-{
-    return renderer_backend_create_geometry(rs->rbs, &g->mesh);
 }
 
 static void init_resource(RendererState* rs, RendererResourceHandle h)
@@ -173,7 +168,7 @@ static void init_resource(RendererState* rs, RendererResourceHandle h)
 
         case RENDERER_RESOURCE_TYPE_MESH: {
             MeshRendererResource* g = get_resource(rs->arr_resources, MeshRendererResource, h);
-            g->backend_state = geometry_init(rs, g);
+            g->backend_state = renderer_backend_create_mesh(rs->rbs, &g->mesh);
         } break;
 
         case RENDERER_RESOURCE_TYPE_NUM:
