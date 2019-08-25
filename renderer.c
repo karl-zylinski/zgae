@@ -8,7 +8,7 @@
 #include "shader_resource.h"
 #include "geometry_types.h"
 #include "math.h"
-#include "resource.h"
+#include "resource_store.h"
 #include "resource_types.h"
 
 typedef struct RendererResourceShader
