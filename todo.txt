@@ -8,9 +8,15 @@
 
 - remove union from Resource (just do void* + cast? perhaps with type enum or macro that takes type and does cast etc)
 
+- require that resoruce store tells us to specify type enum and type enum names for that store... or is that possible??? the resource constains the enum hummm or wait, just use the type in the handle!
+
 ### LESS IMPORTANT ###
 
-- magical central place where handle pools are registered with names and stuff and then we can give it a handle and it will tell us type and subtype information (with string names!!) from it. wow such types
+- to ponder: renamed everything that is "Renderer" to "Render" except Renderer?
+
+- remove "State" from RendererBackendState and RendererState
+
+- magical central place where handle pools are registered with names and stuff and then we can give it a handle and it will tell us type and subtype information (with string names!!) from it. wow such types (fix resource_store.c create func)
 
 - tidy up array.h (look at nothings impl), think about name again 
 

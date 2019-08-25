@@ -10,8 +10,6 @@
 #include "keyboard.h"
 #include <execinfo.h>
 #include "obj_loader.h"
-#include "resource_store.h"
-#include "resource_types.h"
 
 static f32 get_cur_time_seconds()
 {
@@ -57,7 +55,6 @@ int main()
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
     RendererState* rs = renderer_create(WINDOW_TYPE_XCB, win);
-    resource_store_init(rs);
 
     WindowCallbacks wc = {};
     wc.key_pressed_callback = &keyboard_key_pressed;
@@ -66,8 +63,7 @@ int main()
     wc.window_resized_callback = &handle_window_resize;
     linux_xcb_window_update_callbacks(win, &wc);
 
-    ResourceHandle prh = resource_load("pipeline_default.pipeline");
-    RendererResourceHandle ph = resource_lookup(prh)->rrh;
+    RendererResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
     ObjLoadResult olr = obj_load("box.wobj");
     check(olr.ok, "Failed loading obj");
     RendererResourceHandle gh = renderer_load_geometry(rs, &olr.mesh);
@@ -135,7 +131,6 @@ int main()
     info("Main loop exited, shutting down");
     renderer_destroy(rs);
     linux_xcb_window_destroy(win);
-    resource_store_destroy();
     memory_check_leaks();
     info("Shutdown finished");
     return 0;

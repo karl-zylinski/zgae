@@ -3,11 +3,11 @@
 #include "memory.h"
 #include "debug.h"
 #include "window_types.h"
-#include "shader_resource.h"
 #include <string.h>
 #include "geometry_types.h"
 #include "str.h"
-#include "shader_resource_types.h"
+#include "renderer_resource_types.h"
+#include "renderer_resource.h"
 
 #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %s)", res)

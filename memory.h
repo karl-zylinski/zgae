@@ -14,3 +14,5 @@ void* mema_copy(const void* data, size_t s);
 #define mema_repl(p) p = mema_copy(p, sizeof(*p))
 #define mema_repln(p, n) p = mema_copy(p, sizeof(*p)*n)
 #define mema_repls(p) p = mema_copy(p, strlen(p))
+#define mema_type(t) mema_zero(sizeof(t))
+#define mema_copyt(p) mema_copy(p, sizeof(*p))

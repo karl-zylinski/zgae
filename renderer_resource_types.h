@@ -1,6 +1,31 @@
 #pragma once
 
+fwd_handle(RendererResourceHandle);
 
+typedef enum RendererResourceType
+{
+    RENDERER_RESOURCE_TYPE_INVALID,
+    RENDERER_RESOURCE_TYPE_SHADER,
+    RENDERER_RESOURCE_TYPE_PIPELINE,
+    RENDERER_RESOURCE_TYPE_GEOMETRY,
+    RENDERER_RESOURCE_TYPE_NUM
+} RendererResourceType;
+
+typedef enum ShaderType
+{
+    SHADER_TYPE_INVALID,
+    SHADER_TYPE_VERTEX,
+    SHADER_TYPE_FRAGMENT
+} ShaderType;
+
+typedef enum ShaderDataType
+{
+    SHADER_DATA_TYPE_INVALID,
+    SHADER_DATA_TYPE_MAT4,
+    SHADER_DATA_TYPE_VEC2,
+    SHADER_DATA_TYPE_VEC3,
+    SHADER_DATA_TYPE_VEC4,
+} ShaderDataType;
 
 typedef enum ConstantBufferAutoValue
 {
@@ -40,13 +65,3 @@ typedef struct ConstantBuffer
     u32 fields_num;
     u32 binding;
 } ConstantBuffer;
-
-typedef struct PipelineResource
-{
-    ResourceHandle* shader_stages;
-    ConstantBuffer* constant_buffers;
-    VertexInputField* vertex_input;
-    u32 shader_stages_num;
-    u32 vertex_input_num;
-    u32 constant_buffers_num;
-} PipelineResource;
