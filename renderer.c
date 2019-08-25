@@ -46,7 +46,7 @@ typedef struct WorldObject {
 } WorldObject;
 
 typedef struct WorldRenderResource {
-    RenderResourceHandle* arr_objects;
+    WorldObject* arr_objects;
     size_t* arr_free_objects; // previously removed, i.e. "holes"
 } WorldRenderResource;
 
@@ -525,7 +525,7 @@ void renderer_destroy_world(RendererState* rs, RenderResourceHandle h)
     destroy_resource(rs, h);
 }
 
-size_t renderer_world_add(RendererState* rs, RenderResourceHandle world, RenderResourceHandle obj)
+size_t renderer_world_add(RendererState* rs, RenderResourceHandle world, RenderResourceHandle mesh, const Mat4* model)
 {
     WorldRenderResource* w = get_resource(rs->arr_resources, WorldRenderResource, world);
 
@@ -533,21 +533,34 @@ size_t renderer_world_add(RendererState* rs, RenderResourceHandle world, RenderR
     {
         size_t idx = array_last(w->arr_free_objects);
         array_pop(w->arr_free_objects);
-        w->arr_objects[idx] = obj;
+        w->arr_objects[idx].mesh = mesh;
+        w->arr_objects[idx].model = *model;
         return idx;
     }
 
     size_t idx = array_num(w->arr_objects);
-    array_add(w->arr_objects, obj);
+
+    WorldObject wo = {
+        .mesh = mesh,
+        .model = *model
+    };
+
+    array_add(w->arr_objects, wo);
     return idx;
 }
 
 void renderer_world_remove(RendererState* rs, RenderResourceHandle world, size_t idx)
 {
     WorldRenderResource* w = get_resource(rs->arr_resources, WorldRenderResource, world);
-    check(w->arr_objects[idx] == HANDLE_INVALID, "Trying to remove from world twice");
-    w->arr_objects[idx] = HANDLE_INVALID;
+    check(w->arr_objects[idx].mesh == HANDLE_INVALID, "Trying to remove from world twice");
+    w->arr_objects[idx].mesh = HANDLE_INVALID;
     array_add(w->arr_free_objects, idx);
+}
+
+void renderer_world_move(RendererState* rs, RenderResourceHandle world, u32 idx, const Mat4* model)
+{
+    WorldRenderResource* w = get_resource(rs->arr_resources, WorldRenderResource, world);
+    w->arr_objects[idx].model = *model;
 }
 
 static void populate_constant_buffers(RendererState* rs, const PipelineRenderResource* pr, const Mat4* model_matrix, const Mat4* mvp_matrix)
@@ -602,13 +615,12 @@ void renderer_draw_world(RendererState* rs, RenderResourceHandle pipeline_handle
 
     for (size_t i = 0; i < array_num(w->arr_objects); ++i)
     {
-        RenderResourceHandle obj = w->arr_objects[i];
+        WorldObject* obj = w->arr_objects + i;
 
-        if (obj == HANDLE_INVALID)
+        if (obj->mesh == HANDLE_INVALID)
             continue;
 
-        Mat4 model = mat4_identity();
-        renderer_draw(rs, pipeline_handle, obj, &model, cam_pos, cam_rot);
+        renderer_draw(rs, pipeline_handle, obj->mesh, &obj->model, cam_pos, cam_rot);
     }
 }
 

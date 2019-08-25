@@ -9,6 +9,7 @@
 #include <time.h>
 #include "keyboard.h"
 #include <execinfo.h>
+#include <math.h>
 
 static f32 get_cur_time_seconds()
 {
@@ -66,7 +67,8 @@ int main()
     RenderResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
     RenderResourceHandle gh = renderer_resource_load(rs, "box.mesh");
 
-    renderer_world_add(rs, rw, gh);
+    Mat4 model = mat4_identity();
+    u32 box_world_idx = renderer_world_add(rs, rw, gh, &model);
 
     info("Starting timers");
     
@@ -111,6 +113,11 @@ int main()
             camera_pos.z += time_dt();
         if (key_is_held(KC_F))
             camera_pos.z -= time_dt();
+
+        model.w.x = sin(time_since_start());
+        model.w.z = cos(time_since_start());
+
+        renderer_world_move(rs, rw, box_world_idx, &model);
 
         renderer_wait_for_new_frame(rs);
         linux_xcb_window_process_all_events(win);
