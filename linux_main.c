@@ -64,11 +64,7 @@ int main()
     linux_xcb_window_update_callbacks(win, &wc);
 
     RendererResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
-    ObjLoadResult olr = obj_load("box.wobj");
-    check(olr.ok, "Failed loading obj");
-    RendererResourceHandle gh = renderer_load_geometry(rs, &olr.mesh);
-    memf(olr.mesh.vertices);
-    memf(olr.mesh.indices);
+    RendererResourceHandle gh = renderer_resource_load(rs, "box.mesh");
 
     info("Starting timers");
     

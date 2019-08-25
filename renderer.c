@@ -14,6 +14,7 @@
 #include "path.h"
 #include "file.h"
 #include "jzon.h"
+#include "obj_loader.h"
 
 typedef struct ShaderRendererResource
 {
@@ -34,15 +35,15 @@ typedef struct PipelineRendererResource
     RendererBackendPipeline* backend_state;
 } PipelineRendererResource;
 
-typedef struct GeometryRendererResource
+typedef struct MeshRendererResource
 {
     Mesh mesh;
     RendererBackendGeometry* backend_state;
-} GeometryRendererResource;
+} MeshRendererResource;
 
 static const char* renderer_resource_type_names[] =
 {
-    "invalid", "shader", "pipeline", "geometry"
+    "invalid", "shader", "pipeline", "mesh"
 };
 
 static RendererResourceType resource_type_from_str(const char* str)
@@ -103,8 +104,8 @@ static void deinit_resource(RendererState* rs, RendererResourceHandle h)
             renderer_backend_destroy_pipeline(rs->rbs, get_resource(rs->arr_resources, PipelineRendererResource, h)->backend_state);
         } break;
 
-        case RENDERER_RESOURCE_TYPE_GEOMETRY: {
-            renderer_backend_destroy_geometry(rs->rbs, get_resource(rs->arr_resources, GeometryRendererResource, h)->backend_state);
+        case RENDERER_RESOURCE_TYPE_MESH: {
+            renderer_backend_destroy_geometry(rs->rbs, get_resource(rs->arr_resources, MeshRendererResource, h)->backend_state);
         } break;
 
         case RENDERER_RESOURCE_TYPE_NUM:
@@ -113,7 +114,7 @@ static void deinit_resource(RendererState* rs, RendererResourceHandle h)
     }
 }
 
-static RendererBackendGeometry* geometry_init(RendererState* rs, const GeometryRendererResource* g)
+static RendererBackendGeometry* geometry_init(RendererState* rs, const MeshRendererResource* g)
 {
     return renderer_backend_create_geometry(rs->rbs, &g->mesh);
 }
@@ -170,8 +171,8 @@ static void init_resource(RendererState* rs, RendererResourceHandle h)
 
         } break;
 
-        case RENDERER_RESOURCE_TYPE_GEOMETRY: {
-            GeometryRendererResource* g = get_resource(rs->arr_resources, GeometryRendererResource, h);
+        case RENDERER_RESOURCE_TYPE_MESH: {
+            MeshRendererResource* g = get_resource(rs->arr_resources, MeshRendererResource, h);
             g->backend_state = geometry_init(rs, g);
         } break;
 
@@ -211,8 +212,8 @@ static void destroy_resource(RendererState* rs, RendererResourceHandle h)
             memf(pr->vertex_input);
         } break;
 
-        case RENDERER_RESOURCE_TYPE_GEOMETRY: {
-            GeometryRendererResource* g = get_resource(rs->arr_resources, GeometryRendererResource, h);
+        case RENDERER_RESOURCE_TYPE_MESH: {
+            MeshRendererResource* g = get_resource(rs->arr_resources, MeshRendererResource, h);
             memf(g->mesh.vertices);
             memf(g->mesh.indices);
         } break;
@@ -445,6 +446,34 @@ RendererResourceHandle renderer_resource_load(RendererState* rs, const char* fil
             r.data = mema_copyt(&pr);
         } break;
 
+
+        case RENDERER_RESOURCE_TYPE_MESH: {
+            #define ensure(expr) if (!(expr)) error("Error in pipeline resource load");
+            FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
+            ensure(flr.ok);
+            JzonParseResult jpr = jzon_parse(flr.data);
+            ensure(jpr.ok && jpr.output.is_table);
+            memf(flr.data);
+
+            const JzonValue* jz_source = jzon_get(&jpr.output, "source");
+            ensure(jz_source && jz_source->is_string);
+
+            ObjLoadResult olr = obj_load(jz_source->string_val);
+            check(olr.ok, "Failed loading obj");
+            jzon_free(&jpr.output);
+
+            MeshRendererResource g = {
+                .mesh = olr.mesh
+            };
+
+            mema_repln(g.mesh.vertices, g.mesh.vertices_num);
+            mema_repln(g.mesh.indices, g.mesh.indices_num);
+            memf(olr.mesh.vertices);
+            memf(olr.mesh.indices);
+
+            r.data = mema_copyt(&g);
+        } break;
+
         default: error("Implement me!"); break;
     }
 
@@ -469,29 +498,6 @@ void renderer_destroy(RendererState* rs)
     handle_hash_map_destroy(rs->resource_name_to_handle);
     handle_pool_destroy(rs->resource_handle_pool);
     memf(rs);
-}
-
-RendererResourceHandle renderer_load_geometry(RendererState* rs, const Mesh* mesh)
-{
-    GeometryRendererResource g = {
-        .mesh = *mesh
-    };
-
-    g.mesh.vertices = mema_copy(g.mesh.vertices, sizeof(GeometryVertex) * g.mesh.vertices_num);
-    g.mesh.indices = mema_copy(g.mesh.indices, sizeof(GeometryIndex) * g.mesh.indices_num);
-
-    RendererResource r = {
-        .data = mema_copyt(&g)
-    };
-
-
-    RendererResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, RENDERER_RESOURCE_TYPE_GEOMETRY);
-    r.handle = h;
-    array_fill_and_set(rs->arr_resources, handle_index(h), r);
-
-    init_resource(rs, h);
-
-    return h;
 }
 
 static void populate_constant_buffers(RendererState* rs, const PipelineRendererResource* pr, const Mat4* model_matrix, const Mat4* mvp_matrix)
@@ -525,7 +531,7 @@ static void populate_constant_buffers(RendererState* rs, const PipelineRendererR
     }
 }
 
-void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle geometry_handle, const Vec3* cam_pos, const Quat* cam_rot)
+void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle mesh_handle, const Vec3* cam_pos, const Quat* cam_rot)
 {
     Mat4 camera_matrix = mat4_from_rotation_and_translation(cam_rot, cam_pos);
     Mat4 view_matrix = mat4_inverse(&camera_matrix);
@@ -539,7 +545,7 @@ void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, Re
 
     const PipelineRendererResource* pipeline = get_resource(rs->arr_resources, PipelineRendererResource, pipeline_handle);
     populate_constant_buffers(rs, pipeline, &model_matrix, &mvp_matrix);
-    renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs->arr_resources, GeometryRendererResource, geometry_handle)->backend_state);
+    renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs->arr_resources, MeshRendererResource, mesh_handle)->backend_state);
 }
 
 void renderer_present(RendererState* rs)
