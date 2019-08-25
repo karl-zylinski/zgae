@@ -40,9 +40,19 @@ typedef struct MeshRenderResource
     RenderBackendMesh* backend_state;
 } MeshRenderResource;
 
+typedef struct WorldObject {
+    Mat4 model;
+    RenderResourceHandle mesh;
+} WorldObject;
+
+typedef struct WorldRenderResource {
+    RenderResourceHandle* arr_objects;
+    size_t* arr_free_objects; // previously removed, i.e. "holes"
+} WorldRenderResource;
+
 static const char* render_resource_type_names[] =
 {
-    "invalid", "shader", "pipeline", "mesh"
+    "invalid", "shader", "pipeline", "mesh", "world"
 };
 
 static RenderResourceType resource_type_from_str(const char* str)
@@ -212,6 +222,11 @@ static void destroy_resource(RendererState* rs, RenderResourceHandle h)
             memf(g->mesh.indices);
         } break;
 
+        case RENDER_RESOURCE_TYPE_WORLD: {
+            WorldRenderResource* w = get_resource(rs->arr_resources, WorldRenderResource, h);
+            array_destroy(w->arr_objects);
+        } break;
+
         case RENDER_RESOURCE_TYPE_NUM:
         case RENDER_RESOURCE_TYPE_INVALID:
             error("Invalid resource in render resource list"); break;
@@ -293,7 +308,7 @@ static ShaderType shader_type_str_to_enum(const char* str)
 RenderResourceHandle renderer_resource_load(RendererState* rs, const char* filename)
 {
     hash64 name_hash = str_hash(filename);
-    ResourceHandle existing = handle_hash_map_get(rs->resource_name_to_handle, name_hash);
+    RenderResourceHandle existing = handle_hash_map_get(rs->resource_name_to_handle, name_hash);
 
     if (existing != HANDLE_INVALID)
         return existing;
@@ -494,6 +509,47 @@ void renderer_destroy(RendererState* rs)
     memf(rs);
 }
 
+RenderResourceHandle renderer_create_world(RendererState* rs)
+{
+    RenderResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, RENDER_RESOURCE_TYPE_WORLD);
+    RenderResource r = {
+        .handle = h,
+        .data = mema_type(WorldRenderResource)
+    };
+    array_fill_and_set(rs->arr_resources, handle_index(h), r);
+    return h;
+}
+
+void renderer_destroy_world(RendererState* rs, RenderResourceHandle h)
+{
+    destroy_resource(rs, h);
+}
+
+size_t renderer_world_add(RendererState* rs, RenderResourceHandle world, RenderResourceHandle obj)
+{
+    WorldRenderResource* w = get_resource(rs->arr_resources, WorldRenderResource, world);
+
+    if (array_num(w->arr_free_objects) > 0)
+    {
+        size_t idx = array_last(w->arr_free_objects);
+        array_pop(w->arr_free_objects);
+        w->arr_objects[idx] = obj;
+        return idx;
+    }
+
+    size_t idx = array_num(w->arr_objects);
+    array_add(w->arr_objects, obj);
+    return idx;
+}
+
+void renderer_world_remove(RendererState* rs, RenderResourceHandle world, size_t idx)
+{
+    WorldRenderResource* w = get_resource(rs->arr_resources, WorldRenderResource, world);
+    check(w->arr_objects[idx] == HANDLE_INVALID, "Trying to remove from world twice");
+    w->arr_objects[idx] = HANDLE_INVALID;
+    array_add(w->arr_free_objects, idx);
+}
+
 static void populate_constant_buffers(RendererState* rs, const PipelineRenderResource* pr, const Mat4* model_matrix, const Mat4* mvp_matrix)
 {
     for (u32 cb_idx = 0; cb_idx < pr->constant_buffers_num; ++cb_idx)
@@ -525,21 +581,35 @@ static void populate_constant_buffers(RendererState* rs, const PipelineRenderRes
     }
 }
 
-void renderer_draw(RendererState* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, const Vec3* cam_pos, const Quat* cam_rot)
+void renderer_draw(RendererState* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, const Mat4* model, const Vec3* cam_pos, const Quat* cam_rot)
 {
     Mat4 camera_matrix = mat4_from_rotation_and_translation(cam_rot, cam_pos);
     Mat4 view_matrix = mat4_inverse(&camera_matrix);
 
-    Mat4 model_matrix = mat4_identity();
-
     Vec2u size = renderer_backend_get_size(rs->rbs);
     Mat4 proj_matrix = mat4_create_projection_matrix(size.x, size.y);
     Mat4 proj_view_matrix = mat4_mul(&view_matrix, &proj_matrix);
-    Mat4 mvp_matrix = mat4_mul(&model_matrix, &proj_view_matrix);
+    Mat4 mvp_matrix = mat4_mul(model, &proj_view_matrix);
 
     const PipelineRenderResource* pipeline = get_resource(rs->arr_resources, PipelineRenderResource, pipeline_handle);
-    populate_constant_buffers(rs, pipeline, &model_matrix, &mvp_matrix);
+    populate_constant_buffers(rs, pipeline, model, &mvp_matrix);
     renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs->arr_resources, MeshRenderResource, mesh_handle)->backend_state);
+}
+
+void renderer_draw_world(RendererState* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, const Vec3* cam_pos, const Quat* cam_rot)
+{
+    WorldRenderResource* w = get_resource(rs->arr_resources, WorldRenderResource, world_handle);
+
+    for (size_t i = 0; i < array_num(w->arr_objects); ++i)
+    {
+        RenderResourceHandle obj = w->arr_objects[i];
+
+        if (obj == HANDLE_INVALID)
+            continue;
+
+        Mat4 model = mat4_identity();
+        renderer_draw(rs, pipeline_handle, obj, &model, cam_pos, cam_rot);
+    }
 }
 
 void renderer_present(RendererState* rs)

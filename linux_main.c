@@ -54,6 +54,7 @@ int main()
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
     RendererState* rs = renderer_create(WINDOW_TYPE_XCB, win);
+    RenderResourceHandle rw = renderer_create_world(rs);
 
     WindowCallbacks wc = {};
     wc.key_pressed_callback = &keyboard_key_pressed;
@@ -64,6 +65,8 @@ int main()
 
     RenderResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
     RenderResourceHandle gh = renderer_resource_load(rs, "box.mesh");
+
+    renderer_world_add(rs, rw, gh);
 
     info("Starting timers");
     
@@ -118,7 +121,7 @@ int main()
             renderer_surface_resized(rs, window_resize_w, window_resize_h);
         }
 
-        renderer_draw(rs, ph, gh, &camera_pos, &camera_rot);
+        renderer_draw_world(rs, ph, rw, &camera_pos, &camera_rot);
         renderer_present(rs);
         keyboard_end_of_frame();
     }

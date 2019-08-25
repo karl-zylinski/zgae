@@ -10,10 +10,6 @@
 
 ### LESS IMPORTANT ###
 
-- to ponder: renamed everything that is "Renderer" to "Render" except Renderer?
-
-- remove "State" from RendererBackendState and RendererState
-
 - magical central place where handle pools are registered with names and stuff and then we can give it a handle and it will tell us type and subtype information (with string names!!) from it. wow such types (fix resource_store.c create func)
 
 - tidy up array.h (look at nothings impl), think about name again 
