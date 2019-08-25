@@ -29,8 +29,8 @@ typedef i64 hash64;
 // each handle is of this format (bits):
 // iiiiiiii iiiiiiii iiiiiiii iiiiiiii ppppssss ssssssss gggggggg gggggggg
 // i = index
-// p = pool (ex ResoruceHandle, RendererResourceHandle, etc!)
-// s = subtype (ex RendererResourcShader etc)
+// p = pool (ex ResoruceHandle, RenderResourceHandle, etc!)
+// s = subtype (ex RenderResourcShader etc)
 // g = generation, bumped every time the slot changes in the pool (for checking if the handle is dead etc)
 
 typedef u64 Handle;

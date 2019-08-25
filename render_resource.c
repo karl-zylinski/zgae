@@ -1,5 +1,5 @@
-#include "renderer_resource.h"
-#include "renderer_resource_types.h"
+#include "render_resource.h"
+#include "render_resource_types.h"
 #include "debug.h"
 
 u32 shader_data_type_size(ShaderDataType t)

@@ -6,8 +6,6 @@
 
 - stop using strings, keep only hashes!
 
-- remove union from Resource (just do void* + cast? perhaps with type enum or macro that takes type and does cast etc)
-
 - require that resoruce store tells us to specify type enum and type enum names for that store... or is that possible??? the resource constains the enum hummm or wait, just use the type in the handle!
 
 ### LESS IMPORTANT ###

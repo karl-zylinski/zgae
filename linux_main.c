@@ -62,8 +62,8 @@ int main()
     wc.window_resized_callback = &handle_window_resize;
     linux_xcb_window_update_callbacks(win, &wc);
 
-    RendererResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
-    RendererResourceHandle gh = renderer_resource_load(rs, "box.mesh");
+    RenderResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
+    RenderResourceHandle gh = renderer_resource_load(rs, "box.mesh");
 
     info("Starting timers");
     

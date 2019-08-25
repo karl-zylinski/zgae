@@ -5,8 +5,8 @@
 #include "handle_pool.h"
 #include "array.h"
 #include "debug.h"
-#include "renderer_resource_types.h"
-#include "renderer_resource.h"
+#include "render_resource_types.h"
+#include "render_resource.h"
 #include "math.h"
 #include "str.h"
 #include "handle_hash_map.h"
@@ -15,62 +15,62 @@
 #include "jzon.h"
 #include "obj_loader.h"
 
-typedef struct ShaderRendererResource
+typedef struct ShaderRenderResource
 {
     char* source;
     u64 source_size;
     ShaderType type;
-    RendererBackendShader* backend_state;
-} ShaderRendererResource;
+    RenderBackendShader* backend_state;
+} ShaderRenderResource;
 
-typedef struct PipelineRendererResource
+typedef struct PipelineRenderResource
 {
-    RendererResourceHandle* shader_stages;
+    RenderResourceHandle* shader_stages;
     ConstantBuffer* constant_buffers;
     VertexInputField* vertex_input;
     u32 shader_stages_num;
     u32 vertex_input_num;
     u32 constant_buffers_num;
-    RendererBackendPipeline* backend_state;
-} PipelineRendererResource;
+    RenderBackendPipeline* backend_state;
+} PipelineRenderResource;
 
-typedef struct MeshRendererResource
+typedef struct MeshRenderResource
 {
     Mesh mesh;
-    RendererBackendMesh* backend_state;
-} MeshRendererResource;
+    RenderBackendMesh* backend_state;
+} MeshRenderResource;
 
-static const char* renderer_resource_type_names[] =
+static const char* render_resource_type_names[] =
 {
     "invalid", "shader", "pipeline", "mesh"
 };
 
-static RendererResourceType resource_type_from_str(const char* str)
+static RenderResourceType resource_type_from_str(const char* str)
 {
-    i32 idx = str_eql_arr(str, renderer_resource_type_names, arrnum(renderer_resource_type_names));
-    check(idx > 0 && idx < RENDERER_RESOURCE_TYPE_NUM, "Invalid renderer resource type");
+    i32 idx = str_eql_arr(str, render_resource_type_names, arrnum(render_resource_type_names));
+    check(idx > 0 && idx < RENDER_RESOURCE_TYPE_NUM, "Invalid render resource type");
     return idx;
 }
 
-typedef enum RendererResourceFlag
+typedef enum RenderResourceFlag
 {
-    RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT = 0x1
-} RendererResourceFlag;
+    RENDER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT = 0x1
+} RenderResourceFlag;
 
-typedef struct RendererResource
+typedef struct RenderResource
 {
     hash64 name_hash;
-    RendererResourceHandle handle;
-    RendererResourceFlag flag;
+    RenderResourceHandle handle;
+    RenderResourceFlag flag;
     void* data;
-} RendererResource;
+} RenderResource;
 
 typedef struct RendererState
 {
-    RendererBackendState* rbs;
+    RendererBackend* rbs;
 
-    // Note that these are _renderer resources_, they have nothing to do with non-renderer stuff!
-    RendererResource* arr_resources;
+    // Note that these are _render resources_, they have nothing to do with non-render stuff!
+    RenderResource* arr_resources;
     HandleHashMap* resource_name_to_handle;
     HandlePool* resource_handle_pool;
 } RendererState;
@@ -78,58 +78,58 @@ typedef struct RendererState
 RendererState* renderer_create(WindowType window_type, void* window_data)
 {
     RendererState* rs = mema_zero(sizeof(RendererState));
-    rs->resource_handle_pool = handle_pool_create(1, "RendererResourceHandle");
+    rs->resource_handle_pool = handle_pool_create(1, "RenderResourceHandle");
     rs->resource_name_to_handle = handle_hash_map_create();
 
-    for (RendererResourceType s = 1; s < RENDERER_RESOURCE_TYPE_NUM; ++s)
-        handle_pool_set_type(rs->resource_handle_pool, s, renderer_resource_type_names[s]);
+    for (RenderResourceType s = 1; s < RENDER_RESOURCE_TYPE_NUM; ++s)
+        handle_pool_set_type(rs->resource_handle_pool, s, render_resource_type_names[s]);
     
-    RendererBackendState* rbs = renderer_backend_create(window_type, window_data);
+    RendererBackend* rbs = renderer_backend_create(window_type, window_data);
     rs->rbs = rbs;
     return rs;
 }
 
 #define get_resource(r, t, h) ((t*)(r + handle_index(h))->data)
 
-static void deinit_resource(RendererState* rs, RendererResourceHandle h)
+static void deinit_resource(RendererState* rs, RenderResourceHandle h)
 {
     switch(handle_type(h))
     {
-        case RENDERER_RESOURCE_TYPE_SHADER: {
-            renderer_backend_destroy_shader(rs->rbs, get_resource(rs->arr_resources, ShaderRendererResource, h)->backend_state);
+        case RENDER_RESOURCE_TYPE_SHADER: {
+            renderer_backend_destroy_shader(rs->rbs, get_resource(rs->arr_resources, ShaderRenderResource, h)->backend_state);
         } break;
         
-        case RENDERER_RESOURCE_TYPE_PIPELINE: {
-            renderer_backend_destroy_pipeline(rs->rbs, get_resource(rs->arr_resources, PipelineRendererResource, h)->backend_state);
+        case RENDER_RESOURCE_TYPE_PIPELINE: {
+            renderer_backend_destroy_pipeline(rs->rbs, get_resource(rs->arr_resources, PipelineRenderResource, h)->backend_state);
         } break;
 
-        case RENDERER_RESOURCE_TYPE_MESH: {
-            renderer_backend_destroy_mesh(rs->rbs, get_resource(rs->arr_resources, MeshRendererResource, h)->backend_state);
+        case RENDER_RESOURCE_TYPE_MESH: {
+            renderer_backend_destroy_mesh(rs->rbs, get_resource(rs->arr_resources, MeshRenderResource, h)->backend_state);
         } break;
 
-        case RENDERER_RESOURCE_TYPE_NUM:
-        case RENDERER_RESOURCE_TYPE_INVALID:
-            error("Invalid resource in renderer resource list"); break;
+        case RENDER_RESOURCE_TYPE_NUM:
+        case RENDER_RESOURCE_TYPE_INVALID:
+            error("Invalid resource in render resource list"); break;
     }
 }
 
-static void init_resource(RendererState* rs, RendererResourceHandle h)
+static void init_resource(RendererState* rs, RenderResourceHandle h)
 {
     switch(handle_type(h))
     {
-        case RENDERER_RESOURCE_TYPE_SHADER: {
-            ShaderRendererResource* sr = get_resource(rs->arr_resources, ShaderRendererResource, h);
+        case RENDER_RESOURCE_TYPE_SHADER: {
+            ShaderRenderResource* sr = get_resource(rs->arr_resources, ShaderRenderResource, h);
             sr->backend_state = renderer_backend_create_shader(rs->rbs, sr->source, sr->source_size);
         } break;
         
-        case RENDERER_RESOURCE_TYPE_PIPELINE: {
-            PipelineRendererResource* pr = get_resource(rs->arr_resources, PipelineRendererResource, h);
+        case RENDER_RESOURCE_TYPE_PIPELINE: {
+            PipelineRenderResource* pr = get_resource(rs->arr_resources, PipelineRenderResource, h);
 
-            RendererBackendShader** backend_shader_stages = mema(sizeof(RendererBackendShader*) * pr->shader_stages_num);
+            RenderBackendShader** backend_shader_stages = mema(sizeof(RenderBackendShader*) * pr->shader_stages_num);
             ShaderType* backend_shader_types = mema(sizeof(ShaderType) * pr->shader_stages_num);
             for (u32 shdr_idx = 0; shdr_idx < pr->shader_stages_num; ++shdr_idx)
             {
-                const ShaderRendererResource* srr = get_resource(rs->arr_resources, ShaderRendererResource, pr->shader_stages[shdr_idx]);
+                const ShaderRenderResource* srr = get_resource(rs->arr_resources, ShaderRenderResource, pr->shader_stages[shdr_idx]);
                 backend_shader_stages[shdr_idx] = srr->backend_state;
                 backend_shader_types[shdr_idx] = srr->type;
             }
@@ -165,29 +165,29 @@ static void init_resource(RendererState* rs, RendererResourceHandle h)
 
         } break;
 
-        case RENDERER_RESOURCE_TYPE_MESH: {
-            MeshRendererResource* g = get_resource(rs->arr_resources, MeshRendererResource, h);
+        case RENDER_RESOURCE_TYPE_MESH: {
+            MeshRenderResource* g = get_resource(rs->arr_resources, MeshRenderResource, h);
             g->backend_state = renderer_backend_create_mesh(rs->rbs, &g->mesh);
         } break;
 
-        case RENDERER_RESOURCE_TYPE_NUM:
-        case RENDERER_RESOURCE_TYPE_INVALID:
-            error("Invalid resource in renderer resource list"); break;
+        case RENDER_RESOURCE_TYPE_NUM:
+        case RENDER_RESOURCE_TYPE_INVALID:
+            error("Invalid resource in render resource list"); break;
     }
 }
 
-static void destroy_resource(RendererState* rs, RendererResourceHandle h)
+static void destroy_resource(RendererState* rs, RenderResourceHandle h)
 {
     deinit_resource(rs, h);
 
     switch(handle_type(h))
     {
-        case RENDERER_RESOURCE_TYPE_SHADER: {
-            memf(get_resource(rs->arr_resources, ShaderRendererResource, h)->source);
+        case RENDER_RESOURCE_TYPE_SHADER: {
+            memf(get_resource(rs->arr_resources, ShaderRenderResource, h)->source);
         } break;
         
-        case RENDERER_RESOURCE_TYPE_PIPELINE: {
-            const PipelineRendererResource* pr = get_resource(rs->arr_resources, PipelineRendererResource, h);
+        case RENDER_RESOURCE_TYPE_PIPELINE: {
+            const PipelineRenderResource* pr = get_resource(rs->arr_resources, PipelineRenderResource, h);
             memf(pr->shader_stages);
 
             for (u32 i = 0; i < pr->constant_buffers_num; ++i)
@@ -206,15 +206,15 @@ static void destroy_resource(RendererState* rs, RendererResourceHandle h)
             memf(pr->vertex_input);
         } break;
 
-        case RENDERER_RESOURCE_TYPE_MESH: {
-            MeshRendererResource* g = get_resource(rs->arr_resources, MeshRendererResource, h);
+        case RENDER_RESOURCE_TYPE_MESH: {
+            MeshRenderResource* g = get_resource(rs->arr_resources, MeshRenderResource, h);
             memf(g->mesh.vertices);
             memf(g->mesh.indices);
         } break;
 
-        case RENDERER_RESOURCE_TYPE_NUM:
-        case RENDERER_RESOURCE_TYPE_INVALID:
-            error("Invalid resource in renderer resource list"); break;
+        case RENDER_RESOURCE_TYPE_NUM:
+        case RENDER_RESOURCE_TYPE_INVALID:
+            error("Invalid resource in render resource list"); break;
     }
 
     memf(rs->arr_resources[handle_index(h)].data);
@@ -222,7 +222,7 @@ static void destroy_resource(RendererState* rs, RendererResourceHandle h)
     handle_hash_map_remove(rs->resource_name_to_handle, rs->arr_resources[handle_index(h)].name_hash);
 }
 
-static void reinit_resource(RendererState* rs, RendererResourceHandle h)
+static void reinit_resource(RendererState* rs, RenderResourceHandle h)
 {
     deinit_resource(rs, h);
     init_resource(rs, h);
@@ -290,7 +290,7 @@ static ShaderType shader_type_str_to_enum(const char* str)
     return SHADER_TYPE_INVALID;
 }
 
-RendererResourceHandle renderer_resource_load(RendererState* rs, const char* filename)
+RenderResourceHandle renderer_resource_load(RendererState* rs, const char* filename)
 {
     hash64 name_hash = str_hash(filename);
     ResourceHandle existing = handle_hash_map_get(rs->resource_name_to_handle, name_hash);
@@ -299,16 +299,16 @@ RendererResourceHandle renderer_resource_load(RendererState* rs, const char* fil
         return existing;
 
     const char* ext = path_ext(filename);
-    RendererResourceType type = resource_type_from_str(ext);
-    RendererResource r = { .name_hash = name_hash };
+    RenderResourceType type = resource_type_from_str(ext);
+    RenderResource r = { .name_hash = name_hash };
     
     info("Loading resource %s", filename);
 
     switch(type)
     {
-        case RENDERER_RESOURCE_TYPE_SHADER: {
+        case RENDER_RESOURCE_TYPE_SHADER: {
             #define format_check(cond, msg, ...) (check(cond, "When parsing shader %s: %s", filename, msg, ##__VA_ARGS__))
-            ShaderRendererResource sr = {};
+            ShaderRenderResource sr = {};
             FileLoadResult shader_flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
             format_check(shader_flr.ok, "File missing");
             JzonParseResult jpr = jzon_parse(shader_flr.data);
@@ -333,8 +333,8 @@ RendererResourceHandle renderer_resource_load(RendererState* rs, const char* fil
             r.data = mema_copyt(&sr);
         } break;
 
-        case RENDERER_RESOURCE_TYPE_PIPELINE: {
-            PipelineRendererResource pr = {};
+        case RENDER_RESOURCE_TYPE_PIPELINE: {
+            PipelineRenderResource pr = {};
             #define ensure(expr) if (!(expr)) error("Error in pipeline resource load");
             FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
             ensure(flr.ok);
@@ -345,7 +345,7 @@ RendererResourceHandle renderer_resource_load(RendererState* rs, const char* fil
             const JzonValue* jz_shader_stages = jzon_get(&jpr.output, "shader_stages");
             ensure(jz_shader_stages && jz_shader_stages->is_array);
             pr.shader_stages_num = jz_shader_stages->size;
-            pr.shader_stages = mema_zero(sizeof(ShaderRendererResource) * pr.shader_stages_num);
+            pr.shader_stages = mema_zero(sizeof(ShaderRenderResource) * pr.shader_stages_num);
             
             for (u32 shdr_idx = 0; shdr_idx < jz_shader_stages->size; ++shdr_idx)
             {
@@ -436,12 +436,12 @@ RendererResourceHandle renderer_resource_load(RendererState* rs, const char* fil
 
             jzon_free(&jpr.output);
 
-            r.flag = RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT;
+            r.flag = RENDER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT;
             r.data = mema_copyt(&pr);
         } break;
 
 
-        case RENDERER_RESOURCE_TYPE_MESH: {
+        case RENDER_RESOURCE_TYPE_MESH: {
             #define ensure(expr) if (!(expr)) error("Error in pipeline resource load");
             FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
             ensure(flr.ok);
@@ -456,7 +456,7 @@ RendererResourceHandle renderer_resource_load(RendererState* rs, const char* fil
             check(olr.ok, "Failed loading obj");
             jzon_free(&jpr.output);
 
-            MeshRendererResource g = {
+            MeshRenderResource g = {
                 .mesh = olr.mesh
             };
 
@@ -471,7 +471,7 @@ RendererResourceHandle renderer_resource_load(RendererState* rs, const char* fil
         default: error("Implement me!"); break;
     }
 
-    RendererResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, type);
+    RenderResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, type);
     r.handle = h;
     array_fill_and_set(rs->arr_resources, handle_index(h), r);
     init_resource(rs, h);
@@ -480,10 +480,10 @@ RendererResourceHandle renderer_resource_load(RendererState* rs, const char* fil
 
 void renderer_destroy(RendererState* rs)
 {
-    info("Destroying renderer");
+    info("Destroying render");
     renderer_backend_wait_until_idle(rs->rbs);
     
-    info("Destroying all renderer resources");
+    info("Destroying all render resources");
     for (size_t i = 0; i < array_num(rs->arr_resources); ++i)
         destroy_resource(rs, rs->arr_resources[i].handle);
 
@@ -494,7 +494,7 @@ void renderer_destroy(RendererState* rs)
     memf(rs);
 }
 
-static void populate_constant_buffers(RendererState* rs, const PipelineRendererResource* pr, const Mat4* model_matrix, const Mat4* mvp_matrix)
+static void populate_constant_buffers(RendererState* rs, const PipelineRenderResource* pr, const Mat4* model_matrix, const Mat4* mvp_matrix)
 {
     for (u32 cb_idx = 0; cb_idx < pr->constant_buffers_num; ++cb_idx)
     {
@@ -525,7 +525,7 @@ static void populate_constant_buffers(RendererState* rs, const PipelineRendererR
     }
 }
 
-void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, RendererResourceHandle mesh_handle, const Vec3* cam_pos, const Quat* cam_rot)
+void renderer_draw(RendererState* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, const Vec3* cam_pos, const Quat* cam_rot)
 {
     Mat4 camera_matrix = mat4_from_rotation_and_translation(cam_rot, cam_pos);
     Mat4 view_matrix = mat4_inverse(&camera_matrix);
@@ -537,9 +537,9 @@ void renderer_draw(RendererState* rs, RendererResourceHandle pipeline_handle, Re
     Mat4 proj_view_matrix = mat4_mul(&view_matrix, &proj_matrix);
     Mat4 mvp_matrix = mat4_mul(&model_matrix, &proj_view_matrix);
 
-    const PipelineRendererResource* pipeline = get_resource(rs->arr_resources, PipelineRendererResource, pipeline_handle);
+    const PipelineRenderResource* pipeline = get_resource(rs->arr_resources, PipelineRenderResource, pipeline_handle);
     populate_constant_buffers(rs, pipeline, &model_matrix, &mvp_matrix);
-    renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs->arr_resources, MeshRendererResource, mesh_handle)->backend_state);
+    renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs->arr_resources, MeshRenderResource, mesh_handle)->backend_state);
 }
 
 void renderer_present(RendererState* rs)
@@ -554,15 +554,15 @@ void renderer_wait_for_new_frame(RendererState* rs)
 
 void renderer_surface_resized(RendererState* rs, u32 w, u32 h)
 {
-    info("Renderer resizing to %d x %d", w, h);
+    info("Render resizing to %d x %d", w, h);
     renderer_backend_wait_until_idle(rs->rbs);
     renderer_backend_surface_resized(rs->rbs, w, h);
 
     for (size_t i = 0; i < array_num(rs->arr_resources); ++i)
     {
-        RendererResource* rr = rs->arr_resources + i;
+        RenderResource* rr = rs->arr_resources + i;
 
-        if (rr->flag & RENDERER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT)
+        if (rr->flag & RENDER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT)
             reinit_resource(rs, rr->handle);
     }
     renderer_backend_wait_until_idle(rs->rbs);
