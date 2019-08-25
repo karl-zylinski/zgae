@@ -4,13 +4,14 @@ import os
 import sys
 
 all_files = os.listdir(".")
+to_skip = "tests.c"
 to_optimize = []
 
 for f in all_files:
     if not os.path.isfile(f):
         continue
 
-    if f.endswith(".c") or f.endswith(".h"):
+    if f not in to_skip and (f.endswith(".c") or f.endswith(".h")):
         to_optimize.append(f)
 
 for f in to_optimize:

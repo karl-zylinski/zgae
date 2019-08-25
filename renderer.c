@@ -7,7 +7,6 @@
 #include "debug.h"
 #include "renderer_resource_types.h"
 #include "renderer_resource.h"
-#include "mesh_types.h"
 #include "math.h"
 #include "str.h"
 #include "handle_hash_map.h"
