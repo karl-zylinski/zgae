@@ -10,7 +10,7 @@
 #include "keyboard.h"
 #include <execinfo.h>
 #include "obj_loader.h"
-#include "resource_store.h"
+#include "resource.h"
 #include "resource_types.h"
 
 static f32 get_cur_time_seconds()

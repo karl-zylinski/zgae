@@ -1,4 +1,4 @@
-#include "resource_store.h"
+#include "resource.h"
 #include "resource_types.h"
 #include "handle_pool.h"
 #include "path.h"
