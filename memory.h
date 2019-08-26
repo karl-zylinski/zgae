@@ -21,13 +21,3 @@ void memf(void* p);
 
 void memory_check_leaks();
 void memzero(void* p, size_t s);
-
-/*
-void* mema_internal(size_t s);
-void memf(void* p);
-void memory_check_leaks();
-void* mema_copy(const void* data, size_t s);
-
-#define mema(t) (t*)mema_internal(sizeof(t))
-#define mema_type(t) mema_zero(sizeof(t))
-#define mema_copyt(p) mema_copy(p, sizeof(*p))*/

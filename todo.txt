@@ -10,6 +10,8 @@
 
 - require that resoruce store tells us to specify type enum and type enum names for that store... or is that possible??? the resource constains the enum hummm or wait, just use the type in the handle!
 
+- temp allocator, some cool marcro thing that create a a variable and acts on it, what?
+
 ### LESS IMPORTANT ###
 
 - magical central place where handle pools are registered with names and stuff and then we can give it a handle and it will tell us type and subtype information (with string names!!) from it. wow such types (fix resource_store.c create func)
