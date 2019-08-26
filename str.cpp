@@ -23,7 +23,7 @@ char* str_copy(const char* s)
 
 char* str_copy_s(const char* s, size_t size)
 {
-    char* ns = mema(size + 1);
+    char* ns = mema_tn(char, size + 1);
     memcpy(ns, s, size);
     ns[size] = 0;
     return ns;

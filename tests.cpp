@@ -10,7 +10,7 @@ static Backtrace get_backtrace(u32 backtrace_size)
         backtrace_size = 32;
 
     static void* backtraces[32];
-    size_t bt_size = backtrace(backtraces, backtrace_size);
+    u32 bt_size = backtrace(backtraces, backtrace_size);
     const char** bt_symbols = (const char**)backtrace_symbols(backtraces, bt_size);
     Backtrace bt = {
         .function_calls = bt_symbols,

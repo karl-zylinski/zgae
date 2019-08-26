@@ -35,18 +35,18 @@ static bool is_multiline_string_quotes(const char* str)
     return is_str(str, "\"\"\"");
 }
 
-static u64 find_table_pair_insertion_index(JzonKeyValuePair* table, i64 key_hash)
+static u64 find_table_pair_insertion_index(const Array<JzonKeyValuePair>& table, i64 key_hash)
 {
-    if (array_num(table) == 0)
+    if (table.num == 0)
         return 0;
 
-    for (unsigned i = 0; i < array_num(table); ++i)
+    for (unsigned i = 0; i < table.num; ++i)
     {
         if (table[i].key_hash > key_hash)
             return i;
     }
 
-    return array_num(table);
+    return table.num;
 }
 
 static bool is_whitespace(char c)
@@ -197,7 +197,7 @@ static bool parse_array(const char** input, JzonValue* output)
         return true;
     }
 
-    JzonValue* array = NULL;
+    Array<JzonValue> array = {};
 
     while (current(input))
     {
@@ -207,7 +207,7 @@ static bool parse_array(const char** input, JzonValue* output)
         if (!parse_value(input, &value))
             return false;
 
-        array_add(array, value);
+        array_push(&array, value);
         skip_whitespace(input);
 
         if (current(input) == ']')
@@ -217,9 +217,9 @@ static bool parse_array(const char** input, JzonValue* output)
         }
     }
     
-    output->size = array_num(array);
+    output->size = array.num;
     output->array_val = (JzonValue*)array_copy_data(array);
-    array_destroy(array);
+    array_destroy(&array);
     return true;
 }
 
@@ -240,7 +240,7 @@ static bool parse_table(const char** input, JzonValue* output, bool root_table)
         return true;
     }
 
-    JzonKeyValuePair* table = NULL;
+    Array<JzonKeyValuePair> table = {};
 
     while (current(input))
     {
@@ -261,7 +261,7 @@ static bool parse_table(const char** input, JzonValue* output, bool root_table)
         pair.key = key;
         pair.key_hash = str_hash(key);
         pair.val = value;
-        array_insert(table, pair, find_table_pair_insertion_index(table, pair.key_hash));
+        array_insert(&table, pair, find_table_pair_insertion_index(table, pair.key_hash));
         skip_whitespace(input);
 
         if (current(input) == '}')
@@ -271,9 +271,9 @@ static bool parse_table(const char** input, JzonValue* output, bool root_table)
         }
     }
 
-    output->size = array_num(table);
-    output->table_val = (JzonKeyValuePair*)array_copy_data(table);
-    array_destroy(table);
+    output->size = table.num;
+    output->table_val = array_copy_data(table);
+    array_destroy(&table);
     return true;
 }
 

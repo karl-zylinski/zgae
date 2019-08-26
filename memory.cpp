@@ -142,3 +142,10 @@ void* mema_copy(const void* data, size_t s)
     memcpy(p, data, s);
     return p;
 }
+
+void mema__repl(void** p, size_t s)
+{
+    void* np = mema(s);
+    memcpy(np, *p, s);
+    *p = np;
+}

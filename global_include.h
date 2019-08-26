@@ -2,7 +2,6 @@
 // This file is (the only) foracbly included by the compiler!
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 
@@ -50,8 +49,8 @@ static const Handle HANDLE_INVALID = -1;
 
 // Forward declaration helpers
 
-#define fwd_struct(t) typedef struct t t
-#define fwd_enum(e) typedef enum e e
+#define fwd_struct(t) struct t
+#define fwd_enum(e) enum struct e
 #define fwd_handle(h) typedef Handle h
 #define arrnum(a) sizeof(a)/sizeof(a[0])
 

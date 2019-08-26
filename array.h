@@ -1,40 +1,103 @@
 #pragma once
-// Adaption of Strechy buffers by Sean Barret and Niklas Gray
 
-#define ARRAY_MARKER 0x25A3A22A // ZGAE ARRA
-typedef struct ArrayHeader
+template<typename T>
+struct Array
 {
-    u32 marker;
+    T* data;
     size_t num;
     size_t cap;
-} ArrayHeader;
 
-#define array_num(a) ((a) ? array_internal_header(a)->num : 0)
-#define array_cap(a) ((a) ? array_internal_header(a)->cap : 0)
+    const T& operator[](size_t i) const
+    {
+        return data[i];
+    }
 
-#define array_add(a, item) \
-    array_full(a) ? a = array_internal_grow(a, sizeof(*a)) : 0, \
-    (a)[array_internal_header(a)->num++] = item
+    T& operator[](size_t i)
+    {
+        return data[i];
+    }
+};
 
-#define array_fill_and_set(a, idx, item) \
-    idx >= array_num(a) ? a = array_internal_ensure_min_num(a, idx + 1, sizeof(*a)) : 0, \
-    (a)[idx] = item
+void* arr_mem_realloc(void* d, size_t s);
+void* arr_mem_copy(void* d, size_t s);
+void arr_mem_move(void* dest, void* source, size_t s);
+void arr_mem_free(void* d);
 
-#define array_full(a) (array_cap(a) == array_num(a))
+template<typename T>
+void array_maybe_grow(Array<T>* a)
+{
+    if (a->num < a->cap)
+        return;
 
-#define array_copy_data(a) (array_internal_copy_data(a, sizeof((*a))))
-#define array_insert(a, item, idx) \
-    array_full(a) ? a = array_internal_grow(a, sizeof(*a)) : 0, \
-    (a)[array_internal_make_insert_room(a, idx, sizeof((*a)))] = item
+    a->cap = a->cap == 0 ? 1 : a->cap * 2;
+    a->data = (T*)arr_mem_realloc(a->data, sizeof(T) * a->cap);
+}
 
-#define array_destroy(a) ((a) ? array_internal_destroy(a) : 0)
+template<typename T>
+void array_destroy(Array<T>* a)
+{
+    arr_mem_free(a->data);
+}
 
-#define array_last(a) (a[array_num(a) - 1])
-#define array_pop(a) (array_num(a) > 0 ? --array_internal_header(a)->num : 0)
+template<typename T>
+void array_push(Array<T>* a, const T& item)
+{
+    array_maybe_grow(a);
+    a->data[a->num++] = item;
+}
 
-ArrayHeader* array_internal_header(const void* arr);
-void* array_internal_grow(void* arr, size_t item_size);
-void* array_internal_copy_data(void *arr, size_t item_size);
-size_t array_internal_make_insert_room(void* arr, size_t idx, size_t item_size);
-void* array_internal_ensure_min_num(void* arr, size_t num, size_t item_size);
-void array_internal_destroy(void* arr);
+template<typename T>
+void array_insert(Array<T>* a, const T& item, size_t idx)
+{
+    if (idx == a->num)
+    {
+        array_push(a, item);
+        return;
+    }
+
+    array_maybe_grow(a);
+    arr_mem_move(((char*)(a->data)) + (idx + 1)*sizeof(T), ((char*)(a->data)) + idx*sizeof(T), (a->num - idx)*sizeof(T));
+    a->data[idx] = item;
+    ++a->num;
+}
+
+template<typename T>
+const T& array_last(const Array<T>& a)
+{
+    return a.data[a.num - 1];
+}
+
+template<typename T>
+T array_pop(Array<T>* a)
+{
+    --a->num;
+    return array_last(*a);
+}
+
+template<typename T>
+T* array_copy_data(const Array<T>& a)
+{
+    return (T*)arr_mem_copy(a.data, sizeof(T) * a.num);
+}
+
+template<typename T>
+void array_fill_and_set(Array<T>* a, const T& item, size_t idx)
+{
+    if (idx < a->num)
+    {
+        a->data[idx] = item;
+        return;
+    }
+
+    size_t min_num = idx + 1;
+    if (min_num > a->cap)
+    {
+        a->cap = min_num;
+        a->data = (T*)arr_mem_realloc(a->data, sizeof(T) * a->cap);
+    }
+
+    if (min_num > a->num)
+        a->num = min_num;
+
+    a->data[idx] = item;
+}

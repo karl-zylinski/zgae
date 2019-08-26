@@ -38,7 +38,7 @@ static Backtrace get_backtrace(u32 backtrace_size)
         backtrace_size = 32;
 
     static void* backtraces[32];
-    size_t bt_size = backtrace(backtraces, backtrace_size);
+    u32 bt_size = backtrace(backtraces, backtrace_size);
     const char** bt_symbols = (const char**)backtrace_symbols(backtraces, bt_size);
     Backtrace bt = {
         .function_calls = bt_symbols,
@@ -54,7 +54,7 @@ int main()
     memory_init();
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
-    RendererState* rs = renderer_create(WINDOW_TYPE_XCB, win);
+    Renderer* rs = renderer_create(WindowType::Xcb, win);
     RenderResourceHandle rw = renderer_create_world(rs);
 
     WindowCallbacks wc = {};
@@ -101,17 +101,17 @@ int main()
             frames = 0;
         }
 
-        if (key_is_held(KC_A))
+        if (key_is_held(KeyCode::A))
             camera_pos.x -= time_dt();
-        if (key_is_held(KC_D))
+        if (key_is_held(KeyCode::D))
             camera_pos.x += time_dt();
-        if (key_is_held(KC_W))
+        if (key_is_held(KeyCode::W))
             camera_pos.y += time_dt();
-        if (key_is_held(KC_S))
+        if (key_is_held(KeyCode::S))
             camera_pos.y -= time_dt();
-        if (key_is_held(KC_R))
+        if (key_is_held(KeyCode::R))
             camera_pos.z += time_dt();
-        if (key_is_held(KC_F))
+        if (key_is_held(KeyCode::F))
             camera_pos.z -= time_dt();
 
         model.w.x = sin(time_since_start());
@@ -128,7 +128,7 @@ int main()
             renderer_surface_resized(rs, window_resize_w, window_resize_h);
         }
 
-        renderer_draw_world(rs, ph, rw, &camera_pos, &camera_rot);
+        renderer_draw_world(rs, ph, rw, camera_pos, camera_rot);
         renderer_present(rs);
         keyboard_end_of_frame();
     }

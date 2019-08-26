@@ -7,15 +7,15 @@
 typedef struct HandlePool {
     u32 index;
     char* name;
-    Handle* arr_handles;
-    Handle* arr_free_handles;
+    Array<Handle> handles;
+    Array<Handle> free_handles;
     char* types[HANDLE_MAX_TYPE_INDEX];
 } HandlePool;
 
 HandlePool* handle_pool_create(u32 index, const char* name)
 {
     check(index < HANDLE_MAX_POOL_INDEX, "index must be less than %d", TO_STRING(HANDLE_MAX_POOL_INDEX));
-    HandlePool* hp = mema_zero(sizeof(HandlePool));
+    HandlePool* hp = mema_zero_t(HandlePool);
     hp->index = index;
     hp->name = str_copy(name);
     return hp;
@@ -23,13 +23,13 @@ HandlePool* handle_pool_create(u32 index, const char* name)
 
 void handle_pool_destroy(HandlePool* hp)
 {
-    check(array_num(hp->arr_handles) == array_num(hp->arr_free_handles), "Non-returned handles in pool with index %d", hp->index);
+    check(hp->handles.num == hp->free_handles.num, "Non-returned handles in pool with index %d", hp->index);
 
     for (u32 i = 0; i < HANDLE_MAX_TYPE_INDEX; ++i)
         memf(hp->types[i]);
 
-    array_destroy(hp->arr_handles);
-    array_destroy(hp->arr_free_handles);
+    array_destroy(&hp->handles);
+    array_destroy(&hp->free_handles);
     memf(hp->name);
     memf(hp);
 }
@@ -61,21 +61,20 @@ Handle handle_pool_borrow(HandlePool* hp, u32 type_index)
 {
     check(hp->types[type_index], "Trying to reserve handle with invalid type_index!");
 
-    if (array_num(hp->arr_free_handles) == 0)
+    if (hp->free_handles.num == 0)
     {
-        u32 i = array_num(hp->arr_handles); // access with handle_index(h)
+        u32 i = hp->handles.num; // access with handle_index(h)
         u32 p = hp->index; // access with handle_type(h)
         u32 t = type_index; // access with handle_subtype(h)
         u32 g = 0; // access with handle_generation(h)
         Handle h = construct_handle(i, p, t, g);
-        array_add(hp->arr_handles, h);
+        array_push(&hp->handles, h);
         return h;
     }
 
-    Handle old_h = array_last(hp->arr_free_handles);
-    array_pop(hp->arr_free_handles);
+    Handle old_h = array_pop(&hp->free_handles);
     Handle h = construct_handle(handle_index(old_h), hp->index, type_index, handle_generation(old_h));
-    hp->arr_handles[handle_index(h)] = h; // so everything is correct in arr_handles
+    hp->handles[handle_index(h)] = h; // so everything is correct in handles
     return h;
 }
 
@@ -85,13 +84,13 @@ void handle_pool_return(HandlePool* hp, Handle h)
         return;
 
     Handle new_h = construct_handle(handle_index(h), hp->index, handle_type(h), (handle_generation(h) + 1) % HANDLE_MAX_GENERATION);
-    hp->arr_handles[handle_index(h)] = new_h;
-    array_add(hp->arr_free_handles, new_h);
+    hp->handles[handle_index(h)] = new_h;
+    array_push(&hp->free_handles, new_h);
 }
 
 bool handle_pool_is_valid(const HandlePool* hp, Handle h)
 {
     check(handle_index(h) < HANDLE_MAX_INDEX, "Handle out of bounds");
-    Handle hp_h = hp->arr_handles[handle_index(h)];
+    Handle hp_h = hp->handles[handle_index(h)];
     return handle_generation(h) == handle_generation(hp_h);
 }

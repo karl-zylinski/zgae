@@ -1,3 +1,4 @@
+#include "renderer_backend.h"
 #include <vulkan/vulkan.h>
 #include "linux_xcb_window.h"
 #include "memory.h"
@@ -59,10 +60,10 @@ typedef struct RenderBackendMesh
     VkBuffer index_buffer;
     VkDeviceMemory vertex_buffer_memory;
     VkDeviceMemory index_buffer_memory;
-    MeshIndex indices_num;
+    u32 indices_num;
 } RenderBackendMesh;
 
-typedef struct RenderBackend
+typedef struct RendererBackend
 {
     VkInstance instance;
     VkDebugUtilsMessengerEXT debug_messenger;
@@ -162,7 +163,7 @@ static void create_swapchain(
     u32 present_modes_count;
     res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, NULL);
     VERIFY_RES();
-    VkPresentModeKHR* present_modes = mema(present_modes_count * sizeof(VkPresentModeKHR));
+    VkPresentModeKHR* present_modes = mema_tn(VkPresentModeKHR, present_modes_count);
     res = vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_modes_count, present_modes);
     VERIFY_RES();
     VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR; 
@@ -210,7 +211,7 @@ static void create_swapchain(
     res = vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, NULL);
     VERIFY_RES();
     check(swapchain_image_count > 0, "Swapchain contains no images");
-    VkImage* swapchain_images = mema(swapchain_image_count * sizeof(VkImage));
+    VkImage* swapchain_images = mema_tn(VkImage, swapchain_image_count);
     res = vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, swapchain_images);
     VERIFY_RES();
 
@@ -224,7 +225,7 @@ static void create_swapchain(
         vkDestroyFramebuffer(device, old_bufs[i].framebuffer, NULL);
     }
 
-    SwapchainBuffer* bufs = mema_zero(sizeof(SwapchainBuffer) * swapchain_image_count);
+    SwapchainBuffer* bufs = mema_zero_tn(SwapchainBuffer, swapchain_image_count);
 
     for (u32 i = 0; i < swapchain_image_count; ++i)
     {
@@ -402,7 +403,7 @@ static void create_renderpass(VkDevice device, VkFormat surface_format, VkFormat
     VERIFY_RES();
 }
 
-static void destroy_swapchain(RenderBackend* rbs)
+static void destroy_swapchain(RendererBackend* rbs)
 {
     info("Destroying swapchain");
     VkDevice d = rbs->device;
@@ -421,7 +422,7 @@ static void destroy_swapchain(RenderBackend* rbs)
     rbs->swapchain = NULL;
 }
 
-static void destroy_renderpass(RenderBackend* rbs)
+static void destroy_renderpass(RendererBackend* rbs)
 {
     info("Destroying render pass");
     VkDevice d = rbs->device;
@@ -429,14 +430,14 @@ static void destroy_renderpass(RenderBackend* rbs)
     rbs->render_pass = NULL;
 }
 
-static void destroy_surface_size_dependent_resources(RenderBackend* rbs)
+static void destroy_surface_size_dependent_resources(RendererBackend* rbs)
 {
     destroy_swapchain(rbs);
     destroy_renderpass(rbs);
     destroy_depth_buffer(rbs->device, &rbs->depth_buffer);
 }
 
-static void create_surface_size_dependent_resources(RenderBackend* rbs)
+static void create_surface_size_dependent_resources(RendererBackend* rbs)
 {
     VkSurfaceCapabilitiesKHR surface_capabilities;
     VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(rbs->gpu, rbs->surface, &surface_capabilities);
@@ -459,7 +460,7 @@ static void create_surface_size_dependent_resources(RenderBackend* rbs)
     rbs->current_frame = 0;
 }
 
-static void recreate_surface_size_dependent_resources(RenderBackend* rbs)
+static void recreate_surface_size_dependent_resources(RendererBackend* rbs)
 {
     destroy_surface_size_dependent_resources(rbs);
     create_surface_size_dependent_resources(rbs);
@@ -471,7 +472,7 @@ static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface
     u32 num_supported_surface_formats;
     res = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &num_supported_surface_formats, NULL);
     VERIFY_RES();
-    VkSurfaceFormatKHR* supported_surface_formats = mema(num_supported_surface_formats * sizeof(VkSurfaceFormatKHR));
+    VkSurfaceFormatKHR* supported_surface_formats = mema_tn(VkSurfaceFormatKHR, num_supported_surface_formats);
     res = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &num_supported_surface_formats, supported_surface_formats);
     VERIFY_RES();
 
@@ -520,12 +521,12 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, u32 num_gpus)
 typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
 
-RenderBackend* renderer_backend_create(WindowType window_type, void* window_data)
+RendererBackend* renderer_backend_create(WindowType window_type, void* window_data)
 {
     info("Creating Vulkan render");
 
-    check(window_type == WINDOW_TYPE_XCB, "passed window_type_e must be WINDOW_TYPE_XCB");
-    RenderBackend* rbs = mema_zero(sizeof(RenderBackend));
+    check(window_type == WindowType::Xcb, "window_type must be WindowType::Xcb");
+    RendererBackend* rbs = mema_zero_t(RenderBackend);
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -540,7 +541,7 @@ RenderBackend* renderer_backend_create(WindowType window_type, void* window_data
     u32 available_layers_num;
     res = vkEnumerateInstanceLayerProperties(&available_layers_num, NULL);
     VERIFY_RES();
-    VkLayerProperties* available_layers = mema(sizeof(VkLayerProperties) * available_layers_num);
+    VkLayerProperties* available_layers = mema_tn(VkLayerProperties, available_layers_num);
     res = vkEnumerateInstanceLayerProperties(&available_layers_num, available_layers);
     VERIFY_RES();
     bool validation_layer_available = false;
@@ -581,7 +582,7 @@ RenderBackend* renderer_backend_create(WindowType window_type, void* window_data
     VERIFY_RES();
 
     info("Creating XCB Vulkan surface");
-    XcbWindow* win = window_data;
+    XcbWindow* win = (XcbWindow*)window_data;
     VkXcbSurfaceCreateInfoKHR xcbci = {};
     xcbci.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
     xcbci.connection = linux_xcb_window_get_connection(win);
@@ -595,7 +596,7 @@ RenderBackend* renderer_backend_create(WindowType window_type, void* window_data
     res = vkEnumeratePhysicalDevices(instance, &num_available_gpus, NULL);
     check(res == VK_SUCCESS || res == VK_INCOMPLETE, "Failed enumerating GPUs");
     check(num_available_gpus > 0, "No GPUS found");
-    VkPhysicalDevice* available_gpus = mema(sizeof(VkPhysicalDevice) * num_available_gpus);
+    VkPhysicalDevice* available_gpus = mema_tn(VkPhysicalDevice, num_available_gpus);
     res = vkEnumeratePhysicalDevices(instance, &num_available_gpus, available_gpus);
     VERIFY_RES();
     rbs->gpu = choose_gpu(available_gpus, num_available_gpus);
@@ -608,10 +609,10 @@ RenderBackend* renderer_backend_create(WindowType window_type, void* window_data
     info("Finding GPU graphics and present queue families");
     u32 queue_family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, NULL);
-    VkQueueFamilyProperties* queue_family_props = mema(sizeof(VkQueueFamilyProperties) * queue_family_count);
+    VkQueueFamilyProperties* queue_family_props = mema_tn(VkQueueFamilyProperties, queue_family_count);
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, queue_family_props);
     
-    VkBool32* queues_with_present_support = mema(queue_family_count * sizeof(VkBool32));
+    VkBool32* queues_with_present_support = mema_tn(VkBool32, queue_family_count);
     for (u32 i = 0; i < queue_family_count; ++i)
     {
         res = vkGetPhysicalDeviceSurfaceSupportKHR(gpu, i, surface, &queues_with_present_support[i]);
@@ -695,7 +696,7 @@ RenderBackend* renderer_backend_create(WindowType window_type, void* window_data
     VERIFY_RES();
 
     rbs->graphics_cmd_buffers_num = rbs->swapchain_buffers_num;
-    rbs->graphics_cmd_buffers = mema_zero(sizeof(VkCommandBuffer) * rbs->graphics_cmd_buffers_num);
+    rbs->graphics_cmd_buffers = mema_zero_tn(VkCommandBuffer, rbs->graphics_cmd_buffers_num);
     VkCommandBufferAllocateInfo cbai = {};
     cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     cbai.commandPool = rbs->graphics_cmd_pool;
@@ -741,13 +742,13 @@ RenderBackend* renderer_backend_create(WindowType window_type, void* window_data
     return rbs;
 }
 
-void renderer_backend_destroy_shader(RenderBackend* rbs, RenderBackendShader* s)
+void renderer_backend_destroy_shader(RendererBackend* rbs, RenderBackendShader* s)
 {
     vkDestroyShaderModule(rbs->device, s->module, NULL);
     memf(s);
 }
 
-void renderer_backend_destroy_pipeline(RenderBackend* rbs, RenderBackendPipeline* p)
+void renderer_backend_destroy_pipeline(RendererBackend* rbs, RenderBackendPipeline* p)
 {
     for (u32 frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
     {
@@ -767,7 +768,7 @@ void renderer_backend_destroy_pipeline(RenderBackend* rbs, RenderBackendPipeline
     memf(p);
 }
 
-void renderer_backend_destroy_mesh(RenderBackend* rbs, RenderBackendMesh* g)
+void renderer_backend_destroy_mesh(RendererBackend* rbs, RenderBackendMesh* g)
 {
     vkDestroyBuffer(rbs->device, g->vertex_buffer, NULL);
     vkFreeMemory(rbs->device, g->vertex_buffer_memory, NULL);
@@ -776,7 +777,7 @@ void renderer_backend_destroy_mesh(RenderBackend* rbs, RenderBackendMesh* g)
     memf(g);
 }
 
-void renderer_backend_destroy(RenderBackend* rbs)
+void renderer_backend_destroy(RendererBackend* rbs)
 {
     info("Destroying Vulkan render backend");
 
@@ -808,9 +809,9 @@ void renderer_backend_destroy(RenderBackend* rbs)
     memf(rbs);
 }
 
-RenderBackendShader* renderer_backend_create_shader(RenderBackend* rbs, const char* source, u32 source_size)
+RenderBackendShader* renderer_backend_create_shader(RendererBackend* rbs, const char* source, u32 source_size)
 {
-    RenderBackendShader* shader = mema_zero(sizeof(RenderBackendShader));
+    RenderBackendShader* shader = mema_zero_t(RenderBackendShader);
 
     VkShaderModuleCreateInfo smci = {};
     smci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -827,40 +828,38 @@ static VkFormat vk_format_from_shader_data_type(ShaderDataType t)
 {
     switch(t)
     {
-        case SHADER_DATA_TYPE_MAT4: break;
-        case SHADER_DATA_TYPE_VEC2: return VK_FORMAT_R32G32_SFLOAT;
-        case SHADER_DATA_TYPE_VEC3: return VK_FORMAT_R32G32B32_SFLOAT;
-        case SHADER_DATA_TYPE_VEC4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-        case SHADER_DATA_TYPE_INVALID: break;
+        case ShaderDataType::Mat4: break;
+        case ShaderDataType::Vec2: return VK_FORMAT_R32G32_SFLOAT;
+        case ShaderDataType::Vec3: return VK_FORMAT_R32G32B32_SFLOAT;
+        case ShaderDataType::Vec4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case ShaderDataType::Invalid: break;
     }
 
     error("VkFormat unknown for shader data type %d", t);
-    return -1;
 }
 
 static VkShaderStageFlagBits vk_shader_stage_from_shader_type(ShaderType t)
 {
     switch(t)
     {
-        case SHADER_TYPE_VERTEX: return VK_SHADER_STAGE_VERTEX_BIT;
-        case SHADER_TYPE_FRAGMENT: return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case ShaderType::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+        case ShaderType::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
         default: break;
     }
 
     error("Trying to get VkShaderStageFlagBits from ShaderType, but type isn't mapped.");
-    return 0;
 }
 
-RenderBackendPipeline* renderer_backend_create_pipeline(RenderBackend* rbs,
+RenderBackendPipeline* renderer_backend_create_pipeline(RendererBackend* rbs,
     RenderBackendShader** shader_stages, ShaderType* shader_stages_types, u32 shader_stages_num,
     ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
     u32* constant_buffer_sizes, u32* constant_buffer_binding_indices, u32 constant_buffers_num)
 {
-    RenderBackendPipeline* pipeline = mema_zero(sizeof(RenderBackendPipeline));
+    RenderBackendPipeline* pipeline = mema_zero_t(RenderBackendPipeline);
     VkResult res;
 
     // Create vk descriptors that describe the input to vertex shader and the stride of the vertex data.
-    VkVertexInputAttributeDescription* viad = mema_zero(sizeof(VkVertexInputAttributeDescription) * vertex_input_types_num);
+    VkVertexInputAttributeDescription* viad = mema_zero_tn(VkVertexInputAttributeDescription, vertex_input_types_num);
 
     u32 layout_offset = 0;
     for (u32 i = 0; i < vertex_input_types_num; ++i)
@@ -887,9 +886,9 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RenderBackend* rbs,
     pvisci.pVertexAttributeDescriptions = viad;
 
     // Create vk uniform buffers for our constant buffers
-    pipeline->constant_buffers = mema(sizeof(PipelineConstantBuffer) * constant_buffers_num);
+    pipeline->constant_buffers = mema_zero_tn(PipelineConstantBuffer, constant_buffers_num);
     pipeline->constant_buffers_num = constant_buffers_num;
-    VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero(sizeof(VkDescriptorSetLayoutBinding) * constant_buffers_num);
+    VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero_tn(VkDescriptorSetLayoutBinding, constant_buffers_num);
 
     for (size_t cb_idx = 0; cb_idx < constant_buffers_num; ++cb_idx)
     {
@@ -943,7 +942,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RenderBackend* rbs,
 
     for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        pipeline->constant_buffer_descriptor_sets[i] = mema_zero(sizeof(VkDescriptorSet) * constant_buffers_num);
+        pipeline->constant_buffer_descriptor_sets[i] = mema_zero_tn(VkDescriptorSet, constant_buffers_num);
         VkDescriptorSetAllocateInfo dsai = {};
         dsai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         dsai.pNext = NULL;
@@ -1058,7 +1057,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RenderBackend* rbs,
 
 
     // Shader stage info
-    VkPipelineShaderStageCreateInfo* pssci = mema_zero(sizeof(VkPipelineShaderStageCreateInfo) * shader_stages_num);
+    VkPipelineShaderStageCreateInfo* pssci = mema_zero_tn(VkPipelineShaderStageCreateInfo, shader_stages_num);
 
     for (size_t i = 0; i < shader_stages_num; ++i)
     {
@@ -1096,7 +1095,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RenderBackend* rbs,
     return pipeline;
 }
 
-RenderBackendMesh* renderer_backend_create_mesh(RenderBackend* rbs, const Mesh* m)
+RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, const Mesh& m)
 {
     VkResult res;
 
@@ -1109,7 +1108,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RenderBackend* rbs, const Mesh* 
         VkBufferCreateInfo vertex_bci = {};
         vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        vertex_bci.size = sizeof(MeshVertex) * m->vertices_num;
+        vertex_bci.size = sizeof(MeshVertex) * m.vertices_num;
         vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &vertex_bci, NULL, &vertex_buffer);
@@ -1130,7 +1129,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RenderBackend* rbs, const Mesh* 
         res = vkMapMemory(rbs->device, vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(vertex_buffer_memory_data, m->vertices, sizeof(MeshVertex) * m->vertices_num);
+        memcpy(vertex_buffer_memory_data, m.vertices, sizeof(MeshVertex) * m.vertices_num);
     
         vkUnmapMemory(rbs->device, vertex_buffer_memory);
     
@@ -1147,7 +1146,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RenderBackend* rbs, const Mesh* 
         VkBufferCreateInfo index_bci = {};
         index_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         index_bci.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        index_bci.size = sizeof(MeshIndex) * m->indices_num;
+        index_bci.size = sizeof(MeshIndex) * m.indices_num;
         index_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &index_bci, NULL, &index_buffer);
@@ -1168,7 +1167,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RenderBackend* rbs, const Mesh* 
         res = vkMapMemory(rbs->device, index_buffer_memory, 0, index_buffer_mr.size, 0, (void**)&index_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(index_buffer_memory_data, m->indices, sizeof(MeshIndex) * m->indices_num);
+        memcpy(index_buffer_memory_data, m.indices, sizeof(MeshIndex) * m.indices_num);
     
         vkUnmapMemory(rbs->device, index_buffer_memory);
     
@@ -1181,13 +1180,13 @@ RenderBackendMesh* renderer_backend_create_mesh(RenderBackend* rbs, const Mesh* 
         .vertex_buffer_memory = vertex_buffer_memory,
         .index_buffer = index_buffer,
         .index_buffer_memory = index_buffer_memory,
-        .indices_num = m->indices_num
+        .indices_num = m.indices_num
     };
 
-    return mema_copy(&g, sizeof(RenderBackendMesh));
+    return mema_copy_t(&g, RenderBackendMesh);
 }
 
-void renderer_backend_update_constant_buffer(RenderBackend* rbs, RenderBackendPipeline* pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
+void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackendPipeline* pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1232,11 +1231,11 @@ static VkIndexType get_index_type(MeshIndex gi)
     switch(sizeof(gi))
     {
         case 2: return VK_INDEX_TYPE_UINT16;
-        default: error("Implement me!"); return 0;
+        default: error("Implement me!");
     }
 }
 
-void renderer_backend_draw(RenderBackend* rbs, RenderBackendPipeline* pipeline, RenderBackendMesh* mesh)
+void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline, RenderBackendMesh* mesh)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1304,7 +1303,7 @@ void renderer_backend_draw(RenderBackend* rbs, RenderBackendPipeline* pipeline, 
     VERIFY_RES();
 }
 
-void renderer_backend_present(RenderBackend* rbs)
+void renderer_backend_present(RendererBackend* rbs)
 {
     VkResult res;
     u32 cf = rbs->current_frame;
@@ -1351,17 +1350,17 @@ void renderer_backend_present(RenderBackend* rbs)
     rbs->current_frame = (rbs->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void renderer_backend_wait_for_new_frame(RenderBackend* rbs)
+void renderer_backend_wait_for_new_frame(RendererBackend* rbs)
 {
     vkWaitForFences(rbs->device, 1, &rbs->image_in_flight_fences[rbs->current_frame], VK_TRUE, UINT64_MAX);
 }
 
-void renderer_backend_wait_until_idle(RenderBackend* rbs)
+void renderer_backend_wait_until_idle(RendererBackend* rbs)
 {
     vkDeviceWaitIdle(rbs->device);
 }
 
-void renderer_backend_surface_resized(RenderBackend* rbs, u32 width, u32 height)
+void renderer_backend_surface_resized(RendererBackend* rbs, u32 width, u32 height)
 {
     (void)width;
     (void)height;
@@ -1369,7 +1368,7 @@ void renderer_backend_surface_resized(RenderBackend* rbs, u32 width, u32 height)
     recreate_surface_size_dependent_resources(rbs);
 }
 
-Vec2u renderer_backend_get_size(RenderBackend* rbs)
+Vec2u renderer_backend_get_size(RendererBackend* rbs)
 {
     return rbs->swapchain_size;
 }
