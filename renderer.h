@@ -2,11 +2,8 @@
 
 fwd_enum(WindowType);
 fwd_handle(RenderResourceHandle);
-fwd_handle(RenderWorldObject);
-fwd_struct(Mesh);
 fwd_struct(Quat);
 fwd_struct(Renderer);
-fwd_struct(RenderWorld);
 fwd_struct(Vec3);
 fwd_struct(Mat4);
 

@@ -4,14 +4,14 @@ import os
 import sys
 
 all_files = os.listdir(".")
-to_skip = "tests.c"
+to_skip = "tests.cpp"
 to_optimize = []
 
 for f in all_files:
     if not os.path.isfile(f):
         continue
 
-    if f not in to_skip and (f.endswith(".c") or f.endswith(".h")):
+    if f not in to_skip and (f.endswith(".cpp") or f.endswith(".h")):
         to_optimize.append(f)
 
 for f in to_optimize:
@@ -33,7 +33,7 @@ for f in to_optimize:
     for include_idx in lines_to_skip:
         line = org_filelines[include_idx]
 
-        if line.strip() == "#include \"%s\"" % (f[:-1] + "h"):
+        if (line.strip() == "#include \"%s\"" % (f[:-3] + "h")) or include_idx == 0: # first line may be #include "self.h" or #pragma once, sometimes it removes the first, so just skip it
             continue
 
         test_file = "".join(org_filelines[:include_idx] + org_filelines[include_idx+1:])

@@ -1,5 +1,7 @@
 ### IMPORTANT ###
 
+- go over all files and find c -> cpp issues, like * where const T& should be used etc
+
 - fix "what to do" shutdown msg (resource_store.c)
 
 - add render world and draw_world or sumth
