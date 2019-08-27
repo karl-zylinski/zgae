@@ -70,8 +70,7 @@ const T& array_last(const Array<T>& a)
 template<typename T>
 T array_pop(Array<T>* a)
 {
-    --a->num;
-    return array_last(*a);
+    return a->data[--a->num];
 }
 
 template<typename T>
