@@ -185,7 +185,7 @@ static void add_vertex_to_mesh(Array<MeshVertex>* vertices, Array<MeshIndex>* in
 
 ObjLoadResult obj_load(const char* filename)
 {
-    FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_DEFAULT);
+    FileLoadResult flr = file_load(filename, FileLoadMode::Default);
 
     if (!flr.ok)
     {
@@ -232,7 +232,7 @@ ObjLoadResult obj_load(const char* filename)
 
 ObjLoadVerticesResult obj_load_only_vertices(const char* filename)
 {
-    FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_DEFAULT);
+    FileLoadResult flr = file_load(filename, FileLoadMode::Default);
 
     if (!flr.ok)
     {

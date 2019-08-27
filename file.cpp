@@ -15,11 +15,11 @@ FileLoadResult file_load(const char* filename, FileLoadMode mode)
     fseek(file_handle, 0, SEEK_END);
     size_t s = ftell(file_handle);
     fseek(file_handle, 0, SEEK_SET);
-    void* d = mema(s + (mode == FILE_LOAD_MODE_NULL_TERMINATED ? 1 : 0));
+    void* d = mema(s + (mode == FileLoadMode::NullTerminated ? 1 : 0));
     fread(d, 1, s, file_handle);
     fclose(file_handle);
 
-    if (mode == FILE_LOAD_MODE_NULL_TERMINATED)
+    if (mode == FileLoadMode::NullTerminated)
         ((char*)d)[s] = '\0';
 
     FileLoadResult r = {

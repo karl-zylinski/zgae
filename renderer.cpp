@@ -319,7 +319,7 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, const char* filename)
         case RenderResourceType::Shader: {
             #define format_check(cond, msg, ...) (check(cond, "When parsing shader %s: %s", filename, msg, ##__VA_ARGS__))
             ShaderRenderResource sr = {};
-            FileLoadResult shader_flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
+            FileLoadResult shader_flr = file_load(filename, FileLoadMode::NullTerminated);
             format_check(shader_flr.ok, "File missing");
             JzonParseResult jpr = jzon_parse((char*)shader_flr.data);
             format_check(jpr.ok && jpr.output.is_table, "Malformed shader");
@@ -334,7 +334,7 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, const char* filename)
             const JzonValue* jz_source = jzon_get(&jpr.output, "source");
             format_check(jz_source && jz_source->is_string, "source missing or not a string");
 
-            FileLoadResult source_flr = file_load(jz_source->string_val, FILE_LOAD_MODE_DEFAULT);
+            FileLoadResult source_flr = file_load(jz_source->string_val, FileLoadMode::Default);
             format_check(source_flr.ok, "failed opening shader source %s", jz_source->string_val);
             sr.source = (char*)mema_copy(source_flr.data, source_flr.data_size);
             sr.source_size = source_flr.data_size;
@@ -346,7 +346,7 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, const char* filename)
         case RenderResourceType::Pipeline: {
             PipelineRenderResource pr = {};
             #define ensure(expr) if (!(expr)) error("Error in pipeline resource load");
-            FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
+            FileLoadResult flr = file_load(filename, FileLoadMode::NullTerminated);
             ensure(flr.ok);
             JzonParseResult jpr = jzon_parse((char*)flr.data);
             ensure(jpr.ok && jpr.output.is_table);
@@ -453,7 +453,7 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, const char* filename)
 
         case RenderResourceType::Mesh: {
             #define ensure(expr) if (!(expr)) error("Error in pipeline resource load");
-            FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
+            FileLoadResult flr = file_load(filename, FileLoadMode::NullTerminated);
             ensure(flr.ok);
             JzonParseResult jpr = jzon_parse((char*)flr.data);
             ensure(jpr.ok && jpr.output.is_table);
