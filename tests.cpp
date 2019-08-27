@@ -12,7 +12,7 @@ static Backtrace get_backtrace(u32 backtrace_size)
 
     static void* backtraces[32];
     u32 bt_size = backtrace(backtraces, backtrace_size);
-    char** bt_symbols = (char**)backtrace_symbols(backtraces, bt_size);
+    char** bt_symbols = backtrace_symbols(backtraces, bt_size);
     Backtrace bt = {
         .function_calls = bt_symbols,
         .function_calls_num = bt_size

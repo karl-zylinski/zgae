@@ -5,10 +5,10 @@
 Mat4 mat4_create_projection_matrix(f32 bb_width, f32 bb_height);
 Mat4 mat4_identity();
 Mat4 mat4_from_rotation_and_translation(Quat* q, Vec3* t);
-Mat4 mat4_mul(const Mat4& m1, const Mat4& m2);
 Mat4 mat4_inverse(Mat4* m);
 Quat quat_identity();
 
+Mat4 operator*(const Mat4& m1, const Mat4& m2);
 
 bool f32_almost_eql(f32 f1, f32 f2);
 bool vec2_almost_eql(Vec2* v1, Vec2* v2);

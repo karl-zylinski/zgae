@@ -595,8 +595,7 @@ void renderer_draw(Renderer* rs, RenderResourceHandle pipeline_handle, RenderRes
 
     Vec2u size = renderer_backend_get_size(rs->rbs);
     Mat4 proj_matrix = mat4_create_projection_matrix(size.x, size.y);
-    Mat4 proj_view_matrix = mat4_mul(view_matrix, proj_matrix);
-    Mat4 mvp_matrix = mat4_mul(*model, proj_view_matrix);
+    Mat4 mvp_matrix = (*model) * view_matrix * proj_matrix;
 
     PipelineRenderResource* pipeline = get_resource(rs->resources, PipelineRenderResource, pipeline_handle);
     populate_constant_buffers(rs, pipeline, model, &mvp_matrix);
