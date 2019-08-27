@@ -61,7 +61,7 @@ void memory_init()
     #endif
 }
 
-void memzero(void* p, size_t s)
+void memzero(mut void* p, size_t s)
 {
     memset(p, 0, s);
 }
@@ -83,7 +83,7 @@ void* mema_zero(size_t s)
     return p;
 }
 
-void* memra(void* cur, size_t s)
+void* memra(mut void* cur, size_t s)
 {
     #ifdef ENABLE_MEMORY_TRACING
         if (cur)
@@ -100,14 +100,14 @@ void* memra(void* cur, size_t s)
     return p;
 }
 
-void* memra_zero(void* cur, size_t s)
+void* memra_zero(mut void* cur, size_t s)
 {
     void* p = memra(cur, s);
     memzero(p, s);
     return p;
 }
 
-void memf(void* p)
+void memf(mut void* p)
 {
     #ifdef ENABLE_MEMORY_TRACING
         if (p)
@@ -143,7 +143,7 @@ void* mema_copy(void* data, size_t s)
     return p;
 }
 
-void mema__repl(void** p, size_t s)
+void mema__repl(mut void** p, size_t s)
 {
     void* np = mema(s);
     memcpy(np, *p, s);

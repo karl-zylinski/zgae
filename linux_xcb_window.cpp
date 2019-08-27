@@ -77,7 +77,7 @@ void linux_xcb_window_destroy(XcbWindow* w)
     memf(w);
 }
 
-void linux_xcb_window_update_callbacks(XcbWindow* w, WindowCallbacks* wc)
+void linux_xcb_window_update_callbacks(mut XcbWindow* w, WindowCallbacks* wc)
 {
     w->state.callbacks = *wc;
 }
@@ -223,7 +223,7 @@ static KeyCode xcb_key_to_keycode(xcb_keycode_t code)
     return codes[(u32)code];
 }
 
-static void update_event_queue(XcbEventQueue* q, xcb_connection_t* c)
+static void update_event_queue(mut XcbEventQueue* q, mut xcb_connection_t* c)
 {
     free(q->prev);
     q->prev = q->current;
@@ -231,7 +231,7 @@ static void update_event_queue(XcbEventQueue* q, xcb_connection_t* c)
     q->next = xcb_poll_for_event(c);
 }
 
-static bool poll_event(XcbWindow* w)
+static bool poll_event(mut XcbWindow* w)
 {
     update_event_queue(&w->evt_queue, w->connection);
     xcb_generic_event_t* evt = w->evt_queue.current;
@@ -318,7 +318,7 @@ static bool poll_event(XcbWindow* w)
     }
 }
 
-void linux_xcb_window_process_all_events(XcbWindow* w)
+void linux_xcb_window_process_all_events(mut XcbWindow* w)
 {
     while(poll_event(w));
 }
@@ -328,7 +328,7 @@ xcb_connection_t* linux_xcb_window_get_connection(XcbWindow* w)
     return w->connection;
 }
 
-u32 linux_xcb_window_get_handle(XcbWindow* w)
+u32 linux_xcb_window_get_handle(mut XcbWindow* w)
 {
     return w->handle;
 }

@@ -21,7 +21,7 @@ HandlePool* handle_pool_create(u32 index, char* name)
     return hp;
 }
 
-void handle_pool_destroy(HandlePool* hp)
+void handle_pool_destroy(mut HandlePool* hp)
 {
     check(hp->handles.num == hp->free_handles.num, "Non-returned handles in pool with index %d", hp->index);
 
@@ -34,7 +34,7 @@ void handle_pool_destroy(HandlePool* hp)
     memf(hp);
 }
 
-void handle_pool_set_type(HandlePool* hp, u32 type_index, char* type_name)
+void handle_pool_set_type(mut HandlePool* hp, u32 type_index, char* type_name)
 {
     check(type_index < HANDLE_MAX_TYPE_INDEX, "type_index must be less than %d", TO_STRING(HANDLE_MAX_TYPE_INDEX));
     check(!hp->types[type_index], "Handle type already in use!");
@@ -57,7 +57,7 @@ static Handle construct_handle(u32 i, u32 p, u32 t, u32 g)
     return h;
 }
 
-Handle handle_pool_borrow(HandlePool* hp, u32 type_index)
+Handle handle_pool_borrow(mut HandlePool* hp, u32 type_index)
 {
     check(hp->types[type_index], "Trying to reserve handle with invalid type_index!");
 
@@ -78,7 +78,7 @@ Handle handle_pool_borrow(HandlePool* hp, u32 type_index)
     return h;
 }
 
-void handle_pool_return(HandlePool* hp, Handle h)
+void handle_pool_return(mut HandlePool* hp, Handle h)
 {
     if (!handle_pool_is_valid(hp, h))
         return;

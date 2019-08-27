@@ -13,7 +13,7 @@ HandleHashMap* handle_hash_map_create()
     return mema_zero_t(HandleHashMap);
 }
 
-void handle_hash_map_destroy(HandleHashMap* hhp)
+void handle_hash_map_destroy(mut HandleHashMap* hhp)
 {
     array_destroy(&hhp->hashes);
     array_destroy(&hhp->handles);
@@ -64,7 +64,7 @@ static size_t mapping_get_idx(Array<hash64>& hashes, hash64 hash)
     return -1;
 }
 
-void handle_hash_map_add(HandleHashMap* hhp, hash64 hash, Handle handle)
+void handle_hash_map_add(mut HandleHashMap* hhp, hash64 hash, Handle handle)
 {
     u32 idx = find_mapping_insertion_idx(hhp->hashes, hash);
 
@@ -89,7 +89,7 @@ Handle handle_hash_map_get(HandleHashMap* hhp, hash64 h)
     return hhp->handles[idx];
 }
 
-void handle_hash_map_remove(HandleHashMap* hhp, hash64 h)
+void handle_hash_map_remove(mut HandleHashMap* hhp, hash64 h)
 {
     size_t idx = mapping_get_idx(hhp->hashes, h);
 

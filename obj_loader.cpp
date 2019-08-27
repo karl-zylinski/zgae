@@ -32,7 +32,7 @@ typedef struct ParsedData
     Array<ParsedFace> faces;
 } ParsedData;
 
-static void skip_to_numeric(ParserState* ps)
+static void skip_to_numeric(mut ParserState* ps)
 {
     while (ps->head < ps->end && (*ps->head < '0' || *ps->head > '9') && *ps->head != '-')
     {
@@ -40,7 +40,7 @@ static void skip_to_numeric(ParserState* ps)
     }
 }
 
-static void parse_uv(ParserState* ps, ParsedData* pd)
+static void parse_uv(mut ParserState* ps, mut ParsedData* pd)
 {
     Vec2 uv = {};
     skip_to_numeric(ps);
@@ -50,7 +50,7 @@ static void parse_uv(ParserState* ps, ParsedData* pd)
     array_push(&pd->uvs, uv);
 }
 
-static void parse_normal(ParserState* ps, ParsedData* pd)
+static void parse_normal(mut ParserState* ps, mut ParsedData* pd)
 {
     Vec3 normal = {};
     skip_to_numeric(ps);
@@ -62,7 +62,7 @@ static void parse_normal(ParserState* ps, ParsedData* pd)
     array_push(&pd->normals, normal);
 }
 
-static void parse_vertex(ParserState* ps, ParsedData* pd)
+static void parse_vertex(mut ParserState* ps, mut ParsedData* pd)
 {
     Vec3 vertex = {};
     skip_to_numeric(ps);
@@ -74,7 +74,7 @@ static void parse_vertex(ParserState* ps, ParsedData* pd)
     array_push(&pd->vertices, vertex);
 }
 
-static void parse_face(ParserState* ps, ParsedData* pd)
+static void parse_face(mut ParserState* ps, mut ParsedData* pd)
 {
     ParsedFace face = {};
     skip_to_numeric(ps);
@@ -98,7 +98,7 @@ static void parse_face(ParserState* ps, ParsedData* pd)
     array_push(&pd->faces, face);
 }
 
-static void skip_line(ParserState* ps)
+static void skip_line(mut ParserState* ps)
 {
     while (ps->head < ps->end && *ps->head != '\n')
     {
@@ -162,13 +162,15 @@ static int get_existing_vertex(Array<MeshVertex>* vertices, MeshVertex* v1)
     return -1;
 }
 
-static void add_vertex_to_mesh(Array<MeshVertex>* vertices, Array<MeshIndex>* indices, Vec3& pos, Vec3& normal, Vec2& texcoord, Vec4& c)
+static void add_vertex_to_mesh(
+    mut Array<MeshVertex>* vertices, mut Array<MeshIndex>* indices,
+    Vec3* pos, Vec3* normal, Vec2* texcoord, Vec4* c)
 {
     MeshVertex v = {
-        .position = pos,
-        .normal = normal,
-        .texcoord = texcoord,
-        .color = c
+        .position = *pos,
+        .normal = *normal,
+        .texcoord = *texcoord,
+        .color = *c
     };
     
     int i = get_existing_vertex(vertices, &v);
@@ -202,9 +204,9 @@ ObjLoadResult obj_load(char* filename)
     {
         ParsedFace& f = pd.faces[i];
         Vec4 white = {1,1,1,1};
-        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v1], pd.normals[f.n1], pd.uvs[f.u1], white);
-        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v2], pd.normals[f.n2], pd.uvs[f.u2], white);
-        add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v3], pd.normals[f.n3], pd.uvs[f.u3], white);
+        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f.v1], &pd.normals[f.n1], &pd.uvs[f.u1], &white);
+        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f.v2], &pd.normals[f.n2], &pd.uvs[f.u2], &white);
+        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f.v3], &pd.normals[f.n3], &pd.uvs[f.u3], &white);
     }
 
     array_destroy(&pd.vertices);

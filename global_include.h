@@ -46,6 +46,8 @@ static Handle HANDLE_INVALID = -1;
 
 #define SMALL_NUMBER 0.00001f
 
+#define mut
+
 
 // Forward declaration helpers
 

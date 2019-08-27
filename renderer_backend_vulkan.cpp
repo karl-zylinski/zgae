@@ -15,36 +15,36 @@
 
 #define MAX_FRAMES_IN_FLIGHT 2
 
-typedef struct SwapchainBuffer
+struct SwapchainBuffer
 {
     VkImage image;
     VkImageView view;
     VkFramebuffer framebuffer;
-} SwapchainBuffer;
+};
 
-typedef struct DepthBuffer
+struct DepthBuffer
 {
     VkFormat format;
     VkImage image;
     VkImageView view;
     VkDeviceMemory memory;
-} DepthBuffer;
+};
 
-typedef struct RenderBackendShader
+struct RenderBackendShader
 {
     VkShaderModule module;
-} RenderBackendShader;
+};
 
-typedef struct PipelineConstantBuffer
+struct PipelineConstantBuffer
 {
     VkBuffer vk_handle[MAX_FRAMES_IN_FLIGHT];
     VkDeviceMemory memory[MAX_FRAMES_IN_FLIGHT];
     u32 binding;
     u32 size;
     u32 allocated_size;
-} PipelineConstantBuffer;
+};
 
-typedef struct RenderBackendPipeline
+struct RenderBackendPipeline
 {
     PipelineConstantBuffer* constant_buffers;
     VkDescriptorSet* constant_buffer_descriptor_sets[MAX_FRAMES_IN_FLIGHT];
@@ -52,18 +52,18 @@ typedef struct RenderBackendPipeline
     u32 constant_buffers_num;
     VkPipeline vk_handle;
     VkPipelineLayout layout;
-} RenderBackendPipeline;
+};
 
-typedef struct RenderBackendMesh
+struct RenderBackendMesh
 {
     VkBuffer vertex_buffer;
     VkBuffer index_buffer;
     VkDeviceMemory vertex_buffer_memory;
     VkDeviceMemory index_buffer_memory;
     u32 indices_num;
-} RenderBackendMesh;
+};
 
-typedef struct RendererBackend
+struct RendererBackend
 {
     VkInstance instance;
     VkDebugUtilsMessengerEXT debug_messenger;
@@ -91,7 +91,7 @@ typedef struct RendererBackend
     DepthBuffer depth_buffer;
     VkDescriptorPool descriptor_pool_uniform_buffer;
     VkRenderPass render_pass;
-} RenderBackend;
+};
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -526,7 +526,7 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
     info("Creating Vulkan render");
 
     check(window_type == WindowType::Xcb, "window_type must be WindowType::Xcb");
-    RendererBackend* rbs = mema_zero_t(RenderBackend);
+    RendererBackend* rbs = mema_zero_t(RendererBackend);
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -742,13 +742,13 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
     return rbs;
 }
 
-void renderer_backend_destroy_shader(RendererBackend* rbs, RenderBackendShader* s)
+void renderer_backend_destroy_shader(RendererBackend* rbs, mut RenderBackendShader* s)
 {
     vkDestroyShaderModule(rbs->device, s->module, NULL);
     memf(s);
 }
 
-void renderer_backend_destroy_pipeline(RendererBackend* rbs, RenderBackendPipeline* p)
+void renderer_backend_destroy_pipeline(RendererBackend* rbs, mut RenderBackendPipeline* p)
 {
     for (u32 frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
     {
@@ -768,7 +768,7 @@ void renderer_backend_destroy_pipeline(RendererBackend* rbs, RenderBackendPipeli
     memf(p);
 }
 
-void renderer_backend_destroy_mesh(RendererBackend* rbs, RenderBackendMesh* g)
+void renderer_backend_destroy_mesh(RendererBackend* rbs, mut RenderBackendMesh* g)
 {
     vkDestroyBuffer(rbs->device, g->vertex_buffer, NULL);
     vkFreeMemory(rbs->device, g->vertex_buffer_memory, NULL);
@@ -777,7 +777,7 @@ void renderer_backend_destroy_mesh(RendererBackend* rbs, RenderBackendMesh* g)
     memf(g);
 }
 
-void renderer_backend_destroy(RendererBackend* rbs)
+void renderer_backend_destroy(mut RendererBackend* rbs)
 {
     info("Destroying Vulkan render backend");
 
@@ -1360,7 +1360,7 @@ void renderer_backend_wait_until_idle(RendererBackend* rbs)
     vkDeviceWaitIdle(rbs->device);
 }
 
-void renderer_backend_surface_resized(RendererBackend* rbs, u32 width, u32 height)
+void renderer_backend_surface_resized(mut RendererBackend* rbs, u32 width, u32 height)
 {
     (void)width;
     (void)height;
