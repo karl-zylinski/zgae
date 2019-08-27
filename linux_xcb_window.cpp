@@ -19,7 +19,7 @@ typedef struct XcbWindow {
     WindowState state;
 } XcbWindow;
 
-XcbWindow* linux_xcb_window_create(const char* title, u32 width, u32 height)
+XcbWindow* linux_xcb_window_create(char* title, u32 width, u32 height)
 {
     XcbWindow* w = mema_zero_t(XcbWindow);
     info("Creating XCB window w/ title %s, width %d, height %d", title, width, height);
@@ -77,7 +77,7 @@ void linux_xcb_window_destroy(XcbWindow* w)
     memf(w);
 }
 
-void linux_xcb_window_update_callbacks(XcbWindow* w, const WindowCallbacks* wc)
+void linux_xcb_window_update_callbacks(XcbWindow* w, WindowCallbacks* wc)
 {
     w->state.callbacks = *wc;
 }
@@ -300,7 +300,7 @@ static bool poll_event(XcbWindow* w)
         }
         case XCB_CONFIGURE_NOTIFY:
         {
-            const xcb_configure_notify_event_t *cfg_event = (const xcb_configure_notify_event_t *)evt;
+            xcb_configure_notify_event_t *cfg_event = (xcb_configure_notify_event_t *)evt;
             if (((cfg_event->width != w->state.width) || (cfg_event->height != w->state.height)))
             {
                     u32 width = cfg_event->width;
@@ -323,22 +323,22 @@ void linux_xcb_window_process_all_events(XcbWindow* w)
     while(poll_event(w));
 }
 
-xcb_connection_t* linux_xcb_window_get_connection(const XcbWindow* w)
+xcb_connection_t* linux_xcb_window_get_connection(XcbWindow* w)
 {
     return w->connection;
 }
 
-u32 linux_xcb_window_get_handle(const XcbWindow* w)
+u32 linux_xcb_window_get_handle(XcbWindow* w)
 {
     return w->handle;
 }
 
-bool linux_xcb_window_is_open(const XcbWindow* w)
+bool linux_xcb_window_is_open(XcbWindow* w)
 {
     return w->state.open_state == WindowOpenState::Open;
 }
 
-const WindowState* linux_xcb_window_get_state(const XcbWindow* w)
+WindowState* linux_xcb_window_get_state(XcbWindow* w)
 {
     return &w->state;
 }

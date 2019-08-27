@@ -1,9 +1,9 @@
 #pragma once
 
-void str_app(char* s, const char* app);
-void str_app_s(char* s, const char* app, size_t app_len);
-bool str_eql(const char* s1, const char* s2);
-i32 str_eql_arr(const char* s, const char** comp_arr, u32 comp_arr_num);
-char* str_copy(const char* s);
-char* str_copy_s(const char* s, size_t len);
-hash64 str_hash(const char* str);
+void str_app(char* s, char* app);
+void str_app_s(char* s, char* app, size_t app_len);
+bool str_eql(char* s1, char* s2);
+i32 str_eql_arr(char* s, char** comp_arr, u32 comp_arr_num);
+char* str_copy(char* s);
+char* str_copy_s(char* s, size_t len);
+hash64 str_hash(char* str);

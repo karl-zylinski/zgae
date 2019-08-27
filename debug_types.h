@@ -2,7 +2,7 @@
 
 typedef struct Backtrace
 {
-    const char** function_calls;
+    char** function_calls;
     u32 function_calls_num;
 } Backtrace;
 

@@ -108,22 +108,22 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
         return VK_FALSE;
     }
 
-    static const char* non_errors[] = {
+    static char* non_errors[] = {
         "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274",
         "UNASSIGNED-CoreValidation-DrawState-SwapchainTooManyImages"
     };
 
-    static const bool non_errors_suppress[] = {
+    static bool non_errors_suppress[] = {
         false,
         true
     };
 
-    static const char* non_errors_reasons[] = {
+    static char* non_errors_reasons[] = {
         "A race condition between swapchain creation and window resizing happening at arbitrary times makes it impossible to avoid this error. The window will later send a new resize callback, making everything fine.",
         "Due to Vulkan bug (https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/1670)."
     };
 
-    i32 non_error_idx = str_eql_arr(data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
+    i32 non_error_idx = str_eql_arr((char*)data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
 
     if (non_error_idx != -1)
     {
@@ -249,7 +249,7 @@ static void create_swapchain(
     *out_sc_bufs_num = swapchain_image_count;
 }
 
-static void create_framebuffers(VkDevice device, SwapchainBuffer* swapchain_buffers, u32 swapchain_buffers_num, const DepthBuffer* depth_buffer, VkRenderPass render_pass, Vec2u swapchain_size)
+static void create_framebuffers(VkDevice device, SwapchainBuffer* swapchain_buffers, u32 swapchain_buffers_num, DepthBuffer* depth_buffer, VkRenderPass render_pass, Vec2u swapchain_size)
 {
     VkImageView framebuffer_attachments[2];
     framebuffer_attachments[1] = depth_buffer->view;
@@ -271,7 +271,7 @@ static void create_framebuffers(VkDevice device, SwapchainBuffer* swapchain_buff
     }
 }
 
-static u32 memory_type_from_properties(u32 req_memory_type, const VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
+static u32 memory_type_from_properties(u32 req_memory_type, VkPhysicalDeviceMemoryProperties* memory_properties, VkMemoryPropertyFlags memory_requirement_mask)
 {
     for (u32 i = 0; i < memory_properties->memoryTypeCount; ++i)
     {
@@ -293,7 +293,7 @@ static void destroy_depth_buffer(VkDevice device, DepthBuffer* depth_buffer)
     memzero(depth_buffer, sizeof(DepthBuffer));
 }
 
-static void create_depth_buffer(DepthBuffer* out_depth_buffer, VkDevice device, VkPhysicalDevice gpu, const VkPhysicalDeviceMemoryProperties* memory_properties, Vec2u size)
+static void create_depth_buffer(DepthBuffer* out_depth_buffer, VkDevice device, VkPhysicalDevice gpu, VkPhysicalDeviceMemoryProperties* memory_properties, Vec2u size)
 {
     info("Creating depth buffer");
     DepthBuffer depth_buffer = {};
@@ -518,8 +518,8 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, u32 num_gpus)
     return gpus[0];
 }
 
-typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, const VkDebugUtilsMessengerCreateInfoEXT*, const VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
-typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks*);
+typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerCreateInfoEXT*, VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
+typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, VkAllocationCallbacks*);
 
 RendererBackend* renderer_backend_create(WindowType window_type, void* window_data)
 {
@@ -537,7 +537,7 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
     ai.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     ai.apiVersion = VK_API_VERSION_1_0;
 
-    const char* validation_layer_name = "VK_LAYER_LUNARG_standard_validation";
+    char* validation_layer_name = "VK_LAYER_LUNARG_standard_validation";
     u32 available_layers_num;
     res = vkEnumerateInstanceLayerProperties(&available_layers_num, NULL);
     VERIFY_RES();
@@ -562,8 +562,8 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
     debug_ext_ci.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     debug_ext_ci.pfnUserCallback = vulkan_debug_message_callback;
 
-    const char* const validation_layers[] = {validation_layer_name};
-    const char* const extensions[] = {VK_EXT_DEBUG_UTILS_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_XCB_SURFACE_EXTENSION_NAME};
+    char* validation_layers[] = {validation_layer_name};
+    char* extensions[] = {VK_EXT_DEBUG_UTILS_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_XCB_SURFACE_EXTENSION_NAME};
     
     VkInstanceCreateInfo ici = {};
     ici.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -663,7 +663,7 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
     f32 queue_priorities[] = {0.0};
     dqci.pQueuePriorities = queue_priorities;
 
-    const char* const device_extensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    char* device_extensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
     VkDeviceCreateInfo dci = {};
     dci.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     dci.queueCreateInfoCount = 1;
@@ -809,7 +809,7 @@ void renderer_backend_destroy(RendererBackend* rbs)
     memf(rbs);
 }
 
-RenderBackendShader* renderer_backend_create_shader(RendererBackend* rbs, const char* source, u32 source_size)
+RenderBackendShader* renderer_backend_create_shader(RendererBackend* rbs, char* source, u32 source_size)
 {
     RenderBackendShader* shader = mema_zero_t(RenderBackendShader);
 
@@ -1095,7 +1095,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RendererBackend* rbs,
     return pipeline;
 }
 
-RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, const Mesh& m)
+RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, Mesh* m)
 {
     VkResult res;
 
@@ -1108,7 +1108,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, const Mesh
         VkBufferCreateInfo vertex_bci = {};
         vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        vertex_bci.size = sizeof(MeshVertex) * m.vertices_num;
+        vertex_bci.size = sizeof(MeshVertex) * m->vertices_num;
         vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &vertex_bci, NULL, &vertex_buffer);
@@ -1129,7 +1129,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, const Mesh
         res = vkMapMemory(rbs->device, vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(vertex_buffer_memory_data, m.vertices, sizeof(MeshVertex) * m.vertices_num);
+        memcpy(vertex_buffer_memory_data, m->vertices, sizeof(MeshVertex) * m->vertices_num);
     
         vkUnmapMemory(rbs->device, vertex_buffer_memory);
     
@@ -1146,7 +1146,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, const Mesh
         VkBufferCreateInfo index_bci = {};
         index_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         index_bci.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        index_bci.size = sizeof(MeshIndex) * m.indices_num;
+        index_bci.size = sizeof(MeshIndex) * m->indices_num;
         index_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     
         res = vkCreateBuffer(rbs->device, &index_bci, NULL, &index_buffer);
@@ -1167,7 +1167,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, const Mesh
         res = vkMapMemory(rbs->device, index_buffer_memory, 0, index_buffer_mr.size, 0, (void**)&index_buffer_memory_data);
         VERIFY_RES();
     
-        memcpy(index_buffer_memory_data, m.indices, sizeof(MeshIndex) * m.indices_num);
+        memcpy(index_buffer_memory_data, m->indices, sizeof(MeshIndex) * m->indices_num);
     
         vkUnmapMemory(rbs->device, index_buffer_memory);
     
@@ -1180,13 +1180,13 @@ RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, const Mesh
         .vertex_buffer_memory = vertex_buffer_memory,
         .index_buffer = index_buffer,
         .index_buffer_memory = index_buffer_memory,
-        .indices_num = m.indices_num
+        .indices_num = m->indices_num
     };
 
     return mema_copy_t(&g, RenderBackendMesh);
 }
 
-void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackendPipeline* pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
+void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackendPipeline* pipeline, u32 binding, void* data, u32 data_size, u32 offset)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1272,7 +1272,7 @@ void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->constant_buffers_num,
                             pipeline->constant_buffer_descriptor_sets[cf], 0, NULL);
 
-    const VkDeviceSize offsets[1] = {0};
+    VkDeviceSize offsets[1] = {0};
     VkBuffer vertex_buffer = mesh->vertex_buffer;
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
     vkCmdBindIndexBuffer(cmd, mesh->index_buffer, 0, get_index_type(0));

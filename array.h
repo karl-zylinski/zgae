@@ -7,11 +7,6 @@ struct Array
     size_t num;
     size_t cap;
 
-    const T& operator[](size_t i) const
-    {
-        return data[i];
-    }
-
     T& operator[](size_t i)
     {
         return data[i];
@@ -47,7 +42,7 @@ void array_push(Array<T>* a, const T& item)
 }
 
 template<typename T>
-void array_insert(Array<T>* a, const T& item, size_t idx)
+void array_insert(Array<T>* a, T& item, size_t idx)
 {
     if (idx == a->num)
     {
@@ -62,21 +57,15 @@ void array_insert(Array<T>* a, const T& item, size_t idx)
 }
 
 template<typename T>
-const T& array_last(const Array<T>& a)
-{
-    return a.data[a.num - 1];
-}
-
-template<typename T>
 T array_pop(Array<T>* a)
 {
     return a->data[--a->num];
 }
 
 template<typename T>
-T* array_copy_data(const Array<T>& a)
+T* array_copy_data(Array<T>* a)
 {
-    return (T*)arr_mem_copy(a.data, sizeof(T) * a.num);
+    return (T*)arr_mem_copy(a->data, sizeof(T) * a->num);
 }
 
 template<typename T>

@@ -49,7 +49,7 @@ for in_filename in to_compile:
     out_filename = "build/" + object_filename
 
     extra_flags_str = " ".join(extra_flags)
-    compile_error = os.system("%s -c -std=c++11 -Wall -Wextra %s -o %s -g -include global_include.h -DVK_USE_PLATFORM_XCB_KHR %s -Wno-unused-function -Wno-attributes" % (compiler, in_filename, out_filename, extra_flags_str))
+    compile_error = os.system("%s -c -std=c++11 -Wall -Wextra %s -o %s -g -include global_include.h -Wno-writable-strings -DVK_USE_PLATFORM_XCB_KHR %s -Wno-unused-function -Wno-attributes" % (compiler, in_filename, out_filename, extra_flags_str))
 
     if stop_on_error and compile_error != 0:
         exit("\nbuild.py exited: compilation error")

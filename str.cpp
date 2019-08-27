@@ -2,12 +2,12 @@
 #include <string.h>
 #include "memory.h"
 
-void str_app(char* s, const char* app)
+void str_app(char* s, char* app)
 {
     str_app_s(s, app, strlen(app));
 }
 
-void str_app_s(char* s, const char* app, size_t app_len)
+void str_app_s(char* s, char* app, size_t app_len)
 {
     size_t s_len = strlen(s);
     size_t tot_len = s_len + app_len;
@@ -16,12 +16,12 @@ void str_app_s(char* s, const char* app, size_t app_len)
     s[tot_len] = 0;
 }
 
-char* str_copy(const char* s)
+char* str_copy(char* s)
 {
     return str_copy_s(s, strlen(s));
 }
 
-char* str_copy_s(const char* s, size_t size)
+char* str_copy_s(char* s, size_t size)
 {
     char* ns = mema_tn(char, size + 1);
     memcpy(ns, s, size);
@@ -29,12 +29,12 @@ char* str_copy_s(const char* s, size_t size)
     return ns;
 }
 
-bool str_eql(const char* s1, const char* s2)
+bool str_eql(char* s1, char* s2)
 {
     return strcmp(s1, s2) == 0;
 }
 
-i32 str_eql_arr(const char* s, const char** comp_arr, u32 comp_arr_num)
+i32 str_eql_arr(char* s, char** comp_arr, u32 comp_arr_num)
 {
     for (u32 i = 0; i < comp_arr_num; ++i)
     {
@@ -45,18 +45,18 @@ i32 str_eql_arr(const char* s, const char** comp_arr, u32 comp_arr_num)
     return -1;
 }
 
-hash64 str_hash(const char* s)
+hash64 str_hash(char* s)
 {
     size_t len = strlen(s);
     i64 seed = 0;
 
-    const i64 m = 0xc6a4a7935bd1e995ULL;
-    const u32 r = 47;
+    i64 m = 0xc6a4a7935bd1e995ULL;
+    u32 r = 47;
 
     i64 h = seed ^ (len * m);
 
-    const i64 * data = (const i64 *)s;
-    const i64 * end = data + (len / 8);
+    i64 * data = (i64 *)s;
+    i64 * end = data + (len / 8);
 
     while (data != end)
     {
@@ -70,7 +70,7 @@ hash64 str_hash(const char* s)
         h *= m;
     }
 
-    const u8* data2 = (const u8*)data;
+    u8* data2 = (u8*)data;
 
     switch (len & 7)
     {

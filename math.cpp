@@ -20,7 +20,7 @@ Mat4 mat4_create_projection_matrix(f32 bb_width, f32 bb_height)
 
 Mat4 mat4_identity()
 {
-    const Mat4 i = {
+    Mat4 i = {
         {1, 0, 0, 0},
         {0, 1, 0, 0},
         {0, 0, 1, 0},
@@ -30,9 +30,9 @@ Mat4 mat4_identity()
     return i;
 }
 
-Mat4 mat4_from_rotation_and_translation(const Quat& q, const Vec3& t)
+Mat4 mat4_from_rotation_and_translation(Quat* q, Vec3* t)
 {
-    const f32 x = q.x, y = q.y, z = q.z, w = q.w,
+    f32 x = q->x, y = q->y, z = q->z, w = q->w,
         x2 = x + x,
         y2 = y + y,
         z2 = z + z,
@@ -60,12 +60,15 @@ Mat4 mat4_from_rotation_and_translation(const Quat& q, const Vec3& t)
     out.z.y = yz - wx;
     out.z.z = 1 - (xx + yy);
     out.z.w = 0;
-    out.w.x = t.x;
-    out.w.y = t.y;
-    out.w.z = t.z;
+    out.w.x = t->x;
+    out.w.y = t->y;
+    out.w.z = t->z;
     out.w.w = 1;
     return out;
 }
+
+
+
 
 Mat4 mat4_mul(const Mat4& m1, const Mat4& m2)
 {
@@ -97,10 +100,40 @@ Mat4 mat4_mul(const Mat4& m1, const Mat4& m2)
     };
 }
 
-
-Mat4 mat4_inverse(const Mat4& m)
+Mat4 operator*(const Mat4& m1, const Mat4& m2)
 {
-    const float* a = &m.x.x;
+    return {
+        {
+            m1.x.x * m2.x.x + m1.x.y * m2.y.x + m1.x.z * m2.z.x + m1.x.w * m2.w.x,
+            m1.x.x * m2.x.y + m1.x.y * m2.y.y + m1.x.z * m2.z.y + m1.x.w * m2.w.y,
+            m1.x.x * m2.x.z + m1.x.y * m2.y.z + m1.x.z * m2.z.z + m1.x.w * m2.w.z,
+            m1.x.x * m2.x.w + m1.x.y * m2.y.w + m1.x.z * m2.z.w + m1.x.w * m2.w.w
+        },
+        {
+            m1.y.x * m2.x.x + m1.y.y * m2.y.x + m1.y.z * m2.z.x + m1.y.w * m2.w.x,
+            m1.y.x * m2.x.y + m1.y.y * m2.y.y + m1.y.z * m2.z.y + m1.y.w * m2.w.y,
+            m1.y.x * m2.x.z + m1.y.y * m2.y.z + m1.y.z * m2.z.z + m1.y.w * m2.w.z,
+            m1.y.x * m2.x.w + m1.y.y * m2.y.w + m1.y.z * m2.z.w + m1.y.w * m2.w.w
+        },
+        {
+            m1.z.x * m2.x.x + m1.z.y * m2.y.x + m1.z.z * m2.z.x + m1.z.w * m2.w.x,
+            m1.z.x * m2.x.y + m1.z.y * m2.y.y + m1.z.z * m2.z.y + m1.z.w * m2.w.y,
+            m1.z.x * m2.x.z + m1.z.y * m2.y.z + m1.z.z * m2.z.z + m1.z.w * m2.w.z,
+            m1.z.x * m2.x.w + m1.z.y * m2.y.w + m1.z.z * m2.z.w + m1.z.w * m2.w.w
+        },
+        {
+            m1.w.x * m2.x.x + m1.w.y * m2.y.x + m1.w.z * m2.z.x + m1.w.w * m2.w.x,
+            m1.w.x * m2.x.y + m1.w.y * m2.y.y + m1.w.z * m2.z.y + m1.w.w * m2.w.y,
+            m1.w.x * m2.x.z + m1.w.y * m2.y.z + m1.w.z * m2.z.z + m1.w.w * m2.w.z,
+            m1.w.x * m2.x.w + m1.w.y * m2.y.w + m1.w.z * m2.z.w + m1.w.w * m2.w.w
+        }
+    };
+}
+
+
+Mat4 mat4_inverse(Mat4* m)
+{
+    float* a = &m->x.x;
     f32 a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
         a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7],
         a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11],
@@ -153,17 +186,17 @@ bool f32_almost_eql(f32 f1, f32 f2)
     return fabs(f2 - f1) < SMALL_NUMBER;
 }
 
-bool vec2_almost_eql(const Vec2& v1, const Vec2& v2)
+bool vec2_almost_eql(Vec2* v1, Vec2* v2)
 {
-    return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y);
+    return f32_almost_eql(v1->x, v2->x) && f32_almost_eql(v1->y, v2->y);
 }
 
-bool vec3_almost_eql(const Vec3& v1, const Vec3& v2)
+bool vec3_almost_eql(Vec3* v1, Vec3* v2)
 {
-    return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y) && f32_almost_eql(v1.z, v2.z);
+    return f32_almost_eql(v1->x, v2->x) && f32_almost_eql(v1->y, v2->y) && f32_almost_eql(v1->z, v2->z);
 }
 
-bool vec4_almost_eql(const Vec4& v1, const Vec4& v2)
+bool vec4_almost_eql(Vec4* v1, Vec4* v2)
 {
-    return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y) && f32_almost_eql(v1.z, v2.z) && f32_almost_eql(v1.w, v2.w);
+    return f32_almost_eql(v1->x, v2->x) && f32_almost_eql(v1->y, v2->y) && f32_almost_eql(v1->z, v2->z) && f32_almost_eql(v1->w, v2->w);
 }

@@ -39,7 +39,7 @@ static Backtrace get_backtrace(u32 backtrace_size)
 
     static void* backtraces[32];
     u32 bt_size = backtrace(backtraces, backtrace_size);
-    const char** bt_symbols = (const char**)backtrace_symbols(backtraces, bt_size);
+    char** bt_symbols = backtrace_symbols(backtraces, bt_size);
     Backtrace bt = {
         .function_calls = bt_symbols,
         .function_calls_num = bt_size
@@ -128,7 +128,7 @@ int main()
             renderer_surface_resized(rs, window_resize_w, window_resize_h);
         }
 
-        renderer_draw_world(rs, ph, rw, camera_pos, camera_rot);
+        renderer_draw_world(rs, ph, rw, &camera_pos, &camera_rot);
         renderer_present(rs);
         keyboard_end_of_frame();
     }

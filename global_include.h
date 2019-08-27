@@ -33,7 +33,7 @@ typedef i64 hash64;
 // g = generation, bumped every time the slot changes in the pool (for checking if the handle is dead etc)
 
 typedef u64 Handle;
-static const Handle HANDLE_INVALID = -1;
+static Handle HANDLE_INVALID = -1;
 #define handle_index(h) (h >> 32)
 #define handle_pool(h) ((h & 0xffffffff) >> 28)
 #define handle_type(h) ((h & 0xfffffff) >> 16)

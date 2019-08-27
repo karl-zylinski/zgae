@@ -20,7 +20,7 @@ void handle_hash_map_destroy(HandleHashMap* hhp)
     memf(hhp);
 }
 
-static size_t find_mapping_insertion_idx(const Array<hash64>& hashes, hash64 hash)
+static size_t find_mapping_insertion_idx(Array<hash64>& hashes, hash64 hash)
 {
     if (hashes.num == 0)
         return 0;
@@ -34,7 +34,7 @@ static size_t find_mapping_insertion_idx(const Array<hash64>& hashes, hash64 has
     return hashes.num;
 }
 
-static size_t mapping_get_idx(const Array<hash64>& hashes, hash64 hash)
+static size_t mapping_get_idx(Array<hash64>& hashes, hash64 hash)
 {
     if (hashes.num == 0)
         return -1;

@@ -12,7 +12,7 @@ typedef struct HandlePool {
     char* types[HANDLE_MAX_TYPE_INDEX];
 } HandlePool;
 
-HandlePool* handle_pool_create(u32 index, const char* name)
+HandlePool* handle_pool_create(u32 index, char* name)
 {
     check(index < HANDLE_MAX_POOL_INDEX, "index must be less than %d", TO_STRING(HANDLE_MAX_POOL_INDEX));
     HandlePool* hp = mema_zero_t(HandlePool);
@@ -34,7 +34,7 @@ void handle_pool_destroy(HandlePool* hp)
     memf(hp);
 }
 
-void handle_pool_set_type(HandlePool* hp, u32 type_index, const char* type_name)
+void handle_pool_set_type(HandlePool* hp, u32 type_index, char* type_name)
 {
     check(type_index < HANDLE_MAX_TYPE_INDEX, "type_index must be less than %d", TO_STRING(HANDLE_MAX_TYPE_INDEX));
     check(!hp->types[type_index], "Handle type already in use!");
@@ -88,7 +88,7 @@ void handle_pool_return(HandlePool* hp, Handle h)
     array_push(&hp->free_handles, new_h);
 }
 
-bool handle_pool_is_valid(const HandlePool* hp, Handle h)
+bool handle_pool_is_valid(HandlePool* hp, Handle h)
 {
     check(handle_index(h) < HANDLE_MAX_INDEX, "Handle out of bounds");
     Handle hp_h = hp->handles[handle_index(h)];

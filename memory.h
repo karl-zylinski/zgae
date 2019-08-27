@@ -6,7 +6,7 @@ void* mema(size_t s);
 void* mema_zero(size_t s);
 void* memra(void* p, size_t s);
 void* memra_zero(void* p, size_t s);
-void* mema_copy(const void* data, size_t s);
+void* mema_copy(void* data, size_t s);
 void mema__repl(void** p, size_t s);
 void memf(void* p);
 

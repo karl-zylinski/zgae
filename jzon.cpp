@@ -4,17 +4,17 @@
 #include "memory.h"
 #include "str.h"
 
-static void next(const char** input)
+static void next(char** input)
 {
     ++*input;
 }
 
-static char current(const char** input)
+static char current(char** input)
 {
     return **input;
 }
 
-static bool is_str(const char* input, const char* str)
+static bool is_str(char* input, char* str)
 {
     size_t len = strlen(str);
 
@@ -30,12 +30,12 @@ static bool is_str(const char* input, const char* str)
     return true;
 }
 
-static bool is_multiline_string_quotes(const char* str)
+static bool is_multiline_string_quotes(char* str)
 {
     return is_str(str, "\"\"\"");
 }
 
-static u64 find_table_pair_insertion_index(const Array<JzonKeyValuePair>& table, i64 key_hash)
+static u64 find_table_pair_insertion_index(Array<JzonKeyValuePair>& table, i64 key_hash)
 {
     if (table.num == 0)
         return 0;
@@ -54,7 +54,7 @@ static bool is_whitespace(char c)
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-static void skip_whitespace(const char** input)
+static void skip_whitespace(char** input)
 {
     while (current(input))
     {
@@ -72,7 +72,7 @@ static void skip_whitespace(const char** input)
     }
 };
 
-static char* parse_multiline_string(const char** input)
+static char* parse_multiline_string(char** input)
 {
     if (!is_multiline_string_quotes(*input))
         return NULL;
@@ -117,7 +117,7 @@ static char* parse_multiline_string(const char** input)
     return NULL;
 }
 
-static char* parse_string_internal(const char** input)
+static char* parse_string_internal(char** input)
 {
     if (current(input) != '"')
         return NULL;
@@ -144,7 +144,7 @@ static char* parse_string_internal(const char** input)
     return NULL;
 }
 
-static char* parse_keyname(const char** input)
+static char* parse_keyname(char** input)
 {
     if (current(input) == '"')
         return parse_string_internal(input);
@@ -153,7 +153,7 @@ static char* parse_keyname(const char** input)
 
     while (current(input))
     {
-        const char* cur_wo_whitespace = *input;
+        char* cur_wo_whitespace = *input;
         if (is_whitespace(current(input)))
             skip_whitespace(input);
 
@@ -166,7 +166,7 @@ static char* parse_keyname(const char** input)
     return NULL;
 }
 
-static bool parse_string(const char** input, JzonValue* output)
+static bool parse_string(char** input, JzonValue* output)
 {
     char* str = parse_string_internal(input);
 
@@ -178,9 +178,9 @@ static bool parse_string(const char** input, JzonValue* output)
     return true;
 }
 
-static bool parse_value(const char** input, JzonValue* output);
+static bool parse_value(char** input, JzonValue* output);
 
-static bool parse_array(const char** input, JzonValue* output)
+static bool parse_array(char** input, JzonValue* output)
 {   
     if (current(input) != '[')
         return false;
@@ -218,12 +218,12 @@ static bool parse_array(const char** input, JzonValue* output)
     }
     
     output->size = array.num;
-    output->array_val = (JzonValue*)array_copy_data(array);
+    output->array_val = (JzonValue*)array_copy_data(&array);
     array_destroy(&array);
     return true;
 }
 
-static bool parse_table(const char** input, JzonValue* output, bool root_table)
+static bool parse_table(char** input, JzonValue* output, bool root_table)
 {
     if (current(input) == '{')
         next(input);
@@ -272,12 +272,12 @@ static bool parse_table(const char** input, JzonValue* output, bool root_table)
     }
 
     output->size = table.num;
-    output->table_val = array_copy_data(table);
+    output->table_val = array_copy_data(&table);
     array_destroy(&table);
     return true;
 }
 
-static bool parse_number(const char** input, JzonValue* output)
+static bool parse_number(char** input, JzonValue* output)
 {
     bool is_float = false;
     char* start = (char*)*input;
@@ -323,7 +323,7 @@ static bool parse_number(const char** input, JzonValue* output)
     return true;
 }
 
-static bool parse_true(const char** input, JzonValue* output)
+static bool parse_true(char** input, JzonValue* output)
 {
     if (is_str(*input, "true"))
     {
@@ -335,7 +335,7 @@ static bool parse_true(const char** input, JzonValue* output)
     return false;
 }
 
-static bool parse_false(const char** input, JzonValue* output)
+static bool parse_false(char** input, JzonValue* output)
 {
     if (is_str(*input, "false"))
     {
@@ -348,7 +348,7 @@ static bool parse_false(const char** input, JzonValue* output)
     return false;
 }
 
-static bool parse_null(const char** input, JzonValue* output)
+static bool parse_null(char** input, JzonValue* output)
 {
     if (is_str(*input, "null"))
     {
@@ -360,7 +360,7 @@ static bool parse_null(const char** input, JzonValue* output)
     return false;
 }
 
-static bool parse_value(const char** input, JzonValue* output)
+static bool parse_value(char** input, JzonValue* output)
 {
     skip_whitespace(input);
     char ch = current(input);
@@ -378,7 +378,7 @@ static bool parse_value(const char** input, JzonValue* output)
     }
 }
 
-JzonParseResult jzon_parse(const char* input)
+JzonParseResult jzon_parse(char* input)
 {
     JzonValue output = {};
     skip_whitespace(&input);
@@ -417,7 +417,7 @@ void jzon_free(JzonValue* val)
     }
 }
 
-const JzonValue* jzon_get(const JzonValue* table, const char* key)
+JzonValue* jzon_get(JzonValue* table, char* key)
 {
     if (!table->is_table)
         return NULL;

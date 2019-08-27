@@ -6,7 +6,7 @@
 #ifdef ENABLE_MEMORY_TRACING
     typedef struct AllocationCallstack 
     {
-        const char** callstack;
+        char** callstack;
         u32 callstack_num;
         void* ptr;
     } AllocationCallstack;
@@ -136,7 +136,7 @@ void memory_check_leaks()
     #endif
 }
 
-void* mema_copy(const void* data, size_t s)
+void* mema_copy(void* data, size_t s)
 {
     void* p = mema(s);
     memcpy(p, data, s);

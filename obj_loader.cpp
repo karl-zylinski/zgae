@@ -44,9 +44,9 @@ static void parse_uv(ParserState* ps, ParsedData* pd)
 {
     Vec2 uv = {};
     skip_to_numeric(ps);
-    uv.x = strtof((const char*)ps->head, (char**)&ps->head);
+    uv.x = strtof(ps->head, &ps->head);
     skip_to_numeric(ps);
-    uv.y = strtof((const char*)ps->head, (char**)&ps->head);
+    uv.y = strtof(ps->head, &ps->head);
     array_push(&pd->uvs, uv);
 }
 
@@ -54,11 +54,11 @@ static void parse_normal(ParserState* ps, ParsedData* pd)
 {
     Vec3 normal = {};
     skip_to_numeric(ps);
-    normal.x = strtof((const char*)ps->head, (char**)&ps->head);
+    normal.x = strtof(ps->head, &ps->head);
     skip_to_numeric(ps);
-    normal.y = strtof((const char*)ps->head, (char**)&ps->head);
+    normal.y = strtof(ps->head, &ps->head);
     skip_to_numeric(ps);
-    normal.z = strtof((const char*)ps->head, (char**)&ps->head);
+    normal.z = strtof(ps->head, &ps->head);
     array_push(&pd->normals, normal);
 }
 
@@ -66,11 +66,11 @@ static void parse_vertex(ParserState* ps, ParsedData* pd)
 {
     Vec3 vertex = {};
     skip_to_numeric(ps);
-    vertex.x = strtof((const char*)ps->head, (char**)&ps->head);
+    vertex.x = strtof(ps->head, &ps->head);
     skip_to_numeric(ps);
-    vertex.y = strtof((const char*)ps->head, (char**)&ps->head);
+    vertex.y = strtof(ps->head, &ps->head);
     skip_to_numeric(ps);
-    vertex.z = strtof((const char*)ps->head, (char**)&ps->head);
+    vertex.z = strtof(ps->head, &ps->head);
     array_push(&pd->vertices, vertex);
 }
 
@@ -78,23 +78,23 @@ static void parse_face(ParserState* ps, ParsedData* pd)
 {
     ParsedFace face = {};
     skip_to_numeric(ps);
-    face.v1 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.v1 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
-    face.u1 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.u1 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
-    face.n1 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.n1 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
-    face.v2 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.v2 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
-    face.u2 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.u2 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
-    face.n2 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.n2 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
-    face.v3 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.v3 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
-    face.u3 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.u3 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
-    face.n3 = strtol((const char*)ps->head, (char**)&ps->head, 10) - 1;
+    face.n3 = strtol(ps->head, &ps->head, 10) - 1;
     array_push(&pd->faces, face);
 }
 
@@ -118,7 +118,7 @@ static ParsedData parse(char* data, unsigned data_size, ParseMode mode)
     ParserState ps = {};
     ps.data = data;
     ps.head = data;
-    ps.end = (char*)(data + data_size);
+    ps.end = (data + data_size);
     ParsedData pd = {};
     ps.head = ps.data;
 
@@ -144,16 +144,16 @@ static ParsedData parse(char* data, unsigned data_size, ParseMode mode)
     return pd;
 }
 
-static int get_existing_vertex(const Array<MeshVertex>& vertices, const MeshVertex& v1)
+static int get_existing_vertex(Array<MeshVertex>* vertices, MeshVertex* v1)
 {
-    for (unsigned i = 0; i < vertices.num; ++i)
+    for (unsigned i = 0; i < vertices->num; ++i)
     {
-        const MeshVertex& v2 = vertices[i];
+        MeshVertex* v2 = vertices->data + i;
 
-        if (vec3_almost_eql(v1.position, v2.position)
-            && vec3_almost_eql(v1.normal, v2.normal)
-            && vec2_almost_eql(v1.texcoord, v2.texcoord)
-            && vec4_almost_eql(v1.color, v2.color))
+        if (vec3_almost_eql(&v1->position, &v2->position)
+            && vec3_almost_eql(&v1->normal, &v2->normal)
+            && vec2_almost_eql(&v1->texcoord, &v2->texcoord)
+            && vec4_almost_eql(&v1->color, &v2->color))
         {
             return i;
         }
@@ -162,7 +162,7 @@ static int get_existing_vertex(const Array<MeshVertex>& vertices, const MeshVert
     return -1;
 }
 
-static void add_vertex_to_mesh(Array<MeshVertex>* vertices, Array<MeshIndex>* indices, const Vec3& pos, const Vec3& normal, const Vec2& texcoord, const Vec4& c)
+static void add_vertex_to_mesh(Array<MeshVertex>* vertices, Array<MeshIndex>* indices, Vec3& pos, Vec3& normal, Vec2& texcoord, Vec4& c)
 {
     MeshVertex v = {
         .position = pos,
@@ -171,7 +171,7 @@ static void add_vertex_to_mesh(Array<MeshVertex>* vertices, Array<MeshIndex>* in
         .color = c
     };
     
-    int i = get_existing_vertex(*vertices, v);
+    int i = get_existing_vertex(vertices, &v);
 
     if (i != -1)
     {
@@ -183,7 +183,7 @@ static void add_vertex_to_mesh(Array<MeshVertex>* vertices, Array<MeshIndex>* in
     array_push(vertices, v);
 }
 
-ObjLoadResult obj_load(const char* filename)
+ObjLoadResult obj_load(char* filename)
 {
     FileLoadResult flr = file_load(filename, FileLoadMode::Default);
 
@@ -200,7 +200,7 @@ ObjLoadResult obj_load(const char* filename)
 
     for (u32 i = 0; i < pd.faces.num; ++i)
     {
-        const ParsedFace& f = pd.faces[i];
+        ParsedFace& f = pd.faces[i];
         Vec4 white = {1,1,1,1};
         add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v1], pd.normals[f.n1], pd.uvs[f.u1], white);
         add_vertex_to_mesh(&vertices, &indices, pd.vertices[f.v2], pd.normals[f.n2], pd.uvs[f.u2], white);
@@ -213,9 +213,9 @@ ObjLoadResult obj_load(const char* filename)
     array_destroy(&pd.faces);
 
     Mesh m = {
-        .vertices = array_copy_data(vertices),
+        .vertices = array_copy_data(&vertices),
         .vertices_num = (u32)vertices.num,
-        .indices =  array_copy_data(indices),
+        .indices =  array_copy_data(&indices),
         .indices_num = (u32)indices.num
     };
 
@@ -230,7 +230,7 @@ ObjLoadResult obj_load(const char* filename)
     return olr;
 }
 
-ObjLoadVerticesResult obj_load_only_vertices(const char* filename)
+ObjLoadVerticesResult obj_load_only_vertices(char* filename)
 {
     FileLoadResult flr = file_load(filename, FileLoadMode::Default);
 
@@ -245,7 +245,7 @@ ObjLoadVerticesResult obj_load_only_vertices(const char* filename)
 
     ObjLoadVerticesResult olr = {
         .ok = true,
-        .vertices = array_copy_data(pd.vertices),
+        .vertices = array_copy_data(&pd.vertices),
         .vertices_num = (u32)pd.vertices.num
     };
 
