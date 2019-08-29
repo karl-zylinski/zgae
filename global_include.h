@@ -34,10 +34,6 @@ typedef i8 byte;
 
 typedef u64 Handle;
 
-#ifndef NULL
-    #define NULL 0
-#endif
-
 
 // Forward declaration helpers
 
@@ -50,3 +46,7 @@ typedef u64 Handle;
 
 #define STRINGIFY(x) #x
 #define TO_STRING(x) STRINGIFY(x)
+
+#ifndef NULL
+    #define NULL 0
+#endif
