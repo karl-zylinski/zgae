@@ -2,7 +2,7 @@
 #include "debug_types.h"
 
 void debug_init(GetBacktraceCallback get_backtrace);
-[[ noreturn ]] void debug_error(char* msg, ...) ANALYZER_NORETURN;
+[[ noreturn ]] void debug_error(char* msg, ...);
 void debug_info(char* msg, ...);
 Backtrace debug_get_backtrace(u32 size);
 

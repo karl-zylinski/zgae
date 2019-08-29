@@ -525,7 +525,7 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
 {
     info("Creating Vulkan render");
 
-    check(window_type == WindowType::Xcb, "window_type must be WindowType::Xcb");
+    check(window_type == WINDOW_TYPE_XCB, "window_type must be WindowType::Xcb");
     RendererBackend* rbs = mema_zero_t(RendererBackend);
     VkResult res;
 
@@ -828,11 +828,11 @@ static VkFormat vk_format_from_shader_data_type(ShaderDataType t)
 {
     switch(t)
     {
-        case ShaderDataType::Mat4: break;
-        case ShaderDataType::Vec2: return VK_FORMAT_R32G32_SFLOAT;
-        case ShaderDataType::Vec3: return VK_FORMAT_R32G32B32_SFLOAT;
-        case ShaderDataType::Vec4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-        case ShaderDataType::Invalid: break;
+        case SHADER_DATA_TYPE_MAT4: break;
+        case SHADER_DATA_TYPE_VEC2: return VK_FORMAT_R32G32_SFLOAT;
+        case SHADER_DATA_TYPE_VEC3: return VK_FORMAT_R32G32B32_SFLOAT;
+        case SHADER_DATA_TYPE_VEC4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case SHADER_DATA_TYPE_INVALID: break;
     }
 
     error("VkFormat unknown for shader data type %d", t);
@@ -842,8 +842,8 @@ static VkShaderStageFlagBits vk_shader_stage_from_shader_type(ShaderType t)
 {
     switch(t)
     {
-        case ShaderType::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
-        case ShaderType::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case SHADER_TYPE_VERTEX: return VK_SHADER_STAGE_VERTEX_BIT;
+        case SHADER_TYPE_FRAGMENT: return VK_SHADER_STAGE_FRAGMENT_BIT;
         default: break;
     }
 

@@ -2,7 +2,7 @@
 
 fwd_struct(JzonKeyValuePair);
 
-typedef struct JzonValue
+struct JzonValue
 {
     bool is_string : 1;
     bool is_int : 1;
@@ -25,17 +25,19 @@ typedef struct JzonValue
         bool bool_val;
         f32 float_val;
         JzonKeyValuePair* table_val;
-        struct JzonValue* array_val;
+        JzonValue* array_val;
     };
-} JzonValue;
+};
 
-typedef struct JzonKeyValuePair {
+struct JzonKeyValuePair
+{
     char* key;
     hash64 key_hash;
     JzonValue val;
-} JzonKeyValuePair;
+};
 
-typedef struct JzonParseResult {
+struct JzonParseResult
+{
     bool ok;
     JzonValue output;
-} JzonParseResult;
+};

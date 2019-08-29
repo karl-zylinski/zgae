@@ -67,9 +67,6 @@ Mat4 mat4_from_rotation_and_translation(Quat* q, Vec3* t)
     return out;
 }
 
-
-
-
 Mat4 operator*(const Mat4& m1, const Mat4& m2)
 {
     return {

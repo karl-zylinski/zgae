@@ -1,6 +1,6 @@
 #pragma once
 
-enum struct KeyCode
+enum KeyCode : u32
 {
     Unknown,
     A,

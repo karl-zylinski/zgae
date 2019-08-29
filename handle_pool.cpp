@@ -4,13 +4,14 @@
 #include "str.h"
 #include "memory.h"
 
-typedef struct HandlePool {
+struct HandlePool
+{
     u32 index;
     char* name;
     Handle* handles; // dynamic
     Handle* free_handles; // dynamic
     char* types[HANDLE_MAX_TYPE_INDEX];
-} HandlePool;
+};
 
 HandlePool* handle_pool_create(u32 index, char* name)
 {

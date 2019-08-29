@@ -40,11 +40,11 @@ static Backtrace get_backtrace(u32 backtrace_size)
     static void* backtraces[32];
     u32 bt_size = backtrace(backtraces, backtrace_size);
     char** bt_symbols = backtrace_symbols(backtraces, bt_size);
-    Backtrace bt = {
+
+    return {
         .function_calls = bt_symbols,
         .function_calls_num = bt_size
     };
-    return bt;
 }
 
 int main()
@@ -54,7 +54,7 @@ int main()
     memory_init();
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
-    Renderer* rs = renderer_create(WindowType::Xcb, win);
+    Renderer* rs = renderer_create(WINDOW_TYPE_XCB, win);
     RenderResourceHandle rw = renderer_create_world(rs);
 
     WindowCallbacks wc = {};

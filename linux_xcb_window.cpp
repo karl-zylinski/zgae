@@ -7,18 +7,20 @@
 #include "memory.h"
 #include <stdlib.h>
 
-typedef struct XcbEventQueue {
+struct XcbEventQueue
+{
     xcb_generic_event_t* prev;
     xcb_generic_event_t* current;
     xcb_generic_event_t* next;
-} XcbEventQueue;
+};
 
-typedef struct XcbWindow {
+struct XcbWindow
+{
     xcb_connection_t* connection;
     XcbEventQueue evt_queue;
     u32 handle;
     WindowState state;
-} XcbWindow;
+};
 
 XcbWindow* linux_xcb_window_create(char* title, u32 width, u32 height)
 {
@@ -296,7 +298,7 @@ static bool poll_event(XcbWindow* w)
         {
             info("XCB window closed");
             if((*(xcb_client_message_event_t*)evt).data.data32[0] == (*window_deleted_reply).atom)
-                w->state.open_state = WindowOpenState::Closed;
+                w->state.open_state = WINDOW_OPEN_STATE_CLOSED;
             return true;
         }
         case XCB_CONFIGURE_NOTIFY:
@@ -336,7 +338,7 @@ u32 linux_xcb_window_get_handle(XcbWindow* w)
 
 bool linux_xcb_window_is_open(XcbWindow* w)
 {
-    return w->state.open_state == WindowOpenState::Open;
+    return w->state.open_state == WINDOW_OPEN_STATE_OPEN;
 }
 
 WindowState* linux_xcb_window_get_state(XcbWindow* w)

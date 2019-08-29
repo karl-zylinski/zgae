@@ -2,7 +2,7 @@
 	"build_systems":
 	[
 		{
-			"file_regex": "(\\S*?):(\\d+):(\\d+): (error.*|fatal error.*|warning.*)",
+			"file_regex": "(\\S*?):(\\d+):(\\d+): (error.*|fatal error.*|warning.*|note.*)",
 			"name": "zgae",
 			"shell_cmd": "./build.py",
 			"variants":

@@ -54,14 +54,9 @@ static Handle HANDLE_INVALID = -1;
 // Forward declaration helpers
 
 #define fwd_struct(t) struct t
-#define fwd_enum(e) enum struct e
+#define fwd_enum(e) enum e : u32
 #define fwd_handle(h) typedef Handle h
 #define arrnum(a) sizeof(a)/sizeof(a[0])
-
-
-// Clang static analyser stuff
-
-#define ANALYZER_NORETURN __attribute__((analyzer_noreturn))
 
 
 // Misc

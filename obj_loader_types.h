@@ -1,15 +1,15 @@
 #pragma once
 #include "mesh_types.h"
 
-typedef struct ObjLoadResult
+struct ObjLoadResult
 {
     bool ok;
     Mesh mesh;
-} ObjLoadResult;
+};
 
-typedef struct ObjLoadVerticesResult
+struct ObjLoadVerticesResult
 {
     bool ok;
     Vec3* vertices;
     u32 vertices_num;
-} ObjLoadVerticesResult;
+};

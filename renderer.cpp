@@ -39,12 +39,14 @@ struct MeshRenderResource
     RenderBackendMesh* backend_state;
 };
 
-struct WorldObject {
+struct WorldObject
+{
     Mat4 model;
     RenderResourceHandle mesh;
 };
 
-struct WorldRenderResource {
+struct WorldRenderResource
+{
     WorldObject* objects; // dynamic
     u32* free_object_indices; // dynamic, holes in objects
 };
@@ -57,22 +59,22 @@ static char* render_resource_type_names[] =
 static RenderResourceType resource_type_from_str(char* str)
 {
     i32 idx = str_eql_arr(str, render_resource_type_names, arrnum(render_resource_type_names));
-    check(idx > 0 && idx < (i32)RenderResourceType::Num, "Invalid render resource type");
+    check(idx > 0 && idx < RENDER_RESOURCE_TYPE_NUM, "Invalid render resource type");
     return (RenderResourceType)idx;
 }
 
-typedef enum RenderResourceFlag
+enum RenderResourceFlag
 {
     RENDER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT = 0x1
-} RenderResourceFlag;
+};
 
-typedef struct RenderResource
+struct RenderResource
 {
     hash64 name_hash;
     RenderResourceHandle handle;
     RenderResourceFlag flag;
     void* data;
-} RenderResource;
+};
 
 struct Renderer
 {
@@ -90,7 +92,7 @@ Renderer* renderer_create(WindowType window_type, void* window_data)
     rs->resource_handle_pool = handle_pool_create(1, "RenderResourceHandle");
     rs->resource_name_to_handle = handle_hash_map_create();
 
-    for (u32 s = 1; s < (u32)RenderResourceType::Num; ++s)
+    for (u32 s = 1; s < RENDER_RESOURCE_TYPE_NUM; ++s)
         handle_pool_set_type(rs->resource_handle_pool, s, render_resource_type_names[s]);
     
     RendererBackend* rbs = renderer_backend_create(window_type, window_data);
@@ -104,19 +106,19 @@ static void deinit_resource(Renderer* rs, RenderResourceHandle h)
 {
     switch((RenderResourceType)handle_type(h))
     {
-        case RenderResourceType::Shader: {
+        case RENDER_RESOURCE_TYPE_SHADER: {
             renderer_backend_destroy_shader(rs->rbs, get_resource(rs->resources, ShaderRenderResource, h)->backend_state);
         } break;
         
-        case RenderResourceType::Pipeline: {
+        case RENDER_RESOURCE_TYPE_PIPELINE: {
             renderer_backend_destroy_pipeline(rs->rbs, get_resource(rs->resources, PipelineRenderResource, h)->backend_state);
         } break;
 
-        case RenderResourceType::Mesh: {
+        case RENDER_RESOURCE_TYPE_MESH: {
             renderer_backend_destroy_mesh(rs->rbs, get_resource(rs->resources, MeshRenderResource, h)->backend_state);
         } break;
 
-        case RenderResourceType::World: {} break;
+        case RENDER_RESOURCE_TYPE_WORLD: {} break;
 
         default: error("Implement me!");
     }
@@ -126,12 +128,12 @@ static void init_resource(Renderer* rs, RenderResourceHandle h)
 {
     switch((RenderResourceType)handle_type(h))
     {
-        case RenderResourceType::Shader: {
+        case RENDER_RESOURCE_TYPE_SHADER: {
             ShaderRenderResource* sr = get_resource(rs->resources, ShaderRenderResource, h);
             sr->backend_state = renderer_backend_create_shader(rs->rbs, sr->source, sr->source_size);
         } break;
         
-        case RenderResourceType::Pipeline: {
+        case RENDER_RESOURCE_TYPE_PIPELINE: {
             PipelineRenderResource* pr = get_resource(rs->resources, PipelineRenderResource, h);
 
             RenderBackendShader** backend_shader_stages = mema_tn(RenderBackendShader*, pr->shader_stages_num);
@@ -174,7 +176,7 @@ static void init_resource(Renderer* rs, RenderResourceHandle h)
 
         } break;
 
-        case RenderResourceType::Mesh: {
+        case RENDER_RESOURCE_TYPE_MESH: {
             MeshRenderResource* g = get_resource(rs->resources, MeshRenderResource, h);
             g->backend_state = renderer_backend_create_mesh(rs->rbs, &g->mesh);
         } break;
@@ -189,11 +191,11 @@ static void destroy_resource(Renderer* rs, RenderResourceHandle h)
 
     switch((RenderResourceType)handle_type(h))
     {
-        case RenderResourceType::Shader: {
+        case RENDER_RESOURCE_TYPE_SHADER: {
             memf(get_resource(rs->resources, ShaderRenderResource, h)->source);
         } break;
         
-        case RenderResourceType::Pipeline: {
+        case RENDER_RESOURCE_TYPE_PIPELINE: {
             PipelineRenderResource* pr = get_resource(rs->resources, PipelineRenderResource, h);
             memf(pr->shader_stages);
 
@@ -213,13 +215,13 @@ static void destroy_resource(Renderer* rs, RenderResourceHandle h)
             memf(pr->vertex_input);
         } break;
 
-        case RenderResourceType::Mesh: {
+        case RENDER_RESOURCE_TYPE_MESH: {
             MeshRenderResource* g = get_resource(rs->resources, MeshRenderResource, h);
             memf(g->mesh.vertices);
             memf(g->mesh.indices);
         } break;
 
-        case RenderResourceType::World: {
+        case RENDER_RESOURCE_TYPE_WORLD: {
             WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, h);
             da_free(w->objects);
         } break;
@@ -241,63 +243,63 @@ static void reinit_resource(Renderer* rs, RenderResourceHandle h)
 static ShaderDataType shader_data_type_str_to_enum(char* str)
 {
     if (str_eql(str, "mat4"))
-        return ShaderDataType::Mat4;
+        return SHADER_DATA_TYPE_MAT4;
 
     if (str_eql(str, "vec2"))
-        return ShaderDataType::Vec2;
+        return SHADER_DATA_TYPE_VEC2;
 
     if (str_eql(str, "vec3"))
-        return ShaderDataType::Vec3;
+        return SHADER_DATA_TYPE_VEC3;
 
     if (str_eql(str, "vec4"))
-        return ShaderDataType::Vec4;
+        return SHADER_DATA_TYPE_VEC4;
 
-    return ShaderDataType::Invalid;
+    return SHADER_DATA_TYPE_INVALID;
 }
 
 static ConstantBufferAutoValue cb_autoval_str_to_enum(char* str)
 {
     if (str_eql(str, "mat_model_view_projection"))
-        return ConstantBufferAutoValue::MatModelViewProjection;
+        return CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL_VIEW_PROJECTION;
 
     if (str_eql(str, "mat_model"))
-        return ConstantBufferAutoValue::MatModel;
+        return CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL;
 
     if (str_eql(str, "mat_projection"))
-        return ConstantBufferAutoValue::MatProjection;
+        return CONSTANT_BUFFER_AUTO_VALUE_MAT_PROJECTION;
 
     if (str_eql(str, "mat_view_projection"))
-        return ConstantBufferAutoValue::MatViewProjection;
+        return CONSTANT_BUFFER_AUTO_VALUE_MAT_VIEW_PROJECTION;
 
-    return ConstantBufferAutoValue::None;
+    return CONSTANT_BUFFER_AUTO_VALUE_NONE;
 }
 
 static VertexInputValue il_val_str_to_enum(char* str)
 {
     if (str_eql(str, "position"))
-        return VertexInputValue::Position;
+        return VERTEX_INPUT_VALUE_POSITION;
 
     if (str_eql(str, "normal"))
-        return VertexInputValue::Normal;
+        return VERTEX_INPUT_VALUE_NORMAL;
 
     if (str_eql(str, "texcoord"))
-        return VertexInputValue::Texcoord;
+        return VERTEX_INPUT_VALUE_TEXCOORD;
 
     if (str_eql(str, "color"))
-        return VertexInputValue::Color;
+        return VERTEX_INPUT_VALUE_COLOR;
 
-    return VertexInputValue::Invalid;
+    return VERTEX_INPUT_VALUE_INVALID;
 }
 
 static ShaderType shader_type_str_to_enum(char* str)
 {
     if (str_eql(str, "vertex"))
-        return ShaderType::Vertex;
+        return SHADER_TYPE_VERTEX;
 
     if (str_eql(str, "fragment"))
-        return ShaderType::Fragment;
+        return SHADER_TYPE_FRAGMENT;
 
-    return ShaderType::Invalid;
+    return SHADER_TYPE_INVALID;
 }
 
 RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
@@ -316,10 +318,10 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
 
     switch(type)
     {
-        case RenderResourceType::Shader: {
+        case RENDER_RESOURCE_TYPE_SHADER: {
             #define format_check(cond, msg, ...) (check(cond, "When parsing shader %s: %s", filename, msg, ##__VA_ARGS__))
             ShaderRenderResource sr = {};
-            FileLoadResult shader_flr = file_load(filename, FileLoadMode::NullTerminated);
+            FileLoadResult shader_flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
             format_check(shader_flr.ok, "File missing");
             JzonParseResult jpr = jzon_parse((char*)shader_flr.data);
             format_check(jpr.ok && jpr.output.is_table, "Malformed shader");
@@ -328,13 +330,13 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
             JzonValue* jz_type = jzon_get(&jpr.output, "type");
             format_check(jz_type && jz_type->is_string, "type not a string or missing");
             ShaderType st = shader_type_str_to_enum(jz_type->string_val);
-            format_check(st != ShaderType::Invalid, "type isn't an allowed value");
+            format_check(st != SHADER_TYPE_INVALID, "type isn't an allowed value");
             sr.type = st;
 
             JzonValue* jz_source = jzon_get(&jpr.output, "source");
             format_check(jz_source && jz_source->is_string, "source missing or not a string");
 
-            FileLoadResult source_flr = file_load(jz_source->string_val, FileLoadMode::Default);
+            FileLoadResult source_flr = file_load(jz_source->string_val);
             format_check(source_flr.ok, "failed opening shader source %s", jz_source->string_val);
             sr.source = (char*)mema_copy(source_flr.data, source_flr.data_size);
             sr.source_size = source_flr.data_size;
@@ -343,10 +345,10 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
             r.data = mema_copy_t(&sr, ShaderRenderResource);
         } break;
 
-        case RenderResourceType::Pipeline: {
+        case RENDER_RESOURCE_TYPE_PIPELINE: {
             PipelineRenderResource pr = {};
             #define ensure(expr) if (!(expr)) error("Error in pipeline resource load");
-            FileLoadResult flr = file_load(filename, FileLoadMode::NullTerminated);
+            FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
             ensure(flr.ok);
             JzonParseResult jpr = jzon_parse((char*)flr.data);
             ensure(jpr.ok && jpr.output.is_table);
@@ -399,7 +401,7 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
                         JzonValue* jz_type = jzon_get(jz_cbf, "type");
                         ensure(jz_type && jz_type->is_string)
                         ShaderDataType sdt = shader_data_type_str_to_enum(jz_type->string_val);
-                        ensure(sdt != ShaderDataType::Invalid);
+                        ensure(sdt != SHADER_DATA_TYPE_INVALID);
                         cbf->type = sdt;
 
                         JzonValue* jz_cbf_autoval = jzon_get(jz_cbf, "value");
@@ -433,13 +435,13 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
                     JzonValue* jz_type = jzon_get(jz_vif, "type");
                     ensure(jz_type && jz_type->is_string);
                     ShaderDataType sdt = shader_data_type_str_to_enum(jz_type->string_val);
-                    ensure(sdt != ShaderDataType::Invalid);
+                    ensure(sdt != SHADER_DATA_TYPE_INVALID);
                     vif->type = sdt;
 
                     JzonValue* jz_vif_val = jzon_get(jz_vif, "value");
                     ensure(jz_vif_val && jz_vif_val->is_string);
                     VertexInputValue val = il_val_str_to_enum(jz_vif_val->string_val);
-                    ensure(val != VertexInputValue::Invalid);
+                    ensure(val != VERTEX_INPUT_VALUE_INVALID);
                     vif->value = val;
                 }
             }
@@ -451,9 +453,9 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
         } break;
 
 
-        case RenderResourceType::Mesh: {
+        case RENDER_RESOURCE_TYPE_MESH: {
             #define ensure(expr) if (!(expr)) error("Error in pipeline resource load");
-            FileLoadResult flr = file_load(filename, FileLoadMode::NullTerminated);
+            FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
             ensure(flr.ok);
             JzonParseResult jpr = jzon_parse((char*)flr.data);
             ensure(jpr.ok && jpr.output.is_table);
@@ -514,7 +516,7 @@ void renderer_destroy(Renderer* rs)
 
 RenderResourceHandle renderer_create_world(Renderer* rs)
 {
-    RenderResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, (u32)RenderResourceType::World);
+    RenderResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, (u32)RENDER_RESOURCE_TYPE_WORLD);
     RenderResource r = {
         .handle = h,
         .data = mema_t(WorldRenderResource)
@@ -586,11 +588,11 @@ static void populate_constant_buffers(Renderer* rs, PipelineRenderResource* pr, 
 
             switch(cbf->auto_value)
             {
-                case ConstantBufferAutoValue::MatModel:
+                case CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL:
                     renderer_backend_update_constant_buffer(rs->rbs, pr->backend_state, cb->binding, model_matrix, sizeof(*model_matrix), offset);
                     break;
 
-                case ConstantBufferAutoValue::MatModelViewProjection:
+                case CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL_VIEW_PROJECTION:
                     renderer_backend_update_constant_buffer(rs->rbs, pr->backend_state, cb->binding, mvp_matrix, sizeof(*mvp_matrix), offset);
                     break;
 

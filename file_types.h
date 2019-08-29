@@ -7,6 +7,7 @@ struct FileLoadResult
     u64 data_size;
 };
 
-enum struct FileLoadMode {
-    Default, NullTerminated
+enum FileLoadMode
+{
+    FILE_LOAD_MODE_RAW, FILE_LOAD_MODE_NULL_TERMINATED
 };

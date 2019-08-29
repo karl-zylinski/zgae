@@ -5,14 +5,14 @@
 #include "math.h"
 #include <stdlib.h>
 
-typedef struct ParserState
+struct ParserState
 {
     char* data;
     char* head;
     char* end;
-} ParserState;
+};
 
-typedef struct ParsedFace
+struct ParsedFace
 {
     u32 v1;
     u32 v2;
@@ -23,15 +23,15 @@ typedef struct ParsedFace
     u32 u1;
     u32 u2;
     u32 u3;
-} ParsedFace;
+};
 
-typedef struct ParsedData
+struct ParsedData
 {
     Vec3* vertices; // dynamic
     Vec3* normals; // dynamic
     Vec2* uvs; // dynamic
     ParsedFace* faces; // dynamic
-} ParsedData;
+};
 
 static void skip_to_numeric(ParserState* ps)
 {
@@ -188,7 +188,7 @@ static void add_vertex_to_mesh(
 
 ObjLoadResult obj_load(char* filename)
 {
-    FileLoadResult flr = file_load(filename, FileLoadMode::Default);
+    FileLoadResult flr = file_load(filename);
 
     if (!flr.ok)
     {
@@ -235,7 +235,7 @@ ObjLoadResult obj_load(char* filename)
 
 ObjLoadVerticesResult obj_load_only_vertices(char* filename)
 {
-    FileLoadResult flr = file_load(filename, FileLoadMode::Default);
+    FileLoadResult flr = file_load(filename);
 
     if (!flr.ok)
     {

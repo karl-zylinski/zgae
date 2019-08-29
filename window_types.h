@@ -6,12 +6,14 @@ typedef void(*WindowKeyReleasedCallback)(KeyCode k);
 typedef void(*WindowResizedCallback)(u32 w, u32 h);
 typedef void(*WindowFocusLostCallback)();
 
-enum struct WindowType {
-    Xcb
+enum WindowType : u32
+{
+    WINDOW_TYPE_XCB
 };
 
-enum struct WindowOpenState {
-    Open, Closed
+enum WindowOpenState
+{
+    WINDOW_OPEN_STATE_OPEN, WINDOW_OPEN_STATE_CLOSED
 };
 
 struct WindowCallbacks {

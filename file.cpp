@@ -7,26 +7,21 @@ FileLoadResult file_load(char* filename, FileLoadMode mode)
     FILE* file_handle = fopen(filename, "rb");
 
     if (!file_handle)
-    {
-        FileLoadResult r = {.ok = false};
-        return r;
-    }
+        return {.ok = false};
 
     fseek(file_handle, 0, SEEK_END);
     u64 s = ftell(file_handle);
     fseek(file_handle, 0, SEEK_SET);
-    void* d = mema(s + (mode == FileLoadMode::NullTerminated ? 1 : 0));
+    void* d = mema(s + (mode == FILE_LOAD_MODE_NULL_TERMINATED ? 1 : 0));
     fread(d, 1, s, file_handle);
     fclose(file_handle);
 
-    if (mode == FileLoadMode::NullTerminated)
+    if (mode == FILE_LOAD_MODE_NULL_TERMINATED)
         ((char*)d)[s] = '\0';
 
-    FileLoadResult r = {
+    return {
         .ok = true,
         .data = d,
         .data_size = s
     };
-
-    return r;
 }
