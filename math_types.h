@@ -34,3 +34,5 @@ struct Mat4
 {
     Vec4 x, y, z, w;
 };
+
+static Vec3 vec3_zero = {0, 0, 0};

@@ -28,6 +28,8 @@ struct DynamicArrayHeader
     (a)[da__make_insert_room(a, i, sizeof(*(a)))] = (v) \
 )
 
+#define da_remove(a, i) (da__remove(a, i, sizeof(*(a))))
+
 #define da__num(a) (da__header(a)->num)
 #define da__cap(a) (da__header(a)->cap)
 #define da__need_grow(a, n) ((a == NULL) || (n) > da_cap(a))
@@ -39,3 +41,4 @@ void* da__grow_func(void* a, u32 min_num, u32 item_size);
 void da__destroy(void* a);
 void* da__copy_data(void* a, u32 num, u32 item_size);
 u32 da__make_insert_room(void* a, u32 idx, u32 item_size);
+void da__remove(void* a, u32 idx, u32 item_size);

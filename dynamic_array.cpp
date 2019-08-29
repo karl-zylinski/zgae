@@ -51,3 +51,14 @@ u32 da__make_insert_room(void* a, u32 idx, u32 item_size)
     memmove(((i8*)(a)) + (idx + 1) * item_size, ((i8*)(a)) + idx * item_size, (n - idx) * item_size);
     return idx;
 }
+
+void da__remove(void* a, u32 idx, u32 item_size)
+{
+    u32 n = da__num(a);
+    --da__num(a);
+
+    if (idx == n)
+        return;
+
+    memmove(((i8*)(a)) + idx * item_size, ((i8*)(a)) + (idx + 1) * item_size, (n - idx) * item_size);
+}

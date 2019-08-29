@@ -147,6 +147,50 @@ Quat quat_identity()
     return q;
 }
 
+f32 dot(const Vec3& v1, const Vec3& v2)
+{
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+f32 len(const Vec3& v)
+{
+    return sqrtf(dot(v, v));
+}
+
+Vec3 normalize(const Vec3& v)
+{
+    return v * (1/len(v));
+}
+
+Vec3 operator-(const Vec3& v)
+{
+    return {-v.x, -v.y, -v.z};
+}
+
+Vec3 operator-(const Vec3& v1, const Vec3& v2)
+{
+    return {v1.x - v2.x, v1.y - v2.y, v1.z - v2.z};
+}
+
+Vec3 operator*(const Vec3& v, f32 s)
+{
+    return {v.x * s, v.y * s, v.z * s};
+}
+
+Vec3 cross(const Vec3& v1, const Vec3& v2)
+{
+    return  {
+        v1.y * v2.z - v1.z * v2.y,
+        v1.z * v2.x - v1.x * v2.z,
+        v1.x * v2.y - v1.y * v2.x
+    };
+}
+
+bool operator==(const Vec3& v1, const Vec3& v2)
+{
+    return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
+}
+
 bool f32_almost_eql(f32 f1, f32 f2)
 {
     return fabs(f2 - f1) < SMALL_NUMBER;
