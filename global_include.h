@@ -50,3 +50,10 @@ typedef u64 Handle;
 #ifndef NULL
     #define NULL 0
 #endif
+
+
+// function parametesr
+
+#define V(t, n) t n // value
+#define P(t, n) t* n // ptr
+#define C(t, n) const t& n // const

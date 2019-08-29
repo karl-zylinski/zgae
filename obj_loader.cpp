@@ -234,7 +234,7 @@ ObjLoadResult obj_load(char* filename)
     return olr;
 }
 
-ObjLoadVerticesResult obj_load_only_vertices(char* filename)
+ObjLoadVerticesResult obj_load_vertices(char* filename)
 {
     FileLoadResult flr = file_load(filename);
 
@@ -252,6 +252,8 @@ ObjLoadVerticesResult obj_load_only_vertices(char* filename)
         .vertices = (Vec3*)da_copy_data(pd.vertices),
         .vertices_num = (u32)da_num(pd.vertices)
     };
+
+    da_free(pd.vertices);
 
     return olr;
 }

@@ -10,6 +10,8 @@
 #include "keyboard.h"
 #include <execinfo.h>
 #include <math.h>
+#include "obj_loader.h"
+#include "gjk_epa.h"
 
 static f32 get_cur_time_seconds()
 {
@@ -67,8 +69,33 @@ int main()
     RenderResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
     RenderResourceHandle gh = renderer_resource_load(rs, "box.mesh");
 
-    Mat4 model = mat4_identity();
-    u32 box_world_idx = renderer_world_add(rs, rw, gh, &model);
+    ObjLoadVerticesResult olr = obj_load_vertices("box.wobj");
+
+    check(olr.ok, "failed loading physics mesh");
+
+    Vec3 p1 = {0, 0, 0};
+    Vec3 p2 = {-2, 0, 0};
+
+    GjkShape gs1 = {
+        .vertices = olr.vertices,
+        .vertices_num = olr.vertices_num,
+        .position = p1
+    };
+
+    GjkShape gs2 = {
+        .vertices = olr.vertices,
+        .vertices_num = olr.vertices_num,
+        .position = p2
+    };
+
+    Mat4 m1 = mat4_identity();
+    Mat4 m2 = mat4_identity();
+
+    m2.w.x = p2.x;
+
+    u32 b1_world_idx = renderer_world_add(rs, rw, gh, &m1);
+    (void)b1_world_idx;
+    u32 b2_world_idx = renderer_world_add(rs, rw, gh, &m2);
 
     info("Starting timers");
     
@@ -80,7 +107,7 @@ int main()
     info("Entering main loop");
 
     Quat camera_rot = quat_identity();
-    Vec3 camera_pos = {0, -3, 0};
+    Vec3 camera_pos = {0, -8, 0};
 
     while (linux_xcb_window_is_open(win) && !key_held(KC_ESCAPE))
     {
@@ -102,22 +129,31 @@ int main()
         }
 
         if (key_held(KC_A))
-            camera_pos.x -= time_dt();
+            p2.x -= time_dt();
         if (key_held(KC_D))
-            camera_pos.x += time_dt();
+            p2.x += time_dt();
         if (key_held(KC_W))
-            camera_pos.y += time_dt();
+            p2.y += time_dt();
         if (key_held(KC_S))
-            camera_pos.y -= time_dt();
+            p2.y -= time_dt();
         if (key_held(KC_R))
-            camera_pos.z += time_dt();
+            p2.z += time_dt();
         if (key_held(KC_F))
-            camera_pos.z -= time_dt();
+            p2.z -= time_dt();
 
-        model.w.x = sin(time_since_start());
-        model.w.z = cos(time_since_start());
+        gs2.position = p2;
 
-        renderer_world_move(rs, rw, box_world_idx, &model);
+        m2.w.x = p2.x;
+        m2.w.y = p2.y;
+        m2.w.z = p2.z;
+        renderer_world_move(rs, rw, b2_world_idx, &m2);
+
+        bool collision = gjk_intersect(gs1, gs2);
+
+        if (collision)
+        {
+            info("COLLISION");
+        }
 
         renderer_wait_for_new_frame(rs);
         linux_xcb_window_process_all_events(win);
@@ -133,6 +169,7 @@ int main()
         keyboard_end_of_frame();
     }
 
+    memf(olr.vertices);
     info("Main loop exited, shutting down");
     renderer_destroy(rs);
     linux_xcb_window_destroy(win);
