@@ -64,7 +64,7 @@ int main()
     wc.key_released_callback = &keyboard_key_released;
     wc.focus_lost_callback = &keyboard_reset;
     wc.window_resized_callback = &handle_window_resize;
-    linux_xcb_window_update_callbacks(win, &wc);
+    linux_xcb_window_update_callbacks(win, wc);
 
     RenderResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
     RenderResourceHandle gh = renderer_resource_load(rs, "box.mesh");
@@ -93,9 +93,9 @@ int main()
 
     m2.w.x = p2.x;
 
-    u32 b1_world_idx = renderer_world_add(rs, rw, gh, &m1);
+    u32 b1_world_idx = renderer_world_add(rs, rw, gh, m1);
     (void)b1_world_idx;
-    u32 b2_world_idx = renderer_world_add(rs, rw, gh, &m2);
+    u32 b2_world_idx = renderer_world_add(rs, rw, gh, m2);
 
     info("Starting timers");
     
@@ -146,7 +146,7 @@ int main()
         m2.w.x = p2.x;
         m2.w.y = p2.y;
         m2.w.z = p2.z;
-        renderer_world_move(rs, rw, b2_world_idx, &m2);
+        renderer_world_move(rs, rw, b2_world_idx, m2);
 
         bool collision = gjk_intersect(gs1, gs2);
 
@@ -164,7 +164,7 @@ int main()
             renderer_surface_resized(rs, window_resize_w, window_resize_h);
         }
 
-        renderer_draw_world(rs, ph, rw, &camera_pos, &camera_rot);
+        renderer_draw_world(rs, ph, rw, camera_pos, camera_rot);
         renderer_present(rs);
         keyboard_end_of_frame();
     }

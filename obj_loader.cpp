@@ -152,10 +152,10 @@ static int get_existing_vertex(MeshVertex* vertices, MeshVertex* v1)
     {
         MeshVertex* v2 = vertices + i;
 
-        if (vec3_almost_eql(&v1->position, &v2->position)
-            && vec3_almost_eql(&v1->normal, &v2->normal)
-            && vec2_almost_eql(&v1->texcoord, &v2->texcoord)
-            && vec4_almost_eql(&v1->color, &v2->color))
+        if (vec3_almost_eql(v1->position, v2->position)
+            && vec3_almost_eql(v1->normal, v2->normal)
+            && vec2_almost_eql(v1->texcoord, v2->texcoord)
+            && vec4_almost_eql(v1->color, v2->color))
         {
             return i;
         }

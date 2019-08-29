@@ -386,7 +386,7 @@ static GjkEpaSolution run_epa(const GjkShape& s1, const GjkShape& s2, Simplex* s
     return {.colliding = false};
 }
 
-GjkEpaSolution gjk_epa_intersect_and_solve(C(GjkShape, s1), C(GjkShape, s2))
+GjkEpaSolution gjk_epa_intersect_and_solve(const GjkShape& s1, const GjkShape& s2)
 {
     GjkResult res = run_gjk(s1, s2);
 

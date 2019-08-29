@@ -52,12 +52,12 @@ struct WorldRenderResource
     u32* free_object_indices; // dynamic, holes in objects
 };
 
-static char* render_resource_type_names[] =
+static const char* render_resource_type_names[] =
 {
     "invalid", "shader", "pipeline", "mesh", "world"
 };
 
-static RenderResourceType resource_type_from_str(char* str)
+static RenderResourceType resource_type_from_str(const char* str)
 {
     i32 idx = str_eql_arr(str, render_resource_type_names, sizeof(render_resource_type_names)/sizeof(render_resource_type_names[0]));
     check(idx > 0 && idx < RENDER_RESOURCE_TYPE_NUM, "Invalid render resource type");
@@ -241,7 +241,7 @@ static void reinit_resource(Renderer* rs, RenderResourceHandle h)
     init_resource(rs, h);
 }
 
-static ShaderDataType shader_data_type_str_to_enum(char* str)
+static ShaderDataType shader_data_type_str_to_enum(const char* str)
 {
     if (str_eql(str, "mat4"))
         return SHADER_DATA_TYPE_MAT4;
@@ -258,7 +258,7 @@ static ShaderDataType shader_data_type_str_to_enum(char* str)
     return SHADER_DATA_TYPE_INVALID;
 }
 
-static ConstantBufferAutoValue cb_autoval_str_to_enum(char* str)
+static ConstantBufferAutoValue cb_autoval_str_to_enum(const char* str)
 {
     if (str_eql(str, "mat_model_view_projection"))
         return CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL_VIEW_PROJECTION;
@@ -275,7 +275,7 @@ static ConstantBufferAutoValue cb_autoval_str_to_enum(char* str)
     return CONSTANT_BUFFER_AUTO_VALUE_NONE;
 }
 
-static VertexInputValue il_val_str_to_enum(char* str)
+static VertexInputValue il_val_str_to_enum(const char* str)
 {
     if (str_eql(str, "position"))
         return VERTEX_INPUT_VALUE_POSITION;
@@ -292,7 +292,7 @@ static VertexInputValue il_val_str_to_enum(char* str)
     return VERTEX_INPUT_VALUE_INVALID;
 }
 
-static ShaderType shader_type_str_to_enum(char* str)
+static ShaderType shader_type_str_to_enum(const char* str)
 {
     if (str_eql(str, "vertex"))
         return SHADER_TYPE_VERTEX;
@@ -303,7 +303,7 @@ static ShaderType shader_type_str_to_enum(char* str)
     return SHADER_TYPE_INVALID;
 }
 
-RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
+RenderResourceHandle renderer_resource_load(Renderer* rs, const char* filename)
 {
     hash64 name_hash = str_hash(filename);
     RenderResourceHandle existing = handle_hash_map_get(rs->resource_name_to_handle, name_hash);
@@ -311,11 +311,13 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
     if (existing != HANDLE_INVALID)
         return existing;
 
-    char* ext = path_ext(filename);
+    const char* ext = path_ext(filename);
     RenderResourceType type = resource_type_from_str(ext);
     RenderResource r = { .name_hash = name_hash };
     
     info("Loading resource %s", filename);
+
+    #define JZV const JzonValue*
 
     switch(type)
     {
@@ -328,13 +330,13 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
             format_check(jpr.ok && jpr.output.is_table, "Malformed shader");
             memf(shader_flr.data);
             
-            JzonValue* jz_type = jzon_get(&jpr.output, "type");
+            JZV jz_type = jzon_get(&jpr.output, "type");
             format_check(jz_type && jz_type->is_string, "type not a string or missing");
             ShaderType st = shader_type_str_to_enum(jz_type->string_val);
             format_check(st != SHADER_TYPE_INVALID, "type isn't an allowed value");
             sr.type = st;
 
-            JzonValue* jz_source = jzon_get(&jpr.output, "source");
+            JZV jz_source = jzon_get(&jpr.output, "source");
             format_check(jz_source && jz_source->is_string, "source missing or not a string");
 
             FileLoadResult source_flr = file_load(jz_source->string_val);
@@ -355,19 +357,19 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
             ensure(jpr.ok && jpr.output.is_table);
             memf(flr.data);
 
-            JzonValue* jz_shader_stages = jzon_get(&jpr.output, "shader_stages");
+            JZV jz_shader_stages = jzon_get(&jpr.output, "shader_stages");
             ensure(jz_shader_stages && jz_shader_stages->is_array);
             pr.shader_stages_num = jz_shader_stages->size;
             pr.shader_stages = mema_zero_tn(RenderResourceHandle, pr.shader_stages_num);
             
             for (u32 shdr_idx = 0; shdr_idx < jz_shader_stages->size; ++shdr_idx)
             {
-                JzonValue* jz_shader_stage = jz_shader_stages->array_val + shdr_idx;
+                JZV jz_shader_stage = jz_shader_stages->array_val + shdr_idx;
                 ensure(jz_shader_stage->is_string);
                 pr.shader_stages[shdr_idx] = renderer_resource_load(rs, jz_shader_stage->string_val);
             }
 
-            JzonValue* jz_constant_buffers = jzon_get(&jpr.output, "constant_buffers");
+            JZV jz_constant_buffers = jzon_get(&jpr.output, "constant_buffers");
 
             if (jz_constant_buffers)
             {
@@ -377,14 +379,14 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
 
                 for (u32 cb_idx = 0; cb_idx < pr.constant_buffers_num; ++cb_idx)
                 {
-                    JzonValue* jz_constant_buffer = jz_constant_buffers->array_val + cb_idx;
+                    JZV jz_constant_buffer = jz_constant_buffers->array_val + cb_idx;
                     ensure(jz_constant_buffer->is_table);
 
-                    JzonValue* jz_binding = jzon_get(jz_constant_buffer, "binding");
+                    JZV jz_binding = jzon_get(jz_constant_buffer, "binding");
                     ensure(jz_binding && jz_binding->is_int);
                     pr.constant_buffers[cb_idx].binding = jz_binding->int_val;
 
-                    JzonValue* jz_fields = jzon_get(jz_constant_buffer, "fields");
+                    JZV jz_fields = jzon_get(jz_constant_buffer, "fields");
                     ensure(jz_fields && jz_fields->is_array);
 
                     pr.constant_buffers[cb_idx].fields_num = (u32)jz_fields->num;
@@ -392,20 +394,20 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
                     for (u32 i = 0; i < jz_fields->size; ++i)
                     {
                         ConstantBufferField* cbf = pr.constant_buffers[cb_idx].fields + i;
-                        JzonValue* jz_cbf = jz_fields->array_val + i;
+                        JZV jz_cbf = jz_fields->array_val + i;
                         ensure(jz_cbf->is_table);
 
-                        JzonValue* jz_name = jzon_get(jz_cbf, "name");
+                        JZV jz_name = jzon_get(jz_cbf, "name");
                         ensure(jz_name && jz_name->is_string);
                         cbf->name = str_copy(jz_name->string_val);
 
-                        JzonValue* jz_type = jzon_get(jz_cbf, "type");
+                        JZV jz_type = jzon_get(jz_cbf, "type");
                         ensure(jz_type && jz_type->is_string)
                         ShaderDataType sdt = shader_data_type_str_to_enum(jz_type->string_val);
                         ensure(sdt != SHADER_DATA_TYPE_INVALID);
                         cbf->type = sdt;
 
-                        JzonValue* jz_cbf_autoval = jzon_get(jz_cbf, "value");
+                        JZV jz_cbf_autoval = jzon_get(jz_cbf, "value");
                         
                         if (jz_cbf_autoval && jz_cbf_autoval->is_string)
                         {
@@ -416,7 +418,7 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
                 }
             }    
 
-            JzonValue* jz_vertex_input = jzon_get(&jpr.output, "vertex_input");
+            JZV jz_vertex_input = jzon_get(&jpr.output, "vertex_input");
 
             if (jz_vertex_input)
             {
@@ -426,20 +428,20 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
                 for (u32 i = 0; i < jz_vertex_input->size; ++i)
                 {
                     VertexInputField* vif = &pr.vertex_input[i];
-                    JzonValue* jz_vif = jz_vertex_input->array_val + i;
+                    JZV jz_vif = jz_vertex_input->array_val + i;
                     ensure(jz_vif && jz_vif->is_table);
 
-                    JzonValue* jz_name = jzon_get(jz_vif, "name");
+                    JZV jz_name = jzon_get(jz_vif, "name");
                     ensure(jz_name && jz_name->is_string);
                     vif->name = str_copy(jz_name->string_val);
 
-                    JzonValue* jz_type = jzon_get(jz_vif, "type");
+                    JZV jz_type = jzon_get(jz_vif, "type");
                     ensure(jz_type && jz_type->is_string);
                     ShaderDataType sdt = shader_data_type_str_to_enum(jz_type->string_val);
                     ensure(sdt != SHADER_DATA_TYPE_INVALID);
                     vif->type = sdt;
 
-                    JzonValue* jz_vif_val = jzon_get(jz_vif, "value");
+                    JZV jz_vif_val = jzon_get(jz_vif, "value");
                     ensure(jz_vif_val && jz_vif_val->is_string);
                     VertexInputValue val = il_val_str_to_enum(jz_vif_val->string_val);
                     ensure(val != VERTEX_INPUT_VALUE_INVALID);
@@ -462,7 +464,7 @@ RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
             ensure(jpr.ok && jpr.output.is_table);
             memf(flr.data);
 
-            JzonValue* jz_source = jzon_get(&jpr.output, "source");
+            JZV jz_source = jzon_get(&jpr.output, "source");
             ensure(jz_source && jz_source->is_string);
 
             ObjLoadResult olr = obj_load(jz_source->string_val);
@@ -538,7 +540,7 @@ void renderer_destroy_world(Renderer* rs, RenderResourceHandle h)
     destroy_resource(rs, h);
 }
 
-u32 renderer_world_add(Renderer* rs, RenderResourceHandle world, RenderResourceHandle mesh, Mat4* model)
+u32 renderer_world_add(Renderer* rs, RenderResourceHandle world, RenderResourceHandle mesh, C(Mat4) model)
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
 
@@ -546,7 +548,7 @@ u32 renderer_world_add(Renderer* rs, RenderResourceHandle world, RenderResourceH
     {
         u32 idx = da_pop(w->free_object_indices);
         w->objects[idx].mesh = mesh;
-        w->objects[idx].model = *model;
+        w->objects[idx].model = model;
         return idx;
     }
 
@@ -554,7 +556,7 @@ u32 renderer_world_add(Renderer* rs, RenderResourceHandle world, RenderResourceH
 
     WorldObject wo = {
         .mesh = mesh,
-        .model = *model
+        .model = model
     };
 
     da_push(w->objects, wo);
@@ -569,17 +571,17 @@ void renderer_world_remove(Renderer* rs, RenderResourceHandle world, u32 idx)
     da_push(w->free_object_indices, idx);
 }
 
-void renderer_world_move(Renderer* rs, RenderResourceHandle world, u32 idx, Mat4* model)
+void renderer_world_move(Renderer* rs, RenderResourceHandle world, u32 idx, C(Mat4) model)
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
-    w->objects[idx].model = *model;
+    w->objects[idx].model = model;
 }
 
-static void populate_constant_buffers(Renderer* rs, PipelineRenderResource* pr, Mat4* model_matrix, Mat4* mvp_matrix)
+static void populate_constant_buffers(Renderer* rs, C(PipelineRenderResource) pr, C(Mat4) model_matrix, C(Mat4) mvp_matrix)
 {
-    for (u32 cb_idx = 0; cb_idx < pr->constant_buffers_num; ++cb_idx)
+    for (u32 cb_idx = 0; cb_idx < pr.constant_buffers_num; ++cb_idx)
     {
-        ConstantBuffer* cb = pr->constant_buffers + cb_idx;
+        ConstantBuffer* cb = pr.constant_buffers + cb_idx;
 
         u32 offset = 0;
 
@@ -590,11 +592,11 @@ static void populate_constant_buffers(Renderer* rs, PipelineRenderResource* pr, 
             switch(cbf->auto_value)
             {
                 case CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL:
-                    renderer_backend_update_constant_buffer(rs->rbs, pr->backend_state, cb->binding, model_matrix, sizeof(*model_matrix), offset);
+                    renderer_backend_update_constant_buffer(rs->rbs, *pr.backend_state, cb->binding, &model_matrix, sizeof(model_matrix), offset);
                     break;
 
                 case CONSTANT_BUFFER_AUTO_VALUE_MAT_MODEL_VIEW_PROJECTION:
-                    renderer_backend_update_constant_buffer(rs->rbs, pr->backend_state, cb->binding, mvp_matrix, sizeof(*mvp_matrix), offset);
+                    renderer_backend_update_constant_buffer(rs->rbs, *pr.backend_state, cb->binding, &mvp_matrix, sizeof(mvp_matrix), offset);
                     break;
 
                 default: break;
@@ -606,21 +608,21 @@ static void populate_constant_buffers(Renderer* rs, PipelineRenderResource* pr, 
     }
 }
 
-void renderer_draw(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, Mat4* model, Vec3* cam_pos, Quat* cam_rot)
+void renderer_draw(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, C(Mat4) model, C(Vec3) cam_pos, C(Quat) cam_rot)
 {
     Mat4 camera_matrix = mat4_from_rotation_and_translation(cam_rot, cam_pos);
-    Mat4 view_matrix = mat4_inverse(&camera_matrix);
+    Mat4 view_matrix = mat4_inverse(camera_matrix);
 
     Vec2u size = renderer_backend_get_size(rs->rbs);
     Mat4 proj_matrix = mat4_create_projection_matrix(size.x, size.y);
-    Mat4 mvp_matrix = (*model) * view_matrix * proj_matrix;
+    Mat4 mvp_matrix = (model) * view_matrix * proj_matrix;
 
     PipelineRenderResource* pipeline = get_resource(rs->resources, PipelineRenderResource, pipeline_handle);
-    populate_constant_buffers(rs, pipeline, model, &mvp_matrix);
+    populate_constant_buffers(rs, *pipeline, model, mvp_matrix);
     renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs->resources, MeshRenderResource, mesh_handle)->backend_state);
 }
 
-void renderer_draw_world(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, Vec3* cam_pos, Quat* cam_rot)
+void renderer_draw_world(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, C(Vec3) cam_pos, C(Quat) cam_rot)
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world_handle);
 
@@ -631,7 +633,7 @@ void renderer_draw_world(Renderer* rs, RenderResourceHandle pipeline_handle, Ren
         if (obj->mesh == HANDLE_INVALID)
             continue;
 
-        renderer_draw(rs, pipeline_handle, obj->mesh, &obj->model, cam_pos, cam_rot);
+        renderer_draw(rs, pipeline_handle, obj->mesh, obj->model, cam_pos, cam_rot);
     }
 }
 

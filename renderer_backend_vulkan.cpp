@@ -108,22 +108,22 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
         return VK_FALSE;
     }
 
-    static char* non_errors[] = {
+    static const char* non_errors[] = {
         "VUID-VkSwapchainCreateInfoKHR-imageExtent-01274",
         "UNASSIGNED-CoreValidation-DrawState-SwapchainTooManyImages"
     };
 
-    static bool non_errors_suppress[] = {
+    static const bool non_errors_suppress[] = {
         false,
         true
     };
 
-    static char* non_errors_reasons[] = {
+    static const char* non_errors_reasons[] = {
         "A race condition between swapchain creation and window resizing happening at arbitrary times makes it impossible to avoid this error. The window will later send a new resize callback, making everything fine.",
         "Due to Vulkan bug (https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/1670)."
     };
 
-    i32 non_error_idx = str_eql_arr((char*)data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
+    i32 non_error_idx = str_eql_arr((const char*)data->pMessageIdName, non_errors, sizeof(non_errors)/sizeof(char*));
 
     if (non_error_idx != -1)
     {
@@ -1186,7 +1186,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, Mesh* m)
     return mema_copy_t(&g, RenderBackendMesh);
 }
 
-void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackendPipeline* pipeline, u32 binding, void* data, u32 data_size, u32 offset)
+void renderer_backend_update_constant_buffer(RendererBackend* rbs, C(RenderBackendPipeline) pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1194,11 +1194,11 @@ void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackend
     PipelineConstantBuffer* cb = NULL;
     u32 cb_idx = -1;
 
-    for (u32 i = 0; i < pipeline->constant_buffers_num; ++i)
+    for (u32 i = 0; i < pipeline.constant_buffers_num; ++i)
     {
-        if (pipeline->constant_buffers[i].binding == binding)
+        if (pipeline.constant_buffers[i].binding == binding)
         {
-            cb = pipeline->constant_buffers + i;
+            cb = pipeline.constant_buffers + i;
             cb_idx = i;
             break;
         }
@@ -1218,7 +1218,7 @@ void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackend
 
     VkWriteDescriptorSet write = {};
     write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    write.dstSet = pipeline->constant_buffer_descriptor_sets[cf][cb_idx];
+    write.dstSet = pipeline.constant_buffer_descriptor_sets[cf][cb_idx];
     write.descriptorCount = 1;
     write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     write.pBufferInfo = &dbi;

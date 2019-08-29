@@ -80,9 +80,9 @@ void linux_xcb_window_destroy(XcbWindow* w)
     memf(w);
 }
 
-void linux_xcb_window_update_callbacks(XcbWindow* w, WindowCallbacks* wc)
+void linux_xcb_window_update_callbacks(XcbWindow* w, const WindowCallbacks& wc)
 {
-    w->state.callbacks = *wc;
+    w->state.callbacks = wc;
 }
 
 static KeyCode xcb_key_to_keycode(xcb_keycode_t code)
@@ -326,22 +326,22 @@ void linux_xcb_window_process_all_events(XcbWindow* w)
     while(poll_event(w));
 }
 
-xcb_connection_t* linux_xcb_window_get_connection(XcbWindow* w)
+xcb_connection_t* linux_xcb_window_get_connection(const XcbWindow* w)
 {
     return w->connection;
 }
 
-u32 linux_xcb_window_get_handle(XcbWindow* w)
+u32 linux_xcb_window_get_handle(const XcbWindow* w)
 {
     return w->handle;
 }
 
-bool linux_xcb_window_is_open(XcbWindow* w)
+bool linux_xcb_window_is_open(const XcbWindow* w)
 {
     return w->state.open_state == WINDOW_OPEN_STATE_OPEN;
 }
 
-WindowState* linux_xcb_window_get_state(XcbWindow* w)
+const WindowState& linux_xcb_window_get_state(const XcbWindow* w)
 {
-    return &w->state;
+    return w->state;
 }

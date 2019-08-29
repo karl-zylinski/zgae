@@ -84,7 +84,7 @@ void handle_hash_map_add(HandleHashMap* hhp, hash64 hash, Handle handle)
     da_insert(hhp->handles, handle, idx);
 }
 
-Handle handle_hash_map_get(HandleHashMap* hhp, hash64 h)
+Handle handle_hash_map_get(const HandleHashMap* hhp, hash64 h)
 {
     u32 idx = mapping_get_idx(hhp->hashes, h);
 

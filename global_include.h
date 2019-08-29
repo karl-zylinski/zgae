@@ -52,8 +52,5 @@ typedef u64 Handle;
 #endif
 
 
-// function parametesr
-
-#define V(t, n) t n // value
-#define P(t, n) t* n // ptr
-#define C(t, n) const t& n // const
+// For constant function params
+#define C(t) const t&

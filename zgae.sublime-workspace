@@ -4,6 +4,26 @@
 		"selected_items":
 		[
 			[
+				"RenderResou",
+				"RenderResourceFlag"
+			],
+			[
+				"mark",
+				"marker_value"
+			],
+			[
+				"resor",
+				"resources_num"
+			],
+			[
+				"num",
+				"num_needed_resources"
+			],
+			[
+				"Arr",
+				"ArrayHeader"
+			],
+			[
 				"inclu",
 				"include_idx"
 			],
@@ -436,215 +456,10 @@
 	"buffers":
 	[
 		{
-			"file": "debug.cpp",
+			"file": "gjk_epa.h",
 			"settings":
 			{
-				"buffer_size": 1172,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "array.h",
-			"settings":
-			{
-				"buffer_size": 1700,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "obj_loader_types.h",
-			"settings":
-			{
-				"buffer_size": 236,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_pool.cpp",
-			"settings":
-			{
-				"buffer_size": 3221,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "renderer.h",
-			"settings":
-			{
-				"buffer_size": 1332,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "renderer_backend.h",
-			"settings":
-			{
-				"buffer_size": 1775,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "obj_loader.cpp",
-			"settings":
-			{
-				"buffer_size": 6422,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "jzon.cpp",
-			"settings":
-			{
-				"buffer_size": 9427,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "jzon.h",
-			"settings":
-			{
-				"buffer_size": 165,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "jzon_types.h",
-			"settings":
-			{
-				"buffer_size": 691,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "keyboard.cpp",
-			"settings":
-			{
-				"buffer_size": 1098,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "linux_xcb_window.h",
-			"settings":
-			{
-				"buffer_size": 597,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "math.h",
-			"settings":
-			{
-				"buffer_size": 480,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "memory.h",
-			"settings":
-			{
-				"buffer_size": 748,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "memory.cpp",
-			"settings":
-			{
-				"buffer_size": 3323,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "math.cpp",
-			"settings":
-			{
-				"buffer_size": 5378,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "linux_xcb_window.cpp",
-			"settings":
-			{
-				"buffer_size": 10539,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_pool.h",
-			"settings":
-			{
-				"buffer_size": 409,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "build.py",
-			"settings":
-			{
-				"buffer_size": 1933,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "debug.h",
-			"settings":
-			{
-				"buffer_size": 591,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "global_include.h",
-			"settings":
-			{
-				"buffer_size": 1475,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_hash_map.h",
-			"settings":
-			{
-				"buffer_size": 334,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_hash_map.cpp",
-			"settings":
-			{
-				"buffer_size": 2115,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "renderer.cpp",
-			"settings":
-			{
-				"buffer_size": 23139,
+				"buffer_size": 185,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -653,7 +468,34 @@
 			"file": "linux_main.cpp",
 			"settings":
 			{
-				"buffer_size": 4120,
+				"buffer_size": 4763,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "linux_xcb_window.cpp",
+			"settings":
+			{
+				"buffer_size": 9744,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "linux_xcb_window.h",
+			"settings":
+			{
+				"buffer_size": 617,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "renderer.cpp",
+			"settings":
+			{
+				"buffer_size": 23540,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -662,60 +504,70 @@
 			"file": "str.cpp",
 			"settings":
 			{
-				"buffer_size": 1603,
+				"buffer_size": 1642,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "todo.txt",
+			"file": "path.h",
 			"settings":
 			{
-				"buffer_size": 1960,
+				"buffer_size": 50,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
+			"file": "path.cpp",
 			"settings":
 			{
-				"buffer_size": 0,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "tests.cpp",
-			"settings":
-			{
-				"buffer_size": 2261,
+				"buffer_size": 313,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "window_types.h",
-			"settings":
-			{
-				"buffer_size": 671,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "Searching 46 files for \"const\" (case sensitive)\n\n/home/karl/Projects/zgae_c/array.h:\n   36  \n   37  template<typename T>\n   38: void array_push(Array<T>* a, const T& item)\n   39  {\n   40      array_maybe_grow(a);\n   ..\n   70  \n   71  template<typename T>\n   72: void array_fill_and_set(Array<T>* a, const T& item, size_t idx)\n   73  {\n   74      if (idx < a->num)\n\n/home/karl/Projects/zgae_c/handle_pool.cpp:\n   42  }\n   43  \n   44: static Handle construct_handle(u32 i, u32 p, u32 t, u32 g)\n   45  {\n   46:     check(i < HANDLE_MAX_INDEX, \"Trying to construct handle with index >= %d\", TO_STRING(HANDLE_MAX_INDEX));\n   47:     check(p < HANDLE_MAX_POOL_INDEX, \"Trying to construct handle with pool index >= %d\", TO_STRING(HANDLE_MAX_POOL_INDEX));\n   48:     check(t < HANDLE_MAX_TYPE_INDEX, \"Trying to construct handle with type index >= %d\", TO_STRING(HANDLE_MAX_TYPE_INDEX));\n   49:     check(g < HANDLE_MAX_GENERATION, \"Trying to construct handle with generation >= %d\", TO_STRING(HANDLE_MAX_GENERATION));\n   50      Handle h = i;\n   51      h <<= 4;\n   ..\n   68          u32 t = type_index; // access with handle_subtype(h)\n   69          u32 g = 0; // access with handle_generation(h)\n   70:         Handle h = construct_handle(i, p, t, g);\n   71          array_push(&hp->handles, h);\n   72          return h;\n   ..\n   74  \n   75      Handle old_h = array_pop(&hp->free_handles);\n   76:     Handle h = construct_handle(handle_index(old_h), hp->index, type_index, handle_generation(old_h));\n   77      hp->handles[handle_index(h)] = h; // so everything is correct in handles\n   78      return h;\n   ..\n   84          return;\n   85  \n   86:     Handle new_h = construct_handle(handle_index(h), hp->index, handle_type(h), (handle_generation(h) + 1) % HANDLE_MAX_GENERATION);\n   87      hp->handles[handle_index(h)] = new_h;\n   88      array_push(&hp->free_handles, new_h);\n\n/home/karl/Projects/zgae_c/math.cpp:\n   71  \n   72  \n   73: Mat4 mat4_mul(const Mat4& m1, const Mat4& m2)\n   74  {\n   75      return {\n   ..\n  101  }\n  102  \n  103: Mat4 operator*(const Mat4& m1, const Mat4& m2)\n  104  {\n  105      return {\n\n/home/karl/Projects/zgae_c/math.h:\n    6  Mat4 mat4_identity();\n    7  Mat4 mat4_from_rotation_and_translation(Quat* q, Vec3* t);\n    8: Mat4 mat4_mul(const Mat4& m1, const Mat4& m2);\n    9  Mat4 mat4_inverse(Mat4* m);\n   10  Quat quat_identity();\n\n/home/karl/Projects/zgae_c/renderer.cpp:\n   26  {\n   27      RenderResourceHandle* shader_stages;\n   28:     ConstantBuffer* constant_buffers;\n   29      VertexInputField* vertex_input;\n   30      u32 shader_stages_num;\n   31      u32 vertex_input_num;\n   32:     u32 constant_buffers_num;\n   33      RenderBackendPipeline* backend_state;\n   34  };\n   ..\n  148                  vertex_input_types[vi_idx] = pr->vertex_input[vi_idx].type;\n  149  \n  150:             u32* constant_buffer_sizes = mema_tn(u32, pr->constant_buffers_num);\n  151:             u32* constant_buffer_binding_indices = mema_tn(u32, pr->constant_buffers_num);\n  152  \n  153:             for (u32 cb_idx = 0; cb_idx < pr->constant_buffers_num; ++cb_idx)\n  154              {\n  155                  u32 s = 0;\n  156  \n  157:                 for (u32 cb_field_idx = 0; cb_field_idx < pr->constant_buffers[cb_idx].fields_num; ++cb_field_idx)\n  158:                     s += shader_data_type_size(pr->constant_buffers[cb_idx].fields[cb_field_idx].type);\n  159  \n  160:                 constant_buffer_sizes[cb_idx] = s;\n  161:                 constant_buffer_binding_indices[cb_idx] = pr->constant_buffers[cb_idx].binding;\n  162              }\n  163  \n  ...\n  165                  rs->rbs, backend_shader_stages, backend_shader_types, pr->shader_stages_num,\n  166                  vertex_input_types, pr->vertex_input_num,\n  167:                 constant_buffer_sizes, constant_buffer_binding_indices, pr->constant_buffers_num);\n  168  \n  169:             memf(constant_buffer_binding_indices);\n  170:             memf(constant_buffer_sizes);\n  171              memf(vertex_input_types);\n  172              memf(backend_shader_types);\n  ...\n  198              memf(pr->shader_stages);\n  199  \n  200:             for (u32 i = 0; i < pr->constant_buffers_num; ++i)\n  201              {\n  202:                 for (u32 j = 0; j < pr->constant_buffers[i].fields_num; ++j)\n  203:                     memf(pr->constant_buffers[i].fields[j].name);\n  204  \n  205:                 memf(pr->constant_buffers[i].fields);\n  206              }\n  207  \n  208:             memf(pr->constant_buffers);\n  209  \n  210              for (u32 i = 0; i < pr->vertex_input_num; ++i)\n  ...\n  365              }\n  366  \n  367:             JzonValue* jz_constant_buffers = jzon_get(&jpr.output, \"constant_buffers\");\n  368  \n  369:             if (jz_constant_buffers)\n  370              {\n  371:                 ensure(jz_constant_buffers->is_array);\n  372:                 pr.constant_buffers_num = jz_constant_buffers->num;\n  373:                 pr.constant_buffers = mema_zero_tn(ConstantBuffer, pr.constant_buffers_num);\n  374  \n  375:                 for (u32 cb_idx = 0; cb_idx < pr.constant_buffers_num; ++cb_idx)\n  376                  {\n  377:                     JzonValue* jz_constant_buffer = jz_constant_buffers->array_val + cb_idx;\n  378:                     ensure(jz_constant_buffer->is_table);\n  379  \n  380:                     JzonValue* jz_binding = jzon_get(jz_constant_buffer, \"binding\");\n  381                      ensure(jz_binding && jz_binding->is_int);\n  382:                     pr.constant_buffers[cb_idx].binding = jz_binding->int_val;\n  383  \n  384:                     JzonValue* jz_fields = jzon_get(jz_constant_buffer, \"fields\");\n  385                      ensure(jz_fields && jz_fields->is_array);\n  386  \n  387:                     pr.constant_buffers[cb_idx].fields_num = (u32)jz_fields->num;\n  388:                     pr.constant_buffers[cb_idx].fields = mema_zero_tn(ConstantBufferField, pr.constant_buffers[cb_idx].fields_num);\n  389                      for (u32 i = 0; i < jz_fields->size; ++i)\n  390                      {\n  391:                         ConstantBufferField* cbf = pr.constant_buffers[cb_idx].fields + i;\n  392                          JzonValue* jz_cbf = jz_fields->array_val + i;\n  393                          ensure(jz_cbf->is_table);\n  ...\n  558  }\n  559  \n  560: static void populate_constant_buffers(Renderer* rs, PipelineRenderResource* pr, Mat4* model_matrix, Mat4* mvp_matrix)\n  561  {\n  562:     for (u32 cb_idx = 0; cb_idx < pr->constant_buffers_num; ++cb_idx)\n  563      {\n  564:         ConstantBuffer* cb = pr->constant_buffers + cb_idx;\n  565  \n  566          u32 offset = 0;\n  ...\n  573              {\n  574                  case ConstantBufferAutoValue::MatModel:\n  575:                     renderer_backend_update_constant_buffer(rs->rbs, pr->backend_state, cb->binding, model_matrix, sizeof(*model_matrix), offset);\n  576                      break;\n  577  \n  578                  case ConstantBufferAutoValue::MatModelViewProjection:\n  579:                     renderer_backend_update_constant_buffer(rs->rbs, pr->backend_state, cb->binding, mvp_matrix, sizeof(*mvp_matrix), offset);\n  580                      break;\n  581  \n  ...\n  600  \n  601      PipelineRenderResource* pipeline = get_resource(rs->resources, PipelineRenderResource, pipeline_handle);\n  602:     populate_constant_buffers(rs, pipeline, model, &mvp_matrix);\n  603      renderer_backend_draw(rs->rbs, pipeline->backend_state, get_resource(rs->resources, MeshRenderResource, mesh_handle)->backend_state);\n  604  }\n\n/home/karl/Projects/zgae_c/renderer.h:\n   19  void renderer_draw(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, Mat4* model, Vec3* cam_pos, Quat* cam_rot);\n   20  void renderer_present(Renderer* rs);\n   21: void renderer_update_constant_buffer(Renderer* rs, RenderResourceHandle pipeline_handle, u32 binding, void* data, u32 data_size);\n   22  void renderer_wait_for_new_frame(Renderer* rs);\n   23  void renderer_surface_resized(Renderer* rs, u32 w, u32 h);\n\n/home/karl/Projects/zgae_c/renderer_backend.h:\n   19      RenderBackendShader** shader_stages, ShaderType* shader_stages_types, u32 shader_stages_num,\n   20      ShaderDataType* vertex_input_types, u32 vertex_input_types_num,\n   21:     u32* constant_buffer_sizes, u32* constant_buffer_binding_f, u32 constant_buffers_num);\n   22  \n   23  RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, Mesh* mesh);\n   ..\n   30  void renderer_backend_present(RendererBackend* rbs);\n   31  \n   32: void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackendPipeline* pipeline, u32 binding, void* data, u32 data_size, u32 offset);\n   33  void renderer_backend_wait_for_new_frame(RendererBackend* rbs);\n   34  void renderer_backend_wait_until_idle(RendererBackend* rbs);\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.cpp:\n   47  typedef struct RenderBackendPipeline\n   48  {\n   49:     PipelineConstantBuffer* constant_buffers;\n   50:     VkDescriptorSet* constant_buffer_descriptor_sets[MAX_FRAMES_IN_FLIGHT];\n   51:     VkDescriptorSetLayout constant_buffer_descriptor_set_layout;\n   52:     u32 constant_buffers_num;\n   53      VkPipeline vk_handle;\n   54      VkPipelineLayout layout;\n   ..\n   97      VkDebugUtilsMessageSeverityFlagBitsEXT severity,\n   98      VkDebugUtilsMessageTypeFlagsEXT type,\n   99:     const VkDebugUtilsMessengerCallbackDataEXT* data,\n  100      void* user_data)\n  101  {\n  ...\n  753      for (u32 frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)\n  754      {\n  755:         vkFreeDescriptorSets(rbs->device, rbs->descriptor_pool_uniform_buffer, 1, p->constant_buffer_descriptor_sets[frame_idx]);\n  756:         memf(p->constant_buffer_descriptor_sets[frame_idx]);\n  757:         for (u32 cb_idx = 0; cb_idx < p->constant_buffers_num; ++cb_idx)\n  758          {\n  759:             vkDestroyBuffer(rbs->device, p->constant_buffers[cb_idx].vk_handle[frame_idx], NULL);\n  760:             vkFreeMemory(rbs->device, p->constant_buffers[cb_idx].memory[frame_idx], NULL);\n  761          }\n  762      }\n  763  \n  764      vkDestroyPipelineLayout(rbs->device, p->layout, NULL);\n  765:     vkDestroyDescriptorSetLayout(rbs->device, p->constant_buffer_descriptor_set_layout, NULL);\n  766      vkDestroyPipeline(rbs->device, p->vk_handle, NULL);\n  767:     memf(p->constant_buffers);\n  768      memf(p);\n  769  }\n  ...\n  854      RenderBackendShader** shader_stages, ShaderType* shader_stages_types, u32 shader_stages_num,\n  855      ShaderDataType* vertex_input_types, u32 vertex_input_types_num,\n  856:     u32* constant_buffer_sizes, u32* constant_buffer_binding_indices, u32 constant_buffers_num)\n  857  {\n  858      RenderBackendPipeline* pipeline = mema_zero_t(RenderBackendPipeline);\n  ...\n  886      pvisci.pVertexAttributeDescriptions = viad;\n  887  \n  888:     // Create vk uniform buffers for our constant buffers\n  889:     pipeline->constant_buffers = mema_zero_tn(PipelineConstantBuffer, constant_buffers_num);\n  890:     pipeline->constant_buffers_num = constant_buffers_num;\n  891:     VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero_tn(VkDescriptorSetLayoutBinding, constant_buffers_num);\n  892  \n  893:     for (size_t cb_idx = 0; cb_idx < constant_buffers_num; ++cb_idx)\n  894      {\n  895:         PipelineConstantBuffer* cb = pipeline->constant_buffers + cb_idx;\n  896:         cb->binding = constant_buffer_binding_indices[cb_idx];\n  897:         cb->size = constant_buffer_sizes[cb_idx];\n  898  \n  899          VkBufferCreateInfo cb_bci = {};\n  ...\n  925          }\n  926  \n  927:         constant_buffer_bindings[cb_idx].binding = cb->binding;\n  928:         constant_buffer_bindings[cb_idx].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;\n  929:         constant_buffer_bindings[cb_idx].descriptorCount = 1;\n  930:         constant_buffer_bindings[cb_idx].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;\n  931      }\n  932  \n  933      VkDescriptorSetLayoutCreateInfo dslci = {};\n  934      dslci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;\n  935:     dslci.bindingCount = constant_buffers_num;\n  936:     dslci.pBindings = constant_buffer_bindings;\n  937  \n  938:     res = vkCreateDescriptorSetLayout(rbs->device, &dslci, NULL, &pipeline->constant_buffer_descriptor_set_layout);\n  939      VERIFY_RES();\n  940  \n  941:     memf(constant_buffer_bindings);\n  942  \n  943      for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)\n  944      {\n  945:         pipeline->constant_buffer_descriptor_sets[i] = mema_zero_tn(VkDescriptorSet, constant_buffers_num);\n  946          VkDescriptorSetAllocateInfo dsai = {};\n  947          dsai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;\n  948          dsai.pNext = NULL;\n  949          dsai.descriptorPool = rbs->descriptor_pool_uniform_buffer;\n  950:         dsai.descriptorSetCount = constant_buffers_num;\n  951:         dsai.pSetLayouts = &pipeline->constant_buffer_descriptor_set_layout;\n  952:         res = vkAllocateDescriptorSets(rbs->device, &dsai, pipeline->constant_buffer_descriptor_sets[i]);\n  953          VERIFY_RES();\n  954      }\n  ...\n  957      plci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;\n  958      plci.setLayoutCount = 1;\n  959:     plci.pSetLayouts = &pipeline->constant_buffer_descriptor_set_layout;\n  960  \n  961      res = vkCreatePipelineLayout(rbs->device, &plci, NULL, &pipeline->layout);\n  ...\n 1187  }\n 1188  \n 1189: void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackendPipeline* pipeline, u32 binding, void* data, u32 data_size, u32 offset)\n 1190  {\n 1191      u32 cf = rbs->current_frame;\n ....\n 1195      u32 cb_idx = -1;\n 1196  \n 1197:     for (u32 i = 0; i < pipeline->constant_buffers_num; ++i)\n 1198      {\n 1199:         if (pipeline->constant_buffers[i].binding == binding)\n 1200          {\n 1201:             cb = pipeline->constant_buffers + i;\n 1202              cb_idx = i;\n 1203              break;\n ....\n 1205      }\n 1206  \n 1207:     check(cb, \"No constant buffer with binding %d in supplied pipeline\", binding);\n 1208  \n 1209      u8* mapped_uniform_data;\n ....\n 1219      VkWriteDescriptorSet write = {};\n 1220      write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;\n 1221:     write.dstSet = pipeline->constant_buffer_descriptor_sets[cf][cb_idx];\n 1222      write.descriptorCount = 1;\n 1223      write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;\n ....\n 1270      vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->vk_handle);\n 1271  \n 1272:     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->constant_buffers_num,\n 1273:                             pipeline->constant_buffer_descriptor_sets[cf], 0, NULL);\n 1274  \n 1275      VkDeviceSize offsets[1] = {0};\n\n116 matches across 8 files\n\n\nSearching 46 files for \"const \" (case sensitive)\n\n/home/karl/Projects/zgae_c/array.h:\n   36  \n   37  template<typename T>\n   38: void array_push(Array<T>* a, const T& item)\n   39  {\n   40      array_maybe_grow(a);\n   ..\n   70  \n   71  template<typename T>\n   72: void array_fill_and_set(Array<T>* a, const T& item, size_t idx)\n   73  {\n   74      if (idx < a->num)\n\n/home/karl/Projects/zgae_c/math.cpp:\n   71  \n   72  \n   73: Mat4 mat4_mul(const Mat4& m1, const Mat4& m2)\n   74  {\n   75      return {\n   ..\n  101  }\n  102  \n  103: Mat4 operator*(const Mat4& m1, const Mat4& m2)\n  104  {\n  105      return {\n\n/home/karl/Projects/zgae_c/math.h:\n    6  Mat4 mat4_identity();\n    7  Mat4 mat4_from_rotation_and_translation(Quat* q, Vec3* t);\n    8: Mat4 mat4_mul(const Mat4& m1, const Mat4& m2);\n    9  Mat4 mat4_inverse(Mat4* m);\n   10  Quat quat_identity();\n\n/home/karl/Projects/zgae_c/renderer_backend_vulkan.cpp:\n   97      VkDebugUtilsMessageSeverityFlagBitsEXT severity,\n   98      VkDebugUtilsMessageTypeFlagsEXT type,\n   99:     const VkDebugUtilsMessengerCallbackDataEXT* data,\n  100      void* user_data)\n  101  {\n\n9 matches across 4 files\n",
-			"settings":
-			{
-				"buffer_size": 16034,
-				"line_ending": "Unix",
-				"name": "Find Results",
-				"scratch": true
 			}
 		},
 		{
 			"file": "str.h",
 			"settings":
 			{
-				"buffer_size": 286,
+				"buffer_size": 334,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "jzon.cpp",
+			"settings":
+			{
+				"buffer_size": 9340,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "file.h",
+			"settings":
+			{
+				"buffer_size": 125,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "renderer.h",
+			"settings":
+			{
+				"buffer_size": 1314,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "renderer_backend.h",
+			"settings":
+			{
+				"buffer_size": 1759,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -724,7 +576,122 @@
 			"file": "renderer_backend_vulkan.cpp",
 			"settings":
 			{
-				"buffer_size": 52602,
+				"buffer_size": 52606,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "obj_loader.cpp",
+			"settings":
+			{
+				"buffer_size": 6262,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "gjk_epa.cpp",
+			"settings":
+			{
+				"buffer_size": 9801,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "global_include.h",
+			"settings":
+			{
+				"buffer_size": 1037,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "handle_hash_map.h",
+			"settings":
+			{
+				"buffer_size": 329,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "handle_pool.h",
+			"settings":
+			{
+				"buffer_size": 405,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "jzon.h",
+			"settings":
+			{
+				"buffer_size": 172,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "handle_pool.cpp",
+			"settings":
+			{
+				"buffer_size": 3226,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "handle_hash_map.cpp",
+			"settings":
+			{
+				"buffer_size": 2095,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "obj_loader.h",
+			"settings":
+			{
+				"buffer_size": 141,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "obj_loader_types.h",
+			"settings":
+			{
+				"buffer_size": 181,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "math.h",
+			"settings":
+			{
+				"buffer_size": 780,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "math.cpp",
+			"settings":
+			{
+				"buffer_size": 6076,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "gjk_epa_types.h",
+			"settings":
+			{
+				"buffer_size": 187,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -822,13 +789,33 @@
 			]
 		]
 	],
-	"build_varint": "build and run",
+	"build_varint": "",
 	"command_palette":
 	{
 		"height": 0.0,
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"syntax spec",
+				"Preferences: Settings – Syntax Specific"
+			],
+			[
+				"UPP",
+				"Convert Case: Upper Case"
+			],
+			[
+				"upp",
+				"Convert Case: Upper Case"
+			],
+			[
+				"U",
+				"Convert Case: Upper Case"
+			],
+			[
+				"UPPER",
+				"Convert Case: Upper Case"
+			],
 			[
 				"pack",
 				"Package Control: Remove Package"
@@ -844,10 +831,6 @@
 			[
 				"case",
 				"Convert Case: Title Case"
-			],
-			[
-				"upp",
-				"Convert Case: Upper Case"
 			],
 			[
 				"upper",
@@ -886,39 +869,71 @@
 	],
 	"file_history":
 	[
+		"/home/karl/Projects/zgae_c/debug.h",
+		"/home/karl/Projects/zgae_c/gjk_epa.cpp",
+		"/home/karl/Projects/zgae_c/linux_xcb_window.cpp",
+		"/home/karl/Projects/zgae_c/keyboard.cpp",
+		"/home/karl/Projects/zgae_c/linux_main.cpp",
+		"/home/karl/Projects/zgae_c/keycode_types.h",
+		"/home/karl/Projects/zgae_c/debug.cpp",
+		"/home/karl/Projects/zgae_c/math.cpp",
+		"/home/karl/Projects/zgae_c/gjk_epa.h",
+		"/home/karl/Projects/zgae_c/math_types.h",
+		"/home/karl/Projects/zgae_c/math.h",
+		"/home/karl/Projects/zgae/math.cpp",
+		"/home/karl/Projects/zgae_c/dynamic_array.h",
+		"/home/karl/Projects/zgae_c/dynamic_array.cpp",
+		"/home/karl/Projects/zgae_c/file.h",
+		"/home/karl/Projects/zgae_c/file.cpp",
+		"/home/karl/Projects/zgae_c/keyboard.h",
+		"/home/karl/Projects/zgae_c/render_resource.h",
+		"/home/karl/Projects/zgae_c/global_include.h",
+		"/home/karl/Projects/zgae_c/debug_types.h",
+		"/home/karl/Projects/zgae_c/handle.h",
+		"/home/karl/Projects/zgae_c/todo.txt",
+		"/home/karl/Projects/zgae_c/zgae.sublime-project",
+		"/home/karl/Projects/zgae_c/linux_xcb_window.h",
+		"/home/karl/Projects/zgae_c/obj_loader.cpp",
+		"/home/karl/Projects/zgae_c/shader_default_vertex.spv",
+		"/home/karl/Projects/zgae_c/str.h",
+		"/home/karl/Projects/zgae_c/window_types.h",
+		"/home/karl/Projects/zgae_c/handle_pool.cpp",
+		"/home/karl/Projects/zgae_c/handle_pool.h",
+		"/home/karl/Projects/zgae_c/memory.cpp",
+		"/home/karl/Projects/zgae_c/memory.h",
+		"/home/karl/Projects/zgae_c/mesh_types.h",
+		"/home/karl/Projects/zgae_c/handle_hash_map.cpp",
+		"/home/karl/Projects/zgae_c/handle_hash_map.h",
+		"/home/karl/Projects/zgae_c/jzon.cpp",
+		"/home/karl/Projects/zgae_c/jzon.h",
+		"/home/karl/Projects/zgae_c/jzon_types.h",
+		"/home/karl/Projects/zgae_c/path.cpp",
+		"/home/karl/Projects/zgae_c/render_resource_types.h",
+		"/home/karl/Projects/zgae_c/render_resource.cpp",
+		"/home/karl/Projects/zgae_c/obj_loader_types.h",
+		"/home/karl/Projects/zgae_c/renderer.cpp",
+		"/home/karl/Projects/zgae_c/renderer.h",
+		"/home/karl/Projects/zgae_c/renderer_backend.h",
+		"/home/karl/Projects/zgae_c/renderer_backend_vulkan.cpp",
+		"/home/karl/Projects/zgae_c/str.cpp",
+		"/home/karl/Projects/zgae_c/file_types.h",
+		"/home/karl/Projects/lax/window_types.h",
+		"/home/karl/Projects/lax/render_resource_types.h",
+		"/home/karl/Projects/zgae_c/tests.cpp",
+		"/home/karl/Projects/lax/array.h",
+		"/home/karl/Projects/lax/obj_loader.c",
+		"/home/karl/Projects/lax/array.c",
+		"/home/karl/Desktop/old_arr.c",
+		"/home/karl/Projects/zgae_c/build.py",
 		"/home/karl/Projects/zgae_c/math.c",
 		"/home/karl/Projects/zgae_c/array.cpp",
-		"/home/karl/Projects/zgae_c/tests.cpp",
-		"/home/karl/Projects/zgae_c/debug_types.h",
-		"/home/karl/Projects/zgae_c/debug.h",
-		"/home/karl/Projects/zgae_c/renderer.cpp",
-		"/home/karl/Projects/zgae_c/path.cpp",
 		"/home/karl/Projects/zgae_c/path.h",
-		"/home/karl/Projects/zgae_c/linux_main.cpp",
 		"/home/karl/Projects/zgae_c/obj_loader.h",
-		"/home/karl/Projects/zgae_c/renderer.h",
-		"/home/karl/Projects/zgae_c/todo.txt",
-		"/home/karl/Projects/zgae_c/handle_hash_map.h",
-		"/home/karl/Projects/zgae_c/handle_pool.h",
-		"/home/karl/Projects/zgae_c/handle_pool.cpp",
-		"/home/karl/Projects/zgae_c/handle_hash_map.cpp",
 		"/home/karl/Desktop/linux-master/code/handmade_world.h",
 		"/home/karl/Desktop/linux-master/code/handmade_world_mode.h",
 		"/home/karl/Desktop/linux-master/code/linux_sound.h",
 		"/home/karl/Desktop/linux-master/code/win32_handmade.cpp",
-		"/home/karl/Projects/zgae_c/global_include.h",
 		"/home/karl/Projects/zgae_c/optimize_incfwd.py",
-		"/home/karl/Projects/zgae_c/render_resource_types.h",
-		"/home/karl/Projects/zgae_c/file.cpp",
-		"/home/karl/Projects/zgae_c/render_resource.cpp",
-		"/home/karl/Projects/zgae_c/obj_loader.cpp",
-		"/home/karl/Projects/zgae_c/file.h",
-		"/home/karl/Projects/zgae_c/file_types.h",
-		"/home/karl/Projects/zgae_c/memory.h",
-		"/home/karl/Projects/zgae_c/memory.cpp",
-		"/home/karl/Projects/zgae_c/jzon.cpp",
-		"/home/karl/Projects/zgae_c/jzon.h",
-		"/home/karl/Projects/zgae_c/build.py",
 		"/home/karl/Projects/zgae_c/array.h",
 		"/home/karl/Desktop/linux-master/code/win32_handmade.h",
 		"/home/karl/Desktop/linux-master/code/handmade_room_gen.h",
@@ -926,36 +941,17 @@
 		"/home/karl/Desktop/linux-master/code/handmade_particles.h",
 		"/home/karl/Desktop/linux-master/code/handmade_math.h",
 		"/home/karl/Projects/zgae_c/tests.c",
-		"/home/karl/Projects/zgae_c/debug.cpp",
-		"/home/karl/Projects/zgae_c/keyboard.cpp",
-		"/home/karl/Projects/zgae_c/math.h",
-		"/home/karl/Projects/zgae_c/math.cpp",
-		"/home/karl/Projects/zgae_c/renderer_backend_vulkan.cpp",
-		"/home/karl/Projects/zgae_c/window_types.h",
-		"/home/karl/Projects/zgae_c/keyboard.h",
-		"/home/karl/Projects/zgae_c/keycode_types.h",
-		"/home/karl/Projects/zgae_c/linux_xcb_window.cpp",
-		"/home/karl/Projects/zgae_c/zgae.sublime-project",
-		"/home/karl/Projects/zgae_c/renderer_backend.h",
-		"/home/karl/Projects/zgae_c/str.cpp",
-		"/home/karl/Projects/zgae_c/mesh_types.h",
-		"/home/karl/Projects/zgae_c/render_resource.h",
 		"/home/karl/Projects/zgae_c/gjk_epa.c",
-		"/home/karl/Projects/zgae_c/math_types.h",
-		"/home/karl/Projects/zgae/math.cpp",
 		"/home/karl/Projects/zgae/key.h",
 		"/home/karl/Desktop/build_time.txt",
 		"/home/karl/tmp/test.cpp",
-		"/home/karl/Projects/zgae_c/gjk_epa.h",
 		"/home/karl/Desktop/ATLAS/include/atlas_tvec.h",
 		"/home/karl/Projects/zgae/gjk_epa.cpp",
 		"/home/karl/Projects/zgae_c/renderer.c",
 		"/home/karl/Projects/zgae_c/gjk_epa_types.h",
-		"/home/karl/Projects/zgae_c/jzon_types.h",
 		"/home/karl/Projects/zgae_c/obj_loader.c",
 		"/home/karl/Projects/zgae_c/renderer_backend_vulkan.c",
 		"/home/karl/Projects/zgae_c/render_resource.c",
-		"/home/karl/Projects/zgae_c/obj_loader_types.h",
 		"/home/karl/Projects/zgae_c/tests",
 		"/home/karl/Projects/zgae_c/zgae",
 		"/home/karl/Projects/zgae_c/linux_main.c",
@@ -979,7 +975,6 @@
 		"/home/karl/Projects/zgae_c/resource_store.c",
 		"/home/karl/Projects/zgae_c/str.c",
 		"/home/karl/Projects/zgae_c/shader_resource.c",
-		"/home/karl/Projects/zgae_c/str.h",
 		"/home/karl/Projects/zgae_c/jzon.c",
 		"/home/karl/Projects/zgae_c/resource_store.h",
 		"/home/karl/Projects/zgae_c/shader_resource.h",
@@ -1001,23 +996,11 @@
 		"/home/karl/Projects/zgae_c/pipeline_resource.h",
 		"/home/karl/Projects/zgae_c/pipeline_resource.c",
 		"/home/karl/Projects/zgae/renderer_direct3d.cpp",
-		"/home/karl/Projects/zgae/render_world.h",
-		"/home/karl/Projects/zgae_c/geometry_types.h",
-		"/home/karl/Projects/zgae_c/shader.c",
-		"/home/karl/Projects/zgae_c/box.wobj",
-		"/home/karl/Projects/zgae/obj.h",
-		"/home/karl/Projects/zgae/obj.cpp",
-		"/home/karl/Projects/zgae/math.h",
-		"/home/karl/Projects/zgae/types.h",
-		"/home/karl/Projects/zgae/mesh.h",
-		"/home/karl/Projects/zgae_c/shader.h",
-		"/home/karl/Projects/zgae_c/pipeline.c",
-		"/home/karl/Projects/zgae_c/pipeline.h",
-		"/home/karl/Projects/zgae_c/pipeline_types.h"
+		"/home/karl/Projects/zgae/render_world.h"
 	],
 	"find":
 	{
-		"height": 49.0
+		"height": 43.0
 	},
 	"find_in_files":
 	{
@@ -1036,6 +1019,116 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"char* ",
+			"->",
+			"v2->",
+			"v1->",
+			"*",
+			"pipeline->",
+			"pr->",
+			"->",
+			"pr->",
+			"&v",
+			"&",
+			"JzonValue* ",
+			"->string_",
+			"->is_",
+			"jzon_get(&",
+			"JzonValue* ",
+			"C(",
+			"SMALL_NU",
+			"GJK_STATUS_COLLIDING",
+			"m2.w",
+			"renderer_backend_begin_frame",
+			".vertices",
+			"c(GjkShape",
+			"c",
+			"key_is_held",
+			"KeyCode::",
+			"(KeyCode::",
+			"KeyCode::Num",
+			"KeyCode::Unknown",
+			"KeyCode::",
+			"    ",
+			"f.",
+			"& ",
+			"&",
+			"& ",
+			"const",
+			"&",
+			"const ",
+			"num_vertices",
+			"x",
+			"f",
+			"-",
+			"x",
+			"_random_colors",
+			"array_destroy",
+			"array_push",
+			"EPAFace",
+			"GjkStatus::",
+			"GJKStatus",
+			"GJKEPASolution",
+			"GJKResult",
+			"x ",
+			"GJKShape",
+			"GJKEPASolution",
+			"& ",
+			"typedef ",
+			"typedef",
+			"(RenderResourceType)",
+			"(RenderResourceType)handle_type(h)",
+			"(RenderResourceType)",
+			"enum struct",
+			"ShaderType::",
+			"VertexInputValue::",
+			"ConstantBufferAutoValue::",
+			"ShaderDataType::",
+			"RenderResourceType::",
+			"RenderResourceType",
+			"ShaderDataType",
+			"ShaderDataType::Mat4",
+			"typedef stru",
+			" ANALYZER_NORETURN",
+			"mut ",
+			"NULL",
+			"size_t",
+			"da_free",
+			"find_table_pair_insertion_index",
+			"memra_tn",
+			"memra_zero",
+			"destroy_resource",
+			"resources_num",
+			"memra_t",
+			"da__num",
+			"rs->resources",
+			"da_num",
+			"table",
+			"find_table",
+			"da\\_.*\\&",
+			"&",
+			"da_push",
+			"resources",
+			"rs->resources",
+			"array_",
+			"array_push",
+			"da_push",
+			"da_ensure_min_size",
+			"da_.*\\&",
+			"size_t",
+			"hashes.num",
+			"array_destroy",
+			"da_fre",
+			"da_destroy",
+			"array_",
+			"array_push",
+			"array_push(&",
+			"array_",
+			"ArrrayHeader",
+			"ArrayHeader",
+			"array",
+			"array_",
+			"ArrayHeader",
 			"mut ",
 			"mut_",
 			"pd",
@@ -1053,124 +1146,16 @@
 			"m.",
 			"const ",
 			"const char",
-			"const ",
-			"const",
-			"&*",
-			".",
-			"const ",
-			"& ",
-			"&",
-			"pr.",
-			"const ",
-			"const Quat&",
-			"const Vec3&",
-			"const Mat4&",
-			"&",
-			"const ",
-			"(char*)",
-			"(char**)",
-			"(char*)",
-			"const ",
-			"const",
-			"const ",
-			"const",
-			"const JzonValue",
-			"const ",
-			".",
-			"FILE_LOAD_MODE_DEFAULT",
-			"FILE_LOAD_MODE_NULL_TERMINATED",
-			"hhp->",
-			"handle_subtype",
-			"handle_type",
-			"sub",
-			"rs->resources",
-			"array_push",
-			"rs->resources",
-			"get_resou",
-			"Array<",
-			"RendererState*",
-			"RendererState",
-			"RenderBackend*",
-			"h",
-			" -",
-			"KC_",
-			"C_",
-			"arr_handles",
-			"arr_hashes",
-			"arr_",
-			"name_hash",
-			"arr_hashes",
-			"arr_",
-			"KC_NUM",
-			"*",
-			"->",
-			"pr->",
-			"CONSTANT_BUFFER_AUTO_VALUE_",
-			"arr_resources",
-			"}",
-			"typedef struct ",
-			"g",
-			"RENDER_RESOURCE_TYPE_",
-			"SHADER_TYPE_",
-			"VERTEX_INPUT_VALUE",
-			"CONSTANT_BUFFER_AUTO_VALUE",
-			"SHADER_DATA_TYPE",
-			"RENDER_RESOURCE_TYPE_",
-			"RENDER_RESOURCE_TYPE",
-			"Keycode::",
-			"KeyCode",
-			"Unknown",
-			"KC_",
-			", ",
-			"SHADER_TYPE",
-			"SHADER_DATA_TYPE",
-			"->",
-			"}\n",
-			"array_add",
-			"->",
-			"get_existing_vertex",
-			"*",
-			"* ",
-			"->",
-			"v2",
-			"&v1",
-			"array_add",
-			"arr_handles",
-			"        array_add(hp->arr_handles, h);\n",
-			"arr_free_handles",
-			"arr_handles",
-			"result",
-			"x",
-			"TestVec",
-			".z",
-			".y",
-			".x",
-			".z",
-			".y",
-			".x",
-			"type",
-			"x",
-			"TestStruct",
-			"InlineTest",
-			"&",
-			"GJKShape",
-			"&",
-			".",
-			"GJKShape",
-			"WorldRenderResource",
-			"ResourceHandle",
-			"RenderBackend",
-			"RenderState",
-			"renderer_backend",
-			"RenderBackendState",
-			"render_backend_"
+			"const "
 		],
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": false,
+		"regex": true,
 		"replace_history":
 		[
+			"",
+			"u32",
 			"",
 			"m->",
 			"JzonValue",
@@ -1262,24 +1247,52 @@
 	"groups":
 	[
 		{
-			"selected": 6,
+			"selected": 4,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "debug.cpp",
+					"file": "gjk_epa.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1172,
+						"buffer_size": 185,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								833,
-								833
+								185,
+								185
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 22,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "linux_main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4763,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4655,
+								4655
 							]
 						],
 						"settings":
@@ -1289,32 +1302,178 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 840.0,
+						"translation.y": 3117.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 31,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "array.h",
+					"buffer": 2,
+					"file": "linux_xcb_window.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1700,
+						"buffer_size": 9744,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								186,
-								186
+								9500,
+								9500
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C.sublime-syntax",
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6996.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 16,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "linux_xcb_window.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 617,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								295,
+								295
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 15,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "renderer.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 23540,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								20384,
+								20384
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 12797.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "str.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1642,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								638,
+								638
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 37.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "path.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 50,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								29,
+								29
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "path.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 313,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								110,
+								110
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
@@ -1326,20 +1485,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "obj_loader_types.h",
-					"semi_transient": true,
+					"buffer": 8,
+					"file": "str.h",
+					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 236,
+						"buffer_size": 334,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								282,
+								282
 							]
 						],
 						"settings":
@@ -1348,143 +1507,26 @@
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "handle_pool.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3221,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								305,
-								305
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 27,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "renderer.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1332,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1074,
-								1074
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 252.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "renderer_backend.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1775,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1216,
-								1216
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 388.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "obj_loader.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6422,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4130,
-								4130
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 4524.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
+					"buffer": 9,
 					"file": "jzon.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 9427,
+						"buffer_size": 9340,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								169,
-								169
+								8654,
+								8654
 							]
 						],
 						"settings":
@@ -1494,27 +1536,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2016.0,
+						"translation.y": 8947.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 25,
+					"stack_index": 18,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
-					"file": "jzon.h",
+					"buffer": 10,
+					"file": "file.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 165,
+						"buffer_size": 125,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								98,
-								98
+								102,
+								102
 							]
 						],
 						"settings":
@@ -1529,50 +1571,76 @@
 					"type": "text"
 				},
 				{
-					"buffer": 9,
-					"file": "jzon_types.h",
+					"buffer": 11,
+					"file": "renderer.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 691,
+						"buffer_size": 1314,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								482,
-								482
+								754,
+								754
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/C++/C.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 504.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 23,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
-					"file": "keyboard.cpp",
+					"buffer": 12,
+					"file": "renderer_backend.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1098,
+						"buffer_size": 1759,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1340,
+								1340
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 147.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "renderer_backend_vulkan.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 52606,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3103,
+								3103
 							]
 						],
 						"settings":
@@ -1582,27 +1650,145 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2025.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 22,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
-					"file": "linux_xcb_window.h",
+					"buffer": 14,
+					"file": "obj_loader.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 597,
+						"buffer_size": 6262,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								452,
-								452
+								3726,
+								3726
+							],
+							[
+								3740,
+								3740
+							],
+							[
+								3785,
+								3785
+							],
+							[
+								3797,
+								3797
+							],
+							[
+								3840,
+								3840
+							],
+							[
+								3854,
+								3854
+							],
+							[
+								3899,
+								3899
+							],
+							[
+								3910,
+								3910
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2853.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 14,
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "gjk_epa.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9801,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9634,
+								9634
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 8001.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 23,
+					"type": "text"
+				},
+				{
+					"buffer": 16,
+					"file": "global_include.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1037,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1037,
+								1037
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 528.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 17,
+					"file": "handle_hash_map.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 329,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								240,
+								240
 							]
 						],
 						"settings":
@@ -1617,20 +1803,48 @@
 					"type": "text"
 				},
 				{
-					"buffer": 12,
-					"file": "math.h",
+					"buffer": 18,
+					"file": "handle_pool.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 480,
+						"buffer_size": 405,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								480,
-								480
+								212,
+								212
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 19,
+					"file": "jzon.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 172,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								128,
+								128
 							]
 						],
 						"settings":
@@ -1645,49 +1859,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 13,
-					"file": "memory.h",
+					"buffer": 20,
+					"file": "handle_pool.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 748,
+						"buffer_size": 3226,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								44,
-								44
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 15,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "memory.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3323,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3239,
-								3239
+								973,
+								973
 							]
 						],
 						"settings":
@@ -1697,58 +1882,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3780.0,
+						"translation.y": 213.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 16,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 15,
-					"file": "math.cpp",
+					"buffer": 21,
+					"file": "handle_hash_map.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5378,
+						"buffer_size": 2095,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2919,
-								2919
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2452.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 18,
-					"type": "text"
-				},
-				{
-					"buffer": 16,
-					"file": "linux_xcb_window.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 10539,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								10384,
-								10384
+								1651,
+								1651
 							]
 						],
 						"settings":
@@ -1758,27 +1912,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 8988.0,
+						"translation.y": 1122.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 20,
 					"type": "text"
 				},
 				{
-					"buffer": 17,
-					"file": "handle_pool.h",
+					"buffer": 22,
+					"file": "obj_loader.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 409,
+						"buffer_size": 141,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								330,
-								330
+								94,
+								94
 							]
 						],
 						"settings":
@@ -1789,55 +1943,52 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 26,
+					"stack_index": 33,
 					"type": "text"
 				},
 				{
-					"buffer": 18,
-					"file": "build.py",
+					"buffer": 23,
+					"file": "obj_loader_types.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1933,
+						"buffer_size": 181,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1155,
-								1155
+								92,
+								92
 							]
 						],
 						"settings":
 						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/C++/C.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1225.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 32,
 					"type": "text"
 				},
 				{
-					"buffer": 19,
-					"file": "debug.h",
+					"buffer": 0,
+					"file": "gjk_epa.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 591,
+						"buffer_size": 185,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								175,
-								175
+								185,
+								185
 							]
 						],
 						"settings":
@@ -1848,24 +1999,54 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 30,
+					"stack_index": 31,
 					"type": "text"
 				},
 				{
-					"buffer": 20,
-					"file": "global_include.h",
+					"buffer": 14,
+					"file": "obj_loader.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1475,
+						"buffer_size": 6262,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1035,
-								1035
+								5391,
+								5391
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4579.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 30,
+					"type": "text"
+				},
+				{
+					"buffer": 24,
+					"file": "math.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 780,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								522,
+								522
 							]
 						],
 						"settings":
@@ -1873,32 +2054,35 @@
 							"syntax": "Packages/C++/C.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 840.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
-					"buffer": 21,
-					"file": "handle_hash_map.h",
+					"buffer": 15,
+					"file": "gjk_epa.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 334,
+						"buffer_size": 9801,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								155,
-								155
+								410,
+								410
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C.sublime-syntax"
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1908,20 +2092,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 22,
-					"file": "handle_hash_map.cpp",
+					"buffer": 1,
+					"file": "linux_main.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2115,
+						"buffer_size": 4763,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								148,
-								148
+								4425,
+								4425
 							]
 						],
 						"settings":
@@ -1931,137 +2115,19 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1428.0,
+						"translation.y": 2772.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 28,
 					"type": "text"
 				},
 				{
-					"buffer": 23,
+					"buffer": 4,
 					"file": "renderer.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 23139,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								22684,
-								22684
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 17440.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 14,
-					"type": "text"
-				},
-				{
-					"buffer": 24,
-					"file": "linux_main.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4120,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3901,
-								3901
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1136.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 21,
-					"type": "text"
-				},
-				{
-					"buffer": 25,
-					"file": "str.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1603,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								404,
-								404
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1092.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 26,
-					"file": "todo.txt",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1960,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								554,
-								554
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 27,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 0,
+						"buffer_size": 23540,
 						"regions":
 						{
 						},
@@ -2074,30 +2140,60 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 12299.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 27,
 					"type": "text"
 				},
 				{
-					"buffer": 28,
-					"file": "tests.cpp",
+					"buffer": 12,
+					"file": "renderer_backend.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2261,
+						"buffer_size": 1759,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								352,
-								352
+								1340,
+								1340
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 177.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 26,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "renderer_backend_vulkan.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 52606,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
 							]
 						],
 						"settings":
@@ -2110,597 +2206,54 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 25,
 					"type": "text"
 				},
 				{
-					"buffer": 29,
-					"file": "window_types.h",
+					"buffer": 25,
+					"file": "math.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 671,
+						"buffer_size": 6076,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								462,
-								462
+								3464,
+								3464
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C.sublime-syntax",
+							"syntax": "Packages/C++/C++.sublime-syntax",
 							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1687.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
-					"buffer": 30,
+					"buffer": 26,
+					"file": "gjk_epa_types.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 16034,
-						"regions":
-						{
-							"match":
-							{
-								"flags": 112,
-								"regions":
-								[
-									[
-										157,
-										162
-									],
-									[
-										299,
-										304
-									],
-									[
-										447,
-										452
-									],
-									[
-										551,
-										556
-									],
-									[
-										672,
-										677
-									],
-									[
-										803,
-										808
-									],
-									[
-										934,
-										939
-									],
-									[
-										1217,
-										1222
-									],
-									[
-										1408,
-										1413
-									],
-									[
-										1664,
-										1669
-									],
-									[
-										1951,
-										1956
-									],
-									[
-										1967,
-										1972
-									],
-									[
-										2057,
-										2062
-									],
-									[
-										2073,
-										2078
-									],
-									[
-										2270,
-										2275
-									],
-									[
-										2286,
-										2291
-									],
-									[
-										2493,
-										2498
-									],
-									[
-										2636,
-										2641
-									],
-									[
-										2838,
-										2843
-									],
-									[
-										2879,
-										2884
-									],
-									[
-										2926,
-										2931
-									],
-									[
-										2977,
-										2982
-									],
-									[
-										3061,
-										3066
-									],
-									[
-										3225,
-										3230
-									],
-									[
-										3336,
-										3341
-									],
-									[
-										3420,
-										3425
-									],
-									[
-										3478,
-										3483
-									],
-									[
-										3524,
-										3529
-									],
-									[
-										3781,
-										3786
-									],
-									[
-										3804,
-										3809
-									],
-									[
-										3841,
-										3846
-									],
-									[
-										3896,
-										3901
-									],
-									[
-										3954,
-										3959
-									],
-									[
-										4171,
-										4176
-									],
-									[
-										4266,
-										4271
-									],
-									[
-										4339,
-										4344
-									],
-									[
-										4416,
-										4421
-									],
-									[
-										4502,
-										4507
-									],
-									[
-										4663,
-										4668
-									],
-									[
-										4705,
-										4710
-									],
-									[
-										4759,
-										4764
-									],
-									[
-										4831,
-										4836
-									],
-									[
-										4886,
-										4891
-									],
-									[
-										4912,
-										4917
-									],
-									[
-										4961,
-										4966
-									],
-									[
-										5012,
-										5017
-									],
-									[
-										5099,
-										5104
-									],
-									[
-										5197,
-										5202
-									],
-									[
-										5218,
-										5223
-									],
-									[
-										5293,
-										5298
-									],
-									[
-										5392,
-										5397
-									],
-									[
-										5520,
-										5525
-									],
-									[
-										5646,
-										5651
-									],
-									[
-										5781,
-										5786
-									],
-									[
-										5870,
-										5875
-									],
-									[
-										5941,
-										5946
-									],
-									[
-										6138,
-										6143
-									],
-									[
-										6360,
-										6365
-									],
-									[
-										6511,
-										6516
-									],
-									[
-										6596,
-										6601
-									],
-									[
-										6803,
-										6808
-									],
-									[
-										7076,
-										7081
-									],
-									[
-										7367,
-										7372
-									],
-									[
-										7841,
-										7846
-									],
-									[
-										8314,
-										8319
-									],
-									[
-										8342,
-										8347
-									],
-									[
-										8373,
-										8378
-									],
-									[
-										8604,
-										8609
-									],
-									[
-										9012,
-										9017
-									],
-									[
-										9058,
-										9063
-									],
-									[
-										9146,
-										9151
-									],
-									[
-										9200,
-										9205
-									],
-									[
-										9417,
-										9422
-									],
-									[
-										9697,
-										9702
-									],
-									[
-										9765,
-										9770
-									],
-									[
-										9858,
-										9863
-									],
-									[
-										9958,
-										9963
-									],
-									[
-										10060,
-										10065
-									],
-									[
-										10271,
-										10276
-									],
-									[
-										10399,
-										10404
-									],
-									[
-										10648,
-										10653
-									],
-									[
-										10676,
-										10681
-									],
-									[
-										10713,
-										10718
-									],
-									[
-										10942,
-										10947
-									],
-									[
-										10980,
-										10985
-									],
-									[
-										11036,
-										11041
-									],
-									[
-										11080,
-										11085
-									],
-									[
-										11103,
-										11108
-									],
-									[
-										11166,
-										11171
-									],
-									[
-										11236,
-										11241
-									],
-									[
-										11311,
-										11316
-									],
-									[
-										11410,
-										11415
-									],
-									[
-										11466,
-										11471
-									],
-									[
-										11533,
-										11538
-									],
-									[
-										11665,
-										11670
-									],
-									[
-										11736,
-										11741
-									],
-									[
-										11836,
-										11841
-									],
-									[
-										11905,
-										11910
-									],
-									[
-										12165,
-										12170
-									],
-									[
-										12216,
-										12221
-									],
-									[
-										12333,
-										12338
-									],
-									[
-										12422,
-										12427
-									],
-									[
-										12553,
-										12558
-									],
-									[
-										12620,
-										12625
-									],
-									[
-										12922,
-										12927
-									],
-									[
-										12989,
-										12994
-									],
-									[
-										13104,
-										13109
-									],
-									[
-										13337,
-										13342
-									],
-									[
-										13529,
-										13534
-									],
-									[
-										13784,
-										13789
-									],
-									[
-										13853,
-										13858
-									],
-									[
-										13944,
-										13949
-									],
-									[
-										14075,
-										14080
-									],
-									[
-										14335,
-										14340
-									],
-									[
-										14694,
-										14699
-									],
-									[
-										14761,
-										14766
-									],
-									[
-										15046,
-										15052
-									],
-									[
-										15188,
-										15194
-									],
-									[
-										15328,
-										15334
-									],
-									[
-										15344,
-										15350
-									],
-									[
-										15434,
-										15440
-									],
-									[
-										15450,
-										15456
-									],
-									[
-										15647,
-										15653
-									],
-									[
-										15663,
-										15669
-									],
-									[
-										15921,
-										15927
-									]
-								],
-								"scope": ""
-							}
-						},
-						"selection":
-						[
-							[
-								15657,
-								15657
-							]
-						],
-						"settings":
-						{
-							"detect_indentation": false,
-							"line_numbers": false,
-							"output_tag": 2,
-							"result_base_dir": "",
-							"result_file_regex": "^([^ \t].*):$",
-							"result_line_regex": "^ +([0-9]+):",
-							"scroll_past_end": true,
-							"syntax": "Packages/Default/Find Results.hidden-tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 9128.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 35,
-					"type": "text"
-				},
-				{
-					"buffer": 31,
-					"file": "str.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 286,
+						"buffer_size": 187,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								286,
-								286
+								46,
+								46
 							]
 						],
 						"settings":
@@ -2711,133 +2264,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 32,
-					"file": "renderer_backend_vulkan.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 52602,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								46466,
-								46466
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 33792.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 16,
-					"file": "linux_xcb_window.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 10539,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2231,
-								2231
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1616.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 34,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "memory.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3323,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3314,
-								3314
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3328.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 33,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 0,
-			"sheets":
-			[
-				{
-					"buffer": 32,
-					"file": "renderer_backend_vulkan.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 52602,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								52313,
-								52313
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 37740.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
+					"stack_index": 21,
 					"type": "text"
 				}
 			]
@@ -2845,7 +2272,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 37.0
+		"height": 43.0
 	},
 	"input":
 	{
@@ -2860,18 +2287,11 @@
 				0,
 				1,
 				1
-			],
-			[
-				1,
-				0,
-				2,
-				1
 			]
 		],
 		"cols":
 		[
 			0.0,
-			0.564814861455,
 			1.0
 		],
 		"rows":
@@ -2883,7 +2303,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 449.0
+		"height": 193.0
 	},
 	"output.find_results":
 	{
@@ -2893,7 +2313,7 @@
 	"project": "zgae.sublime-project",
 	"replace":
 	{
-		"height": 90.0
+		"height": 58.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -2903,8 +2323,136 @@
 		"selected_items":
 		[
 			[
+				"render",
+				"renderer.cpp"
+			],
+			[
+				"str",
+				"str.cpp"
+			],
+			[
+				"ren",
+				"renderer.h"
+			],
+			[
+				"math.cpp",
+				"math.cpp"
+			],
+			[
+				"globa",
+				"global_include.h"
+			],
+			[
+				"gl",
+				"global_include.h"
+			],
+			[
+				"",
+				"global_include.h"
+			],
+			[
+				"xcb",
+				"linux_xcb_window.cpp"
+			],
+			[
+				"jzon",
+				"jzon.cpp"
+			],
+			[
 				"glo",
 				"global_include.h"
+			],
+			[
+				"glob",
+				"global_include.h"
+			],
+			[
+				"math",
+				"math.h"
+			],
+			[
+				"rend_ba",
+				"renderer_backend.h"
+			],
+			[
+				"rend",
+				"renderer.cpp"
+			],
+			[
+				"main",
+				"linux_main.cpp"
+			],
+			[
+				"gjk",
+				"gjk_epa.cpp"
+			],
+			[
+				"obj",
+				"obj_loader.cpp"
+			],
+			[
+				"keyb",
+				"keyboard.h"
+			],
+			[
+				"key",
+				"keycode_types.h"
+			],
+			[
+				"linux",
+				"linux_main.cpp"
+			],
+			[
+				"dyn",
+				"dynamic_array.cpp"
+			],
+			[
+				"MATH",
+				"math.cpp"
+			],
+			[
+				"arr",
+				"dynamic_array.h"
+			],
+			[
+				"FILE",
+				"file_types.h"
+			],
+			[
+				"RENDERRES",
+				"render_resource_types.h"
+			],
+			[
+				"ZGAE",
+				"zgae.sublime-project"
+			],
+			[
+				"glb",
+				"global_include.h"
+			],
+			[
+				"glba",
+				"global_include.h"
+			],
+			[
+				"mem",
+				"memory.h"
+			],
+			[
+				"dy",
+				"dynamic_array.cpp"
+			],
+			[
+				"REN",
+				"renderer.cpp"
+			],
+			[
+				"jz",
+				"jzon.cpp"
+			],
+			[
+				"tests",
+				"tests.cpp"
 			],
 			[
 				"back",
@@ -2915,24 +2463,12 @@
 				"renderer_backend_vulkan.cpp"
 			],
 			[
-				"mem",
-				"memory.cpp"
-			],
-			[
 				"lin",
 				"linux_xcb_window.cpp"
 			],
 			[
-				"ren",
-				"renderer.cpp"
-			],
-			[
 				"li",
 				"linux_main.cpp"
-			],
-			[
-				"math",
-				"math.h"
 			],
 			[
 				"m",
@@ -2943,18 +2479,6 @@
 				"math.h"
 			],
 			[
-				"obj",
-				"obj_loader.cpp"
-			],
-			[
-				"render",
-				"renderer.cpp"
-			],
-			[
-				"math.cpp",
-				"math.cpp"
-			],
-			[
 				"handle",
 				"handle_pool.cpp"
 			],
@@ -2963,16 +2487,8 @@
 				"build.py"
 			],
 			[
-				"arr",
-				"array.h"
-			],
-			[
 				"ath",
 				"path.h"
-			],
-			[
-				"jzon",
-				"jzon.h"
 			],
 			[
 				"todo",
@@ -2985,10 +2501,6 @@
 			[
 				"opt",
 				"optimize_incfwd.py"
-			],
-			[
-				"gl",
-				"global_include.h"
 			],
 			[
 				"rende",
@@ -3031,10 +2543,6 @@
 				"array.h"
 			],
 			[
-				"key",
-				"keycode_types.h"
-			],
-			[
 				"ey",
 				"keyboard.h"
 			],
@@ -3067,15 +2575,7 @@
 				"tests.c"
 			],
 			[
-				"main",
-				"linux_main.c"
-			],
-			[
 				"re",
-				"renderer.h"
-			],
-			[
-				"rend",
 				"renderer.h"
 			],
 			[
@@ -3135,24 +2635,12 @@
 				"global_include.h"
 			],
 			[
-				"tests",
-				"tests.c"
-			],
-			[
 				"handl",
 				"handle_pool.h"
 			],
 			[
-				"globa",
-				"global_include.h"
-			],
-			[
 				"tesst",
 				"tests.c"
-			],
-			[
-				"glb",
-				"global_include.h"
 			],
 			[
 				"buil",
@@ -3161,10 +2649,6 @@
 			[
 				"gloab",
 				"global_include.h"
-			],
-			[
-				"",
-				"handle_pool.c"
 			],
 			[
 				"resour",
@@ -3263,10 +2747,6 @@
 				"todo.txt"
 			],
 			[
-				"glob",
-				"global_include.h"
-			],
-			[
 				"render_b",
 				"renderer_backend_vulkan.c"
 			],
@@ -3323,10 +2803,6 @@
 				"linux_xcb_window.c"
 			],
 			[
-				"xcb",
-				"linux_xcb_window.c"
-			],
-			[
 				"vu",
 				"renderer_backend_vulkan.c"
 			],
@@ -3337,10 +2813,6 @@
 			[
 				"backe",
 				"renderer_backend_vulkan.c"
-			],
-			[
-				"str",
-				"str.h"
 			]
 		],
 		"width": 0.0
@@ -3371,7 +2843,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 282.0,
+	"side_bar_width": 446.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

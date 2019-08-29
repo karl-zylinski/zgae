@@ -1,10 +1,10 @@
 #include "path.h"
 #include "debug.h"
 
-char* path_ext(char* p)
+const char* path_ext(const char* p)
 {
-    char* pp = p;
-    char* ext_start = NULL;
+    const char* pp = p;
+    const char* ext_start = NULL;
 
     while(*pp)
     {

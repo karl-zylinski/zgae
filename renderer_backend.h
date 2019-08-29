@@ -29,7 +29,7 @@ void renderer_backend_destroy_mesh(RendererBackend* rbs, RenderBackendMesh* g);
 void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline, RenderBackendMesh* mesh);
 void renderer_backend_present(RendererBackend* rbs);
 
-void renderer_backend_update_constant_buffer(RendererBackend* rbs, RenderBackendPipeline* pipeline, u32 binding, void* data, u32 data_size, u32 offset);
+void renderer_backend_update_constant_buffer(RendererBackend* rbs, C(RenderBackendPipeline) pipeline, u32 binding, const void* data, u32 data_size, u32 offset);
 void renderer_backend_wait_for_new_frame(RendererBackend* rbs);
 void renderer_backend_wait_until_idle(RendererBackend* rbs);
 void renderer_backend_surface_resized(RendererBackend* rbs, u32 width, u32 height);

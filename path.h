@@ -1,3 +1,3 @@
 #pragma once
 
-char* path_ext(char* p);
+const char* path_ext(const char* p);

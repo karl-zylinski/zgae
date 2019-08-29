@@ -3,4 +3,4 @@
 
 JzonParseResult jzon_parse(char* input);
 void jzon_free(JzonValue* val);
-JzonValue* jzon_get(JzonValue* object, char* key);
+const JzonValue* jzon_get(const JzonValue* table, char* key);

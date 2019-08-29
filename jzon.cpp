@@ -420,7 +420,7 @@ void jzon_free(JzonValue* val)
     }
 }
 
-JzonValue* jzon_get(JzonValue* table, char* key)
+const JzonValue* jzon_get(const JzonValue* table, char* key)
 {
     if (!table->is_table)
         return NULL;

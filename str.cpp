@@ -2,12 +2,12 @@
 #include <string.h>
 #include "memory.h"
 
-void str_app(char* s, char* app)
+void str_app(char* s, const char* app)
 {
     str_app_s(s, app, strlen(app));
 }
 
-void str_app_s(char* s, char* app, u32 app_len)
+void str_app_s(char* s, const char* app, u32 app_len)
 {
     u32 s_len = strlen(s);
     u32 tot_len = s_len + app_len;
@@ -16,12 +16,12 @@ void str_app_s(char* s, char* app, u32 app_len)
     s[tot_len] = 0;
 }
 
-char* str_copy(char* s)
+char* str_copy(const char* s)
 {
     return str_copy_s(s, strlen(s));
 }
 
-char* str_copy_s(char* s, u32 size)
+char* str_copy_s(const char* s, u32 size)
 {
     char* ns = mema_tn(char, size + 1);
     memcpy(ns, s, size);
@@ -29,12 +29,12 @@ char* str_copy_s(char* s, u32 size)
     return ns;
 }
 
-bool str_eql(char* s1, char* s2)
+bool str_eql(const char* s1, const char* s2)
 {
     return strcmp(s1, s2) == 0;
 }
 
-i32 str_eql_arr(char* s, char** comp_arr, u32 comp_arr_num)
+i32 str_eql_arr(const char* s, const char** comp_arr, u32 comp_arr_num)
 {
     for (u32 i = 0; i < comp_arr_num; ++i)
     {
@@ -45,7 +45,7 @@ i32 str_eql_arr(char* s, char** comp_arr, u32 comp_arr_num)
     return -1;
 }
 
-hash64 str_hash(char* s)
+hash64 str_hash(const char* s)
 {
     u32 len = strlen(s);
     i64 seed = 0;
