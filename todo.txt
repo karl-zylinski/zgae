@@ -8,22 +8,12 @@
 
 - temp allocator, some cool marcro thing that create a a variable and acts on it, what?
 
-- some hmh things:
-
-#define internal static
-#endif
-#define local_persist static
-#define global static
 
 ### LESS IMPORTANT ###
-
-- move Handle things out of global_includes? make it smaller in general
 
 - make da_insert prettier
 
 - magical central place where handle pools are registered with names and stuff and then we can give it a handle and it will tell us type and subtype information (with string names!!) from it. wow such types (fix resource_store.c create func)
-
-- tidy up array.h (look at nothings impl), think about name again 
 
 - put renderer on own thread
 
@@ -42,5 +32,3 @@
 - add library shader compiler or invoke commandline shader compiler (so we can use glsl)
 
 - make resource that is compiled into just a struct and then loaded quickly (data compiler)
-
-- array: make array_internal_ensure_min_size func use array_internal_grow with capacity parameter! i.e. grow will then make it at least as big as the supplied value, maybe bigger (geometric growth)
