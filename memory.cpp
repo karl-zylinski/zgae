@@ -5,12 +5,12 @@
 #include <stdlib.h>
 
 #ifdef ENABLE_MEMORY_TRACING
-    typedef struct AllocationCallstack 
+    struct AllocationCallstack 
     {
         char** callstack;
         u32 callstack_num;
         void* ptr;
-    } AllocationCallstack;
+    };
 
     #define MAX_ALLOC_CALLSTACKS 8096
     static AllocationCallstack alloc_callstacks[MAX_ALLOC_CALLSTACKS];

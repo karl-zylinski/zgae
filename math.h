@@ -2,6 +2,8 @@
 #include "math_types.h"
 
 #define PI 3.14159265358979323846
+#define SMALL_NUMBER 0.00001f
+
 Mat4 mat4_create_projection_matrix(f32 bb_width, f32 bb_height);
 Mat4 mat4_identity();
 Mat4 mat4_from_rotation_and_translation(Quat* q, Vec3* t);

@@ -13,6 +13,7 @@
 #include "file.h"
 #include "jzon.h"
 #include "obj_loader.h"
+#include "handle.h"
 
 struct ShaderRenderResource
 {
@@ -58,7 +59,7 @@ static char* render_resource_type_names[] =
 
 static RenderResourceType resource_type_from_str(char* str)
 {
-    i32 idx = str_eql_arr(str, render_resource_type_names, arrnum(render_resource_type_names));
+    i32 idx = str_eql_arr(str, render_resource_type_names, sizeof(render_resource_type_names)/sizeof(render_resource_type_names[0]));
     check(idx > 0 && idx < RENDER_RESOURCE_TYPE_NUM, "Invalid render resource type");
     return (RenderResourceType)idx;
 }
@@ -104,7 +105,7 @@ Renderer* renderer_create(WindowType window_type, void* window_data)
 
 static void deinit_resource(Renderer* rs, RenderResourceHandle h)
 {
-    switch((RenderResourceType)handle_type(h))
+    switch(handle_type(h))
     {
         case RENDER_RESOURCE_TYPE_SHADER: {
             renderer_backend_destroy_shader(rs->rbs, get_resource(rs->resources, ShaderRenderResource, h)->backend_state);
@@ -126,7 +127,7 @@ static void deinit_resource(Renderer* rs, RenderResourceHandle h)
 
 static void init_resource(Renderer* rs, RenderResourceHandle h)
 {
-    switch((RenderResourceType)handle_type(h))
+    switch(handle_type(h))
     {
         case RENDER_RESOURCE_TYPE_SHADER: {
             ShaderRenderResource* sr = get_resource(rs->resources, ShaderRenderResource, h);
@@ -189,7 +190,7 @@ static void destroy_resource(Renderer* rs, RenderResourceHandle h)
 {
     deinit_resource(rs, h);
 
-    switch((RenderResourceType)handle_type(h))
+    switch(handle_type(h))
     {
         case RENDER_RESOURCE_TYPE_SHADER: {
             memf(get_resource(rs->resources, ShaderRenderResource, h)->source);

@@ -3,6 +3,7 @@
 #include "dynamic_array.h"
 #include "str.h"
 #include "memory.h"
+#include "handle.h"
 
 struct HandlePool
 {

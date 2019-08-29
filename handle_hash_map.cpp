@@ -1,6 +1,7 @@
 #include "handle_hash_map.h"
 #include "memory.h"
 #include "dynamic_array.h"
+#include "handle.h"
 
 struct HandleHashMap
 {

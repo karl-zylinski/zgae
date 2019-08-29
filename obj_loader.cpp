@@ -109,10 +109,11 @@ static void skip_line(ParserState* ps)
     ++ps->head;
 }
 
-typedef enum ParseMode {
+enum ParseMode
+{
     PARSE_MODE_ALL,
     PARSE_MODE_ONLY_VERTICES
-} ParseMode;
+};
 
 static ParsedData parse(char* data, unsigned data_size, ParseMode mode)
 {
