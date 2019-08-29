@@ -21,6 +21,7 @@ typedef float f32;
 typedef double f64;
 
 typedef i64 hash64;
+typedef i8 byte;
 
 
 // Handles

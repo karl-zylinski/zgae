@@ -2,7 +2,7 @@
 #include "handle_pool.h"
 #include "debug.h"
 #include "memory.h"
-#include "array.h"
+#include "dynamic_array.h"
 #include <execinfo.h>
 
 static Backtrace get_backtrace(u32 backtrace_size)
@@ -68,26 +68,26 @@ int main()
     }
 
     {
-        Array<u32> a = {};
-        array_push(&a, 5u);
-        array_push(&a, 2u);
+        u32* a = NULL;
+        da_push(a, 5u);
+        da_push(a, 2u);
 
         assert(a[0] == 5u);
         assert(a[1] == 2u);
 
-        array_insert(&a, 10u, 1);
+        da_insert(a, 10u, 1);
 
         assert(a[0] == 5u);
         assert(a[1] == 10u);
         assert(a[2] == 2u);
 
-        u32 p = array_pop(&a);
+        u32 p = da_pop(a);
         assert(p == 2u);
-        assert(a.num == 2);
+        assert(da_num(a) == 2);
         assert(a[0] == 5u);
         assert(a[1] == 10u);
-
-        array_fill_and_set(&a, 137u, 10);
-        assert(a[10] == 137u);
+        da_free(a);
     }
+
+    info("All tests completed without errors");
 }

@@ -1,6 +1,6 @@
 #include "jzon.h"
 #include <string.h>
-#include "array.h"
+#include "dynamic_array.h"
 #include "memory.h"
 #include "str.h"
 
@@ -35,18 +35,20 @@ static bool is_multiline_string_quotes(char* str)
     return is_str(str, "\"\"\"");
 }
 
-static u64 find_table_pair_insertion_index(Array<JzonKeyValuePair>& table, i64 key_hash)
+static u64 find_table_pair_insertion_index(JzonKeyValuePair* table, i64 key_hash)
 {
-    if (table.num == 0)
+    u32 n = da_num(table);
+
+    if (n == 0)
         return 0;
 
-    for (unsigned i = 0; i < table.num; ++i)
+    for (u32 i = 0; i < n; ++i)
     {
         if (table[i].key_hash > key_hash)
             return i;
     }
 
-    return table.num;
+    return n;
 }
 
 static bool is_whitespace(char c)
@@ -197,7 +199,7 @@ static bool parse_array(mut char** input, mut JzonValue* output)
         return true;
     }
 
-    Array<JzonValue> array = {};
+    JzonValue* array = NULL;
 
     while (current(input))
     {
@@ -207,7 +209,7 @@ static bool parse_array(mut char** input, mut JzonValue* output)
         if (!parse_value(input, &value))
             return false;
 
-        array_push(&array, value);
+        da_push(array, value);
         skip_whitespace(input);
 
         if (current(input) == ']')
@@ -217,9 +219,9 @@ static bool parse_array(mut char** input, mut JzonValue* output)
         }
     }
     
-    output->size = array.num;
-    output->array_val = (JzonValue*)array_copy_data(&array);
-    array_destroy(&array);
+    output->size = da_num(array);
+    output->array_val = (JzonValue*)da_copy_data(array);
+    da_free(array);
     return true;
 }
 
@@ -240,7 +242,7 @@ static bool parse_table(mut char** input, mut JzonValue* output, bool root_table
         return true;
     }
 
-    Array<JzonKeyValuePair> table = {};
+    JzonKeyValuePair* table = NULL;
 
     while (current(input))
     {
@@ -261,7 +263,7 @@ static bool parse_table(mut char** input, mut JzonValue* output, bool root_table
         pair.key = key;
         pair.key_hash = str_hash(key);
         pair.val = value;
-        array_insert(&table, pair, find_table_pair_insertion_index(table, pair.key_hash));
+        da_insert(table, pair, find_table_pair_insertion_index(table, pair.key_hash));
         skip_whitespace(input);
 
         if (current(input) == '}')
@@ -271,9 +273,9 @@ static bool parse_table(mut char** input, mut JzonValue* output, bool root_table
         }
     }
 
-    output->size = table.num;
-    output->table_val = array_copy_data(&table);
-    array_destroy(&table);
+    output->size = da_num(table);
+    output->table_val = (JzonKeyValuePair*)da_copy_data(table);
+    da_free(table);
     return true;
 }
 

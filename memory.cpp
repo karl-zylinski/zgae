@@ -100,10 +100,10 @@ void* memra(mut void* cur, size_t s)
     return p;
 }
 
-void* memra_zero(mut void* cur, size_t s)
+void* memra_zero_added(mut void* cur, size_t new_size, size_t old_size)
 {
-    void* p = memra(cur, s);
-    memzero(p, s);
+    void* p = memra(cur, new_size);
+    memzero(((byte*)p) + old_size, new_size - old_size);
     return p;
 }
 

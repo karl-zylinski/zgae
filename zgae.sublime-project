@@ -1,34 +1,35 @@
 {
-    "folders":
-    [
-        {
-            "path": "."
-        }
-    ],
-    "build_systems": [
-        {
-            "name": "zgae",
-            "shell_cmd": "./build.py",
-            "file_regex": "(\\S*?):(\\d+):(\\d+): (error.*|fatal error.*|warning.*)",
-
-            "variants": [
-                {
-                    "name": "build and run",
-                    "shell_cmd": "./build.py && ./zgae",
-                },
-                {
-                    "name": "build and debug",
-                    "shell_cmd": "./build.py && gnome-terminal -- lldb zgae -o r",
-                },
-                {
-                    "name": "static code analysis",
-                    "shell_cmd": "scan-build ./build.py static_analysis",
-                },
-                {
-                    "name": "build and run tests",
-                    "shell_cmd": "./build.py tests && gnome-terminal -- lldb tests -o r",
-                }
-            ]
-        }
-    ]
+	"build_systems":
+	[
+		{
+			"file_regex": "(\\S*?):(\\d+):(\\d+): (error.*|fatal error.*|warning.*)",
+			"name": "zgae",
+			"shell_cmd": "./build.py",
+			"variants":
+			[
+				{
+					"name": "build and run",
+					"shell_cmd": "./build.py && ./zgae"
+				},
+				{
+					"name": "build and debug",
+					"shell_cmd": "./build.py && gnome-terminal -- lldb zgae -o r"
+				},
+				{
+					"name": "static code analysis",
+					"shell_cmd": "scan-build ./build.py static_analysis"
+				},
+				{
+					"name": "build and run tests",
+					"shell_cmd": "./build.py tests && gnome-terminal -- lldb tests -o r"
+				}
+			]
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	]
 }

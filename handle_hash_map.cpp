@@ -1,11 +1,11 @@
 #include "handle_hash_map.h"
 #include "memory.h"
-#include "array.h"
+#include "dynamic_array.h"
 
 struct HandleHashMap
 {
-    Array<hash64> hashes;
-    Array<Handle> handles;
+    hash64* hashes; // dynamic
+    Handle* handles; // dynamic
 };
 
 HandleHashMap* handle_hash_map_create()
@@ -15,34 +15,38 @@ HandleHashMap* handle_hash_map_create()
 
 void handle_hash_map_destroy(mut HandleHashMap* hhp)
 {
-    array_destroy(&hhp->hashes);
-    array_destroy(&hhp->handles);
+    da_free(hhp->hashes);
+    da_free(hhp->handles);
     memf(hhp);
 }
 
-static size_t find_mapping_insertion_idx(Array<hash64>& hashes, hash64 hash)
+static u32 find_mapping_insertion_idx(hash64* hashes, hash64 hash)
 {
-    if (hashes.num == 0)
+    u32 n = da_num(hashes);
+
+    if (n == 0)
         return 0;
 
-    for (size_t i = 0; i < hashes.num; ++i)
+    for (u32 i = 0; i < n; ++i)
     {
         if (hashes[i] > hash)
             return i;
     }
 
-    return hashes.num;
+    return n;
 }
 
-static size_t mapping_get_idx(Array<hash64>& hashes, hash64 hash)
+static u32 mapping_get_idx(hash64* hashes, hash64 hash)
 {
-    if (hashes.num == 0)
+    u32 n = da_num(hashes);
+
+    if (n == 0)
         return -1;
 
-    size_t mz = hashes.num;
-    size_t first = 0;
-    size_t last = mz - 1;
-    size_t middle = (first + last) / 2;
+    u32 mz = n;
+    u32 first = 0;
+    u32 last = mz - 1;
+    u32 middle = (first + last) / 2;
 
     while (first <= last)
     {
@@ -68,22 +72,22 @@ void handle_hash_map_add(mut HandleHashMap* hhp, hash64 hash, Handle handle)
 {
     u32 idx = find_mapping_insertion_idx(hhp->hashes, hash);
 
-    if (idx < hhp->hashes.num && hhp->handles[idx] == HANDLE_INVALID) // reuse dead slot
+    if (idx < da_num(hhp->hashes) && hhp->handles[idx] == HANDLE_INVALID) // reuse dead slot
     {
         hhp->handles[idx] = handle;
         hhp->hashes[idx] = hash;
         return;
     }
 
-    array_insert(&hhp->hashes, hash, idx);
-    array_insert(&hhp->handles, handle, idx);
+    da_insert(hhp->hashes, hash, idx);
+    da_insert(hhp->handles, handle, idx);
 }
 
 Handle handle_hash_map_get(HandleHashMap* hhp, hash64 h)
 {
-    size_t idx = mapping_get_idx(hhp->hashes, h);
+    u32 idx = mapping_get_idx(hhp->hashes, h);
 
-    if (idx == (size_t)-1)
+    if (idx == (u32)-1)
         return HANDLE_INVALID;
 
     return hhp->handles[idx];
@@ -91,9 +95,9 @@ Handle handle_hash_map_get(HandleHashMap* hhp, hash64 h)
 
 void handle_hash_map_remove(mut HandleHashMap* hhp, hash64 h)
 {
-    size_t idx = mapping_get_idx(hhp->hashes, h);
+    u32 idx = mapping_get_idx(hhp->hashes, h);
 
-    if (idx == (size_t)-1)
+    if (idx == (u32)-1)
         return;
 
     hhp->hashes[idx] = 0;

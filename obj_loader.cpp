@@ -1,5 +1,5 @@
 #include "obj_loader.h"
-#include "array.h"
+#include "dynamic_array.h"
 #include "file.h"
 #include "memory.h"
 #include "math.h"
@@ -26,10 +26,10 @@ typedef struct ParsedFace
 
 typedef struct ParsedData
 {
-    Array<Vec3> vertices;
-    Array<Vec3> normals;
-    Array<Vec2> uvs;
-    Array<ParsedFace> faces;
+    Vec3* vertices; // dynamic
+    Vec3* normals; // dynamic
+    Vec2* uvs; // dynamic
+    ParsedFace* faces; // dynamic
 } ParsedData;
 
 static void skip_to_numeric(mut ParserState* ps)
@@ -47,7 +47,7 @@ static void parse_uv(mut ParserState* ps, mut ParsedData* pd)
     uv.x = strtof(ps->head, &ps->head);
     skip_to_numeric(ps);
     uv.y = strtof(ps->head, &ps->head);
-    array_push(&pd->uvs, uv);
+    da_push(pd->uvs, uv);
 }
 
 static void parse_normal(mut ParserState* ps, mut ParsedData* pd)
@@ -59,7 +59,7 @@ static void parse_normal(mut ParserState* ps, mut ParsedData* pd)
     normal.y = strtof(ps->head, &ps->head);
     skip_to_numeric(ps);
     normal.z = strtof(ps->head, &ps->head);
-    array_push(&pd->normals, normal);
+    da_push(pd->normals, normal);
 }
 
 static void parse_vertex(mut ParserState* ps, mut ParsedData* pd)
@@ -71,7 +71,7 @@ static void parse_vertex(mut ParserState* ps, mut ParsedData* pd)
     vertex.y = strtof(ps->head, &ps->head);
     skip_to_numeric(ps);
     vertex.z = strtof(ps->head, &ps->head);
-    array_push(&pd->vertices, vertex);
+    da_push(pd->vertices, vertex);
 }
 
 static void parse_face(mut ParserState* ps, mut ParsedData* pd)
@@ -95,7 +95,7 @@ static void parse_face(mut ParserState* ps, mut ParsedData* pd)
     face.u3 = strtol(ps->head, &ps->head, 10) - 1;
     skip_to_numeric(ps);
     face.n3 = strtol(ps->head, &ps->head, 10) - 1;
-    array_push(&pd->faces, face);
+    da_push(pd->faces, face);
 }
 
 static void skip_line(mut ParserState* ps)
@@ -144,11 +144,11 @@ static ParsedData parse(char* data, unsigned data_size, ParseMode mode)
     return pd;
 }
 
-static int get_existing_vertex(Array<MeshVertex>* vertices, MeshVertex* v1)
+static int get_existing_vertex(MeshVertex* vertices, MeshVertex* v1)
 {
-    for (unsigned i = 0; i < vertices->num; ++i)
+    for (unsigned i = 0; i < da_num(vertices); ++i)
     {
-        MeshVertex* v2 = vertices->data + i;
+        MeshVertex* v2 = vertices + i;
 
         if (vec3_almost_eql(&v1->position, &v2->position)
             && vec3_almost_eql(&v1->normal, &v2->normal)
@@ -163,7 +163,7 @@ static int get_existing_vertex(Array<MeshVertex>* vertices, MeshVertex* v1)
 }
 
 static void add_vertex_to_mesh(
-    mut Array<MeshVertex>* vertices, mut Array<MeshIndex>* indices,
+    mut MeshVertex** vertices, mut MeshIndex** indices,
     Vec3* pos, Vec3* normal, Vec2* texcoord, Vec4* c)
 {
     MeshVertex v = {
@@ -173,16 +173,16 @@ static void add_vertex_to_mesh(
         .color = *c
     };
     
-    int i = get_existing_vertex(vertices, &v);
+    int i = get_existing_vertex(*vertices, &v);
 
     if (i != -1)
     {
-        array_push(indices, (MeshIndex)i);
+        da_push(*indices, (MeshIndex)i);
         return;
     }
 
-    array_push(indices, (MeshIndex)vertices->num);
-    array_push(vertices, v);
+    da_push(*indices, (MeshIndex)(da_num(*vertices)));
+    da_push(*vertices, v);
 }
 
 ObjLoadResult obj_load(char* filename)
@@ -197,10 +197,10 @@ ObjLoadResult obj_load(char* filename)
 
     ParsedData pd = parse((char*)flr.data, flr.data_size, PARSE_MODE_ALL);
     memf(flr.data);
-    Array<MeshVertex> vertices = {};
-    Array<MeshIndex> indices = {};
+    MeshVertex* vertices = NULL;
+    MeshIndex* indices = NULL;
 
-    for (u32 i = 0; i < pd.faces.num; ++i)
+    for (u32 i = 0; i < da_num(pd.faces); ++i)
     {
         ParsedFace& f = pd.faces[i];
         Vec4 white = {1,1,1,1};
@@ -209,20 +209,20 @@ ObjLoadResult obj_load(char* filename)
         add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f.v3], &pd.normals[f.n3], &pd.uvs[f.u3], &white);
     }
 
-    array_destroy(&pd.vertices);
-    array_destroy(&pd.normals);
-    array_destroy(&pd.uvs);
-    array_destroy(&pd.faces);
+    da_free(pd.vertices);
+    da_free(pd.normals);
+    da_free(pd.uvs);
+    da_free(pd.faces);
 
     Mesh m = {
-        .vertices = array_copy_data(&vertices),
-        .vertices_num = (u32)vertices.num,
-        .indices =  array_copy_data(&indices),
-        .indices_num = (u32)indices.num
+        .vertices = (MeshVertex*)da_copy_data(vertices),
+        .vertices_num = (u32)da_num(vertices),
+        .indices = (MeshIndex*)da_copy_data(indices),
+        .indices_num = (u32)da_num(indices)
     };
 
-    array_destroy(&vertices);
-    array_destroy(&indices);
+    da_free(vertices);
+    da_free(indices);
 
     ObjLoadResult olr = {
         .ok = true,
@@ -247,8 +247,8 @@ ObjLoadVerticesResult obj_load_only_vertices(char* filename)
 
     ObjLoadVerticesResult olr = {
         .ok = true,
-        .vertices = array_copy_data(&pd.vertices),
-        .vertices_num = (u32)pd.vertices.num
+        .vertices = (Vec3*)da_copy_data(pd.vertices),
+        .vertices_num = (u32)da_num(pd.vertices)
     };
 
     return olr;

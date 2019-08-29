@@ -2,7 +2,7 @@
 #include "renderer_backend.h"
 #include "memory.h"
 #include "handle_pool.h"
-#include "array.h"
+#include "dynamic_array.h"
 #include "debug.h"
 #include "render_resource_types.h"
 #include "render_resource.h"
@@ -45,8 +45,8 @@ struct WorldObject {
 };
 
 struct WorldRenderResource {
-    Array<WorldObject> objects;
-    Array<size_t> free_object_indices; // holes in objects
+    WorldObject* objects; // dynamic
+    u32* free_object_indices; // dynamic, holes in objects
 };
 
 static char* render_resource_type_names[] =
@@ -78,8 +78,8 @@ struct Renderer
 {
     RendererBackend* rbs;
 
-    // Note that these are _render resources_, they have nothing to do with non-render stuff!
-    Array<RenderResource> resources;
+    RenderResource* resources;
+    u32 resources_num;
     HandleHashMap* resource_name_to_handle;
     HandlePool* resource_handle_pool;
 };
@@ -221,7 +221,7 @@ static void destroy_resource(mut Renderer* rs, RenderResourceHandle h)
 
         case RenderResourceType::World: {
             WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, h);
-            array_destroy(&w->objects);
+            da_free(w->objects);
         } break;
 
         default: error("Invalid resource in render resource list");
@@ -483,7 +483,15 @@ RenderResourceHandle renderer_resource_load(mut Renderer* rs, char* filename)
 
     RenderResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, (u32)type);
     r.handle = h;
-    array_fill_and_set(&rs->resources, r, handle_index(h));
+
+    u32 num_needed_resources = handle_index(h) + 1;
+    if (num_needed_resources > rs->resources_num)
+    {
+        rs->resources = (RenderResource*)memra_zero_added(rs->resources, num_needed_resources * sizeof(RenderResource), rs->resources_num * sizeof(RenderResource));
+        rs->resources_num = num_needed_resources;
+    }
+    rs->resources[handle_index(h)] = r;
+
     init_resource(rs, h);
     return h;
 }
@@ -494,10 +502,10 @@ void renderer_destroy(mut Renderer* rs)
     renderer_backend_wait_until_idle(rs->rbs);
     
     info("Destroying all render resources");
-    for (size_t i = 0; i < rs->resources.num; ++i)
+    for (size_t i = 0; i < rs->resources_num; ++i)
         destroy_resource(rs, rs->resources[i].handle);
 
-    array_destroy(&rs->resources);
+    memf(rs->resources);
     renderer_backend_destroy(rs->rbs);
     handle_hash_map_destroy(rs->resource_name_to_handle);
     handle_pool_destroy(rs->resource_handle_pool);
@@ -511,7 +519,14 @@ RenderResourceHandle renderer_create_world(mut Renderer* rs)
         .handle = h,
         .data = mema_t(WorldRenderResource)
     };
-    array_fill_and_set(&rs->resources, r, handle_index(h));
+
+    u32 num_needed_resources = handle_index(h) + 1;
+    if (num_needed_resources > rs->resources_num)
+    {
+        rs->resources = (RenderResource*)memra_zero_added(rs->resources, num_needed_resources * sizeof(RenderResource), rs->resources_num * sizeof(RenderResource));
+        rs->resources_num = num_needed_resources;
+    }
+    rs->resources[handle_index(h)] = r;
     return h;
 }
 
@@ -524,22 +539,22 @@ size_t renderer_world_add(mut Renderer* rs, RenderResourceHandle world, RenderRe
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
 
-    if (w->free_object_indices.num > 0)
+    if (da_num(w->free_object_indices) > 0)
     {
-        size_t idx = array_pop(&w->free_object_indices);
+        u32 idx = da_pop(w->free_object_indices);
         w->objects[idx].mesh = mesh;
         w->objects[idx].model = *model;
         return idx;
     }
 
-    size_t idx = w->objects.num;
+    u32 idx = da_num(w->objects);
 
     WorldObject wo = {
         .mesh = mesh,
         .model = *model
     };
 
-    array_push(&w->objects, wo);
+    da_push(w->objects, wo);
     return idx;
 }
 
@@ -548,7 +563,7 @@ void renderer_world_remove(mut Renderer* rs, RenderResourceHandle world, size_t 
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
     check(w->objects[idx].mesh == HANDLE_INVALID, "Trying to remove from world twice");
     w->objects[idx].mesh = HANDLE_INVALID;
-    array_push(&w->free_object_indices, idx);
+    da_push(w->free_object_indices, idx);
 }
 
 void renderer_world_move(mut Renderer* rs, RenderResourceHandle world, u32 idx, Mat4* model)
@@ -606,9 +621,9 @@ void renderer_draw_world(Renderer* rs, RenderResourceHandle pipeline_handle, Ren
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world_handle);
 
-    for (size_t i = 0; i < w->objects.num; ++i)
+    for (size_t i = 0; i < da_num(w->objects); ++i)
     {
-        WorldObject* obj = w->objects.data + i;
+        WorldObject* obj = w->objects + i;
 
         if (obj->mesh == HANDLE_INVALID)
             continue;
@@ -633,9 +648,9 @@ void renderer_surface_resized(mut Renderer* rs, u32 w, u32 h)
     renderer_backend_wait_until_idle(rs->rbs);
     renderer_backend_surface_resized(rs->rbs, w, h);
 
-    for (size_t i = 0; i < rs->resources.num; ++i)
+    for (size_t i = 0; i < rs->resources_num; ++i)
     {
-        RenderResource* rr = rs->resources.data + i;
+        RenderResource* rr = rs->resources + i;
 
         if (rr->flag & RENDER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT)
             reinit_resource(rs, rr->handle);
