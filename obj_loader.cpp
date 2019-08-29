@@ -3,6 +3,7 @@
 #include "file.h"
 #include "memory.h"
 #include "math.h"
+#include <stdlib.h>
 
 typedef struct ParserState
 {
@@ -32,7 +33,7 @@ typedef struct ParsedData
     ParsedFace* faces; // dynamic
 } ParsedData;
 
-static void skip_to_numeric(mut ParserState* ps)
+static void skip_to_numeric(ParserState* ps)
 {
     while (ps->head < ps->end && (*ps->head < '0' || *ps->head > '9') && *ps->head != '-')
     {
@@ -40,7 +41,7 @@ static void skip_to_numeric(mut ParserState* ps)
     }
 }
 
-static void parse_uv(mut ParserState* ps, mut ParsedData* pd)
+static void parse_uv(ParserState* ps, ParsedData* pd)
 {
     Vec2 uv = {};
     skip_to_numeric(ps);
@@ -50,7 +51,7 @@ static void parse_uv(mut ParserState* ps, mut ParsedData* pd)
     da_push(pd->uvs, uv);
 }
 
-static void parse_normal(mut ParserState* ps, mut ParsedData* pd)
+static void parse_normal(ParserState* ps, ParsedData* pd)
 {
     Vec3 normal = {};
     skip_to_numeric(ps);
@@ -62,7 +63,7 @@ static void parse_normal(mut ParserState* ps, mut ParsedData* pd)
     da_push(pd->normals, normal);
 }
 
-static void parse_vertex(mut ParserState* ps, mut ParsedData* pd)
+static void parse_vertex(ParserState* ps, ParsedData* pd)
 {
     Vec3 vertex = {};
     skip_to_numeric(ps);
@@ -74,7 +75,7 @@ static void parse_vertex(mut ParserState* ps, mut ParsedData* pd)
     da_push(pd->vertices, vertex);
 }
 
-static void parse_face(mut ParserState* ps, mut ParsedData* pd)
+static void parse_face(ParserState* ps, ParsedData* pd)
 {
     ParsedFace face = {};
     skip_to_numeric(ps);
@@ -98,7 +99,7 @@ static void parse_face(mut ParserState* ps, mut ParsedData* pd)
     da_push(pd->faces, face);
 }
 
-static void skip_line(mut ParserState* ps)
+static void skip_line(ParserState* ps)
 {
     while (ps->head < ps->end && *ps->head != '\n')
     {
@@ -163,7 +164,7 @@ static int get_existing_vertex(MeshVertex* vertices, MeshVertex* v1)
 }
 
 static void add_vertex_to_mesh(
-    mut MeshVertex** vertices, mut MeshIndex** indices,
+    MeshVertex** vertices, MeshIndex** indices,
     Vec3* pos, Vec3* normal, Vec2* texcoord, Vec4* c)
 {
     MeshVertex v = {

@@ -100,7 +100,7 @@ Renderer* renderer_create(WindowType window_type, void* window_data)
 
 #define get_resource(r, t, h) ((t*)(r[handle_index(h)]).data)
 
-static void deinit_resource(mut Renderer* rs, RenderResourceHandle h)
+static void deinit_resource(Renderer* rs, RenderResourceHandle h)
 {
     switch((RenderResourceType)handle_type(h))
     {
@@ -122,7 +122,7 @@ static void deinit_resource(mut Renderer* rs, RenderResourceHandle h)
     }
 }
 
-static void init_resource(mut Renderer* rs, RenderResourceHandle h)
+static void init_resource(Renderer* rs, RenderResourceHandle h)
 {
     switch((RenderResourceType)handle_type(h))
     {
@@ -183,7 +183,7 @@ static void init_resource(mut Renderer* rs, RenderResourceHandle h)
     }
 }
 
-static void destroy_resource(mut Renderer* rs, RenderResourceHandle h)
+static void destroy_resource(Renderer* rs, RenderResourceHandle h)
 {
     deinit_resource(rs, h);
 
@@ -232,7 +232,7 @@ static void destroy_resource(mut Renderer* rs, RenderResourceHandle h)
     handle_hash_map_remove(rs->resource_name_to_handle, rs->resources[handle_index(h)].name_hash);
 }
 
-static void reinit_resource(mut Renderer* rs, RenderResourceHandle h)
+static void reinit_resource(Renderer* rs, RenderResourceHandle h)
 {
     deinit_resource(rs, h);
     init_resource(rs, h);
@@ -300,7 +300,7 @@ static ShaderType shader_type_str_to_enum(char* str)
     return ShaderType::Invalid;
 }
 
-RenderResourceHandle renderer_resource_load(mut Renderer* rs, char* filename)
+RenderResourceHandle renderer_resource_load(Renderer* rs, char* filename)
 {
     hash64 name_hash = str_hash(filename);
     RenderResourceHandle existing = handle_hash_map_get(rs->resource_name_to_handle, name_hash);
@@ -496,13 +496,13 @@ RenderResourceHandle renderer_resource_load(mut Renderer* rs, char* filename)
     return h;
 }
 
-void renderer_destroy(mut Renderer* rs)
+void renderer_destroy(Renderer* rs)
 {
     info("Destroying render");
     renderer_backend_wait_until_idle(rs->rbs);
     
     info("Destroying all render resources");
-    for (size_t i = 0; i < rs->resources_num; ++i)
+    for (u32 i = 0; i < rs->resources_num; ++i)
         destroy_resource(rs, rs->resources[i].handle);
 
     memf(rs->resources);
@@ -512,7 +512,7 @@ void renderer_destroy(mut Renderer* rs)
     memf(rs);
 }
 
-RenderResourceHandle renderer_create_world(mut Renderer* rs)
+RenderResourceHandle renderer_create_world(Renderer* rs)
 {
     RenderResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, (u32)RenderResourceType::World);
     RenderResource r = {
@@ -530,12 +530,12 @@ RenderResourceHandle renderer_create_world(mut Renderer* rs)
     return h;
 }
 
-void renderer_destroy_world(mut Renderer* rs, RenderResourceHandle h)
+void renderer_destroy_world(Renderer* rs, RenderResourceHandle h)
 {
     destroy_resource(rs, h);
 }
 
-size_t renderer_world_add(mut Renderer* rs, RenderResourceHandle world, RenderResourceHandle mesh, Mat4* model)
+u32 renderer_world_add(Renderer* rs, RenderResourceHandle world, RenderResourceHandle mesh, Mat4* model)
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
 
@@ -558,7 +558,7 @@ size_t renderer_world_add(mut Renderer* rs, RenderResourceHandle world, RenderRe
     return idx;
 }
 
-void renderer_world_remove(mut Renderer* rs, RenderResourceHandle world, size_t idx)
+void renderer_world_remove(Renderer* rs, RenderResourceHandle world, u32 idx)
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
     check(w->objects[idx].mesh == HANDLE_INVALID, "Trying to remove from world twice");
@@ -566,7 +566,7 @@ void renderer_world_remove(mut Renderer* rs, RenderResourceHandle world, size_t 
     da_push(w->free_object_indices, idx);
 }
 
-void renderer_world_move(mut Renderer* rs, RenderResourceHandle world, u32 idx, Mat4* model)
+void renderer_world_move(Renderer* rs, RenderResourceHandle world, u32 idx, Mat4* model)
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
     w->objects[idx].model = *model;
@@ -621,7 +621,7 @@ void renderer_draw_world(Renderer* rs, RenderResourceHandle pipeline_handle, Ren
 {
     WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world_handle);
 
-    for (size_t i = 0; i < da_num(w->objects); ++i)
+    for (u32 i = 0; i < da_num(w->objects); ++i)
     {
         WorldObject* obj = w->objects + i;
 
@@ -632,7 +632,7 @@ void renderer_draw_world(Renderer* rs, RenderResourceHandle pipeline_handle, Ren
     }
 }
 
-void renderer_present(mut Renderer* rs)
+void renderer_present(Renderer* rs)
 {
     renderer_backend_present(rs->rbs);
 }
@@ -642,13 +642,13 @@ void renderer_wait_for_new_frame(Renderer* rs)
     renderer_backend_wait_for_new_frame(rs->rbs);
 }
 
-void renderer_surface_resized(mut Renderer* rs, u32 w, u32 h)
+void renderer_surface_resized(Renderer* rs, u32 w, u32 h)
 {
     info("Render resizing to %d x %d", w, h);
     renderer_backend_wait_until_idle(rs->rbs);
     renderer_backend_surface_resized(rs->rbs, w, h);
 
-    for (size_t i = 0; i < rs->resources_num; ++i)
+    for (u32 i = 0; i < rs->resources_num; ++i)
     {
         RenderResource* rr = rs->resources + i;
 

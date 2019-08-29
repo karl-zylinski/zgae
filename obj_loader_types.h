@@ -11,5 +11,5 @@ typedef struct ObjLoadVerticesResult
 {
     bool ok;
     Vec3* vertices;
-    size_t vertices_num;
+    u32 vertices_num;
 } ObjLoadVerticesResult;

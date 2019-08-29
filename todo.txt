@@ -2,17 +2,11 @@
 
 - go over all files and find c -> cpp issues, like * where const T& should be used etc
 
-- fix "what to do" shutdown msg (resource_store.c)
-
-- add render world and draw_world or sumth
-
 - stop using strings, keep only hashes!
 
 - require that resoruce store tells us to specify type enum and type enum names for that store... or is that possible??? the resource constains the enum hummm or wait, just use the type in the handle!
 
 - temp allocator, some cool marcro thing that create a a variable and acts on it, what?
-
-- stop using size_t
 
 - some hmh things:
 

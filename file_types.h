@@ -4,7 +4,7 @@ struct FileLoadResult
 {
     bool ok;
     void* data;
-    size_t data_size;
+    u64 data_size;
 };
 
 enum struct FileLoadMode {

@@ -6,14 +6,14 @@ FileLoadResult file_load(char* filename, FileLoadMode mode)
 {
     FILE* file_handle = fopen(filename, "rb");
 
-    if (file_handle == NULL)
+    if (!file_handle)
     {
         FileLoadResult r = {.ok = false};
         return r;
     }
 
     fseek(file_handle, 0, SEEK_END);
-    size_t s = ftell(file_handle);
+    u64 s = ftell(file_handle);
     fseek(file_handle, 0, SEEK_SET);
     void* d = mema(s + (mode == FileLoadMode::NullTerminated ? 1 : 0));
     fread(d, 1, s, file_handle);

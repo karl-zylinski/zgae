@@ -742,13 +742,13 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
     return rbs;
 }
 
-void renderer_backend_destroy_shader(RendererBackend* rbs, mut RenderBackendShader* s)
+void renderer_backend_destroy_shader(RendererBackend* rbs, RenderBackendShader* s)
 {
     vkDestroyShaderModule(rbs->device, s->module, NULL);
     memf(s);
 }
 
-void renderer_backend_destroy_pipeline(RendererBackend* rbs, mut RenderBackendPipeline* p)
+void renderer_backend_destroy_pipeline(RendererBackend* rbs, RenderBackendPipeline* p)
 {
     for (u32 frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
     {
@@ -768,7 +768,7 @@ void renderer_backend_destroy_pipeline(RendererBackend* rbs, mut RenderBackendPi
     memf(p);
 }
 
-void renderer_backend_destroy_mesh(RendererBackend* rbs, mut RenderBackendMesh* g)
+void renderer_backend_destroy_mesh(RendererBackend* rbs, RenderBackendMesh* g)
 {
     vkDestroyBuffer(rbs->device, g->vertex_buffer, NULL);
     vkFreeMemory(rbs->device, g->vertex_buffer_memory, NULL);
@@ -777,7 +777,7 @@ void renderer_backend_destroy_mesh(RendererBackend* rbs, mut RenderBackendMesh* 
     memf(g);
 }
 
-void renderer_backend_destroy(mut RendererBackend* rbs)
+void renderer_backend_destroy(RendererBackend* rbs)
 {
     info("Destroying Vulkan render backend");
 
@@ -788,7 +788,7 @@ void renderer_backend_destroy(mut RendererBackend* rbs)
         vkWaitForFences(d, 1, &rbs->image_in_flight_fences[i], VK_TRUE, UINT64_MAX);
     }
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(d, rbs->render_finished_semaphores[i], NULL);
         vkDestroySemaphore(d, rbs->image_available_semaphores[i], NULL);
         vkDestroyFence(d, rbs->image_in_flight_fences[i], NULL);
@@ -890,7 +890,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RendererBackend* rbs,
     pipeline->constant_buffers_num = constant_buffers_num;
     VkDescriptorSetLayoutBinding* constant_buffer_bindings = mema_zero_tn(VkDescriptorSetLayoutBinding, constant_buffers_num);
 
-    for (size_t cb_idx = 0; cb_idx < constant_buffers_num; ++cb_idx)
+    for (u32 cb_idx = 0; cb_idx < constant_buffers_num; ++cb_idx)
     {
         PipelineConstantBuffer* cb = pipeline->constant_buffers + cb_idx;
         cb->binding = constant_buffer_binding_indices[cb_idx];
@@ -1059,7 +1059,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RendererBackend* rbs,
     // Shader stage info
     VkPipelineShaderStageCreateInfo* pssci = mema_zero_tn(VkPipelineShaderStageCreateInfo, shader_stages_num);
 
-    for (size_t i = 0; i < shader_stages_num; ++i)
+    for (u32 i = 0; i < shader_stages_num; ++i)
     {
         pssci[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         pssci[i].stage = vk_shader_stage_from_shader_type(shader_stages_types[i]);
@@ -1360,7 +1360,7 @@ void renderer_backend_wait_until_idle(RendererBackend* rbs)
     vkDeviceWaitIdle(rbs->device);
 }
 
-void renderer_backend_surface_resized(mut RendererBackend* rbs, u32 width, u32 height)
+void renderer_backend_surface_resized(RendererBackend* rbs, u32 width, u32 height)
 {
     (void)width;
     (void)height;

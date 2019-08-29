@@ -7,10 +7,10 @@ void str_app(char* s, char* app)
     str_app_s(s, app, strlen(app));
 }
 
-void str_app_s(char* s, char* app, size_t app_len)
+void str_app_s(char* s, char* app, u32 app_len)
 {
-    size_t s_len = strlen(s);
-    size_t tot_len = s_len + app_len;
+    u32 s_len = strlen(s);
+    u32 tot_len = s_len + app_len;
     memra(s, tot_len + 1);
     memcpy(s + s_len, app, app_len);
     s[tot_len] = 0;
@@ -21,7 +21,7 @@ char* str_copy(char* s)
     return str_copy_s(s, strlen(s));
 }
 
-char* str_copy_s(char* s, size_t size)
+char* str_copy_s(char* s, u32 size)
 {
     char* ns = mema_tn(char, size + 1);
     memcpy(ns, s, size);
@@ -47,7 +47,7 @@ i32 str_eql_arr(char* s, char** comp_arr, u32 comp_arr_num)
 
 hash64 str_hash(char* s)
 {
-    size_t len = strlen(s);
+    u32 len = strlen(s);
     i64 seed = 0;
 
     i64 m = 0xc6a4a7935bd1e995ULL;

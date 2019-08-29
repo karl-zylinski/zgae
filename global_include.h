@@ -2,7 +2,6 @@
 // This file is (the only) foracbly included by the compiler!
 
 #include <stdint.h>
-#include <stdlib.h>
 
 
 // Basic types
@@ -47,7 +46,9 @@ static Handle HANDLE_INVALID = -1;
 
 #define SMALL_NUMBER 0.00001f
 
-#define mut
+#ifndef NULL
+    #define NULL 0
+#endif
 
 
 // Forward declaration helpers

@@ -2,6 +2,7 @@
 #include "debug.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef ENABLE_MEMORY_TRACING
     typedef struct AllocationCallstack 
@@ -61,12 +62,12 @@ void memory_init()
     #endif
 }
 
-void memzero(mut void* p, size_t s)
+void memzero(void* p, u64 s)
 {
     memset(p, 0, s);
 }
 
-void* mema(size_t s)
+void* mema(u64 s)
 {
     void* p = malloc(s);
     #ifdef ENABLE_MEMORY_TRACING
@@ -76,14 +77,14 @@ void* mema(size_t s)
     return p;
 }
 
-void* mema_zero(size_t s)
+void* mema_zero(u64 s)
 {
     void* p = mema(s);
     memzero(p, s);
     return p;
 }
 
-void* memra(mut void* cur, size_t s)
+void* memra(void* cur, u64 s)
 {
     #ifdef ENABLE_MEMORY_TRACING
         if (cur)
@@ -100,14 +101,14 @@ void* memra(mut void* cur, size_t s)
     return p;
 }
 
-void* memra_zero_added(mut void* cur, size_t new_size, size_t old_size)
+void* memra_zero_added(void* cur, u64 new_size, u64 old_size)
 {
     void* p = memra(cur, new_size);
     memzero(((byte*)p) + old_size, new_size - old_size);
     return p;
 }
 
-void memf(mut void* p)
+void memf(void* p)
 {
     #ifdef ENABLE_MEMORY_TRACING
         if (p)
@@ -136,14 +137,14 @@ void memory_check_leaks()
     #endif
 }
 
-void* mema_copy(void* data, size_t s)
+void* mema_copy(void* data, u64 s)
 {
     void* p = mema(s);
     memcpy(p, data, s);
     return p;
 }
 
-void mema__repl(mut void** p, size_t s)
+void mema__repl(void** p, u64 s)
 {
     void* np = mema(s);
     memcpy(np, *p, s);

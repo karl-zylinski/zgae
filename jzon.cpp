@@ -3,8 +3,9 @@
 #include "dynamic_array.h"
 #include "memory.h"
 #include "str.h"
+#include <stdlib.h>
 
-static void next(mut char** input)
+static void next(char** input)
 {
     ++*input;
 }
@@ -16,7 +17,7 @@ static char current(char** input)
 
 static bool is_str(char* input, char* str)
 {
-    size_t len = strlen(str);
+    u32 len = strlen(str);
 
     for (unsigned i = 0; i < len; ++i)
     {
@@ -56,7 +57,7 @@ static bool is_whitespace(char c)
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-static void skip_whitespace(mut char** input)
+static void skip_whitespace(char** input)
 {
     while (current(input))
     {
@@ -74,7 +75,7 @@ static void skip_whitespace(mut char** input)
     }
 };
 
-static char* parse_multiline_string(mut char** input)
+static char* parse_multiline_string(char** input)
 {
     if (!is_multiline_string_quotes(*input))
         return NULL;
@@ -119,7 +120,7 @@ static char* parse_multiline_string(mut char** input)
     return NULL;
 }
 
-static char* parse_string_internal(mut char** input)
+static char* parse_string_internal(char** input)
 {
     if (current(input) != '"')
         return NULL;
@@ -146,7 +147,7 @@ static char* parse_string_internal(mut char** input)
     return NULL;
 }
 
-static char* parse_keyname(mut char** input)
+static char* parse_keyname(char** input)
 {
     if (current(input) == '"')
         return parse_string_internal(input);
@@ -168,7 +169,7 @@ static char* parse_keyname(mut char** input)
     return NULL;
 }
 
-static bool parse_string(mut char** input, mut JzonValue* output)
+static bool parse_string(char** input, JzonValue* output)
 {
     char* str = parse_string_internal(input);
 
@@ -180,9 +181,9 @@ static bool parse_string(mut char** input, mut JzonValue* output)
     return true;
 }
 
-static bool parse_value(mut char** input, mut JzonValue* output);
+static bool parse_value(char** input, JzonValue* output);
 
-static bool parse_array(mut char** input, mut JzonValue* output)
+static bool parse_array(char** input, JzonValue* output)
 {   
     if (current(input) != '[')
         return false;
@@ -225,7 +226,7 @@ static bool parse_array(mut char** input, mut JzonValue* output)
     return true;
 }
 
-static bool parse_table(mut char** input, mut JzonValue* output, bool root_table)
+static bool parse_table(char** input, JzonValue* output, bool root_table)
 {
     if (current(input) == '{')
         next(input);
@@ -279,7 +280,7 @@ static bool parse_table(mut char** input, mut JzonValue* output, bool root_table
     return true;
 }
 
-static bool parse_number(mut char** input, mut JzonValue* output)
+static bool parse_number(char** input, JzonValue* output)
 {
     bool is_float = false;
     char* start = (char*)*input;
@@ -325,7 +326,7 @@ static bool parse_number(mut char** input, mut JzonValue* output)
     return true;
 }
 
-static bool parse_true(mut char** input, mut JzonValue* output)
+static bool parse_true(char** input, JzonValue* output)
 {
     if (is_str(*input, "true"))
     {
@@ -337,7 +338,7 @@ static bool parse_true(mut char** input, mut JzonValue* output)
     return false;
 }
 
-static bool parse_false(mut char** input, mut JzonValue* output)
+static bool parse_false(char** input, JzonValue* output)
 {
     if (is_str(*input, "false"))
     {
@@ -350,7 +351,7 @@ static bool parse_false(mut char** input, mut JzonValue* output)
     return false;
 }
 
-static bool parse_null(mut char** input, mut JzonValue* output)
+static bool parse_null(char** input, JzonValue* output)
 {
     if (is_str(*input, "null"))
     {
@@ -362,7 +363,7 @@ static bool parse_null(mut char** input, mut JzonValue* output)
     return false;
 }
 
-static bool parse_value(mut char** input, mut JzonValue* output)
+static bool parse_value(char** input, JzonValue* output)
 {
     skip_whitespace(input);
     char ch = current(input);
@@ -394,7 +395,7 @@ JzonParseResult jzon_parse(char* input)
     return pr;
 }
 
-void jzon_free(mut JzonValue* val)
+void jzon_free(JzonValue* val)
 {
     if (val->is_table)
     {
@@ -429,9 +430,9 @@ JzonValue* jzon_get(JzonValue* table, char* key)
     
     i64 key_hash = str_hash(key);
 
-    size_t first = 0;
-    size_t last = table->size - 1;
-    size_t middle = (first + last) / 2;
+    u32 first = 0;
+    u32 last = table->size - 1;
+    u32 middle = (first + last) / 2;
 
     while (first <= last)
     {
