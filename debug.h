@@ -2,8 +2,8 @@
 #include "debug_types.h"
 
 void debug_init(GetBacktraceCallback get_backtrace);
-[[ noreturn ]] void debug_error(char* msg, ...);
-void debug_info(char* msg, ...);
+[[ noreturn ]] void debug_error(const char* msg, ...);
+void debug_info(const char* msg, ...);
 Backtrace debug_get_backtrace(u32 size);
 
 #define error(msg, ...) debug_error(msg, ##__VA_ARGS__)

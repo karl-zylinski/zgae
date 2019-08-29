@@ -2,9 +2,9 @@
 #include "keycode_types.h"
 #include "memory.h"
 
-static bool keys_held[(u32)KeyCode::Num];
-static bool keys_went_down[(u32)KeyCode::Num];
-static bool keys_went_up[(u32)KeyCode::Num];
+static bool keys_held[(u32)KC_NUM];
+static bool keys_went_down[(u32)KC_NUM];
+static bool keys_went_up[(u32)KC_NUM];
 
 void keyboard_init()
 {
@@ -13,7 +13,7 @@ void keyboard_init()
 
 void keyboard_key_pressed(KeyCode key)
 {
-    if (key == KeyCode::Unknown)
+    if (key == KC_UNKNOWN)
         return;
 
     keys_went_down[(u32)key] = true;
@@ -22,7 +22,7 @@ void keyboard_key_pressed(KeyCode key)
 
 void keyboard_key_released(KeyCode key)
 {
-    if (key == KeyCode::Unknown)
+    if (key == KC_UNKNOWN)
         return;
 
     keys_went_down[(u32)key] = true;
@@ -42,7 +42,7 @@ void keyboard_reset()
     memzero(keys_went_up, sizeof(keys_went_up));
 }
 
-bool key_is_held(KeyCode key)
+bool key_held(KeyCode key)
 {
     return keys_held[(u32)key];
 }

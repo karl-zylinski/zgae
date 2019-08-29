@@ -16,7 +16,7 @@ static void print_current_time()
     fprintf(stderr, "[%02d:%02d:%02d] ", hour, minute, second);
 }
 
-void debug_error(char* msg, ...)
+void debug_error(const char* msg, ...)
 {
     print_current_time();
     check(g_get_backtrace, "Please run debug_init with function that returns backtraces as parameter.");
@@ -33,7 +33,7 @@ void debug_error(char* msg, ...)
     abort();
 }
 
-void debug_info(char* msg, ...)
+void debug_info(const char* msg, ...)
 {
     print_current_time();
     va_list args;

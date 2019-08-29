@@ -8,6 +8,6 @@ void keyboard_key_released(KeyCode key);
 void keyboard_end_of_frame();
 void keyboard_reset();
 
-bool key_is_held(KeyCode key);
+bool key_held(KeyCode key);
 bool key_went_down(KeyCode key);
 bool key_went_up(KeyCode key);

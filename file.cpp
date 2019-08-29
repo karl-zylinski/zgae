@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "memory.h"
 
-FileLoadResult file_load(char* filename, FileLoadMode mode)
+FileLoadResult file_load(const char* filename, FileLoadMode mode)
 {
     FILE* file_handle = fopen(filename, "rb");
 

@@ -82,7 +82,7 @@ int main()
     Quat camera_rot = quat_identity();
     Vec3 camera_pos = {0, -3, 0};
 
-    while (linux_xcb_window_is_open(win))
+    while (linux_xcb_window_is_open(win) && !key_held(KC_ESCAPE))
     {
         f32 cur_time = get_cur_time_seconds();
         f32 dt = cur_time - last_frame_time;
@@ -101,17 +101,17 @@ int main()
             frames = 0;
         }
 
-        if (key_is_held(KeyCode::A))
+        if (key_held(KC_A))
             camera_pos.x -= time_dt();
-        if (key_is_held(KeyCode::D))
+        if (key_held(KC_D))
             camera_pos.x += time_dt();
-        if (key_is_held(KeyCode::W))
+        if (key_held(KC_W))
             camera_pos.y += time_dt();
-        if (key_is_held(KeyCode::S))
+        if (key_held(KC_S))
             camera_pos.y -= time_dt();
-        if (key_is_held(KeyCode::R))
+        if (key_held(KC_R))
             camera_pos.z += time_dt();
-        if (key_is_held(KeyCode::F))
+        if (key_held(KC_F))
             camera_pos.z -= time_dt();
 
         model.w.x = sin(time_since_start());
