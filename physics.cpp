@@ -51,7 +51,7 @@ struct PhysicsWorldObject
     Quat rotation;
 };
 
-struct RigidBody
+struct Rigidbody
 {
     bool used;
     PhysicsWorldObjectHandle object;
@@ -63,7 +63,7 @@ struct PhysicsResourceWorld
 {
     PhysicsWorldObject* objects; // dynamic
     u32* free_object_indices; // dynamic, holes in objects
-    RigidBody* rigidbodies; // dynamic
+    Rigidbody* rigidbodies; // dynamic
     u32* free_rigidbody_indices; // dynamic, holes in rigidbodies
     RenderResourceHandle render_handle;
 };
@@ -171,7 +171,7 @@ PhysicsWorldRigidbodyHandle physics_add_rigidbody(Entity* e)
 
     let idx = da_num(w->rigidbodies);
 
-    RigidBody rb = {
+    Rigidbody rb = {
         .object = e->physics_object,
         .entity = e,
         .used = true
@@ -241,15 +241,20 @@ void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectH
 void physics_update_world(PhysicsResourceHandle world)
 {
     let w = get_resource(PhysicsResourceWorld, world);
-    //float dt = time_dt();
+    float dt = time_dt();
 
     for (u32 rigidbody_idx = 0; rigidbody_idx < da_num(w->rigidbodies); ++rigidbody_idx)
     {
-        if (!w->rigidbodies[rigidbody_idx].used)
+        let rb = w->rigidbodies + rigidbody_idx;
+        if (!rb->used)
             continue;
 
-        let rb_world_object_index = w->rigidbodies[rigidbody_idx].object;
+        Vec3 g = {0, 0, -1.82f*dt};
+        rb->velocity += g;
+        let rb_world_object_index = rb->object;
         let wo = w->objects + rb_world_object_index;
+        physics_world_move(world, rb_world_object_index, rb->velocity);
+        w->rigidbodies[rigidbody_idx].entity->position = w->objects[rb_world_object_index].position;
         let c1 = get_resource(PhysicsResourceCollider, wo->collider);
         let p1 = wo->position;
         //let r1 = w->objects[rigidbody_idx].rotation;
@@ -286,7 +291,7 @@ void physics_update_world(PhysicsResourceHandle world)
             if (coll.colliding)
             {
                 physics_world_move(world, rb_world_object_index, coll.solution);
-
+                rb->velocity = vec3_zero;
                 w->rigidbodies[rigidbody_idx].entity->position = w->objects[rb_world_object_index].position;
                 w->rigidbodies[rigidbody_idx].entity->rotation = w->objects[rb_world_object_index].rotation;
             }

@@ -359,7 +359,7 @@ static GjkEpaSolution run_epa(const GjkShape& s1, const GjkShape& s2, Simplex* s
         Vec3 d = support_diff(s1, s2, f->normal);
         float depth = dot(d, f->normal);
 
-        if (f->distance == 0)
+        if (fabs(f->distance) < 0.0001f)
         {
             da_free(faces);
             // Origin is on face, so depth will be zero. Solution is zero vector.

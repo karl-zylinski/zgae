@@ -60,7 +60,7 @@ int main()
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
     renderer_init(WINDOW_TYPE_XCB, win);
-    RenderResourceHandle rw = renderer_create_world();
+    RenderResourceHandle render_world = renderer_create_world();
     physics_init();
 
     WindowCallbacks wc = {};
@@ -70,18 +70,25 @@ int main()
     wc.window_resized_callback = &handle_window_resize;
     linux_xcb_window_update_callbacks(win, wc);
 
-    RenderResourceHandle pipeline_handle = renderer_resource_load("pipeline_default.pipeline");
-    RenderResourceHandle mesh_handle = renderer_resource_load("box.mesh");
+    let pipeline = renderer_resource_load("pipeline_default.pipeline");
+    let box_render_mesh = renderer_resource_load("box.mesh");
+    let floor_render_mesh = renderer_resource_load("floor.mesh");
 
-    let physics_world = physics_world_create(rw);
-    let physics_mesh = physics_resource_load("box.mesh");
-    let physics_collider = physics_collider_create(physics_mesh);
+    let physics_world = physics_world_create(render_world);
+    let box_physics_mesh = physics_resource_load("box.mesh");
+    let floor_physics_mesh = physics_resource_load("floor.mesh");
+    let box_collider = physics_collider_create(box_physics_mesh);
+    let floor_collider = physics_collider_create(floor_physics_mesh);
 
-    let e1 = entity_create({0, 0, 0}, quat_identity(), rw, mesh_handle, physics_world, physics_collider);
+    let e1 = entity_create({-3, 0, 5}, quat_identity(), render_world, box_render_mesh, physics_world, box_collider);
     (void)e1;
-    let e2 = entity_create({-2, 0, 0}, quat_identity(), rw, mesh_handle, physics_world, physics_collider);
+    let e2 = entity_create({0, 0, 9}, quat_identity(), render_world, box_render_mesh, physics_world, box_collider);
     (void)e2;
 
+    let floor = entity_create({0, 0, -5}, quat_identity(), render_world, floor_render_mesh, physics_world, floor_collider);
+    (void)floor;
+
+    entity_create_rigidbody(&e1);
     entity_create_rigidbody(&e2);
 
     info("Starting timers");
@@ -94,7 +101,7 @@ int main()
     info("Entering main loop");
 
     Quat camera_rot = quat_identity();
-    Vec3 camera_pos = {0, -8, 0};
+    Vec3 camera_pos = {0, -30, 0};
 
     while (linux_xcb_window_is_open(win) && !key_held(KC_ESCAPE))
     {
@@ -140,8 +147,8 @@ int main()
         }
 
         physics_update_world(physics_world);
-        renderer_begin_frame(pipeline_handle);
-        renderer_draw_world(pipeline_handle, rw, camera_pos, camera_rot);
+        renderer_begin_frame(pipeline);
+        renderer_draw_world(pipeline, render_world, camera_pos, camera_rot);
         renderer_end_frame();
         renderer_present();
         keyboard_end_of_frame();
