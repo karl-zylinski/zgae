@@ -54,7 +54,7 @@ int main()
     debug_init(get_backtrace);
     memory_init();
     keyboard_init();
-    XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
+    XcbWindow* win = linux_xcb_window_create("ZGAE", 1280, 720);
     renderer_init(WINDOW_TYPE_XCB, win);
     physics_init();
 
