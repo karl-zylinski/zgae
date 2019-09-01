@@ -1,8 +1,6 @@
 #pragma once
 #include "entity_types.h"
 
-fwd_handle(PhysicsResourceHandle);
-fwd_handle(RenderResourceHandle);
 
 Entity entity_create(
     const Vec3& pos,

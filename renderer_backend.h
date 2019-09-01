@@ -1,7 +1,6 @@
 #pragma once
 #include "math_types.h"
 
-fwd_struct(RendererBackend);
 fwd_struct(RenderBackendShader);
 fwd_struct(RenderBackendPipeline);
 fwd_struct(RenderBackendMesh);

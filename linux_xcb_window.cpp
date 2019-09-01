@@ -6,7 +6,6 @@
 #include "window_types.h"
 #include "memory.h"
 #include <stdlib.h>
-#include <math.h>
 
 struct XcbEventQueue
 {

@@ -1,5 +1,4 @@
 #include "player.h"
-#include "camera.h"
 #include "camera_first_person.h"
 #include "entity.h"
 #include "keyboard.h"

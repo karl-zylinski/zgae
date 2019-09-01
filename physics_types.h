@@ -2,8 +2,6 @@
 #include "renderer_types.h"
 
 fwd_handle(RenderResourceHandle);
-fwd_struct(Vec3);
-fwd_struct(Quat);
 
 typedef u32 PhysicsWorldObjectHandle;
 typedef u32 PhysicsWorldRigidbodyHandle;

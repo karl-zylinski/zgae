@@ -1,5 +1,4 @@
 #include "mouse.h"
-#include "memory.h"
 
 struct MouseState
 {

@@ -1,5 +1,4 @@
 #pragma once
-#include "renderer_types.h"
 #include "physics_types.h"
 #include "math_types.h"
 
