@@ -15,5 +15,3 @@ enum PhysicsResourceType
     PHYSICS_RESOURCE_TYPE_WORLD,
     PHYSICS_RESOURCE_TYPE_NUM
 };
-
-typedef void(*PhysicsPositionUpdateCallback)(RenderResourceHandle world, RenderWorldObjectHandle obj, const Vec3& p, const Quat& q);

@@ -13,6 +13,7 @@
 #include "file.h"
 #include "jzon.h"
 #include "obj_loader.h"
+#include "renderer.h"
 
 struct PhysicsResource
 {
@@ -27,7 +28,6 @@ struct PhysicsState
     u32 resources_num;
     HandleHashMap* resource_name_to_handle;
     HandlePool* resource_handle_pool;
-    PhysicsPositionUpdateCallback position_update_callback;
 };
 
 struct PhysicsResourceMesh
@@ -56,6 +56,8 @@ struct PhysicsResourceWorld
     RenderResourceHandle render_handle;
 };
 
+static PhysicsState* ps = NULL;
+
 static const char* physics_resoruce_type_names[] =
 {
     "invalid", "mesh", "collider", "world"
@@ -63,18 +65,16 @@ static const char* physics_resoruce_type_names[] =
 
 #define get_resource(t, h) ((t*)(ps->resources[handle_index(h)]).data)
 
-PhysicsState* physics_state_create(PhysicsPositionUpdateCallback position_update_callback)
+void physics_init()
 {
-    let ps = mema_zero_t(PhysicsState);
+    check(ps == NULL, "Trying to init physics twice");
+    ps = mema_zero_t(PhysicsState);
 
     ps->resource_handle_pool = handle_pool_create(1, "PhysicsResourceHandle");
     ps->resource_name_to_handle = handle_hash_map_create();
-    ps->position_update_callback = position_update_callback;
 
     for (u32 s = 1; s < PHYSICS_RESOURCE_TYPE_NUM; ++s)
         handle_pool_set_type(ps->resource_handle_pool, s, physics_resoruce_type_names[s]);
-
-    return ps;
 }
 
 static PhysicsResourceType resource_type_from_str(const char* str)
@@ -84,7 +84,7 @@ static PhysicsResourceType resource_type_from_str(const char* str)
     return (PhysicsResourceType)idx;
 }
 
-static PhysicsResourceHandle add_resource(PhysicsState* ps, hash64 name_hash, PhysicsResourceType type, void* data)
+static PhysicsResourceHandle add_resource(hash64 name_hash, PhysicsResourceType type, void* data)
 {
     let handle = handle_pool_borrow(ps->resource_handle_pool, (u32)type);
     u32 num_needed_resources = handle_index(handle) + 1;
@@ -101,7 +101,7 @@ static PhysicsResourceHandle add_resource(PhysicsState* ps, hash64 name_hash, Ph
     return handle;
 }
 
-PhysicsResourceHandle physics_resource_load(PhysicsState* ps, const char* filename)
+PhysicsResourceHandle physics_resource_load(const char* filename)
 {
     let name_hash = str_hash(filename);
     let existing = handle_hash_map_get(ps->resource_name_to_handle, name_hash);
@@ -140,24 +140,24 @@ PhysicsResourceHandle physics_resource_load(PhysicsState* ps, const char* filena
         default: error("Implement me!");
     }
 
-    return add_resource(ps, name_hash, type, data);
+    return add_resource(name_hash, type, data);
 }
 
-PhysicsResourceHandle physics_collider_create(PhysicsState* ps, PhysicsResourceHandle mesh)
+PhysicsResourceHandle physics_collider_create(PhysicsResourceHandle mesh)
 {
     let c = mema_zero_t(PhysicsResourceCollider);
     c->mesh = mesh;
-    return add_resource(ps, 0, PHYSICS_RESOURCE_TYPE_COLLIDER, c);
+    return add_resource(0, PHYSICS_RESOURCE_TYPE_COLLIDER, c);
 }
 
-PhysicsResourceHandle physics_world_create(PhysicsState* ps, RenderResourceHandle render_handle)
+PhysicsResourceHandle physics_world_create(RenderResourceHandle render_handle)
 {
     let w = mema_zero_t(PhysicsResourceWorld);
     w->render_handle = render_handle;
-    return add_resource(ps, 0, PHYSICS_RESOURCE_TYPE_WORLD, w);
+    return add_resource(0, PHYSICS_RESOURCE_TYPE_WORLD, w);
 }
 
-PhysicsWorldObjectHandle physics_world_add(PhysicsState* ps, PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)
+PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
 
@@ -183,22 +183,22 @@ PhysicsWorldObjectHandle physics_world_add(PhysicsState* ps, PhysicsResourceHand
     return h;
 }
 
-void physics_world_move(PhysicsState* ps, PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos)
+void physics_world_move(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     w->objects[obj].position += pos;
-    ps->position_update_callback(w->render_handle, w->objects[obj].render_handle, w->objects[obj].position, w->objects[obj].rotation);
+    renderer_world_set_position_and_rotation(w->render_handle, w->objects[obj].render_handle, w->objects[obj].position, w->objects[obj].rotation);
 }
 
-void physics_world_set_position(PhysicsState* ps, PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
+void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     w->objects[obj].position = pos;
     w->objects[obj].rotation = rot;
-    ps->position_update_callback(w->render_handle, w->objects[obj].render_handle, pos, rot);
+    renderer_world_set_position_and_rotation(w->render_handle, w->objects[obj].render_handle, pos, rot);
 }
 
-void physics_update_world(PhysicsState* ps, PhysicsResourceHandle world)
+void physics_update_world(PhysicsResourceHandle world)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     //float dt = time_dt();
@@ -242,7 +242,7 @@ void physics_update_world(PhysicsState* ps, PhysicsResourceHandle world)
             let coll = gjk_epa_intersect_and_solve(s1, s2);
 
             if (coll.colliding)
-                physics_world_move(ps, world, i, coll.solution);
+                physics_world_move(world, i, coll.solution);
 
             memf(s2.vertices);
         }
@@ -251,7 +251,7 @@ void physics_update_world(PhysicsState* ps, PhysicsResourceHandle world)
     }
 }
 
-static void destroy_resource(PhysicsState* ps, PhysicsResourceHandle h)
+static void destroy_resource(PhysicsResourceHandle h)
 {
     switch(handle_type(h))
     {
@@ -274,10 +274,10 @@ static void destroy_resource(PhysicsState* ps, PhysicsResourceHandle h)
         handle_hash_map_remove(ps->resource_name_to_handle, ps->resources[handle_index(h)].name_hash);
 }
 
-void physics_state_destroy(PhysicsState* ps)
+void physics_shutdown()
 {
     for (u32 i = 0; i < ps->resources_num; ++i)
-        destroy_resource(ps, ps->resources[i].handle);
+        destroy_resource(ps->resources[i].handle);
 
     memf(ps->resources);
     handle_hash_map_destroy(ps->resource_name_to_handle);
