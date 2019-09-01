@@ -6,6 +6,7 @@
 #include "window_types.h"
 #include "memory.h"
 #include <stdlib.h>
+#include <math.h>
 
 struct XcbEventQueue
 {
@@ -22,6 +23,14 @@ struct XcbWindow
     WindowState state;
 };
 
+static u32 event_mask = XCB_EVENT_MASK_EXPOSURE
+        | XCB_EVENT_MASK_KEY_PRESS
+        | XCB_EVENT_MASK_KEY_RELEASE
+        | XCB_EVENT_MASK_FOCUS_CHANGE
+        | XCB_EVENT_MASK_STRUCTURE_NOTIFY 
+        | XCB_EVENT_MASK_POINTER_MOTION
+        | XCB_EVENT_MASK_ENTER_WINDOW;
+
 XcbWindow* linux_xcb_window_create(char* title, u32 width, u32 height)
 {
     XcbWindow* w = mema_zero_t(XcbWindow);
@@ -32,12 +41,7 @@ XcbWindow* linux_xcb_window_create(char* title, u32 width, u32 height)
     xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(w->connection)).data;
     w->handle = xcb_generate_id(w->connection);
     u32 mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-    u32 values[] = { screen->black_pixel, 
-        XCB_EVENT_MASK_EXPOSURE
-        | XCB_EVENT_MASK_KEY_PRESS
-        | XCB_EVENT_MASK_KEY_RELEASE
-        | XCB_EVENT_MASK_FOCUS_CHANGE
-        | XCB_EVENT_MASK_STRUCTURE_NOTIFY };
+    u32 values[] = { screen->black_pixel, event_mask };
     xcb_create_window(
         w->connection,
         XCB_COPY_FROM_PARENT,
@@ -299,6 +303,26 @@ static bool poll_event(XcbWindow* w)
             info("XCB window closed");
             if((*(xcb_client_message_event_t*)evt).data.data32[0] == (*window_deleted_reply).atom)
                 w->state.open_state = WINDOW_OPEN_STATE_CLOSED;
+            return true;
+        }
+        case XCB_ENTER_NOTIFY: {
+            xcb_change_window_attributes(w->connection, w->handle, XCB_CW_EVENT_MASK, (uint32_t[]){ XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT });
+            xcb_warp_pointer(w->connection, XCB_NONE, w->handle, 0, 0, 0, 0, w->state.width / 2, w->state.height / 2);
+            xcb_change_window_attributes(w->connection, w->handle, XCB_CW_EVENT_MASK, (uint32_t[]){ event_mask });
+            return true;
+        } 
+        case XCB_MOTION_NOTIFY: {
+            xcb_motion_notify_event_t* motion_evt = (xcb_motion_notify_event_t *)evt;
+            let x = motion_evt->event_x;
+            let y = motion_evt->event_y;
+            let fake_origin_x = w->state.width/2;
+            let fake_origin_y = w->state.height/2;
+            let dx = x - fake_origin_x;
+            let dy = y - fake_origin_y;
+            w->state.callbacks.mouse_moved_callback(dx, dy);
+            xcb_change_window_attributes(w->connection, w->handle, XCB_CW_EVENT_MASK, (uint32_t[]){ XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT });
+            xcb_warp_pointer(w->connection, XCB_NONE, w->handle, 0, 0, 0, 0, fake_origin_x, fake_origin_y);
+            xcb_change_window_attributes(w->connection, w->handle, XCB_CW_EVENT_MASK, (uint32_t[]){ event_mask });
             return true;
         }
         case XCB_CONFIGURE_NOTIFY:

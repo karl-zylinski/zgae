@@ -1,5 +1,6 @@
 #include "math.h"
 #include <math.h>
+#include "debug.h"
 
 Mat4 mat4_create_projection_matrix(f32 bb_width, f32 bb_height)
 {
@@ -141,12 +142,6 @@ Mat4 mat4_inverse(const Mat4& m)
     return result;
 }
 
-Quat quat_identity()
-{
-    Quat q = {0, 0, 0, 1};
-    return q;
-}
-
 f32 dot(const Vec3& v1, const Vec3& v2)
 {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
@@ -221,4 +216,96 @@ bool vec3_almost_eql(const Vec3& v1, const Vec3& v2)
 bool vec4_almost_eql(const Vec4& v1, const Vec4& v2)
 {
     return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y) && f32_almost_eql(v1.z, v2.z) && f32_almost_eql(v1.w, v2.w);
+}
+
+Quat quat_identity()
+{
+    return {0, 0, 0, 1};
+}
+
+Quat operator*(const Quat& a, const Quat& b)
+{
+    return
+    {
+        a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+        a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+        a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
+        a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
+    };
+}
+
+Quat quat_rotate_x(const Quat& q, float rads)
+{
+    float adjusted_rads = rads * 0.5f; 
+    float bx = sin(adjusted_rads);
+    float bw = cos(adjusted_rads);
+    return
+    {
+        q.x * bw + q.w * bx,
+        q.y * bw + q.z * bx,
+        q.z * bw - q.y * bx,
+        q.w * bw - q.x * bx
+    };
+}
+
+Quat quat_rotate_y(const Quat& q, float rads)
+{
+    float adjusted_rads = rads * 0.5f;
+    float by = sin(adjusted_rads);
+    float bw = cos(adjusted_rads);
+    return
+    {
+        q.x * bw - q.z * by,
+        q.y * bw + q.w * by,
+        q.z * bw + q.x * by,
+        q.w * bw - q.y * by
+    };
+}
+
+Quat quat_rotate_z(const Quat& q, float rads)
+{
+    float adjusted_rads = rads * 0.5f;
+    float bz = sin(adjusted_rads);
+    float bw = cos(adjusted_rads);
+    return
+    {
+        q.x * bw + q.y * bz,
+        q.y * bw - q.x * bz,
+        q.z * bw + q.w * bz,
+        q.w * bw - q.z * bz
+    };
+}
+
+Quat quat_from_axis_angle(const Vec3& axis, float angle)
+{
+    float half_angle = angle * 0.5f;
+    float s = sin(half_angle);
+    return
+    quat_normalize({
+        axis.x * s,
+        axis.y * s,
+        axis.z * s,
+        cos(half_angle)
+    });
+}
+
+Quat quat_normalize(const Quat& q)
+{
+    float len = sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
+    check(len != 0, "Trying to normalize zero length Quat");
+    return
+    {
+        q.x / len,
+        q.y / len,
+        q.z / len,
+        q.w / len
+    };
+}
+
+Vec3 quat_transform_vec3(const Quat& q, const Vec3& v)
+{
+    const Vec3 qv = {q.x, q.y, q.z};
+    const Vec3 uv = cross(qv, v);
+    const Vec3 uuv = cross(qv, uv);
+    return v + ((uv * q.w) + uuv) * 2.0f;
 }

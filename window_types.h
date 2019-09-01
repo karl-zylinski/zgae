@@ -5,6 +5,7 @@ typedef void(*WindowKeyPressedCallback)(KeyCode k);
 typedef void(*WindowKeyReleasedCallback)(KeyCode k);
 typedef void(*WindowResizedCallback)(u32 w, u32 h);
 typedef void(*WindowFocusLostCallback)();
+typedef void(*WindowMouseMovedCallback)(u32 dx, u32 dy);
 
 enum WindowType : u32
 {
@@ -21,6 +22,7 @@ struct WindowCallbacks {
     WindowKeyReleasedCallback key_released_callback;
     WindowFocusLostCallback focus_lost_callback;
     WindowResizedCallback window_resized_callback;
+    WindowMouseMovedCallback mouse_moved_callback;
 };
 
 struct WindowState {

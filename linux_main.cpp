@@ -17,6 +17,7 @@
 #include "camera.h"
 #include "camera_first_person.h"
 #include "player.h"
+#include "mouse.h"
 
 static f32 get_cur_time_seconds()
 {
@@ -71,6 +72,7 @@ int main()
     wc.key_released_callback = &keyboard_key_released;
     wc.focus_lost_callback = &keyboard_reset;
     wc.window_resized_callback = &handle_window_resize;
+    wc.mouse_moved_callback = &mouse_moved;
     linux_xcb_window_update_callbacks(win, wc);
 
     let pipeline = renderer_resource_load("pipeline_default.pipeline");
@@ -104,8 +106,6 @@ int main()
     
     f32 start_time = get_cur_time_seconds();
     f32 last_frame_time = start_time;
-    f32 framerate_timer = 0;
-    u32 frames = 0;
 
     info("Entering main loop");
 
@@ -116,17 +116,6 @@ int main()
         f32 since_start = cur_time - start_time;
         last_frame_time = cur_time;
         set_frame_timers(dt, since_start);
-        frames = frames + 1;
-
-        if (time_since_start() > (framerate_timer + 2))
-        {
-            f32 d = time_since_start() - framerate_timer;
-            f32 ft = d/((f32)frames);
-            (void)ft;
-            //info("%f ms", ft*1000.0f);
-            framerate_timer = time_since_start();
-            frames = 0;
-        }
 
         renderer_wait_for_new_frame();
         linux_xcb_window_process_all_events(win);
@@ -144,6 +133,7 @@ int main()
         renderer_end_frame();
         renderer_present();
         keyboard_end_of_frame();
+        mouse_end_of_frame();
     }
 
     info("Main loop exited, shutting down");

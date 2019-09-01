@@ -10,7 +10,7 @@
 void player_update(Player* p)
 {
     Vec3 d = {};
-    float s = 5.0f;
+    float s = 4.0f;
 
     if (key_held(KC_A))
         d.x -= time_dt() * s;
@@ -25,7 +25,8 @@ void player_update(Player* p)
     if (key_held(KC_F))
         d.z -= time_dt() * s;
 
-    entity_move(p->entity, d);
+    Vec3 rotated_d = quat_transform_vec3(p->camera.rot, d);
+    entity_move(p->entity, rotated_d);
     p->camera.pos = p->entity->pos;
     camera_first_person_update(&p->camera);
 }

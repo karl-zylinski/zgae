@@ -87,17 +87,18 @@ struct Renderer
     HandlePool* resource_handle_pool;
 };
 
-static Renderer* rs = NULL;
+static Renderer rs = {};
+static bool inited = false;
 
 void renderer_init(WindowType window_type, void* window_data)
 {
-    check(rs == NULL, "Trying to init renderer twice!");
-    rs = mema_zero_t(Renderer);
-    rs->resource_handle_pool = handle_pool_create(0, "RenderResourceHandle");
-    rs->resource_name_to_handle = handle_hash_map_create();
+    check(!inited, "Trying to init renderer twice!");
+    inited = true;
+    rs.resource_handle_pool = handle_pool_create(0, "RenderResourceHandle");
+    rs.resource_name_to_handle = handle_hash_map_create();
 
     for (u32 s = 1; s < RENDER_RESOURCE_TYPE_NUM; ++s)
-        handle_pool_set_type(rs->resource_handle_pool, s, render_resource_type_names[s]);
+        handle_pool_set_type(rs.resource_handle_pool, s, render_resource_type_names[s]);
     
     renderer_backend_init(window_type, window_data);
 }
@@ -109,15 +110,15 @@ static void deinit_resource(RenderResourceHandle h)
     switch(handle_type(h))
     {
         case RENDER_RESOURCE_TYPE_SHADER: {
-            renderer_backend_destroy_shader(get_resource(rs->resources, ShaderRenderResource, h)->backend_state);
+            renderer_backend_destroy_shader(get_resource(rs.resources, ShaderRenderResource, h)->backend_state);
         } break;
         
         case RENDER_RESOURCE_TYPE_PIPELINE: {
-            renderer_backend_destroy_pipeline(get_resource(rs->resources, PipelineRenderResource, h)->backend_state);
+            renderer_backend_destroy_pipeline(get_resource(rs.resources, PipelineRenderResource, h)->backend_state);
         } break;
 
         case RENDER_RESOURCE_TYPE_MESH: {
-            renderer_backend_destroy_mesh(get_resource(rs->resources, MeshRenderResource, h)->backend_state);
+            renderer_backend_destroy_mesh(get_resource(rs.resources, MeshRenderResource, h)->backend_state);
         } break;
 
         case RENDER_RESOURCE_TYPE_WORLD: {} break;
@@ -131,12 +132,12 @@ static void init_resource(RenderResourceHandle h)
     switch(handle_type(h))
     {
         case RENDER_RESOURCE_TYPE_SHADER: {
-            ShaderRenderResource* sr = get_resource(rs->resources, ShaderRenderResource, h);
+            ShaderRenderResource* sr = get_resource(rs.resources, ShaderRenderResource, h);
             sr->backend_state = renderer_backend_create_shader(sr->source, sr->source_size);
         } break;
         
         case RENDER_RESOURCE_TYPE_PIPELINE: {
-            PipelineRenderResource* pr = get_resource(rs->resources, PipelineRenderResource, h);
+            PipelineRenderResource* pr = get_resource(rs.resources, PipelineRenderResource, h);
 
             RenderBackendShader** backend_shader_stages = mema_tn(RenderBackendShader*, pr->shader_stages_num);
             ShaderType* backend_shader_types = mema_tn(ShaderType, pr->shader_stages_num);
@@ -146,7 +147,7 @@ static void init_resource(RenderResourceHandle h)
 
             for (u32 shdr_idx = 0; shdr_idx < pr->shader_stages_num; ++shdr_idx)
             {
-                ShaderRenderResource* srr = get_resource(rs->resources, ShaderRenderResource, pr->shader_stages[shdr_idx]);
+                ShaderRenderResource* srr = get_resource(rs.resources, ShaderRenderResource, pr->shader_stages[shdr_idx]);
                 backend_shader_stages[shdr_idx] = srr->backend_state;
                 backend_shader_types[shdr_idx] = srr->type;
 
@@ -198,7 +199,7 @@ static void init_resource(RenderResourceHandle h)
         } break;
 
         case RENDER_RESOURCE_TYPE_MESH: {
-            MeshRenderResource* g = get_resource(rs->resources, MeshRenderResource, h);
+            MeshRenderResource* g = get_resource(rs.resources, MeshRenderResource, h);
             g->backend_state = renderer_backend_create_mesh(&g->mesh);
         } break;
 
@@ -213,7 +214,7 @@ static void destroy_resource(RenderResourceHandle h)
     switch(handle_type(h))
     {
         case RENDER_RESOURCE_TYPE_SHADER: {
-            let sr = get_resource(rs->resources, ShaderRenderResource, h);
+            let sr = get_resource(rs.resources, ShaderRenderResource, h);
 
             for (u32 i = 0; i < sr->push_constant_fields_num; ++i)
                     memf(sr->push_constant_fields[i].name);
@@ -223,7 +224,7 @@ static void destroy_resource(RenderResourceHandle h)
         } break;
         
         case RENDER_RESOURCE_TYPE_PIPELINE: {
-            PipelineRenderResource* pr = get_resource(rs->resources, PipelineRenderResource, h);
+            PipelineRenderResource* pr = get_resource(rs.resources, PipelineRenderResource, h);
             memf(pr->shader_stages);
 
             for (u32 i = 0; i < pr->constant_buffers_num; ++i)
@@ -243,22 +244,22 @@ static void destroy_resource(RenderResourceHandle h)
         } break;
 
         case RENDER_RESOURCE_TYPE_MESH: {
-            MeshRenderResource* g = get_resource(rs->resources, MeshRenderResource, h);
+            MeshRenderResource* g = get_resource(rs.resources, MeshRenderResource, h);
             memf(g->mesh.vertices);
             memf(g->mesh.indices);
         } break;
 
         case RENDER_RESOURCE_TYPE_WORLD: {
-            WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, h);
+            WorldRenderResource* w = get_resource(rs.resources, WorldRenderResource, h);
             da_free(w->objects);
         } break;
 
         default: error("Invalid resource in render resource list");
     }
 
-    memf(rs->resources[handle_index(h)].data);
-    handle_pool_return(rs->resource_handle_pool, h);
-    handle_hash_map_remove(rs->resource_name_to_handle, rs->resources[handle_index(h)].name_hash);
+    memf(rs.resources[handle_index(h)].data);
+    handle_pool_return(rs.resource_handle_pool, h);
+    handle_hash_map_remove(rs.resource_name_to_handle, rs.resources[handle_index(h)].name_hash);
 }
 
 static void reinit_resource(RenderResourceHandle h)
@@ -355,7 +356,7 @@ static ConstantBufferField resource_load_parse_constant_buffer_field(const JzonV
 RenderResourceHandle renderer_resource_load(const char* filename)
 {
     hash64 name_hash = str_hash(filename);
-    RenderResourceHandle existing = handle_hash_map_get(rs->resource_name_to_handle, name_hash);
+    RenderResourceHandle existing = handle_hash_map_get(rs.resource_name_to_handle, name_hash);
 
     if (existing != HANDLE_INVALID)
         return existing;
@@ -520,16 +521,16 @@ RenderResourceHandle renderer_resource_load(const char* filename)
         default: error("Implement me!"); break;
     }
 
-    RenderResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, (u32)type);
+    RenderResourceHandle h = handle_pool_borrow(rs.resource_handle_pool, (u32)type);
     r.handle = h;
 
     u32 num_needed_resources = handle_index(h) + 1;
-    if (num_needed_resources > rs->resources_num)
+    if (num_needed_resources > rs.resources_num)
     {
-        rs->resources = (RenderResource*)memra_zero_added(rs->resources, num_needed_resources * sizeof(RenderResource), rs->resources_num * sizeof(RenderResource));
-        rs->resources_num = num_needed_resources;
+        rs.resources = (RenderResource*)memra_zero_added(rs.resources, num_needed_resources * sizeof(RenderResource), rs.resources_num * sizeof(RenderResource));
+        rs.resources_num = num_needed_resources;
     }
-    rs->resources[handle_index(h)] = r;
+    rs.resources[handle_index(h)] = r;
 
     init_resource(h);
     return h;
@@ -541,31 +542,30 @@ void renderer_shutdown()
     renderer_backend_wait_until_idle();
     
     info("Destroying all render resources");
-    for (u32 i = 0; i < rs->resources_num; ++i)
-        destroy_resource(rs->resources[i].handle);
+    for (u32 i = 0; i < rs.resources_num; ++i)
+        destroy_resource(rs.resources[i].handle);
 
-    memf(rs->resources);
+    memf(rs.resources);
     renderer_backend_shutdown();
-    handle_hash_map_destroy(rs->resource_name_to_handle);
-    handle_pool_destroy(rs->resource_handle_pool);
-    memf(rs);
+    handle_hash_map_destroy(rs.resource_name_to_handle);
+    handle_pool_destroy(rs.resource_handle_pool);
 }
 
 RenderResourceHandle renderer_create_world()
 {
-    RenderResourceHandle h = handle_pool_borrow(rs->resource_handle_pool, (u32)RENDER_RESOURCE_TYPE_WORLD);
+    RenderResourceHandle h = handle_pool_borrow(rs.resource_handle_pool, (u32)RENDER_RESOURCE_TYPE_WORLD);
     RenderResource r = {
         .handle = h,
         .data = mema_t(WorldRenderResource)
     };
 
     u32 num_needed_resources = handle_index(h) + 1;
-    if (num_needed_resources > rs->resources_num)
+    if (num_needed_resources > rs.resources_num)
     {
-        rs->resources = (RenderResource*)memra_zero_added(rs->resources, num_needed_resources * sizeof(RenderResource), rs->resources_num * sizeof(RenderResource));
-        rs->resources_num = num_needed_resources;
+        rs.resources = (RenderResource*)memra_zero_added(rs.resources, num_needed_resources * sizeof(RenderResource), rs.resources_num * sizeof(RenderResource));
+        rs.resources_num = num_needed_resources;
     }
-    rs->resources[handle_index(h)] = r;
+    rs.resources[handle_index(h)] = r;
     return h;
 }
 
@@ -576,7 +576,7 @@ void renderer_destroy_world(RenderResourceHandle h)
 
 u32 renderer_world_add(RenderResourceHandle world, RenderResourceHandle mesh, const Vec3& pos, const Quat& rot)
 {
-    WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
+    WorldRenderResource* w = get_resource(rs.resources, WorldRenderResource, world);
     Mat4 model = mat4_from_rotation_and_translation(rot, pos);
 
     if (da_num(w->free_object_indices) > 0)
@@ -600,7 +600,7 @@ u32 renderer_world_add(RenderResourceHandle world, RenderResourceHandle mesh, co
 
 void renderer_world_remove(RenderResourceHandle world, RenderWorldObjectHandle h)
 {
-    WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
+    WorldRenderResource* w = get_resource(rs.resources, WorldRenderResource, world);
     check(w->objects[h].mesh == HANDLE_INVALID, "Trying to remove from world twice");
     w->objects[h].mesh = HANDLE_INVALID;
     da_push(w->free_object_indices, h);
@@ -608,7 +608,7 @@ void renderer_world_remove(RenderResourceHandle world, RenderWorldObjectHandle h
 
 void renderer_world_set_position_and_rotation(RenderResourceHandle world, RenderWorldObjectHandle h, const Vec3& pos, const Quat& rot)
 {
-    WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world);
+    WorldRenderResource* w = get_resource(rs.resources, WorldRenderResource, world);
     w->objects[h].model = mat4_from_rotation_and_translation(rot, pos);
 }
 
@@ -645,7 +645,7 @@ static void populate_constant_buffers(const PipelineRenderResource& pr, const Ma
 
 void renderer_begin_frame(RenderResourceHandle pipeline_handle)
 {
-    PipelineRenderResource* pipeline = get_resource(rs->resources, PipelineRenderResource, pipeline_handle);
+    PipelineRenderResource* pipeline = get_resource(rs.resources, PipelineRenderResource, pipeline_handle);
     (void)pipeline;
     //
     //populate_constant_buffers(*pipeline, model, mvp_matrix);
@@ -662,9 +662,9 @@ void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle me
     Mat4 proj_matrix = mat4_create_projection_matrix(size.x, size.y);
     Mat4 mvp_matrix = model * view_matrix * proj_matrix;
 
-    PipelineRenderResource* pipeline = get_resource(rs->resources, PipelineRenderResource, pipeline_handle);
+    PipelineRenderResource* pipeline = get_resource(rs.resources, PipelineRenderResource, pipeline_handle);
 
-    renderer_backend_draw(pipeline->backend_state, get_resource(rs->resources, MeshRenderResource, mesh_handle)->backend_state, mvp_matrix, model);
+    renderer_backend_draw(pipeline->backend_state, get_resource(rs.resources, MeshRenderResource, mesh_handle)->backend_state, mvp_matrix, model);
 }
 
 void renderer_end_frame()
@@ -674,7 +674,7 @@ void renderer_end_frame()
 
 void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, const Vec3& cam_pos, const Quat& cam_rot)
 {
-    WorldRenderResource* w = get_resource(rs->resources, WorldRenderResource, world_handle);
+    WorldRenderResource* w = get_resource(rs.resources, WorldRenderResource, world_handle);
 
     for (u32 i = 0; i < da_num(w->objects); ++i)
     {
@@ -703,9 +703,9 @@ void renderer_surface_resized(u32 w, u32 h)
     renderer_backend_wait_until_idle();
     renderer_backend_surface_resized(w, h);
 
-    for (u32 i = 0; i < rs->resources_num; ++i)
+    for (u32 i = 0; i < rs.resources_num; ++i)
     {
-        RenderResource* rr = rs->resources + i;
+        RenderResource* rr = rs.resources + i;
 
         if (rr->flag & RENDER_RESOURCE_FLAG_SURFACE_SIZE_DEPENDENT)
             reinit_resource(rr->handle);

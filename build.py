@@ -2,6 +2,7 @@
 
 import os
 import sys
+from datetime import datetime
 
 all_files = os.listdir(".")
 to_compile = []
@@ -44,6 +45,7 @@ if "stop_on_first_error" in sys.argv:
 if not static_analysis:
     extra_flags.append("-Werror")
 
+compile_start = datetime.now()
 for in_filename in to_compile:
     object_filename = in_filename[0:-4] + ".o"
     out_filename = "build/" + object_filename
@@ -55,13 +57,23 @@ for in_filename in to_compile:
         exit("\nbuild.py exited: compilation error")
 
     built_objects.append(out_filename)
+compile_end = datetime.now()
+compile_dt = compile_end - compile_start
 
+print("Compile dt: %f s" % (compile_dt.seconds + compile_dt.microseconds/1000000.0))
 
 if static_analysis:
     exit("static analysis done")
 
+link_start = datetime.now()
 linker_input_str = " ".join(built_objects)
 linker_error = os.system("%s %s -rdynamic -o %s -lrt -lm -lxcb -lvulkan" % (compiler, linker_input_str, output))
+link_end = datetime.now()
+link_dt = link_end - link_start
+total_dt = link_end - compile_start
+
+print("Link dt: %f s" % (link_dt.seconds + link_dt.microseconds/1000000.0))
+print("Total dt: %f s" % (total_dt.seconds + total_dt.microseconds/1000000.0))
 
 if stop_on_error and linker_error != 0:
     exit("\nbuild.py exited: linker error")

@@ -35,4 +35,10 @@ struct Mat4
     Vec4 x, y, z, w;
 };
 
+struct Vec2i
+{
+    i32 x, y;
+};
+
 static Vec3 vec3_zero = {0, 0, 0};
+static Vec3 vec3_up = {0, 0, 1};
