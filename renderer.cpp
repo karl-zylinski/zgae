@@ -554,9 +554,12 @@ void renderer_shutdown()
 RenderResourceHandle renderer_create_world()
 {
     RenderResourceHandle h = handle_pool_borrow(rs.resource_handle_pool, (u32)RENDER_RESOURCE_TYPE_WORLD);
+    let wrr = mema_zero_t(WorldRenderResource);
+    WorldObject dummy = {};
+    da_push(wrr->objects, dummy);
     RenderResource r = {
         .handle = h,
-        .data = mema_t(WorldRenderResource)
+        .data = wrr
     };
 
     u32 num_needed_resources = handle_index(h) + 1;

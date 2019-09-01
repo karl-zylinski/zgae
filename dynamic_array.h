@@ -42,3 +42,4 @@ void da__destroy(void* a);
 void* da__copy_data(void* a, u32 num, u32 item_size);
 u32 da__make_insert_room(void* a, u32 idx, u32 item_size);
 void da__remove(void* a, u32 idx, u32 item_size);
+u32 da__add_empty_ret_idx(void* a, u32 item_size);

@@ -15,6 +15,7 @@
 #include "obj_loader.h"
 #include "renderer.h"
 #include "entity_types.h"
+#include "world_types.h"
 
 struct PhysicsResource
 {
@@ -157,7 +158,7 @@ PhysicsResourceHandle physics_resource_load(const char* filename)
 
 PhysicsWorldRigidbodyHandle physics_add_rigidbody(Entity* e)
 {
-    let w = get_resource(PhysicsResourceWorld, e->physics_world);
+    let w = get_resource(PhysicsResourceWorld, e->world->physics_world);
 
     if (da_num(w->free_rigidbody_indices) > 0)
     {
@@ -191,6 +192,8 @@ PhysicsResourceHandle physics_collider_create(PhysicsResourceHandle mesh)
 PhysicsResourceHandle physics_world_create(RenderResourceHandle render_handle)
 {
     let w = mema_zero_t(PhysicsResourceWorld);
+    PhysicsWorldObject dummy = {};
+    da_push(w->objects, dummy);
     w->render_handle = render_handle;
     return add_resource(0, PHYSICS_RESOURCE_TYPE_WORLD, w);
 }

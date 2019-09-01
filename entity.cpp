@@ -3,35 +3,52 @@
 #include "physics.h"
 #include "math.h"
 #include "debug.h"
+#include "world_types.h"
+#include "dynamic_array.h"
+#include "world.h"
 
-Entity entity_create(
+EntityRef entity_create(
+    World* w,
     const Vec3& pos,
-    const Quat& rot, 
-    RenderResourceHandle render_world,
-    RenderResourceHandle mesh,
-    PhysicsResourceHandle physics_world,
-    PhysicsResourceHandle collider)
+    const Quat& rot)
 {
-    let render_world_handle = renderer_world_add(render_world, mesh, pos, rot);
-    let physics_world_handle = physics_world_add(physics_world, collider, render_world_handle, pos, rot);
-
+    let world_entity_handle = world_create_entity(w, pos, rot);
     return {
-        .pos = pos,
-        .rot = rot,
-        .physics_world = physics_world,
-        .render_object = render_world_handle,
-        .physics_object = physics_world_handle
+        .world = w,
+        .handle = world_entity_handle
     };
 }
 
-void entity_move(Entity* e, const Vec3& d)
+void entity_move(EntityRef* er, const Vec3& d)
 {
+    let e = world_lookup_entity(er->world, er->handle);
     e->pos += d;
-    physics_world_set_position(e->physics_world, e->physics_object, e->pos, e->rot);
+
+    if (e->physics_object)
+        physics_world_set_position(e->world->physics_world, e->physics_object, e->pos, e->rot);
 }
 
-void entity_create_rigidbody(Entity* e)
+void entity_create_rigidbody(EntityRef* er)
 {
+    let e = world_lookup_entity(er->world, er->handle);
+    check(e->physics_object, "Trying to create rigidbody on entity with no physics representation.");
     check(e->physics_rigidbody == NULL, "Trying to add rigidbody to entity twice");
     e->physics_rigidbody = physics_add_rigidbody(e);
+}
+
+Vec3 entity_get_position(const EntityRef& er)
+{
+    return world_lookup_entity(er.world, er.handle)->pos;
+}
+
+void entity_set_render_mesh(EntityRef* er, RenderResourceHandle mesh)
+{
+    let e = world_lookup_entity(er->world, er->handle);
+    e->render_object = renderer_world_add(er->world->render_world, mesh, e->pos, e->rot);
+}
+
+void entity_set_physics_collider(EntityRef* er, PhysicsResourceHandle collider)
+{
+    let e = world_lookup_entity(er->world, er->handle);
+    e->physics_object = physics_world_add(er->world->physics_world, collider, e->render_object, e->pos, e->rot);
 }

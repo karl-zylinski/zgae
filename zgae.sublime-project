@@ -22,6 +22,10 @@
 				{
 					"name": "build and run tests",
 					"shell_cmd": "./build.py tests && gnome-terminal -- lldb tests -o r"
+				},
+				{
+					"name": "build and run (-Wno-unused-variable)",
+					"shell_cmd": "./build.py nounusedwarning && ./zgae"
 				}
 			]
 		}

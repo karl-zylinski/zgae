@@ -25,7 +25,7 @@ void player_update(Player* p)
         d.z -= time_dt() * s;
 
     Vec3 rotated_d = quat_transform_vec3(p->camera.rot, d);
-    entity_move(p->entity, rotated_d);
-    p->camera.pos = p->entity->pos;
+    entity_move(&p->entity, rotated_d);
+    p->camera.pos = entity_get_position(p->entity);
     camera_first_person_update(&p->camera);
 }

@@ -34,6 +34,9 @@ extra_flags = [
     "-DENABLE_SLOW_DEBUG_CHECKS"
 ]
 
+if "nounusedwarning" in sys.argv:
+    extra_flags.append("-Wno-unused-variable")
+
 compiler = os.environ["CC"] if ("CC" in os.environ) else "clang++"
 
 static_analysis = "static_analysis" in sys.argv

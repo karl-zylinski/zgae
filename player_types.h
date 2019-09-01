@@ -5,5 +5,5 @@
 struct Player
 {
     Camera camera;
-    Entity* entity;
+    EntityRef entity;
 };
