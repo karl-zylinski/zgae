@@ -5,10 +5,12 @@
 fwd_handle(PhysicsResourceHandle);
 fwd_struct(Vec3);
 fwd_struct(Quat);
+fwd_struct(Entity);
 
 void physics_init();
 PhysicsResourceHandle physics_resource_load(const char* filename);
 PhysicsResourceHandle physics_collider_create(PhysicsResourceHandle mesh);
+PhysicsWorldRigidbodyHandle physics_add_rigidbody(Entity* e);
 PhysicsResourceHandle physics_world_create(RenderResourceHandle render_handle);
 PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot);
 void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot);

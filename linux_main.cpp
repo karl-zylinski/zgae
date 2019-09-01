@@ -82,6 +82,8 @@ int main()
     let e2 = entity_create({-2, 0, 0}, quat_identity(), rw, mesh_handle, physics_world, physics_collider);
     (void)e2;
 
+    entity_create_rigidbody(&e2);
+
     info("Starting timers");
     
     f32 start_time = get_cur_time_seconds();
@@ -127,7 +129,7 @@ int main()
         if (key_held(KC_F))
             d.z -= time_dt();
 
-        entity_move(&e1, d);
+        entity_move(&e2, d);
         renderer_wait_for_new_frame();
         linux_xcb_window_process_all_events(win);
 

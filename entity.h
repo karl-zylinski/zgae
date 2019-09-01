@@ -13,3 +13,4 @@ Entity entity_create(
     PhysicsResourceHandle collider);
 
 void entity_move(Entity* e, const Vec3& d);
+void entity_create_rigidbody(Entity* e);

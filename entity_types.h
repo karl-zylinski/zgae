@@ -12,4 +12,5 @@ struct Entity
     PhysicsResourceHandle physics_world;
     RenderWorldObjectHandle render_object;
     PhysicsWorldObjectHandle physics_object;
+    PhysicsWorldRigidbodyHandle physics_rigidbody;
 };

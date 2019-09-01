@@ -2,6 +2,7 @@
 #include "renderer.h"
 #include "physics.h"
 #include "math.h"
+#include "debug.h"
 
 Entity entity_create(
     const Vec3& pos,
@@ -27,4 +28,10 @@ void entity_move(Entity* e, const Vec3& d)
 {
     e->position += d;
     physics_world_set_position(e->physics_world, e->physics_object, e->position, e->rotation);
+}
+
+void entity_create_rigidbody(Entity* e)
+{
+    check(e->physics_rigidbody == NULL, "Trying to add rigidbody to entity twice");
+    e->physics_rigidbody = physics_add_rigidbody(e);
 }
