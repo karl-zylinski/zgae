@@ -752,7 +752,9 @@ void renderer_backend_destroy_pipeline(RendererBackend* rbs, RenderBackendPipeli
 {
     for (u32 frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
     {
-        vkFreeDescriptorSets(rbs->device, rbs->descriptor_pool_uniform_buffer, 1, p->constant_buffer_descriptor_sets[frame_idx]);
+        if (p->constant_buffer_descriptor_sets[frame_idx])
+            vkFreeDescriptorSets(rbs->device, rbs->descriptor_pool_uniform_buffer, 1, p->constant_buffer_descriptor_sets[frame_idx]);
+
         memf(p->constant_buffer_descriptor_sets[frame_idx]);
         for (u32 cb_idx = 0; cb_idx < p->constant_buffers_num; ++cb_idx)
         {
@@ -851,9 +853,10 @@ static VkShaderStageFlagBits vk_shader_stage_from_shader_type(ShaderType t)
 }
 
 RenderBackendPipeline* renderer_backend_create_pipeline(RendererBackend* rbs,
-    RenderBackendShader** shader_stages, ShaderType* shader_stages_types, u32 shader_stages_num,
-    ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
-    u32* constant_buffer_sizes, u32* constant_buffer_binding_indices, u32 constant_buffers_num)
+    const RenderBackendShader* const* shader_stages, const ShaderType* shader_stages_types, u32 shader_stages_num,
+    const ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
+    const u32* constant_buffer_sizes, const u32* constant_buffer_binding_indices, u32 constant_buffers_num,
+    const u32* push_constants_sizes, const ShaderType* push_constants_shader_types, u32 push_constants_num)
 {
     RenderBackendPipeline* pipeline = mema_zero_t(RenderBackendPipeline);
     VkResult res;
@@ -940,27 +943,42 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RendererBackend* rbs,
 
     memf(constant_buffer_bindings);
 
-    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    if (constant_buffers_num > 0)
     {
-        pipeline->constant_buffer_descriptor_sets[i] = mema_zero_tn(VkDescriptorSet, constant_buffers_num);
-        VkDescriptorSetAllocateInfo dsai = {};
-        dsai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        dsai.pNext = NULL;
-        dsai.descriptorPool = rbs->descriptor_pool_uniform_buffer;
-        dsai.descriptorSetCount = constant_buffers_num;
-        dsai.pSetLayouts = &pipeline->constant_buffer_descriptor_set_layout;
-        res = vkAllocateDescriptorSets(rbs->device, &dsai, pipeline->constant_buffer_descriptor_sets[i]);
-        VERIFY_RES();
+        for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        {
+            pipeline->constant_buffer_descriptor_sets[i] = mema_zero_tn(VkDescriptorSet, constant_buffers_num);
+            VkDescriptorSetAllocateInfo dsai = {};
+            dsai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            dsai.pNext = NULL;
+            dsai.descriptorPool = rbs->descriptor_pool_uniform_buffer;
+            dsai.descriptorSetCount = constant_buffers_num;
+            dsai.pSetLayouts = &pipeline->constant_buffer_descriptor_set_layout;
+            res = vkAllocateDescriptorSets(rbs->device, &dsai, pipeline->constant_buffer_descriptor_sets[i]);
+            VERIFY_RES();
+        }
+    }
+
+    VkPushConstantRange* push_constants = mema_zero_tn(VkPushConstantRange, push_constants_num);
+
+    for (u32 i = 0; i < push_constants_num; ++i)
+    {
+        push_constants[i].stageFlags = vk_shader_stage_from_shader_type(push_constants_shader_types[i]);
+        push_constants[i].offset = 0;
+        push_constants[i].size = push_constants_sizes[i];
     }
 
     VkPipelineLayoutCreateInfo plci = {};
     plci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     plci.setLayoutCount = 1;
+    plci.pushConstantRangeCount = push_constants_num;
+    plci.pPushConstantRanges = push_constants;
     plci.pSetLayouts = &pipeline->constant_buffer_descriptor_set_layout;
 
     res = vkCreatePipelineLayout(rbs->device, &plci, NULL, &pipeline->layout);
     VERIFY_RES();
 
+    memf(push_constants);
 
     // Set which topology we want
     VkPipelineInputAssemblyStateCreateInfo piasci = {};
@@ -1186,7 +1204,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, Mesh* m)
     return mema_copy_t(&g, RenderBackendMesh);
 }
 
-void renderer_backend_update_constant_buffer(RendererBackend* rbs, C(RenderBackendPipeline) pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
+void renderer_backend_update_constant_buffer(RendererBackend* rbs, const RenderBackendPipeline& pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1235,12 +1253,11 @@ static VkIndexType get_index_type(MeshIndex gi)
     }
 }
 
-void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline, RenderBackendMesh* mesh)
+void renderer_backend_begin_frame(RendererBackend* rbs, RenderBackendPipeline* pipeline)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
     VkCommandBufferBeginInfo cbbi = {};
-    
     cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     VkCommandBuffer cmd = rbs->graphics_cmd_buffers[cf];
     res = vkBeginCommandBuffer(cmd, &cbbi);
@@ -1263,14 +1280,32 @@ void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline
     rpbi.renderArea.extent.width = rbs->swapchain_size.x;
     rpbi.renderArea.extent.height = rbs->swapchain_size.y;
     rpbi.clearValueCount = 2;
-
     rpbi.pClearValues = clear_values;
     vkCmdBeginRenderPass(cmd, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->vk_handle);
 
-    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->constant_buffers_num,
-                            pipeline->constant_buffer_descriptor_sets[cf], 0, NULL);
+    if (pipeline->constant_buffers_num)
+    {
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->constant_buffers_num,
+                                pipeline->constant_buffer_descriptor_sets[cf], 0, NULL);
+    }
+}
+
+void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline, RenderBackendMesh* mesh, const Mat4& mvp, const Mat4& model)
+{
+    u32 cf = rbs->current_frame;
+    VkCommandBuffer cmd = rbs->graphics_cmd_buffers[cf];
+    
+    Mat4 pc[2] = {mvp, model};
+
+    vkCmdPushConstants(
+        cmd,
+        pipeline->layout,
+        VK_SHADER_STAGE_VERTEX_BIT,
+        0,
+        sizeof(pc),
+        pc);
 
     VkDeviceSize offsets[1] = {0};
     VkBuffer vertex_buffer = mesh->vertex_buffer;
@@ -1297,8 +1332,14 @@ void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline
 
     vkCmdDrawIndexed(cmd, mesh->indices_num, 1, 0, 0, 0);
 
-    vkCmdEndRenderPass(cmd);
+}
 
+void renderer_backend_end_frame(RendererBackend* rbs)
+{
+    VkResult res;
+    u32 cf = rbs->current_frame;
+    VkCommandBuffer cmd = rbs->graphics_cmd_buffers[cf];
+    vkCmdEndRenderPass(cmd);
     res = vkEndCommandBuffer(cmd);
     VERIFY_RES();
 }

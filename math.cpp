@@ -30,7 +30,7 @@ Mat4 mat4_identity()
     return i;
 }
 
-Mat4 mat4_from_rotation_and_translation(C(Quat) q, C(Vec3) t)
+Mat4 mat4_from_rotation_and_translation(const Quat& q, const Vec3& t)
 {
     f32 x = q.x, y = q.y, z = q.z, w = q.w,
         x2 = x + x,
@@ -97,7 +97,7 @@ Mat4 operator*(const Mat4& m1, const Mat4& m2)
     };
 }
 
-Mat4 mat4_inverse(C(Mat4) m)
+Mat4 mat4_inverse(const Mat4& m)
 {
     const float* a = &m.x.x;
     f32 a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
@@ -147,37 +147,37 @@ Quat quat_identity()
     return q;
 }
 
-f32 dot(C(Vec3) v1, C(Vec3) v2)
+f32 dot(const Vec3& v1, const Vec3& v2)
 {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-f32 len(C(Vec3) v)
+f32 len(const Vec3& v)
 {
     return sqrtf(dot(v, v));
 }
 
-Vec3 normalize(C(Vec3) v)
+Vec3 normalize(const Vec3& v)
 {
     return v * (1/len(v));
 }
 
-Vec3 operator-(C(Vec3) v)
+Vec3 operator-(const Vec3& v)
 {
     return {-v.x, -v.y, -v.z};
 }
 
-Vec3 operator-(C(Vec3) v1, C(Vec3) v2)
+Vec3 operator-(const Vec3& v1, const Vec3& v2)
 {
     return {v1.x - v2.x, v1.y - v2.y, v1.z - v2.z};
 }
 
-Vec3 operator*(C(Vec3) v, f32 s)
+Vec3 operator*(const Vec3& v, f32 s)
 {
     return {v.x * s, v.y * s, v.z * s};
 }
 
-Vec3 cross(C(Vec3) v1, C(Vec3) v2)
+Vec3 cross(const Vec3& v1, const Vec3& v2)
 {
     return  {
         v1.y * v2.z - v1.z * v2.y,
@@ -186,7 +186,19 @@ Vec3 cross(C(Vec3) v1, C(Vec3) v2)
     };
 }
 
-bool operator==(C(Vec3) v1, C(Vec3) v2)
+Vec3 operator+(const Vec3& v1, const Vec3& v2)
+{
+    return {v1.x + v2.x, v1.y + v2.y, v1.z + v2.z};
+}
+
+void operator+=(Vec3& v1, const Vec3& v2)
+{
+    v1.x += v2.x;
+    v1.y += v2.y;
+    v1.z += v2.z;
+}
+
+bool operator==(const Vec3& v1, const Vec3& v2)
 {
     return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
 }
@@ -196,17 +208,17 @@ bool f32_almost_eql(f32 f1, f32 f2)
     return fabs(f2 - f1) < SMALL_NUMBER;
 }
 
-bool vec2_almost_eql(C(Vec2) v1, C(Vec2) v2)
+bool vec2_almost_eql(const Vec2& v1, const Vec2& v2)
 {
     return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y);
 }
 
-bool vec3_almost_eql(C(Vec3) v1, C(Vec3) v2)
+bool vec3_almost_eql(const Vec3& v1, const Vec3& v2)
 {
     return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y) && f32_almost_eql(v1.z, v2.z);
 }
 
-bool vec4_almost_eql(C(Vec4) v1, C(Vec4) v2)
+bool vec4_almost_eql(const Vec4& v1, const Vec4& v2)
 {
     return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y) && f32_almost_eql(v1.z, v2.z) && f32_almost_eql(v1.w, v2.w);
 }

@@ -25,3 +25,6 @@ void memf(void* p);
 
 void memory_check_leaks();
 void memzero(void* p, u64 s);
+
+#define memzero_t(p, t) memzero(p, sizeof(t));
+#define memzero_p(p) memzero(p, sizeof(*p));

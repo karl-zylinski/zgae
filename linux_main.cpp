@@ -12,6 +12,7 @@
 #include <math.h>
 #include "obj_loader.h"
 #include "gjk_epa.h"
+#include "physics.h"
 
 static f32 get_cur_time_seconds()
 {
@@ -49,6 +50,14 @@ static Backtrace get_backtrace(u32 backtrace_size)
     };
 }
 
+static Renderer* g_rs = NULL;
+
+void update_renderer_position(RenderResourceHandle world, RenderWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
+{
+    renderer_world_set_position_and_rotation(g_rs, world, obj, pos, rot);
+}
+
+
 int main()
 {
     info("Starting ZGAE");
@@ -57,7 +66,9 @@ int main()
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
     Renderer* rs = renderer_create(WINDOW_TYPE_XCB, win);
+    g_rs = rs;
     RenderResourceHandle rw = renderer_create_world(rs);
+    let ps = physics_state_create(update_renderer_position);
 
     WindowCallbacks wc = {};
     wc.key_pressed_callback = &keyboard_key_pressed;
@@ -73,29 +84,23 @@ int main()
 
     check(olr.ok, "failed loading physics mesh");
 
+
+    Quat rot = quat_identity();
     Vec3 p1 = {0, 0, 0};
     Vec3 p2 = {-2, 0, 0};
 
-    GjkShape gs1 = {
-        .vertices = olr.vertices,
-        .vertices_num = olr.vertices_num,
-        .position = p1
-    };
-
-    GjkShape gs2 = {
-        .vertices = olr.vertices,
-        .vertices_num = olr.vertices_num,
-        .position = p2
-    };
-
-    Mat4 m1 = mat4_identity();
-    Mat4 m2 = mat4_identity();
-
-    m2.w.x = p2.x;
-
-    u32 b1_world_idx = renderer_world_add(rs, rw, gh, m1);
+    u32 b1_world_idx = renderer_world_add(rs, rw, gh, p1, rot);
     (void)b1_world_idx;
-    u32 b2_world_idx = renderer_world_add(rs, rw, gh, m2);
+    u32 b2_world_idx = renderer_world_add(rs, rw, gh, p2, rot);
+
+
+    let physics_mesh = physics_resource_load(ps, "box.mesh");
+    let physics_collider = physics_collider_create(ps, physics_mesh);
+    let physics_world = physics_world_create(ps, rw);
+    let p_b1 = physics_world_add(ps, physics_world, physics_collider, b1_world_idx, p1, rot);
+    (void)p_b1;
+    let p_b2 = physics_world_add(ps, physics_world, physics_collider, b2_world_idx, p2, rot);
+
 
     info("Starting timers");
     
@@ -141,19 +146,7 @@ int main()
         if (key_held(KC_F))
             p2.z -= time_dt();
 
-        gs2.position = p2;
-
-        m2.w.x = p2.x;
-        m2.w.y = p2.y;
-        m2.w.z = p2.z;
-        renderer_world_move(rs, rw, b2_world_idx, m2);
-
-        bool collision = gjk_intersect(gs1, gs2);
-
-        if (collision)
-        {
-            info("COLLISION");
-        }
+        physics_world_set_position(ps, physics_world, p_b2, p2, rot);
 
         renderer_wait_for_new_frame(rs);
         linux_xcb_window_process_all_events(win);
@@ -164,13 +157,17 @@ int main()
             renderer_surface_resized(rs, window_resize_w, window_resize_h);
         }
 
+        physics_update_world(ps, physics_world);
+        renderer_begin_frame(rs, ph);
         renderer_draw_world(rs, ph, rw, camera_pos, camera_rot);
+        renderer_end_frame(rs);
         renderer_present(rs);
         keyboard_end_of_frame();
     }
 
     memf(olr.vertices);
     info("Main loop exited, shutting down");
+    physics_state_destroy(ps);
     renderer_destroy(rs);
     linux_xcb_window_destroy(win);
     memory_check_leaks();

@@ -4,12 +4,14 @@
 
 - stop using strings, keep only hashes!
 
-- require that resoruce store tells us to specify type enum and type enum names for that store... or is that possible??? the resource constains the enum hummm or wait, just use the type in the handle!
+- make gjk-epa work
 
-- temp allocator, some cool marcro thing that create a a variable and acts on it, what?
+- fix renderer backend not being able to draw two things
 
 
 ### LESS IMPORTANT ###
+
+- require that resoruce store tells us to specify type enum and type enum names for that store... or is that possible??? the resource constains the enum hummm or wait, just use the type in the handle!
 
 - make da_insert prettier
 

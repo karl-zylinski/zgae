@@ -3,24 +3,6 @@ shader_stages = [
     "shader_default_fragment.shader"
 ]
 
-constant_buffers = [
-    {
-        binding = 0
-        fields = [
-            {
-                name = "mvp"
-                type = "mat4"
-                value = "mat_model_view_projection"
-            },
-            {
-                name = "model"
-                type = "mat4"
-                value = "mat_model"
-            }
-        ]
-    }
-]
-
 vertex_input = [
     {
         name = "position"

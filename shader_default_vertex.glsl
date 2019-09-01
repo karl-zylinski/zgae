@@ -2,7 +2,8 @@
 #extension GL_ARB_separate_shader_objects: enable
 #extension GL_ARB_shading_language_420pack:  enable
 
-layout (std140, binding = 0) uniform Matrices {
+layout(push_constant) uniform Matrices
+{
     mat4 mvp;
     mat4 model;
 };

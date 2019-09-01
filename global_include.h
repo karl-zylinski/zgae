@@ -51,6 +51,4 @@ typedef u64 Handle;
     #define NULL 0
 #endif
 
-
-// For constant function params
-#define C(t) const t&
+#define let auto

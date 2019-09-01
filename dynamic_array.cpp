@@ -6,7 +6,7 @@
 DynamicArrayHeader* da__header(void* a)
 {
     DynamicArrayHeader* dah = ((DynamicArrayHeader*)(a)) - 1;
-    check(dah->marker == marker_value, "Passed parameter to da_* func probably ins't a dynamic array");
+    check(dah->marker == marker_value, "Passed parameter to da_* func probably ins't a dynamic array, is it perhaps a normal array?");
     return dah;
 }
 

@@ -4,6 +4,182 @@
 		"selected_items":
 		[
 			[
+				"PhysicsR",
+				"PhysicsResourceMesh"
+			],
+			[
+				"get",
+				"get_resource"
+			],
+			[
+				"PhysiscRes",
+				"PhysicsResourceHandle"
+			],
+			[
+				"resou",
+				"resources"
+			],
+			[
+				"resu",
+				"resources_num"
+			],
+			[
+				"Phys",
+				"PhysicsState"
+			],
+			[
+				"ver",
+				"vertices"
+			],
+			[
+				"vertices",
+				"vertices"
+			],
+			[
+				"ob",
+				"objects"
+			],
+			[
+				"Physicsco",
+				"PhysicsResourceCollider"
+			],
+			[
+				"Colli",
+				"PhysicsResourceCollider"
+			],
+			[
+				"World",
+				"PhysicsResourceWorld"
+			],
+			[
+				"Physicsworld",
+				"PhysicsResourceWorld"
+			],
+			[
+				"Physics",
+				"PhysicsResourceWorld"
+			],
+			[
+				"cllider",
+				"PhysicsResourceCollider"
+			],
+			[
+				"resour",
+				"resource_data"
+			],
+			[
+				"Coll",
+				"PhysicsResourceCollider"
+			],
+			[
+				"PhyscsRes",
+				"PhysicsResourceType"
+			],
+			[
+				"PhysicsRes",
+				"PhysicsResourceType"
+			],
+			[
+				"Handle",
+				"HandlePool"
+			],
+			[
+				"PHysicsres",
+				"PhysicsResourceHandle"
+			],
+			[
+				"file",
+				"filename"
+			],
+			[
+				"Ph",
+				"PhysicsState"
+			],
+			[
+				"physi",
+				"physics_world"
+			],
+			[
+				"Physi",
+				"PhysicsResourceHandle"
+			],
+			[
+				"PHys",
+				"PhysicsResourceHandle"
+			],
+			[
+				"phys",
+				"physics_world"
+			],
+			[
+				"push",
+				"push_constants"
+			],
+			[
+				"push_con",
+				"push_constants_num"
+			],
+			[
+				"Render",
+				"Renderer"
+			],
+			[
+				"push_co",
+				"push_constants_sizes"
+			],
+			[
+				"push_",
+				"push_constant_types"
+			],
+			[
+				"push_Const",
+				"push_constant_sizes"
+			],
+			[
+				"push_c",
+				"push_contants_num"
+			],
+			[
+				"Shader",
+				"ShaderType"
+			],
+			[
+				"auto",
+				"auto_val"
+			],
+			[
+				"CB_AUTO",
+				"CONSTANT_BUFFER_AUTO_VALUE_NONE"
+			],
+			[
+				"constant_buffer",
+				"constant_buffers_num"
+			],
+			[
+				"TemALl",
+				"TempAllocatorDataBlock"
+			],
+			[
+				"Tem",
+				"TempAllocatorData"
+			],
+			[
+				"Temp",
+				"TempAllocatorDataBlock"
+			],
+			[
+				"ALLO",
+				"ALLOCATOR_TYPE_TEMP"
+			],
+			[
+				"Alloc",
+				"Allocator"
+			],
+			[
+				"Allocat",
+				"AllocatorType"
+			],
+			[
 				"RenderResou",
 				"RenderResourceFlag"
 			],
@@ -56,20 +232,12 @@
 				"PipelineRenderResource"
 			],
 			[
-				"Shader",
-				"ShaderDataType"
-			],
-			[
 				"Keyco",
 				"Keycode"
 			],
 			[
 				"ine",
 				"inline_test"
-			],
-			[
-				"Render",
-				"RendererState"
 			],
 			[
 				"REnderREs",
@@ -128,16 +296,8 @@
 				"RendererState"
 			],
 			[
-				"resour",
-				"Resource"
-			],
-			[
 				"arr",
 				"arr_handle"
-			],
-			[
-				"Handle",
-				"HandleHashMap"
 			],
 			[
 				"Resource",
@@ -354,344 +514,19 @@
 			[
 				"allo",
 				"alloc_callstacks"
-			],
-			[
-				"callsta",
-				"callstack_num"
-			],
-			[
-				"alloc",
-				"allocation_callstack_t"
-			],
-			[
-				"back",
-				"backtrace_size"
-			],
-			[
-				"get_",
-				"g_get_backtrace"
-			],
-			[
-				"backtra",
-				"backtrace_symbols"
-			],
-			[
-				"funct",
-				"function_calls"
-			],
-			[
-				"geometry",
-				"geometry_index_t"
-			],
-			[
-				"vertices",
-				"vertices_num"
-			],
-			[
-				"geo",
-				"geometry"
-			],
-			[
-				"indices",
-				"indices_num"
-			],
-			[
-				"geom",
-				"geometry_index_t"
-			],
-			[
-				"uint",
-				"uint16_t"
-			],
-			[
-				"index",
-				"index_buffer_memory"
-			],
-			[
-				"vertex_buff",
-				"vertex_buffer_memory"
-			],
-			[
-				"verex",
-				"vertex_buffer"
-			],
-			[
-				"index_",
-				"index_buffer"
-			],
-			[
-				"VkDevi",
-				"VkDeviceMemory"
-			],
-			[
-				"index_buff",
-				"index_buffer_memory"
-			],
-			[
-				"ava",
-				"available_layers"
-			],
-			[
-				"Valida",
-				"validation_layer_name"
-			],
-			[
-				"non_er",
-				"non_errors"
-			],
-			[
-				"avail",
-				"available_layers_num"
-			],
-			[
-				"validat",
-				"validation_layer_available"
-			],
-			[
-				"vali",
-				"validation_layer_name"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "gjk_epa.h",
+			"contents": "#include \"physics.h\"\n#include \"memory.h\"\n#include \"handle_hash_map.h\"\n#include \"handle_pool.h\"\n#include \"str.h\"\n#include \"debug.h\"\n#include \"handle.h\"\n#include \"path.h\"\n#include \"math.h\"\n#include \"dynamic_array.h\"\n#include \"time.h\"\n#include \"gjk_epa.h\"\n#include \"file.h\"\n#include \"jzon.h\"\n#include \"obj_loader.h\"\n\nstruct PhysicsResource\n{\n    hash64 name_hash;\n    PhysicsResourceHandle handle; // type is in the handle, get with handle_type(handle)\n    void* data;\n};\n\nstruct PhysicsState\n{\n    PhysicsResource* resources;\n    u32 resources_num;\n    HandleHashMap* resource_name_to_handle;\n    HandlePool* resource_handle_pool;\n    PhysicsPositionUpdateCallback position_update_callback;\n};\n\nstruct PhysicsResourceMesh\n{\n    Vec3* vertices;\n    u32 vertices_num;\n};\n\nstruct PhysicsResourceCollider\n{\n    PhysicsResourceHandle mesh;\n};\n\nstruct PhysicsWorldObject\n{\n    PhysicsResourceHandle collider;\n    RenderWorldObjectHandle render_handle;\n    Vec3 position;\n    Quat rotation;\n};\n\nstruct PhysicsResourceWorld\n{\n    PhysicsWorldObject* objects; // dynamic\n    u32* free_object_indices; // dynamic, holes in objects\n    RenderResourceHandle render_handle;\n};\n\nstatic const char* physics_resoruce_type_names[] =\n{\n    \"invalid\", \"mesh\", \"collider\", \"world\"\n};\n\n#define get_resource(t, h) ((t*)(ps->resources[handle_index(h)]).data)\n\nPhysicsState* physics_state_create(PhysicsPositionUpdateCallback position_update_callback)\n{\n    let ps = mema_zero_t(PhysicsState);\n\n    ps->resource_handle_pool = handle_pool_create(1, \"PhysicsResourceHandle\");\n    ps->resource_name_to_handle = handle_hash_map_create();\n    ps->position_update_callback = position_update_callback;\n\n    for (u32 s = 1; s < PHYSICS_RESOURCE_TYPE_NUM; ++s)\n        handle_pool_set_type(ps->resource_handle_pool, s, physics_resoruce_type_names[s]);\n\n    return ps;\n}\n\nstatic PhysicsResourceType resource_type_from_str(const char* str)\n{\n    i32 idx = str_eql_arr(str, physics_resoruce_type_names, sizeof(physics_resoruce_type_names)/sizeof(physics_resoruce_type_names[0]));\n    check(idx > 0 && idx < PHYSICS_RESOURCE_TYPE_NUM, \"Invalid physics resource type\");\n    return (PhysicsResourceType)idx;\n}\n\nstatic PhysicsResourceHandle add_resource(PhysicsState* ps, hash64 name_hash, PhysicsResourceType type, void* data)\n{\n    let handle = handle_pool_borrow(ps->resource_handle_pool, (u32)type);\n    u32 num_needed_resources = handle_index(handle) + 1;\n    if (num_needed_resources > ps->resources_num)\n    {\n        ps->resources = (PhysicsResource*)memra_zero_added(ps->resources, num_needed_resources * sizeof(PhysicsResource), ps->resources_num * sizeof(PhysicsResource));\n        ps->resources_num = num_needed_resources;\n    }\n    PhysicsResource* r = ps->resources + handle_index(handle);\n    memzero_p(r);\n    r->name_hash = name_hash;\n    r->handle = handle;\n    r->data = data;\n    return handle;\n}\n\nPhysicsResourceHandle physics_resource_load(PhysicsState* ps, const char* filename)\n{\n    let name_hash = str_hash(filename);\n    let existing = handle_hash_map_get(ps->resource_name_to_handle, name_hash);\n\n    if (existing != HANDLE_INVALID)\n        return existing;\n\n    const char* ext = path_ext(filename);\n    let type = resource_type_from_str(ext);\n    void* data = NULL;\n\n    switch(type)\n    {\n        case PHYSICS_RESOURCE_TYPE_MESH: {\n            FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);\n            check(flr.ok, \"Failed loading mesh from %s\", filename);\n            JzonParseResult jpr = jzon_parse((char*)flr.data);\n            check(jpr.ok && jpr.output.is_table, \"Outer object in %s isn't a table\", filename);\n            memf(flr.data);\n\n            let jz_source = jzon_get(jpr.output, \"source\");\n            check(jz_source && jz_source->is_string, \"%s doesn't contain source field\", filename);\n\n            let obj_vertices = obj_load_vertices(jz_source->string_val);\n            check(obj_vertices.ok, \"Failed loading obj specified by %s in %s\", jz_source->string_val, filename);\n            jzon_free(&jpr.output);\n\n            check(obj_vertices.ok, \"Failed loading mesh from file %s\", filename);\n\n            let m = mema_zero_t(PhysicsResourceMesh);\n            m->vertices = obj_vertices.vertices;\n            m->vertices_num = obj_vertices.vertices_num;\n            data = m;\n        } break;\n\n        default: error(\"Implement me!\");\n    }\n\n    return add_resource(ps, name_hash, type, data);\n}\n\nPhysicsResourceHandle physics_collider_create(PhysicsState* ps, PhysicsResourceHandle mesh)\n{\n    let c = mema_zero_t(PhysicsResourceCollider);\n    c->mesh = mesh;\n    return add_resource(ps, 0, PHYSICS_RESOURCE_TYPE_COLLIDER, c);\n}\n\nPhysicsResourceHandle physics_world_create(PhysicsState* ps, RenderResourceHandle render_handle)\n{\n    let w = mema_zero_t(PhysicsResourceWorld);\n    w->render_handle = render_handle;\n    return add_resource(ps, 0, PHYSICS_RESOURCE_TYPE_WORLD, w);\n}\n\nPhysicsWorldObjectHandle physics_world_add(PhysicsState* ps, PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)\n{\n    let w = get_resource(PhysicsResourceWorld, world);\n\n   if (da_num(w->free_object_indices) > 0)\n    {\n        u32 idx = da_pop(w->free_object_indices);\n        w->objects[idx].collider = collider;\n        w->objects[idx].position = pos;\n        w->objects[idx].rotation = rot;\n        return idx;\n    }\n\n    let h = da_num(w->objects);\n\n    PhysicsWorldObject wo = {\n        .collider = collider,\n        .position = pos,\n        .rotation = rot,\n        .render_handle = render_handle\n    };\n\n    da_push(w->objects, wo);\n    return h;\n}\n\nvoid physics_world_move(PhysicsState* ps, PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos)\n{\n    let w = get_resource(PhysicsResourceWorld, world);\n    w->objects[obj].position += pos;\n    ps->position_update_callback(w->render_handle, w->objects[obj].render_handle, w->objects[obj].position, w->objects[obj].rotation);\n}\n\nvoid physics_world_set_position(PhysicsState* ps, PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)\n{\n    let w = get_resource(PhysicsResourceWorld, world);\n    w->objects[obj].position = pos;\n    w->objects[obj].rotation = rot;\n    ps->position_update_callback(w->render_handle, w->objects[obj].render_handle, pos, rot);\n}\n\nvoid physics_update_world(PhysicsState* ps, PhysicsResourceHandle world)\n{\n    let w = get_resource(PhysicsResourceWorld, world);\n    //float dt = time_dt();\n\n    for (u32 i = 0; i < da_num(w->objects); ++i)\n    {\n        if (!w->objects[i].collider)\n            continue;\n\n        let c1 = get_resource(PhysicsResourceCollider, w->objects[i].collider);\n        let p1 = w->objects[i].position;\n        //let r1 = w->objects[i].rotation;\n        let m1 = get_resource(PhysicsResourceMesh, c1->mesh);\n\n        GjkShape s1 = {\n            .vertices = mema_tn(Vec3, m1->vertices_num),\n            .vertices_num = m1->vertices_num\n        };\n\n        for (u32 vi = 0; vi < s1.vertices_num; ++vi)\n            s1.vertices[vi] = m1->vertices[vi] + p1;\n\n        for (u32 j = i + 1; j < da_num(w->objects); ++j)\n        {\n            if (!w->objects[j].collider)\n                continue;\n\n            let c2 = get_resource(PhysicsResourceCollider, w->objects[j].collider);\n            let p2 = w->objects[j].position;\n            //let r2 = w->objects[j].rotation;\n            let m2 = get_resource(PhysicsResourceMesh, c2->mesh);\n\n            GjkShape s2 = {\n                .vertices = mema_tn(Vec3, m2->vertices_num),\n                .vertices_num = m2->vertices_num\n            };\n\n            for (u32 vi = 0; vi < s2.vertices_num; ++vi)\n                s2.vertices[vi] = m2->vertices[vi] + p2;\n\n            let coll = gjk_epa_intersect_and_solve(s1, s2);\n\n            if (coll.colliding)\n                physics_world_move(ps, world, i, coll.solution);\n\n            memf(s2.vertices);\n        }\n\n        memf(s1.vertices);\n    }\n}\n\nstatic void destroy_resource(PhysicsState* ps, PhysicsResourceHandle h)\n{\n    switch(handle_type(h))\n    {\n        case PHYSICS_RESOURCE_TYPE_MESH: {\n            let m = get_resource(PhysicsResourceMesh, h);\n            memf(m-.\n        } break;\n    }\n\n    memf(ps->resources[handle_index(h)].data);\n    handle_pool_return(ps->resource_handle_pool, h);\n\n    if (ps->resources[handle_index(h)].name_hash)\n        handle_hash_map_remove(ps->resource_name_to_handle, ps->resources[handle_index(h)].name_hash);\n}\n\nvoid physics_state_destroy(PhysicsState* ps)\n{\n    for (u32 i = 0; i < ps->resources_num; ++i)\n        destroy_resource(ps, ps->resources[i].handle);\n\n    memf(ps->resources);\n    handle_hash_map_destroy(ps->resource_name_to_handle);\n    handle_pool_destroy(ps->resource_handle_pool);\n    memf(ps);\n}",
+			"file": "physics.cpp",
+			"file_size": 8749,
+			"file_write_time": 132118225017376709,
 			"settings":
 			{
-				"buffer_size": 185,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "linux_main.cpp",
-			"settings":
-			{
-				"buffer_size": 4763,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "linux_xcb_window.cpp",
-			"settings":
-			{
-				"buffer_size": 9744,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "linux_xcb_window.h",
-			"settings":
-			{
-				"buffer_size": 617,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "renderer.cpp",
-			"settings":
-			{
-				"buffer_size": 23540,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "str.cpp",
-			"settings":
-			{
-				"buffer_size": 1642,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "path.h",
-			"settings":
-			{
-				"buffer_size": 50,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "path.cpp",
-			"settings":
-			{
-				"buffer_size": 313,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "str.h",
-			"settings":
-			{
-				"buffer_size": 334,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "jzon.cpp",
-			"settings":
-			{
-				"buffer_size": 9340,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "file.h",
-			"settings":
-			{
-				"buffer_size": 125,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "renderer.h",
-			"settings":
-			{
-				"buffer_size": 1314,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "renderer_backend.h",
-			"settings":
-			{
-				"buffer_size": 1759,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "renderer_backend_vulkan.cpp",
-			"settings":
-			{
-				"buffer_size": 52606,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "obj_loader.cpp",
-			"settings":
-			{
-				"buffer_size": 6262,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "gjk_epa.cpp",
-			"settings":
-			{
-				"buffer_size": 9801,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "global_include.h",
-			"settings":
-			{
-				"buffer_size": 1037,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_hash_map.h",
-			"settings":
-			{
-				"buffer_size": 329,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_pool.h",
-			"settings":
-			{
-				"buffer_size": 405,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "jzon.h",
-			"settings":
-			{
-				"buffer_size": 172,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_pool.cpp",
-			"settings":
-			{
-				"buffer_size": 3226,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "handle_hash_map.cpp",
-			"settings":
-			{
-				"buffer_size": 2095,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "obj_loader.h",
-			"settings":
-			{
-				"buffer_size": 141,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "obj_loader_types.h",
-			"settings":
-			{
-				"buffer_size": 181,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "math.h",
-			"settings":
-			{
-				"buffer_size": 780,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "math.cpp",
-			"settings":
-			{
-				"buffer_size": 6076,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "gjk_epa_types.h",
-			"settings":
-			{
-				"buffer_size": 187,
+				"buffer_size": 8815,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -789,7 +624,7 @@
 			]
 		]
 	],
-	"build_varint": "",
+	"build_varint": "build and run",
 	"command_palette":
 	{
 		"height": 0.0,
@@ -869,53 +704,69 @@
 	],
 	"file_history":
 	[
-		"/home/karl/Projects/zgae_c/debug.h",
+		"/home/karl/Projects/zgae_c/linux_main.cpp",
+		"/home/karl/Projects/zgae_c/physics_types.h",
+		"/home/karl/Projects/zgae_c/renderer.h",
+		"/home/karl/Projects/zgae_c/renderer.cpp",
+		"/home/karl/Projects/zgae_c/math.h",
+		"/home/karl/Projects/zgae_c/physics.h",
+		"/home/karl/Projects/zgae_c/renderer_types.h",
+		"/home/karl/Projects/zgae_c/physics.cpp",
 		"/home/karl/Projects/zgae_c/gjk_epa.cpp",
 		"/home/karl/Projects/zgae_c/linux_xcb_window.cpp",
+		"/home/karl/Projects/zgae_c/window_types.h",
+		"/home/karl/Projects/zgae_c/gjk_epa.h",
+		"/home/karl/Projects/zgae_c/mesh_types.h",
+		"/home/karl/Projects/zgae_c/obj_loader_types.h",
+		"/home/karl/Projects/zgae_c/gjk_epa_types.h",
+		"/home/karl/Projects/zgae_c/memory.h",
+		"/home/karl/Projects/zgae_c/box.mesh",
+		"/home/karl/Projects/zgae/physics.cpp",
+		"/home/karl/Projects/zgae_c/obj_loader.h",
+		"/home/karl/Projects/zgae_c/mesh.cpp",
+		"/home/karl/Projects/zgae_c/mesh.h",
+		"/home/karl/Projects/zgae_c/render_resource_types.h",
+		"/home/karl/Projects/zgae_c/math.cpp",
+		"/home/karl/Projects/zgae/math.cpp",
+		"/home/karl/Projects/zgae_c/renderer_backend.h",
+		"/home/karl/Projects/zgae_c/build.py",
+		"/home/karl/Projects/zgae_c/renderer_backend_vulkan.cpp",
+		"/home/karl/Projects/zgae_c/global_include.h",
+		"/home/karl/Projects/zgae_c/dynamic_array.cpp",
+		"/home/karl/Projects/zgae_c/shader_default_vertex.shader",
+		"/home/karl/Projects/zgae_c/todo.txt",
+		"/home/karl/Projects/zgae_c/jzon.h",
+		"/home/karl/Projects/zgae_c/jzon.cpp",
+		"/home/karl/Projects/zgae_c/pipeline_default.pipeline",
+		"/home/karl/Projects/zgae_c/shader_default_vertex.glsl",
+		"/home/karl/Projects/zgae_c/memory.cpp",
+		"/home/karl/Projects/zgae_c/linux_xcb_window.h",
+		"/home/karl/Projects/zgae_c/str.cpp",
+		"/home/karl/Projects/zgae_c/path.h",
+		"/home/karl/Projects/zgae_c/path.cpp",
+		"/home/karl/Projects/zgae_c/str.h",
+		"/home/karl/Projects/zgae_c/file.h",
+		"/home/karl/Projects/zgae_c/obj_loader.cpp",
+		"/home/karl/Projects/zgae_c/handle_hash_map.h",
+		"/home/karl/Projects/zgae_c/handle_pool.h",
+		"/home/karl/Projects/zgae_c/handle_pool.cpp",
+		"/home/karl/Projects/zgae_c/handle_hash_map.cpp",
+		"/home/karl/Projects/zgae_c/memory_types.h",
+		"/home/karl/Projects/zgae_c/debug.h",
 		"/home/karl/Projects/zgae_c/keyboard.cpp",
-		"/home/karl/Projects/zgae_c/linux_main.cpp",
 		"/home/karl/Projects/zgae_c/keycode_types.h",
 		"/home/karl/Projects/zgae_c/debug.cpp",
-		"/home/karl/Projects/zgae_c/math.cpp",
-		"/home/karl/Projects/zgae_c/gjk_epa.h",
 		"/home/karl/Projects/zgae_c/math_types.h",
-		"/home/karl/Projects/zgae_c/math.h",
-		"/home/karl/Projects/zgae/math.cpp",
 		"/home/karl/Projects/zgae_c/dynamic_array.h",
-		"/home/karl/Projects/zgae_c/dynamic_array.cpp",
-		"/home/karl/Projects/zgae_c/file.h",
 		"/home/karl/Projects/zgae_c/file.cpp",
 		"/home/karl/Projects/zgae_c/keyboard.h",
 		"/home/karl/Projects/zgae_c/render_resource.h",
-		"/home/karl/Projects/zgae_c/global_include.h",
 		"/home/karl/Projects/zgae_c/debug_types.h",
 		"/home/karl/Projects/zgae_c/handle.h",
-		"/home/karl/Projects/zgae_c/todo.txt",
 		"/home/karl/Projects/zgae_c/zgae.sublime-project",
-		"/home/karl/Projects/zgae_c/linux_xcb_window.h",
-		"/home/karl/Projects/zgae_c/obj_loader.cpp",
 		"/home/karl/Projects/zgae_c/shader_default_vertex.spv",
-		"/home/karl/Projects/zgae_c/str.h",
-		"/home/karl/Projects/zgae_c/window_types.h",
-		"/home/karl/Projects/zgae_c/handle_pool.cpp",
-		"/home/karl/Projects/zgae_c/handle_pool.h",
-		"/home/karl/Projects/zgae_c/memory.cpp",
-		"/home/karl/Projects/zgae_c/memory.h",
-		"/home/karl/Projects/zgae_c/mesh_types.h",
-		"/home/karl/Projects/zgae_c/handle_hash_map.cpp",
-		"/home/karl/Projects/zgae_c/handle_hash_map.h",
-		"/home/karl/Projects/zgae_c/jzon.cpp",
-		"/home/karl/Projects/zgae_c/jzon.h",
 		"/home/karl/Projects/zgae_c/jzon_types.h",
-		"/home/karl/Projects/zgae_c/path.cpp",
-		"/home/karl/Projects/zgae_c/render_resource_types.h",
 		"/home/karl/Projects/zgae_c/render_resource.cpp",
-		"/home/karl/Projects/zgae_c/obj_loader_types.h",
-		"/home/karl/Projects/zgae_c/renderer.cpp",
-		"/home/karl/Projects/zgae_c/renderer.h",
-		"/home/karl/Projects/zgae_c/renderer_backend.h",
-		"/home/karl/Projects/zgae_c/renderer_backend_vulkan.cpp",
-		"/home/karl/Projects/zgae_c/str.cpp",
 		"/home/karl/Projects/zgae_c/file_types.h",
 		"/home/karl/Projects/lax/window_types.h",
 		"/home/karl/Projects/lax/render_resource_types.h",
@@ -924,11 +775,8 @@
 		"/home/karl/Projects/lax/obj_loader.c",
 		"/home/karl/Projects/lax/array.c",
 		"/home/karl/Desktop/old_arr.c",
-		"/home/karl/Projects/zgae_c/build.py",
 		"/home/karl/Projects/zgae_c/math.c",
 		"/home/karl/Projects/zgae_c/array.cpp",
-		"/home/karl/Projects/zgae_c/path.h",
-		"/home/karl/Projects/zgae_c/obj_loader.h",
 		"/home/karl/Desktop/linux-master/code/handmade_world.h",
 		"/home/karl/Desktop/linux-master/code/handmade_world_mode.h",
 		"/home/karl/Desktop/linux-master/code/linux_sound.h",
@@ -948,14 +796,12 @@
 		"/home/karl/Desktop/ATLAS/include/atlas_tvec.h",
 		"/home/karl/Projects/zgae/gjk_epa.cpp",
 		"/home/karl/Projects/zgae_c/renderer.c",
-		"/home/karl/Projects/zgae_c/gjk_epa_types.h",
 		"/home/karl/Projects/zgae_c/obj_loader.c",
 		"/home/karl/Projects/zgae_c/renderer_backend_vulkan.c",
 		"/home/karl/Projects/zgae_c/render_resource.c",
 		"/home/karl/Projects/zgae_c/tests",
 		"/home/karl/Projects/zgae_c/zgae",
 		"/home/karl/Projects/zgae_c/linux_main.c",
-		"/home/karl/Projects/zgae_c/box.mesh",
 		"/home/karl/Projects/zgae/gjk_epa.h",
 		"/home/karl/Projects/zgae_c/render_world_types.h",
 		"/home/karl/Projects/zgae_c/handle_hash_map.c",
@@ -983,20 +829,9 @@
 		"/home/karl/Projects/zgae_c/gpu_types.h",
 		"/home/karl/Projects/zgae_c/renderer_utils.h",
 		"/home/karl/Projects/zgae_c/renderer_utils.c",
-		"/home/karl/Projects/zgae_c/shader_default_vertex.glsl",
 		"/home/karl/Projects/zgae_c/shader_default_fragment.glsl",
-		"/home/karl/Projects/zgae_c/shader_default_vertex.shader",
-		"/home/karl/Projects/zgae_c/pipeline_default.pipeline",
 		"/home/karl/Projects/zgae_c/time.h",
-		"/home/karl/Projects/zgae_c/path.c",
-		"/home/karl/Projects/zgae/shader_default.hlsl",
-		"/home/karl/Projects/zgae/game/main.lua",
-		"/home/karl/Projects/zgae/game/avatar.lua",
-		"/home/karl/Projects/zgae/renderer_direct3d.h",
-		"/home/karl/Projects/zgae_c/pipeline_resource.h",
-		"/home/karl/Projects/zgae_c/pipeline_resource.c",
-		"/home/karl/Projects/zgae/renderer_direct3d.cpp",
-		"/home/karl/Projects/zgae/render_world.h"
+		"/home/karl/Projects/zgae_c/path.c"
 	],
 	"find":
 	{
@@ -1019,6 +854,68 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"rs",
+			"pool",
+			"rs",
+			"_destroy",
+			"model",
+			"callback",
+			"}\n",
+			"1",
+			"i",
+			"olr",
+			"object_",
+			"free_object_indices",
+			"type",
+			"handle",
+			"rs",
+			"TYPE_MESH",
+			"JZV ",
+			"render_resource_type_names",
+			"PhysicsResourceHandle",
+			"PhysicsWorldObjectHandle",
+			"position",
+			"vkCmdBindDescriptorSets",
+			"cler_values",
+			"resource_load_parse_constant_buffer_field",
+			"var",
+			"push_const",
+			"push_constant_fields_num",
+			"push_contants_num",
+			") ",
+			"jz_push_constants",
+			"push_constants",
+			"pc_field_num",
+			"cp_field_idx",
+			"cb_field_idx",
+			") ",
+			"& ",
+			") ",
+			"& ",
+			") ",
+			"CR(",
+			"descriptorSetCount",
+			"resource_load_parse_constant_buffer_field",
+			"&jpr.output",
+			"able->",
+			"jz_cbf_autoval",
+			"jz_cbf",
+			"SetLayoutCreate",
+			"PoolCreateInfo",
+			"constant_buffer_descriptor_sets",
+			"vk_handle",
+			"C(",
+			"& ",
+			"mema__repl",
+			"h_alloc",
+			"h",
+			"heap_alloc",
+			"mema",
+			"vk_handle",
+			"_pipeline",
+			"pipeline",
+			"descriptorset",
+			"vkBind",
 			"char* ",
 			"->",
 			"v2->",
@@ -1084,76 +981,16 @@
 			"VertexInputValue::",
 			"ConstantBufferAutoValue::",
 			"ShaderDataType::",
-			"RenderResourceType::",
-			"RenderResourceType",
-			"ShaderDataType",
-			"ShaderDataType::Mat4",
-			"typedef stru",
-			" ANALYZER_NORETURN",
-			"mut ",
-			"NULL",
-			"size_t",
-			"da_free",
-			"find_table_pair_insertion_index",
-			"memra_tn",
-			"memra_zero",
-			"destroy_resource",
-			"resources_num",
-			"memra_t",
-			"da__num",
-			"rs->resources",
-			"da_num",
-			"table",
-			"find_table",
-			"da\\_.*\\&",
-			"&",
-			"da_push",
-			"resources",
-			"rs->resources",
-			"array_",
-			"array_push",
-			"da_push",
-			"da_ensure_min_size",
-			"da_.*\\&",
-			"size_t",
-			"hashes.num",
-			"array_destroy",
-			"da_fre",
-			"da_destroy",
-			"array_",
-			"array_push",
-			"array_push(&",
-			"array_",
-			"ArrrayHeader",
-			"ArrayHeader",
-			"array",
-			"array_",
-			"ArrayHeader",
-			"mut ",
-			"mut_",
-			"pd",
-			"ps",
-			"q",
-			"w",
-			"w->",
-			"w",
-			"val",
-			"hp",
-			"hhp",
-			"const ",
-			"const",
-			"const ",
-			"m.",
-			"const ",
-			"const char",
-			"const "
+			"RenderResourceType::"
 		],
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": true,
+		"regex": false,
 		"replace_history":
 		[
+			"const ",
+			"CR(",
 			"",
 			"u32",
 			"",
@@ -1247,1024 +1084,73 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "gjk_epa.h",
+					"file": "physics.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 185,
+						"buffer_size": 8815,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								185,
-								185
+								8233,
+								8233
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C.sublime-syntax"
+							"auto_name": "",
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 22,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "linux_main.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4763,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4655,
-								4655
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3117.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "linux_xcb_window.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9744,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9500,
-								9500
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 6996.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 16,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "linux_xcb_window.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 617,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								295,
-								295
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 15,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "renderer.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 23540,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								20384,
-								20384
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 12797.0,
+						"translation.y": 5371.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
 					"type": "text"
-				},
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
 				{
-					"buffer": 5,
-					"file": "str.cpp",
+					"buffer": 0,
+					"file": "physics.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1642,
+						"buffer_size": 8815,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								638,
-								638
+								5866,
+								5866
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"auto_name": "",
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 37.0,
+						"translation.y": 3102.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "path.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 50,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								29,
-								29
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "path.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 313,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								110,
-								110
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "str.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 334,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								282,
-								282
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "jzon.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9340,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								8654,
-								8654
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 8947.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 18,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "file.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 125,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								102,
-								102
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 24,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "renderer.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1314,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								754,
-								754
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 12,
-					"file": "renderer_backend.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1759,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1340,
-								1340
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 147.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				},
-				{
-					"buffer": 13,
-					"file": "renderer_backend_vulkan.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 52606,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3103,
-								3103
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2025.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "obj_loader.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6262,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3726,
-								3726
-							],
-							[
-								3740,
-								3740
-							],
-							[
-								3785,
-								3785
-							],
-							[
-								3797,
-								3797
-							],
-							[
-								3840,
-								3840
-							],
-							[
-								3854,
-								3854
-							],
-							[
-								3899,
-								3899
-							],
-							[
-								3910,
-								3910
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2853.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 14,
-					"type": "text"
-				},
-				{
-					"buffer": 15,
-					"file": "gjk_epa.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9801,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9634,
-								9634
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 8001.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 23,
-					"type": "text"
-				},
-				{
-					"buffer": 16,
-					"file": "global_include.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1037,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1037,
-								1037
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 528.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				},
-				{
-					"buffer": 17,
-					"file": "handle_hash_map.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 329,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								240,
-								240
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 19,
-					"type": "text"
-				},
-				{
-					"buffer": 18,
-					"file": "handle_pool.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 405,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								212,
-								212
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 19,
-					"file": "jzon.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 172,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								128,
-								128
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 17,
-					"type": "text"
-				},
-				{
-					"buffer": 20,
-					"file": "handle_pool.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3226,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								973,
-								973
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 213.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 21,
-					"file": "handle_hash_map.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2095,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1651,
-								1651
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1122.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 20,
-					"type": "text"
-				},
-				{
-					"buffer": 22,
-					"file": "obj_loader.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 141,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								94,
-								94
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 33,
-					"type": "text"
-				},
-				{
-					"buffer": 23,
-					"file": "obj_loader_types.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 181,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								92,
-								92
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 32,
-					"type": "text"
-				},
-				{
-					"buffer": 0,
-					"file": "gjk_epa.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 185,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								185,
-								185
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 31,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "obj_loader.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6262,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5391,
-								5391
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 4579.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 30,
-					"type": "text"
-				},
-				{
-					"buffer": 24,
-					"file": "math.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 780,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								522,
-								522
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 15,
-					"file": "gjk_epa.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9801,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								410,
-								410
-							]
-						],
-						"settings":
-						{
-							"history_list_is_closing": true,
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 29,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "linux_main.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4763,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								4425,
-								4425
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2772.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 28,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "renderer.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 23540,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 12299.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 27,
-					"type": "text"
-				},
-				{
-					"buffer": 12,
-					"file": "renderer_backend.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1759,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1340,
-								1340
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 177.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 26,
-					"type": "text"
-				},
-				{
-					"buffer": 13,
-					"file": "renderer_backend_vulkan.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 52606,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 25,
-					"type": "text"
-				},
-				{
-					"buffer": 25,
-					"file": "math.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6076,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3464,
-								3464
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1687.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 26,
-					"file": "gjk_epa_types.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 187,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								46,
-								46
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 21,
 					"type": "text"
 				}
 			]
@@ -2272,7 +1158,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 43.0
+		"height": 31.0
 	},
 	"input":
 	{
@@ -2287,11 +1173,18 @@
 				0,
 				1,
 				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
 			]
 		],
 		"cols":
 		[
 			0.0,
+			0.5,
 			1.0
 		],
 		"rows":
@@ -2303,7 +1196,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 193.0
+		"height": 600.0
 	},
 	"output.find_results":
 	{
@@ -2323,59 +1216,59 @@
 		"selected_items":
 		[
 			[
-				"render",
-				"renderer.cpp"
+				"phys",
+				"physics.cpp"
 			],
 			[
-				"str",
-				"str.cpp"
+				"ph",
+				"physics.h"
 			],
 			[
 				"ren",
-				"renderer.h"
+				"renderer.cpp"
 			],
 			[
-				"math.cpp",
-				"math.cpp"
-			],
-			[
-				"globa",
-				"global_include.h"
-			],
-			[
-				"gl",
-				"global_include.h"
-			],
-			[
-				"",
-				"global_include.h"
-			],
-			[
-				"xcb",
-				"linux_xcb_window.cpp"
-			],
-			[
-				"jzon",
-				"jzon.cpp"
-			],
-			[
-				"glo",
-				"global_include.h"
-			],
-			[
-				"glob",
-				"global_include.h"
+				"physics",
+				"physics.cpp"
 			],
 			[
 				"math",
 				"math.h"
 			],
 			[
-				"rend_ba",
-				"renderer_backend.h"
+				"rende",
+				"renderer.h"
 			],
 			[
-				"rend",
+				"renere_ty",
+				"renderer_types.h"
+			],
+			[
+				"physi",
+				"physics_types.h"
+			],
+			[
+				"gjk",
+				"gjk_epa.h"
+			],
+			[
+				"obj",
+				"obj_loader_types.h"
+			],
+			[
+				"mesht",
+				"mesh_types.h"
+			],
+			[
+				"mesh",
+				"mesh.cpp"
+			],
+			[
+				"phy",
+				"physics.h"
+			],
+			[
+				"render",
 				"renderer.cpp"
 			],
 			[
@@ -2383,12 +1276,112 @@
 				"linux_main.cpp"
 			],
 			[
-				"gjk",
-				"gjk_epa.cpp"
+				"mem",
+				"memory.h"
 			],
 			[
-				"obj",
-				"obj_loader.cpp"
+				"me",
+				"memory.h"
+			],
+			[
+				"renderr_res",
+				"render_resource_types.h"
+			],
+			[
+				"box",
+				"box.mesh"
+			],
+			[
+				"rend",
+				"renderer.h"
+			],
+			[
+				"bui",
+				"build.py"
+			],
+			[
+				"globa",
+				"global_include.h"
+			],
+			[
+				"rendererba",
+				"renderer_backend.h"
+			],
+			[
+				"back",
+				"renderer_backend.h"
+			],
+			[
+				"bac",
+				"renderer_backend.h"
+			],
+			[
+				"renderer_back",
+				"renderer_backend.h"
+			],
+			[
+				"glo",
+				"global_include.h"
+			],
+			[
+				"vertex",
+				"shader_default_vertex.shader"
+			],
+			[
+				"verte",
+				"shader_default_vertex.shader"
+			],
+			[
+				"",
+				"shader_default_vertex.glsl"
+			],
+			[
+				"s",
+				"shader_default_vertex.glsl"
+			],
+			[
+				"backe",
+				"renderer_backend_vulkan.cpp"
+			],
+			[
+				"shader",
+				"shader_default_vertex.shader"
+			],
+			[
+				"jzon",
+				"jzon.h"
+			],
+			[
+				"pipe",
+				"pipeline_default.pipeline"
+			],
+			[
+				"global",
+				"global_include.h"
+			],
+			[
+				"str",
+				"str.cpp"
+			],
+			[
+				"math.cpp",
+				"math.cpp"
+			],
+			[
+				"gl",
+				"global_include.h"
+			],
+			[
+				"xcb",
+				"linux_xcb_window.cpp"
+			],
+			[
+				"glob",
+				"global_include.h"
+			],
+			[
+				"rend_ba",
+				"renderer_backend.h"
 			],
 			[
 				"keyb",
@@ -2435,10 +1428,6 @@
 				"global_include.h"
 			],
 			[
-				"mem",
-				"memory.h"
-			],
-			[
 				"dy",
 				"dynamic_array.cpp"
 			],
@@ -2453,10 +1442,6 @@
 			[
 				"tests",
 				"tests.cpp"
-			],
-			[
-				"back",
-				"renderer_backend_vulkan.cpp"
 			],
 			[
 				"vulk",
@@ -2483,10 +1468,6 @@
 				"handle_pool.cpp"
 			],
 			[
-				"bui",
-				"build.py"
-			],
-			[
 				"ath",
 				"path.h"
 			],
@@ -2501,10 +1482,6 @@
 			[
 				"opt",
 				"optimize_incfwd.py"
-			],
-			[
-				"rende",
-				"renderer.h"
 			],
 			[
 				"deb",
@@ -2557,18 +1534,6 @@
 			[
 				"keycod",
 				"keycode_types.h"
-			],
-			[
-				"me",
-				"memory.h"
-			],
-			[
-				"mesh",
-				"mesh_types.h"
-			],
-			[
-				"global",
-				"global_include.h"
 			],
 			[
 				"test",
@@ -2653,14 +1618,6 @@
 			[
 				"resour",
 				"resource_types.h"
-			],
-			[
-				"pipe",
-				"pipeline_resource_types.h"
-			],
-			[
-				"shader",
-				"shader_resource_types.h"
 			],
 			[
 				"resourc",
@@ -2751,10 +1708,6 @@
 				"renderer_backend_vulkan.c"
 			],
 			[
-				"bac",
-				"renderer_backend.h"
-			],
-			[
 				"renderr",
 				"renderer_backend.h"
 			],
@@ -2773,46 +1726,6 @@
 			[
 				"ol",
 				"obj_loader_types.h"
-			],
-			[
-				"fi",
-				"file_types.h"
-			],
-			[
-				"geome",
-				"geometry_types.h"
-			],
-			[
-				"math.",
-				"math.c"
-			],
-			[
-				"goe",
-				"geometry_types.h"
-			],
-			[
-				"load",
-				"obj_loader_types.h"
-			],
-			[
-				"vulkan",
-				"renderer_backend_vulkan.c"
-			],
-			[
-				"linux_xc",
-				"linux_xcb_window.c"
-			],
-			[
-				"vu",
-				"renderer_backend_vulkan.c"
-			],
-			[
-				"debug",
-				"debug.h"
-			],
-			[
-				"backe",
-				"renderer_backend_vulkan.c"
 			]
 		],
 		"width": 0.0
@@ -2843,7 +1756,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 446.0,
+	"side_bar_width": 283.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

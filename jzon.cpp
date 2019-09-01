@@ -420,26 +420,26 @@ void jzon_free(JzonValue* val)
     }
 }
 
-const JzonValue* jzon_get(const JzonValue* table, char* key)
+const JzonValue* jzon_get(const JzonValue& table, char* key)
 {
-    if (!table->is_table)
+    if (!table.is_table)
         return NULL;
 
-    if (table->size == 0)
+    if (table.size == 0)
         return NULL;
     
     i64 key_hash = str_hash(key);
 
     u32 first = 0;
-    u32 last = table->size - 1;
+    u32 last = table.size - 1;
     u32 middle = (first + last) / 2;
 
     while (first <= last)
     {
-        if (table->table_val[middle].key_hash < key_hash)
+        if (table.table_val[middle].key_hash < key_hash)
             first = middle + 1;
-        else if (table->table_val[middle].key_hash == key_hash)
-            return &table->table_val[middle].val;
+        else if (table.table_val[middle].key_hash == key_hash)
+            return &table.table_val[middle].val;
         else
         {
             if (middle == 0)

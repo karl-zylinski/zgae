@@ -1,4 +1,5 @@
 #pragma once
+#include "renderer_types.h"
 
 fwd_enum(WindowType);
 fwd_handle(RenderResourceHandle);
@@ -11,12 +12,14 @@ Renderer* renderer_create(WindowType window_type, void* window_data);
 void renderer_destroy(Renderer* rs);
 RenderResourceHandle renderer_create_world(Renderer* rs);
 void renderer_destroy_world(Renderer* rs, RenderResourceHandle h);
-u32 renderer_world_add(Renderer* rs, RenderResourceHandle world, RenderResourceHandle mesh, C(Mat4) model);
-void renderer_world_remove(Renderer* rs, RenderResourceHandle world, u32 idx);
-void renderer_world_move(Renderer* rs, RenderResourceHandle world, u32 idx, C(Mat4) model);
+RenderWorldObjectHandle renderer_world_add(Renderer* rs, RenderResourceHandle world, RenderResourceHandle mesh, const Vec3& position, const Quat& rot);
+void renderer_world_remove(Renderer* rs, RenderResourceHandle world, RenderWorldObjectHandle h);
+void renderer_world_set_position_and_rotation(Renderer* rs, RenderResourceHandle world, RenderWorldObjectHandle h, const Vec3& position, const Quat& rot);
 RenderResourceHandle renderer_resource_load(Renderer* rs, const char* filename);
-void renderer_draw_world(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, C(Vec3) cam_pos, C(Quat) cam_rot);
-void renderer_draw(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, C(Mat4) model, C(Vec3) cam_pos, C(Quat) cam_rot);
+void renderer_begin_frame(Renderer* rs, RenderResourceHandle pipeline_handle);
+void renderer_draw_world(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, const Vec3& cam_pos, const Quat& cam_rot);
+void renderer_end_frame(Renderer* rs);
+void renderer_draw(Renderer* rs, RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, const Mat4& model, const Vec3& cam_pos, const Quat& cam_rot);
 void renderer_present(Renderer* rs);
 void renderer_update_constant_buffer(Renderer* rs, RenderResourceHandle pipeline_handle, u32 binding, void* data, u32 data_size);
 void renderer_wait_for_new_frame(Renderer* rs);
