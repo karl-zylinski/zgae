@@ -13,6 +13,7 @@
 #include "obj_loader.h"
 #include "gjk_epa.h"
 #include "physics.h"
+#include "entity.h"
 
 static f32 get_cur_time_seconds()
 {
@@ -50,11 +51,9 @@ static Backtrace get_backtrace(u32 backtrace_size)
     };
 }
 
-static Renderer* g_rs = NULL;
-
 void update_renderer_position(RenderResourceHandle world, RenderWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
 {
-    renderer_world_set_position_and_rotation(g_rs, world, obj, pos, rot);
+    renderer_world_set_position_and_rotation(world, obj, pos, rot);
 }
 
 
@@ -65,9 +64,8 @@ int main()
     memory_init();
     keyboard_init();
     XcbWindow* win = linux_xcb_window_create("ZGAE", 640, 480);
-    Renderer* rs = renderer_create(WINDOW_TYPE_XCB, win);
-    g_rs = rs;
-    RenderResourceHandle rw = renderer_create_world(rs);
+    renderer_init(WINDOW_TYPE_XCB, win);
+    RenderResourceHandle rw = renderer_create_world();
     let ps = physics_state_create(update_renderer_position);
 
     WindowCallbacks wc = {};
@@ -77,8 +75,12 @@ int main()
     wc.window_resized_callback = &handle_window_resize;
     linux_xcb_window_update_callbacks(win, wc);
 
-    RenderResourceHandle ph = renderer_resource_load(rs, "pipeline_default.pipeline");
-    RenderResourceHandle gh = renderer_resource_load(rs, "box.mesh");
+    RenderResourceHandle pipeline_handle = renderer_resource_load("pipeline_default.pipeline");
+    RenderResourceHandle mesh_handle = renderer_resource_load("box.mesh");
+
+    //let e1 = entity_create({0, 0, 0}, quat_identity(), rw, mesh_handle);
+    //let e1 = entity_create({-2, 0, 0}, quat_identity(), rw, mesh_handle);
+
 
     ObjLoadVerticesResult olr = obj_load_vertices("box.wobj");
 
@@ -89,9 +91,9 @@ int main()
     Vec3 p1 = {0, 0, 0};
     Vec3 p2 = {-2, 0, 0};
 
-    u32 b1_world_idx = renderer_world_add(rs, rw, gh, p1, rot);
+    u32 b1_world_idx = renderer_world_add(rw, mesh_handle, p1, rot);
     (void)b1_world_idx;
-    u32 b2_world_idx = renderer_world_add(rs, rw, gh, p2, rot);
+    u32 b2_world_idx = renderer_world_add(rw, mesh_handle, p2, rot);
 
 
     let physics_mesh = physics_resource_load(ps, "box.mesh");
@@ -148,27 +150,27 @@ int main()
 
         physics_world_set_position(ps, physics_world, p_b2, p2, rot);
 
-        renderer_wait_for_new_frame(rs);
+        renderer_wait_for_new_frame();
         linux_xcb_window_process_all_events(win);
 
         if (window_resize_handled == false && time_since_start() > window_resized_at + 0.5f)
         {
             window_resize_handled = true;
-            renderer_surface_resized(rs, window_resize_w, window_resize_h);
+            renderer_surface_resized(window_resize_w, window_resize_h);
         }
 
         physics_update_world(ps, physics_world);
-        renderer_begin_frame(rs, ph);
-        renderer_draw_world(rs, ph, rw, camera_pos, camera_rot);
-        renderer_end_frame(rs);
-        renderer_present(rs);
+        renderer_begin_frame(pipeline_handle);
+        renderer_draw_world(pipeline_handle, rw, camera_pos, camera_rot);
+        renderer_end_frame();
+        renderer_present();
         keyboard_end_of_frame();
     }
 
     memf(olr.vertices);
     info("Main loop exited, shutting down");
     physics_state_destroy(ps);
-    renderer_destroy(rs);
+    renderer_shutdown();
     linux_xcb_window_destroy(win);
     memory_check_leaks();
     info("Shutdown finished");

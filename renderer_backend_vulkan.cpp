@@ -93,6 +93,8 @@ struct RendererBackend
     VkRenderPass render_pass;
 };
 
+static RendererBackend* rbs = NULL;
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_message_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
@@ -403,7 +405,7 @@ static void create_renderpass(VkDevice device, VkFormat surface_format, VkFormat
     VERIFY_RES();
 }
 
-static void destroy_swapchain(RendererBackend* rbs)
+static void destroy_swapchain()
 {
     info("Destroying swapchain");
     VkDevice d = rbs->device;
@@ -422,7 +424,7 @@ static void destroy_swapchain(RendererBackend* rbs)
     rbs->swapchain = NULL;
 }
 
-static void destroy_renderpass(RendererBackend* rbs)
+static void destroy_renderpass()
 {
     info("Destroying render pass");
     VkDevice d = rbs->device;
@@ -430,14 +432,14 @@ static void destroy_renderpass(RendererBackend* rbs)
     rbs->render_pass = NULL;
 }
 
-static void destroy_surface_size_dependent_resources(RendererBackend* rbs)
+static void destroy_surface_size_dependent_resources()
 {
-    destroy_swapchain(rbs);
-    destroy_renderpass(rbs);
+    destroy_swapchain();
+    destroy_renderpass();
     destroy_depth_buffer(rbs->device, &rbs->depth_buffer);
 }
 
-static void create_surface_size_dependent_resources(RendererBackend* rbs)
+static void create_surface_size_dependent_resources()
 {
     VkSurfaceCapabilitiesKHR surface_capabilities;
     VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(rbs->gpu, rbs->surface, &surface_capabilities);
@@ -460,10 +462,10 @@ static void create_surface_size_dependent_resources(RendererBackend* rbs)
     rbs->current_frame = 0;
 }
 
-static void recreate_surface_size_dependent_resources(RendererBackend* rbs)
+static void recreate_surface_size_dependent_resources()
 {
-    destroy_surface_size_dependent_resources(rbs);
-    create_surface_size_dependent_resources(rbs);
+    destroy_surface_size_dependent_resources();
+    create_surface_size_dependent_resources();
 }
 
 static VkFormat choose_surface_format(VkPhysicalDevice gpu, VkSurfaceKHR surface)
@@ -521,12 +523,13 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, u32 num_gpus)
 typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerCreateInfoEXT*, VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, VkAllocationCallbacks*);
 
-RendererBackend* renderer_backend_create(WindowType window_type, void* window_data)
+void renderer_backend_init(WindowType window_type, void* window_data)
 {
-    info("Creating Vulkan render");
+    check(rbs == NULL, "Trying to init vulkan backend twice");
+    info("Initing Vulkan render backend");
 
     check(window_type == WINDOW_TYPE_XCB, "window_type must be WindowType::Xcb");
-    RendererBackend* rbs = mema_zero_t(RendererBackend);
+    rbs = mema_zero_t(RendererBackend);
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -678,7 +681,7 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
     rbs->surface_format = choose_surface_format(gpu, surface);
     info("Chose surface VkFormat: %d", rbs->surface_format);
     
-    create_surface_size_dependent_resources(rbs);
+    create_surface_size_dependent_resources();
 
     info("Creating graphics and present queues");
     vkGetDeviceQueue(device, rbs->graphics_queue_family_idx, 0, &rbs->graphics_queue);
@@ -738,17 +741,15 @@ RendererBackend* renderer_backend_create(WindowType window_type, void* window_da
         res = vkCreateFence(device, &fci, NULL, &rbs->image_in_flight_fences[i]);
         VERIFY_RES();
     }
-
-    return rbs;
 }
 
-void renderer_backend_destroy_shader(RendererBackend* rbs, RenderBackendShader* s)
+void renderer_backend_destroy_shader(RenderBackendShader* s)
 {
     vkDestroyShaderModule(rbs->device, s->module, NULL);
     memf(s);
 }
 
-void renderer_backend_destroy_pipeline(RendererBackend* rbs, RenderBackendPipeline* p)
+void renderer_backend_destroy_pipeline(RenderBackendPipeline* p)
 {
     for (u32 frame_idx = 0; frame_idx < MAX_FRAMES_IN_FLIGHT; ++frame_idx)
     {
@@ -770,7 +771,7 @@ void renderer_backend_destroy_pipeline(RendererBackend* rbs, RenderBackendPipeli
     memf(p);
 }
 
-void renderer_backend_destroy_mesh(RendererBackend* rbs, RenderBackendMesh* g)
+void renderer_backend_destroy_mesh(RenderBackendMesh* g)
 {
     vkDestroyBuffer(rbs->device, g->vertex_buffer, NULL);
     vkFreeMemory(rbs->device, g->vertex_buffer_memory, NULL);
@@ -779,9 +780,9 @@ void renderer_backend_destroy_mesh(RendererBackend* rbs, RenderBackendMesh* g)
     memf(g);
 }
 
-void renderer_backend_destroy(RendererBackend* rbs)
+void renderer_backend_shutdown()
 {
-    info("Destroying Vulkan render backend");
+    info("Shutting down Vulkan render backend");
 
     VkDevice d = rbs->device;
 
@@ -796,7 +797,7 @@ void renderer_backend_destroy(RendererBackend* rbs)
         vkDestroyFence(d, rbs->image_in_flight_fences[i], NULL);
     }
 
-    destroy_surface_size_dependent_resources(rbs);
+    destroy_surface_size_dependent_resources();
     vkDestroyDescriptorPool(d, rbs->descriptor_pool_uniform_buffer, NULL);
 
     vkFreeCommandBuffers(d, rbs->graphics_cmd_pool, rbs->graphics_cmd_buffers_num, rbs->graphics_cmd_buffers);
@@ -811,7 +812,7 @@ void renderer_backend_destroy(RendererBackend* rbs)
     memf(rbs);
 }
 
-RenderBackendShader* renderer_backend_create_shader(RendererBackend* rbs, char* source, u32 source_size)
+RenderBackendShader* renderer_backend_create_shader(char* source, u32 source_size)
 {
     RenderBackendShader* shader = mema_zero_t(RenderBackendShader);
 
@@ -852,7 +853,7 @@ static VkShaderStageFlagBits vk_shader_stage_from_shader_type(ShaderType t)
     error("Trying to get VkShaderStageFlagBits from ShaderType, but type isn't mapped.");
 }
 
-RenderBackendPipeline* renderer_backend_create_pipeline(RendererBackend* rbs,
+RenderBackendPipeline* renderer_backend_create_pipeline(
     const RenderBackendShader* const* shader_stages, const ShaderType* shader_stages_types, u32 shader_stages_num,
     const ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
     const u32* constant_buffer_sizes, const u32* constant_buffer_binding_indices, u32 constant_buffers_num,
@@ -1113,7 +1114,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(RendererBackend* rbs,
     return pipeline;
 }
 
-RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, Mesh* m)
+RenderBackendMesh* renderer_backend_create_mesh(Mesh* m)
 {
     VkResult res;
 
@@ -1204,7 +1205,7 @@ RenderBackendMesh* renderer_backend_create_mesh(RendererBackend* rbs, Mesh* m)
     return mema_copy_t(&g, RenderBackendMesh);
 }
 
-void renderer_backend_update_constant_buffer(RendererBackend* rbs, const RenderBackendPipeline& pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
+void renderer_backend_update_constant_buffer(const RenderBackendPipeline& pipeline, u32 binding, const void* data, u32 data_size, u32 offset)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1253,7 +1254,7 @@ static VkIndexType get_index_type(MeshIndex gi)
     }
 }
 
-void renderer_backend_begin_frame(RendererBackend* rbs, RenderBackendPipeline* pipeline)
+void renderer_backend_begin_frame(RenderBackendPipeline* pipeline)
 {
     u32 cf = rbs->current_frame;
     VkResult res;
@@ -1292,7 +1293,7 @@ void renderer_backend_begin_frame(RendererBackend* rbs, RenderBackendPipeline* p
     }
 }
 
-void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline, RenderBackendMesh* mesh, const Mat4& mvp, const Mat4& model)
+void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* mesh, const Mat4& mvp, const Mat4& model)
 {
     u32 cf = rbs->current_frame;
     VkCommandBuffer cmd = rbs->graphics_cmd_buffers[cf];
@@ -1334,7 +1335,7 @@ void renderer_backend_draw(RendererBackend* rbs, RenderBackendPipeline* pipeline
 
 }
 
-void renderer_backend_end_frame(RendererBackend* rbs)
+void renderer_backend_end_frame()
 {
     VkResult res;
     u32 cf = rbs->current_frame;
@@ -1344,7 +1345,7 @@ void renderer_backend_end_frame(RendererBackend* rbs)
     VERIFY_RES();
 }
 
-void renderer_backend_present(RendererBackend* rbs)
+void renderer_backend_present()
 {
     VkResult res;
     u32 cf = rbs->current_frame;
@@ -1391,25 +1392,25 @@ void renderer_backend_present(RendererBackend* rbs)
     rbs->current_frame = (rbs->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void renderer_backend_wait_for_new_frame(RendererBackend* rbs)
+void renderer_backend_wait_for_new_frame()
 {
     vkWaitForFences(rbs->device, 1, &rbs->image_in_flight_fences[rbs->current_frame], VK_TRUE, UINT64_MAX);
 }
 
-void renderer_backend_wait_until_idle(RendererBackend* rbs)
+void renderer_backend_wait_until_idle()
 {
     vkDeviceWaitIdle(rbs->device);
 }
 
-void renderer_backend_surface_resized(RendererBackend* rbs, u32 width, u32 height)
+void renderer_backend_surface_resized(u32 width, u32 height)
 {
     (void)width;
     (void)height;
     info("Render backend resizing to %d x %d", width, height);
-    recreate_surface_size_dependent_resources(rbs);
+    recreate_surface_size_dependent_resources();
 }
 
-Vec2u renderer_backend_get_size(RendererBackend* rbs)
+Vec2u renderer_backend_get_size()
 {
     return rbs->swapchain_size;
 }
