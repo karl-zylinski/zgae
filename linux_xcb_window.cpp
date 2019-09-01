@@ -2,7 +2,7 @@
 #include <xcb/xcb.h>
 #include <string.h>
 #include "debug.h"
-#include "keycode_types.h"
+#include "keyboard_types.h"
 #include "window_types.h"
 #include "memory.h"
 #include <stdlib.h>

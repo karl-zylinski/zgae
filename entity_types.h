@@ -7,8 +7,8 @@ fwd_handle(PhysicsResourceHandle);
 
 struct Entity
 {
-    Vec3 position;
-    Quat rotation;
+    Vec3 pos;
+    Quat rot;
     PhysicsResourceHandle physics_world;
     RenderWorldObjectHandle render_object;
     PhysicsWorldObjectHandle physics_object;

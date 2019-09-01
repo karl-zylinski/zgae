@@ -1,7 +1,7 @@
 #include "linux_xcb_window.h"
 #include "window_types.h"
 #include "renderer.h"
-#include "keycode_types.h"
+#include "keyboard_types.h"
 #include "debug.h"
 #include "memory.h"
 #include "math.h"
@@ -14,6 +14,9 @@
 #include "gjk_epa.h"
 #include "physics.h"
 #include "entity.h"
+#include "camera.h"
+#include "camera_first_person.h"
+#include "player.h"
 
 static f32 get_cur_time_seconds()
 {
@@ -80,9 +83,9 @@ int main()
     let box_collider = physics_collider_create(box_physics_mesh);
     let floor_collider = physics_collider_create(floor_physics_mesh);
 
-    let e1 = entity_create({-3, 0, 5}, quat_identity(), render_world, box_render_mesh, physics_world, box_collider);
+    let e1 = entity_create({-4, 0, 5}, quat_identity(), render_world, box_render_mesh, physics_world, box_collider);
     (void)e1;
-    let e2 = entity_create({0, 0, 9}, quat_identity(), render_world, box_render_mesh, physics_world, box_collider);
+    let e2 = entity_create({4, 0, 9}, quat_identity(), render_world, box_render_mesh, physics_world, box_collider);
     (void)e2;
 
     let floor = entity_create({0, 0, -5}, quat_identity(), render_world, floor_render_mesh, physics_world, floor_collider);
@@ -90,6 +93,12 @@ int main()
 
     entity_create_rigidbody(&e1);
     entity_create_rigidbody(&e2);
+
+    Player player = {
+        .camera = camera_create(),
+        .entity = &e1
+    };
+
 
     info("Starting timers");
     
@@ -99,9 +108,6 @@ int main()
     u32 frames = 0;
 
     info("Entering main loop");
-
-    Quat camera_rot = quat_identity();
-    Vec3 camera_pos = {0, -30, 0};
 
     while (linux_xcb_window_is_open(win) && !key_held(KC_ESCAPE))
     {
@@ -122,21 +128,6 @@ int main()
             frames = 0;
         }
 
-        Vec3 d = {};
-        if (key_held(KC_A))
-            d.x -= time_dt();
-        if (key_held(KC_D))
-            d.x += time_dt();
-        if (key_held(KC_W))
-            d.y += time_dt();
-        if (key_held(KC_S))
-            d.y -= time_dt();
-        if (key_held(KC_R))
-            d.z += time_dt();
-        if (key_held(KC_F))
-            d.z -= time_dt();
-
-        entity_move(&e2, d);
         renderer_wait_for_new_frame();
         linux_xcb_window_process_all_events(win);
 
@@ -146,9 +137,10 @@ int main()
             renderer_surface_resized(window_resize_w, window_resize_h);
         }
 
+        player_update(&player);
         physics_update_world(physics_world);
         renderer_begin_frame(pipeline);
-        renderer_draw_world(pipeline, render_world, camera_pos, camera_rot);
+        renderer_draw_world(pipeline, render_world, player.camera.pos, player.camera.rot);
         renderer_end_frame();
         renderer_present();
         keyboard_end_of_frame();

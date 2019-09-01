@@ -47,8 +47,8 @@ struct PhysicsWorldObject
     bool used;
     PhysicsResourceHandle collider;
     RenderWorldObjectHandle render_handle;
-    Vec3 position;
-    Quat rotation;
+    Vec3 pos;
+    Quat rot;
 };
 
 struct Rigidbody
@@ -203,8 +203,8 @@ PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsR
     {
         u32 idx = da_pop(w->free_object_indices);
         w->objects[idx].collider = collider;
-        w->objects[idx].position = pos;
-        w->objects[idx].rotation = rot;
+        w->objects[idx].pos = pos;
+        w->objects[idx].rot = rot;
         w->objects[idx].used = true;
         return idx;
     }
@@ -213,8 +213,8 @@ PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsR
 
     PhysicsWorldObject wo = {
         .collider = collider,
-        .position = pos,
-        .rotation = rot,
+        .pos = pos,
+        .rot = rot,
         .render_handle = render_handle,
         .used = true
     };
@@ -226,15 +226,15 @@ PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsR
 void physics_world_move(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos)
 {
     let w = get_resource(PhysicsResourceWorld, world);
-    w->objects[obj].position += pos;
-    renderer_world_set_position_and_rotation(w->render_handle, w->objects[obj].render_handle, w->objects[obj].position, w->objects[obj].rotation);
+    w->objects[obj].pos += pos;
+    renderer_world_set_position_and_rotation(w->render_handle, w->objects[obj].render_handle, w->objects[obj].pos, w->objects[obj].rot);
 }
 
 void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
-    w->objects[obj].position = pos;
-    w->objects[obj].rotation = rot;
+    w->objects[obj].pos = pos;
+    w->objects[obj].rot = rot;
     renderer_world_set_position_and_rotation(w->render_handle, w->objects[obj].render_handle, pos, rot);
 }
 
@@ -254,9 +254,9 @@ void physics_update_world(PhysicsResourceHandle world)
         let rb_world_object_index = rb->object;
         let wo = w->objects + rb_world_object_index;
         physics_world_move(world, rb_world_object_index, rb->velocity);
-        w->rigidbodies[rigidbody_idx].entity->position = w->objects[rb_world_object_index].position;
+        w->rigidbodies[rigidbody_idx].entity->pos = w->objects[rb_world_object_index].pos;
         let c1 = get_resource(PhysicsResourceCollider, wo->collider);
-        let p1 = wo->position;
+        let p1 = wo->pos;
         //let r1 = w->objects[rigidbody_idx].rotation;
         let m1 = get_resource(PhysicsResourceMesh, c1->mesh);
 
@@ -274,7 +274,7 @@ void physics_update_world(PhysicsResourceHandle world)
                 continue;
 
             let c2 = get_resource(PhysicsResourceCollider, w->objects[world_object_index].collider);
-            let p2 = w->objects[world_object_index].position;
+            let p2 = w->objects[world_object_index].pos;
             //let r2 = w->objects[world_object_index].rotation;
             let m2 = get_resource(PhysicsResourceMesh, c2->mesh);
 
@@ -292,8 +292,8 @@ void physics_update_world(PhysicsResourceHandle world)
             {
                 physics_world_move(world, rb_world_object_index, coll.solution);
                 rb->velocity = vec3_zero;
-                w->rigidbodies[rigidbody_idx].entity->position = w->objects[rb_world_object_index].position;
-                w->rigidbodies[rigidbody_idx].entity->rotation = w->objects[rb_world_object_index].rotation;
+                w->rigidbodies[rigidbody_idx].entity->pos = w->objects[rb_world_object_index].pos;
+                w->rigidbodies[rigidbody_idx].entity->rot = w->objects[rb_world_object_index].rot;
             }
 
             memf(s2.vertices);

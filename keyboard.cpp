@@ -1,5 +1,5 @@
 #include "keyboard.h"
-#include "keycode_types.h"
+#include "keyboard_types.h"
 #include "memory.h"
 
 static bool keys_held[(u32)KC_NUM];

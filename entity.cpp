@@ -16,8 +16,8 @@ Entity entity_create(
     let physics_world_handle = physics_world_add(physics_world, collider, render_world_handle, pos, rot);
 
     return {
-        .position = pos,
-        .rotation = rot,
+        .pos = pos,
+        .rot = rot,
         .physics_world = physics_world,
         .render_object = render_world_handle,
         .physics_object = physics_world_handle
@@ -26,8 +26,8 @@ Entity entity_create(
 
 void entity_move(Entity* e, const Vec3& d)
 {
-    e->position += d;
-    physics_world_set_position(e->physics_world, e->physics_object, e->position, e->rotation);
+    e->pos += d;
+    physics_world_set_position(e->physics_world, e->physics_object, e->pos, e->rot);
 }
 
 void entity_create_rigidbody(Entity* e)
