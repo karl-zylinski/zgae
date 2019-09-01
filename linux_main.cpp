@@ -73,32 +73,14 @@ int main()
     RenderResourceHandle pipeline_handle = renderer_resource_load("pipeline_default.pipeline");
     RenderResourceHandle mesh_handle = renderer_resource_load("box.mesh");
 
+    let physics_world = physics_world_create(rw);
     let physics_mesh = physics_resource_load("box.mesh");
     let physics_collider = physics_collider_create(physics_mesh);
 
-//    let e1 = entity_create({0, 0, 0}, quat_identity(), rw, mesh_handle, );
-    //let e1 = entity_create({-2, 0, 0}, quat_identity(), rw, mesh_handle, );
-
-
-    ObjLoadVerticesResult olr = obj_load_vertices("box.wobj");
-
-    check(olr.ok, "failed loading physics mesh");
-
-
-    Quat rot = quat_identity();
-    Vec3 p1 = {0, 0, 0};
-    Vec3 p2 = {-2, 0, 0};
-
-    u32 b1_world_idx = renderer_world_add(rw, mesh_handle, p1, rot);
-    (void)b1_world_idx;
-    u32 b2_world_idx = renderer_world_add(rw, mesh_handle, p2, rot);
-
-
-    let physics_world = physics_world_create(rw);
-    let p_b1 = physics_world_add(physics_world, physics_collider, b1_world_idx, p1, rot);
-    (void)p_b1;
-    let p_b2 = physics_world_add(physics_world, physics_collider, b2_world_idx, p2, rot);
-
+    let e1 = entity_create({0, 0, 0}, quat_identity(), rw, mesh_handle, physics_world, physics_collider);
+    (void)e1;
+    let e2 = entity_create({-2, 0, 0}, quat_identity(), rw, mesh_handle, physics_world, physics_collider);
+    (void)e2;
 
     info("Starting timers");
     
@@ -131,21 +113,21 @@ int main()
             frames = 0;
         }
 
+        Vec3 d = {};
         if (key_held(KC_A))
-            p2.x -= time_dt();
+            d.x -= time_dt();
         if (key_held(KC_D))
-            p2.x += time_dt();
+            d.x += time_dt();
         if (key_held(KC_W))
-            p2.y += time_dt();
+            d.y += time_dt();
         if (key_held(KC_S))
-            p2.y -= time_dt();
+            d.y -= time_dt();
         if (key_held(KC_R))
-            p2.z += time_dt();
+            d.z += time_dt();
         if (key_held(KC_F))
-            p2.z -= time_dt();
+            d.z -= time_dt();
 
-        physics_world_set_position(physics_world, p_b2, p2, rot);
-
+        entity_move(&e1, d);
         renderer_wait_for_new_frame();
         linux_xcb_window_process_all_events(win);
 
@@ -163,7 +145,6 @@ int main()
         keyboard_end_of_frame();
     }
 
-    memf(olr.vertices);
     info("Main loop exited, shutting down");
     physics_shutdown();
     renderer_shutdown();
