@@ -2,12 +2,12 @@
 #include <vulkan/vulkan.h>
 #include "memory.h"
 #include "debug.h"
-#include "window_types.h"
 #include <string.h>
 #include "mesh_types.h"
 #include "str.h"
 #include "render_resource_types.h"
 #include "render_resource.h"
+#include "renderer_types.h"
 
 #define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 #define VERIFY_RES() check(res == VK_SUCCESS, "Vulkan error (VkResult is %s)", res)

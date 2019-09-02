@@ -2,7 +2,6 @@
 #include <X11/Xutil.h>
 #include <X11/X.h>
 #include <X11/extensions/Xcomposite.h>
-#include "window_types.h"
 #include "renderer.h"
 #include "keyboard_types.h"
 #include "debug.h"
@@ -80,6 +79,7 @@ int main()
                              0, 0, width, height, 10, CopyFromParent, InputOutput, 
                              CopyFromParent,  CWBackPixel | CWEventMask | CWBorderPixel, &attrs);
 
+    XStoreName(display, window, "ZGAE");
     XMapWindow(display, window);
 
     GenericWindowInfo wi = {
@@ -99,6 +99,7 @@ int main()
     info("Entering main loop");
 
     bool open = true;
+    bool closed_by_wm = false;
     bool has_focus = false;
 
     // Makes ClientMessage trigger when window is clsoed
@@ -156,6 +157,7 @@ int main()
 
                 case ClientMessage:
                 {
+                    closed_by_wm = true;
                     info("Xlib window closed"); // Should this do some check against wm_delete_atom?
                     open = false;
                 } break;
@@ -218,8 +220,13 @@ int main()
     info("Main loop exited, shutting down");
     physics_shutdown();
     renderer_shutdown();
-    XDestroyWindow(display, window);
-    XCloseDisplay(display);
+
+    if (!closed_by_wm)
+    {
+        XDestroyWindow(display, window);
+        XCloseDisplay(display);
+    }
+    
     memory_check_leaks();
     info("Shutdown finished");
     return 0;
