@@ -17,6 +17,28 @@ World* world_create(RenderResourceHandle render_world, PhysicsResourceHandle phy
     return w;
 }
 
+void world_destroy(World* w)
+{
+    for (u32 i = 0; i < w->entities_num; ++i)
+    {
+        Entity* e = w->entities + i;
+
+        if (!e->handle)
+            continue;
+
+        world_destroy_entity(w, e->handle);
+    }
+    handle_pool_destroy(w->entity_handle_pool);
+    memf(w->entities);
+    memf(w);
+}
+
+void world_destroy_entity(World* w, WorldEntityHandle weh)
+{
+    memzero(w->entities + handle_index(weh), sizeof(Entity));
+    handle_pool_return(w->entity_handle_pool, weh);
+}
+
 WorldEntityHandle world_create_entity(World* w, const Vec3& pos, const Quat& rot)
 {
     WorldEntityHandle h = handle_pool_borrow(w->entity_handle_pool, handle_type);
@@ -31,6 +53,7 @@ WorldEntityHandle world_create_entity(World* w, const Vec3& pos, const Quat& rot
     e->pos = pos;
     e->rot = rot;
     e->world = w;
+    e->handle = h;
     return h;
 }
 

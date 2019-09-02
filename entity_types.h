@@ -14,6 +14,7 @@ struct Entity
     RenderWorldObjectHandle render_object;
     PhysicsWorldObjectHandle physics_object;
     PhysicsWorldRigidbodyHandle physics_rigidbody;
+    WorldEntityHandle handle;
 };
 
 struct EntityRef

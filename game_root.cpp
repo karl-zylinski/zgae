@@ -79,4 +79,5 @@ void game_update()
 void game_shutdown()
 {
     info("Entering game_shutdown()");
+    world_destroy(gs.world);
 }
