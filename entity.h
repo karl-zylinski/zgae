@@ -1,7 +1,6 @@
 #pragma once
 #include "entity_types.h"
 
-fwd_struct(World);
 
 EntityRef entity_create(
     World* w,

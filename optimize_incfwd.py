@@ -41,7 +41,7 @@ for f in to_optimize:
         write_fp.write(test_file)
         write_fp.close()
 
-        build_error = os.system("./build.py stop_on_first_error > /dev/null 2>&1")
+        build_error = os.WEXITSTATUS(os.system("./build.py stop_on_first_error > /dev/null 2>&1"))
 
         if build_error == 0:
             removed_idx.append(include_idx)

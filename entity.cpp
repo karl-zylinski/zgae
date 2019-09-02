@@ -1,10 +1,7 @@
 #include "entity.h"
 #include "renderer.h"
-#include "physics.h"
 #include "math.h"
 #include "debug.h"
-#include "world_types.h"
-#include "dynamic_array.h"
 #include "world.h"
 #include "physics.h"
 
