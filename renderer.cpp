@@ -90,7 +90,7 @@ struct Renderer
 static Renderer rs = {};
 static bool inited = false;
 
-void renderer_init(WindowType window_type, void* window_data)
+void renderer_init(WindowType window_type, const GenericWindowInfo& window_info)
 {
     check(!inited, "Trying to init renderer twice!");
     inited = true;
@@ -100,7 +100,7 @@ void renderer_init(WindowType window_type, void* window_data)
     for (u32 s = 1; s < RENDER_RESOURCE_TYPE_NUM; ++s)
         handle_pool_set_type(rs.resource_handle_pool, s, render_resource_type_names[s]);
     
-    renderer_backend_init(window_type, window_data);
+    renderer_backend_init(window_type, window_info);
 }
 
 #define get_resource(r, t, h) ((t*)(r[handle_index(h)]).data)

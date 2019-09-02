@@ -1,6 +1,5 @@
 #include "renderer_backend.h"
 #include <vulkan/vulkan.h>
-#include "linux_xcb_window.h"
 #include "memory.h"
 #include "debug.h"
 #include "window_types.h"
@@ -524,13 +523,13 @@ static VkPhysicalDevice choose_gpu(VkPhysicalDevice* gpus, u32 num_gpus)
 typedef VkResult (*fptr_vkCreateDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerCreateInfoEXT*, VkAllocationCallbacks*, VkDebugUtilsMessengerEXT*);
 typedef void (*fptr_vkDestroyDebugUtilsMessengerEXT)(VkInstance, VkDebugUtilsMessengerEXT, VkAllocationCallbacks*);
 
-void renderer_backend_init(WindowType window_type, void* window_data)
+void renderer_backend_init(WindowType window_type, const GenericWindowInfo& window_info)
 {
     check(inited == false, "Trying to init vulkan backend twice");
     inited = true;
     info("Initing Vulkan render backend");
 
-    check(window_type == WINDOW_TYPE_XCB, "window_type must be WindowType::Xcb");
+    check(window_type == WINDOW_TYPE_X11, "window_type must be WINDOW_TYPE_X11");
     VkResult res;
 
     info("Creating Vulkan instance and debug callback");
@@ -567,7 +566,7 @@ void renderer_backend_init(WindowType window_type, void* window_data)
     debug_ext_ci.pfnUserCallback = vulkan_debug_message_callback;
 
     char* validation_layers[] = {validation_layer_name};
-    char* extensions[] = {VK_EXT_DEBUG_UTILS_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_XCB_SURFACE_EXTENSION_NAME};
+    char* extensions[] = {VK_EXT_DEBUG_UTILS_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_XLIB_SURFACE_EXTENSION_NAME};
     
     VkInstanceCreateInfo ici = {};
     ici.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -585,13 +584,12 @@ void renderer_backend_init(WindowType window_type, void* window_data)
     res = vkCreateDebugUtilsMessengerEXT(instance, &debug_ext_ci, NULL, &rbs.debug_messenger);
     VERIFY_RES();
 
-    info("Creating XCB Vulkan surface");
-    XcbWindow* win = (XcbWindow*)window_data;
-    VkXcbSurfaceCreateInfoKHR xcbci = {};
-    xcbci.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-    xcbci.connection = linux_xcb_window_get_connection(win);
-    xcbci.window = linux_xcb_window_get_handle(win);
-    res = vkCreateXcbSurfaceKHR(instance, &xcbci, NULL, &rbs.surface);
+    info("Creating X11 Vulkan surface");
+    VkXlibSurfaceCreateInfoKHR xlibsci = {};
+    xlibsci.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+    xlibsci.dpy = (Display*)window_info.display;
+    xlibsci.window = (Window)window_info.handle;
+    res = vkCreateXlibSurfaceKHR(instance, &xlibsci, NULL, &rbs.surface);
     VERIFY_RES();
     VkSurfaceKHR surface = rbs.surface;
 

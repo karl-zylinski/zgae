@@ -7,7 +7,7 @@ from datetime import datetime
 all_files = os.listdir(".")
 to_compile = []
 
-entry_files = ["linux_main.cpp", "tests.cpp"]
+entry_files = ["main_linux_xlib_vulkan.cpp", "tests.cpp"]
 
 for f in all_files:
     if not os.path.isfile(f):
@@ -22,7 +22,7 @@ if "tests" in sys.argv:
     to_compile.append("tests.cpp")
     output = "tests"
 else:
-    to_compile.append("linux_main.cpp")
+    to_compile.append("main_linux_xlib_vulkan.cpp")
 
 if not os.path.isdir("build"):
     os.mkdir("build")
@@ -54,7 +54,7 @@ for in_filename in to_compile:
     out_filename = "build/" + object_filename
 
     extra_flags_str = " ".join(extra_flags)
-    compile_error = os.system("%s -c -std=c++11 -Wall -Wextra %s -o %s -g -include global_include.h -Wno-writable-strings -DVK_USE_PLATFORM_XCB_KHR %s -Wno-unused-function -Wno-attributes" % (compiler, in_filename, out_filename, extra_flags_str))
+    compile_error = os.system("%s -c -std=c++11 -Wall -Wextra %s -o %s -g -include global_include.h -Wno-writable-strings -DVK_USE_PLATFORM_XLIB_KHR %s -Wno-unused-function -Wno-attributes" % (compiler, in_filename, out_filename, extra_flags_str))
 
     if stop_on_error and compile_error != 0:
         exit("\nbuild.py exited: compilation error")
@@ -70,7 +70,7 @@ if static_analysis:
 
 link_start = datetime.now()
 linker_input_str = " ".join(built_objects)
-linker_error = os.system("%s %s -rdynamic -o %s -lrt -lm -lxcb -lvulkan" % (compiler, linker_input_str, output))
+linker_error = os.system("%s %s -rdynamic -o %s -lrt -lm -lX11 -lvulkan" % (compiler, linker_input_str, output))
 link_end = datetime.now()
 link_dt = link_end - link_start
 total_dt = link_end - compile_start

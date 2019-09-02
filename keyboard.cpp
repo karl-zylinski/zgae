@@ -11,7 +11,7 @@ void keyboard_init()
     keyboard_reset();
 }
 
-void keyboard_key_pressed(KeyCode key)
+void keyboard_key_pressed(Keycode key)
 {
     if (key == KC_UNKNOWN)
         return;
@@ -20,7 +20,7 @@ void keyboard_key_pressed(KeyCode key)
     keys_held[(u32)key] = true;
 }
 
-void keyboard_key_released(KeyCode key)
+void keyboard_key_released(Keycode key)
 {
     if (key == KC_UNKNOWN)
         return;
@@ -42,17 +42,17 @@ void keyboard_reset()
     memzero(keys_went_up, sizeof(keys_went_up));
 }
 
-bool key_held(KeyCode key)
+bool key_held(Keycode key)
 {
     return keys_held[(u32)key];
 }
 
-bool key_went_down(KeyCode key)
+bool key_went_down(Keycode key)
 {
     return keys_went_down[(u32)key];
 }
 
-bool key_went_up(KeyCode key)
+bool key_went_up(Keycode key)
 {
     return keys_went_up[(u32)key];
 }

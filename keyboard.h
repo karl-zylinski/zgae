@@ -1,13 +1,13 @@
 #pragma once
 
-fwd_enum(KeyCode);
+fwd_enum(Keycode);
 
 void keyboard_init();
-void keyboard_key_pressed(KeyCode key);
-void keyboard_key_released(KeyCode key);
+void keyboard_key_pressed(Keycode key);
+void keyboard_key_released(Keycode key);
 void keyboard_end_of_frame();
 void keyboard_reset();
 
-bool key_held(KeyCode key);
-bool key_went_down(KeyCode key);
-bool key_went_up(KeyCode key);
+bool key_held(Keycode key);
+bool key_went_down(Keycode key);
+bool key_went_up(Keycode key);

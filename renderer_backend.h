@@ -1,15 +1,16 @@
 #pragma once
 #include "math_types.h"
 
-fwd_struct(RenderBackendShader);
-fwd_struct(RenderBackendPipeline);
-fwd_struct(RenderBackendMesh);
-fwd_struct(Mesh);
-fwd_enum(WindowType);
-fwd_enum(ShaderType);
 fwd_enum(ShaderDataType);
+fwd_enum(ShaderType);
+fwd_enum(WindowType);
+fwd_struct(GenericWindowInfo);
+fwd_struct(Mesh);
+fwd_struct(RenderBackendMesh);
+fwd_struct(RenderBackendPipeline);
+fwd_struct(RenderBackendShader);
 
-void renderer_backend_init(WindowType window_type, void* window_data);
+void renderer_backend_init(WindowType window_type, const GenericWindowInfo& window_info);
 void renderer_backend_shutdown();
 
 RenderBackendShader* renderer_backend_create_shader(char* source, u32 source_size);

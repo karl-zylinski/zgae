@@ -7,8 +7,9 @@ fwd_struct(Quat);
 fwd_struct(Renderer);
 fwd_struct(Vec3);
 fwd_struct(Mat4);
+fwd_struct(GenericWindowInfo);
 
-void renderer_init(WindowType window_type, void* window_data);
+void renderer_init(WindowType window_type, const GenericWindowInfo& window_data);
 void renderer_shutdown();
 RenderResourceHandle renderer_create_world();
 void renderer_destroy_world(RenderResourceHandle h);

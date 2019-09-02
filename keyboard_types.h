@@ -1,6 +1,6 @@
 #pragma once
 
-enum KeyCode : u32
+enum Keycode : u32
 {
     KC_UNKNOWN,
     KC_A,
