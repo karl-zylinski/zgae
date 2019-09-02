@@ -25,7 +25,7 @@ void keyboard_key_released(Keycode key)
     if (key == KC_UNKNOWN)
         return;
 
-    keys_went_down[(u32)key] = true;
+    keys_went_up[(u32)key] = true;
     keys_held[(u32)key] = false;
 }
 

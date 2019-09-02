@@ -14,6 +14,7 @@ struct GameState
 {
     EntityRef e1;
     EntityRef e2;
+    EntityRef e3;
     EntityRef floor1;
     EntityRef floor2;
     Player player;
@@ -48,15 +49,20 @@ void game_init()
     gs.e2 = entity_create(gs.world, {4, 0, 9}, quat_identity());
     entity_set_render_mesh(&gs.e2, box_render_mesh);
     entity_set_physics_collider(&gs.e2, box_collider);
+
+    gs.e3 = entity_create(gs.world, {7, -2, 9}, quat_identity());
+    entity_set_render_mesh(&gs.e3, box_render_mesh);
+    entity_set_physics_collider(&gs.e3, box_collider);
     gs.floor1 = entity_create(gs.world, {0, 0, -5}, quat_identity());
     entity_set_render_mesh(&gs.floor1, floor_render_mesh);
     entity_set_physics_collider(&gs.floor1, floor_collider);
-    gs.floor2 = entity_create(gs.world, {2, 3, -10}, quat_identity());
+    gs.floor2 = entity_create(gs.world, {-0.5, 15, -5.5}, quat_identity());
     entity_set_render_mesh(&gs.floor2, floor_render_mesh);
     entity_set_physics_collider(&gs.floor2, floor_collider);
 
-    entity_create_rigidbody(&gs.e1);
-    entity_create_rigidbody(&gs.e2);
+    entity_create_rigidbody(&gs.e1, 75);
+    entity_create_rigidbody(&gs.e3, 1);
+    entity_create_rigidbody(&gs.e2, 1);
 
     gs.player = {
         .camera = camera_create(),

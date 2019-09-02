@@ -30,6 +30,8 @@
                 };
 
                 alloc_callstacks[i] = ac;
+
+                info("%d", i);
                 return;
             }
         }

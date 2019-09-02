@@ -16,6 +16,7 @@
 #include "renderer.h"
 #include "entity_types.h"
 #include "world_types.h"
+#include "entity.h"
 
 struct PhysicsResource
 {
@@ -57,7 +58,8 @@ struct Rigidbody
     bool used;
     PhysicsWorldObjectHandle object;
     Vec3 velocity;
-    Entity* entity;
+    f32 mass;
+    EntityRef entity;
 };
 
 struct PhysicsResourceWorld
@@ -156,16 +158,18 @@ PhysicsResourceHandle physics_resource_load(const char* filename)
     return add_resource(name_hash, type, data);
 }
 
-PhysicsWorldRigidbodyHandle physics_add_rigidbody(Entity* e)
+PhysicsWorldRigidbodyHandle physics_add_rigidbody(EntityRef* er, f32 mass)
 {
-    let w = get_resource(PhysicsResourceWorld, e->world->physics_world);
+    let w = get_resource(PhysicsResourceWorld, er->world->physics_world);
+    let e = entity_deref(er);
 
     if (da_num(w->free_rigidbody_indices) > 0)
     {
         u32 idx = da_pop(w->free_rigidbody_indices);
         w->rigidbodies[idx].object = e->physics_object;
         w->rigidbodies[idx].velocity = vec3_zero;
-        w->rigidbodies[idx].entity = e;
+        w->rigidbodies[idx].mass = mass;
+        w->rigidbodies[idx].entity = *er;
         w->rigidbodies[idx].used = true;
         return idx;
     }
@@ -174,12 +178,20 @@ PhysicsWorldRigidbodyHandle physics_add_rigidbody(Entity* e)
 
     Rigidbody rb = {
         .object = e->physics_object,
-        .entity = e,
+        .entity = *er,
+        .mass = mass,
         .used = true
     };
 
     da_push(w->rigidbodies, rb);
     return idx;
+}
+
+void physics_add_force(PhysicsResourceHandle world, PhysicsWorldRigidbodyHandle rbh, const Vec3& f)
+{
+    let w = get_resource(PhysicsResourceWorld, world);
+    let rb = w->rigidbodies + rbh;
+    rb->velocity += f*(1/rb->mass);
 }
 
 PhysicsResourceHandle physics_collider_create(PhysicsResourceHandle mesh)
@@ -193,7 +205,9 @@ PhysicsResourceHandle physics_world_create(RenderResourceHandle render_handle)
 {
     let w = mema_zero_t(PhysicsResourceWorld);
     PhysicsWorldObject dummy = {};
+    Rigidbody dummy2 = {};
     da_push(w->objects, dummy);
+    da_push(w->rigidbodies, dummy2);
     w->render_handle = render_handle;
     return add_resource(0, PHYSICS_RESOURCE_TYPE_WORLD, w);
 }
@@ -230,7 +244,6 @@ void physics_world_move(PhysicsResourceHandle world, PhysicsWorldObjectHandle ob
 {
     let w = get_resource(PhysicsResourceWorld, world);
     w->objects[obj].pos += pos;
-    renderer_world_set_position_and_rotation(w->render_handle, w->objects[obj].render_handle, w->objects[obj].pos, w->objects[obj].rot);
 }
 
 void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
@@ -238,7 +251,6 @@ void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectH
     let w = get_resource(PhysicsResourceWorld, world);
     w->objects[obj].pos = pos;
     w->objects[obj].rot = rot;
-    renderer_world_set_position_and_rotation(w->render_handle, w->objects[obj].render_handle, pos, rot);
 }
 
 void physics_update_world(PhysicsResourceHandle world)
@@ -252,29 +264,29 @@ void physics_update_world(PhysicsResourceHandle world)
         if (!rb->used)
             continue;
 
-        Vec3 g = {0, 0, -1.82f*dt};
-        rb->velocity += g;
+        Vec3 g = {0, 0, -0.82f};
+        rb->velocity += g*dt;
         let rb_world_object_index = rb->object;
         let wo = w->objects + rb_world_object_index;
-        physics_world_move(world, rb_world_object_index, rb->velocity);
-        w->rigidbodies[rigidbody_idx].entity->pos = w->objects[rb_world_object_index].pos;
-        let c1 = get_resource(PhysicsResourceCollider, wo->collider);
-        let p1 = wo->pos;
-        //let r1 = w->objects[rigidbody_idx].rotation;
-        let m1 = get_resource(PhysicsResourceMesh, c1->mesh);
-
-        GjkShape s1 = {
-            .vertices = mema_tn(Vec3, m1->vertices_num),
-            .vertices_num = m1->vertices_num
-        };
-
-        for (u32 vi = 0; vi < s1.vertices_num; ++vi)
-            s1.vertices[vi] = m1->vertices[vi] + p1;
+        entity_move(&rb->entity, rb->velocity);
 
         for (u32 world_object_index = 0; world_object_index < da_num(w->objects); ++world_object_index)
         {
             if (world_object_index == rb_world_object_index || !w->objects[world_object_index].used)
-                continue;
+                            continue;
+
+            let c1 = get_resource(PhysicsResourceCollider, wo->collider);
+            let p1 = wo->pos;
+            //let r1 = w->objects[rigidbody_idx].rotation;
+            let m1 = get_resource(PhysicsResourceMesh, c1->mesh);
+
+            GjkShape s1 = {
+                .vertices = mema_tn(Vec3, m1->vertices_num),
+                .vertices_num = m1->vertices_num
+            };
+
+            for (u32 vi = 0; vi < s1.vertices_num; ++vi)
+                s1.vertices[vi] = m1->vertices[vi] + p1;
 
             let c2 = get_resource(PhysicsResourceCollider, w->objects[world_object_index].collider);
             let p2 = w->objects[world_object_index].pos;
@@ -293,16 +305,18 @@ void physics_update_world(PhysicsResourceHandle world)
 
             if (coll.colliding)
             {
-                physics_world_move(world, rb_world_object_index, coll.solution);
-                rb->velocity = vec3_zero;
-                w->rigidbodies[rigidbody_idx].entity->pos = w->objects[rb_world_object_index].pos;
-                w->rigidbodies[rigidbody_idx].entity->rot = w->objects[rb_world_object_index].rot;
+                if (dot(rb->velocity, coll.solution) < 0)
+                {
+                    Vec3 vel_in_sol_dir = project(rb->velocity, coll.solution);
+                    rb->velocity -= vel_in_sol_dir;
+                }
+                
+                entity_move(&rb->entity, coll.solution);
             }
 
+            memf(s1.vertices);
             memf(s2.vertices);
         }
-
-        memf(s1.vertices);
     }
 }
 

@@ -154,6 +154,9 @@ f32 len(const Vec3& v)
 
 Vec3 normalize(const Vec3& v)
 {
+    if (v == vec3_zero)
+        return v;
+
     return v * (1/len(v));
 }
 
@@ -196,6 +199,27 @@ void operator+=(Vec3& v1, const Vec3& v2)
 bool operator==(const Vec3& v1, const Vec3& v2)
 {
     return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
+}
+
+Vec3 operator*(f32 s, const Vec3& v)
+{
+    return v * s;
+}
+
+void operator-=(Vec3& v1, const Vec3& v2)
+{
+    v1 = v1 - v2;
+}
+
+Vec3 project(const Vec3& v, const Vec3& on)
+{
+    let unit_dir = on*(1/len(on));
+    return dot(v, unit_dir) * unit_dir;
+}
+
+Vec2 operator*(const Vec2i& v, f32 s)
+{
+    return { v.x * s, v.y * s };
 }
 
 bool f32_almost_eql(f32 f1, f32 f2)
@@ -301,11 +325,16 @@ Quat quat_normalize(const Quat& q)
         q.w / len
     };
 }
-
+    
 Vec3 quat_transform_vec3(const Quat& q, const Vec3& v)
 {
     const Vec3 qv = {q.x, q.y, q.z};
     const Vec3 uv = cross(qv, v);
     const Vec3 uuv = cross(qv, uv);
     return v + ((uv * q.w) + uuv) * 2.0f;
+}
+
+f32 clamp(f32 v, f32 minv, f32 maxv)
+{
+    return fmax(minv, fmin(maxv, v));
 }

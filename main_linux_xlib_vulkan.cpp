@@ -130,7 +130,6 @@ int main()
             switch(evt.type)
             {
                 case KeyPress: {
-                    info("Key pressed");
                     let xlib_code = evt.xkey.keycode;
                     let kc = x11_keycode_to_keycode(xlib_code);
                     if (kc == KC_UNKNOWN)
@@ -154,7 +153,6 @@ int main()
                         }
                     }
 
-                    info("Key released");
                     let xlib_code = evt.xkey.keycode;
                     let kc = x11_keycode_to_keycode(xlib_code);
                     if (kc == KC_UNKNOWN)
@@ -307,7 +305,7 @@ static Keycode x11_keycode_to_keycode(u32 code)
         KC_UNKNOWN, // 62
         KC_UNKNOWN, // 63
         KC_UNKNOWN, // 64
-        KC_UNKNOWN, // 65
+        KC_SPACE, // 65
         KC_UNKNOWN, // 66
         KC_UNKNOWN, // 67
         KC_UNKNOWN, // 68
