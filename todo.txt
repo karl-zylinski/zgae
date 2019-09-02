@@ -1,12 +1,6 @@
 ### IMPORTANT ###
 
-- go over all files and find c -> cpp issues, like * where const T& should be used etc
-
 - stop using strings, keep only hashes!
-
-- make gjk-epa work
-
-- fix renderer backend not being able to draw two things
 
 
 ### LESS IMPORTANT ###

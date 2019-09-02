@@ -79,6 +79,13 @@ int main()
                              0, 0, width, height, 10, CopyFromParent, InputOutput, 
                              CopyFromParent,  CWBackPixel | CWEventMask | CWBorderPixel, &attrs);
 
+    // Hide cursor
+    XColor xcolor;
+    static char csr_bits[] = {0x00};
+    Pixmap csr = XCreateBitmapFromData(display,window,csr_bits,1,1);
+    Cursor cursor = XCreatePixmapCursor(display,csr,csr,&xcolor,&xcolor,1,1); 
+    XDefineCursor(display, window, cursor);
+
     XStoreName(display, window, "ZGAE");
     XMapWindow(display, window);
 
@@ -221,12 +228,12 @@ int main()
     physics_shutdown();
     renderer_shutdown();
 
-    if (!closed_by_wm)
+    if (!closed_by_wm) // May crash because display is already gone if we dont do this
     {
         XDestroyWindow(display, window);
         XCloseDisplay(display);
     }
-    
+
     memory_check_leaks();
     info("Shutdown finished");
     return 0;
