@@ -15,6 +15,5 @@ void physics_add_force(PhysicsResourceHandle world, PhysicsWorldRigidbodyHandle 
 PhysicsResourceHandle physics_world_create(RenderResourceHandle render_handle);
 PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot);
 void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot);
-void physics_world_move(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos);
 void physics_update_world(PhysicsResourceHandle world);
 void physics_shutdown();

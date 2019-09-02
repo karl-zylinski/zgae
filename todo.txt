@@ -2,6 +2,7 @@
 
 - stop using strings, keep only hashes!
 
+- fix the handle mess
 
 ### LESS IMPORTANT ###
 

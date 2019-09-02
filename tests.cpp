@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "dynamic_array.h"
 #include <execinfo.h>
+#include "handle.h"y
 
 static Backtrace get_backtrace(u32 backtrace_size)
 {

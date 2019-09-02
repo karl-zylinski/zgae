@@ -98,7 +98,7 @@ Mat4 operator*(const Mat4& m1, const Mat4& m2)
     };
 }
 
-Mat4 mat4_inverse(const Mat4& m)
+Mat4 inverse(const Mat4& m)
 {
     const float* a = &m.x.x;
     f32 a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
@@ -196,6 +196,11 @@ void operator+=(Vec3& v1, const Vec3& v2)
     v1.z += v2.z;
 }
 
+void operator*=(Vec3& v1, f32 s)
+{
+    v1 = v1 * s;
+}
+
 bool operator==(const Vec3& v1, const Vec3& v2)
 {
     return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
@@ -222,24 +227,24 @@ Vec2 operator*(const Vec2i& v, f32 s)
     return { v.x * s, v.y * s };
 }
 
-bool f32_almost_eql(f32 f1, f32 f2)
+bool almost_eql(f32 f1, f32 f2)
 {
     return fabs(f2 - f1) < SMALL_NUMBER;
 }
 
-bool vec2_almost_eql(const Vec2& v1, const Vec2& v2)
+bool almost_eql(const Vec2& v1, const Vec2& v2)
 {
-    return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y);
+    return almost_eql(v1.x, v2.x) && almost_eql(v1.y, v2.y);
 }
 
-bool vec3_almost_eql(const Vec3& v1, const Vec3& v2)
+bool almost_eql(const Vec3& v1, const Vec3& v2)
 {
-    return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y) && f32_almost_eql(v1.z, v2.z);
+    return almost_eql(v1.x, v2.x) && almost_eql(v1.y, v2.y) && almost_eql(v1.z, v2.z);
 }
 
-bool vec4_almost_eql(const Vec4& v1, const Vec4& v2)
+bool almost_eql(const Vec4& v1, const Vec4& v2)
 {
-    return f32_almost_eql(v1.x, v2.x) && f32_almost_eql(v1.y, v2.y) && f32_almost_eql(v1.z, v2.z) && f32_almost_eql(v1.w, v2.w);
+    return almost_eql(v1.x, v2.x) && almost_eql(v1.y, v2.y) && almost_eql(v1.z, v2.z) && almost_eql(v1.w, v2.w);
 }
 
 Quat quat_identity()
@@ -256,6 +261,11 @@ Quat operator*(const Quat& a, const Quat& b)
         a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
         a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
     };
+}
+
+void operator*=(Quat& a, const Quat& b)
+{
+    a = a * b;
 }
 
 Quat quat_rotate_x(const Quat& q, float rads)
@@ -304,8 +314,7 @@ Quat quat_from_axis_angle(const Vec3& axis, float angle)
 {
     float half_angle = angle * 0.5f;
     float s = sin(half_angle);
-    return
-    quat_normalize({
+    return normalize({
         axis.x * s,
         axis.y * s,
         axis.z * s,
@@ -313,7 +322,7 @@ Quat quat_from_axis_angle(const Vec3& axis, float angle)
     });
 }
 
-Quat quat_normalize(const Quat& q)
+Quat normalize(const Quat& q)
 {
     float len = sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
     check(len != 0, "Trying to normalize zero length Quat");
@@ -326,7 +335,7 @@ Quat quat_normalize(const Quat& q)
     };
 }
     
-Vec3 quat_transform_vec3(const Quat& q, const Vec3& v)
+Vec3 rotate_vec3(const Quat& q, const Vec3& v)
 {
     const Vec3 qv = {q.x, q.y, q.z};
     const Vec3 uv = cross(qv, v);

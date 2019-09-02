@@ -29,6 +29,20 @@ void entity_move(EntityRef* er, const Vec3& d)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
+
+void entity_rotate(EntityRef* er, const Vec3& axis, float rad)
+{
+    let e = world_lookup_entity(er->world, er->handle);
+    let r = quat_from_axis_angle(axis, rad);
+    e->rot *= r;
+
+    if (e->physics_object)
+        physics_world_set_position(e->world->physics_world, e->physics_object, e->pos, e->rot);
+
+    if (e->render_object)
+        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
+}
+
 void entity_create_rigidbody(EntityRef* er, f32 mass)
 {
     let e = world_lookup_entity(er->world, er->handle);

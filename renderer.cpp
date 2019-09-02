@@ -659,7 +659,7 @@ void renderer_begin_frame(RenderResourceHandle pipeline_handle)
 void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, const Mat4& model, const Vec3& cam_pos, const Quat& cam_rot)
 {
     Mat4 camera_matrix = mat4_from_rotation_and_translation(cam_rot, cam_pos);
-    Mat4 view_matrix = mat4_inverse(camera_matrix);
+    Mat4 view_matrix = inverse(camera_matrix);
 
     Vec2u size = renderer_backend_get_size();
     Mat4 proj_matrix = mat4_create_projection_matrix(size.x, size.y);

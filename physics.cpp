@@ -240,12 +240,6 @@ PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsR
     return h;
 }
 
-void physics_world_move(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos)
-{
-    let w = get_resource(PhysicsResourceWorld, world);
-    w->objects[obj].pos += pos;
-}
-
 void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
@@ -273,11 +267,11 @@ void physics_update_world(PhysicsResourceHandle world)
         for (u32 world_object_index = 0; world_object_index < da_num(w->objects); ++world_object_index)
         {
             if (world_object_index == rb_world_object_index || !w->objects[world_object_index].used)
-                            continue;
+                continue;
 
             let c1 = get_resource(PhysicsResourceCollider, wo->collider);
             let p1 = wo->pos;
-            //let r1 = w->objects[rigidbody_idx].rotation;
+            let r1 = wo->rot;
             let m1 = get_resource(PhysicsResourceMesh, c1->mesh);
 
             GjkShape s1 = {
@@ -286,11 +280,11 @@ void physics_update_world(PhysicsResourceHandle world)
             };
 
             for (u32 vi = 0; vi < s1.vertices_num; ++vi)
-                s1.vertices[vi] = m1->vertices[vi] + p1;
+                s1.vertices[vi] = rotate_vec3(r1, m1->vertices[vi]) + p1;
 
             let c2 = get_resource(PhysicsResourceCollider, w->objects[world_object_index].collider);
             let p2 = w->objects[world_object_index].pos;
-            //let r2 = w->objects[world_object_index].rotation;
+            let r2 = w->objects[world_object_index].rot;
             let m2 = get_resource(PhysicsResourceMesh, c2->mesh);
 
             GjkShape s2 = {
@@ -299,7 +293,7 @@ void physics_update_world(PhysicsResourceHandle world)
             };
 
             for (u32 vi = 0; vi < s2.vertices_num; ++vi)
-                s2.vertices[vi] = m2->vertices[vi] + p2;
+                s2.vertices[vi] = rotate_vec3(r2, m2->vertices[vi]) + p2;
 
             let coll = gjk_epa_intersect_and_solve(s1, s2);
 
@@ -309,6 +303,7 @@ void physics_update_world(PhysicsResourceHandle world)
                 {
                     Vec3 vel_in_sol_dir = project(rb->velocity, coll.solution);
                     rb->velocity -= vel_in_sol_dir;
+                    rb->velocity *= 0.9f;
                 }
                 
                 entity_move(&rb->entity, coll.solution);

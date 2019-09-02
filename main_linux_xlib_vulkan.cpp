@@ -215,7 +215,10 @@ int main()
             renderer_surface_resized(width, height);
         }
 
-        game_update();
+        bool cont = game_update();
+
+        if (!cont)
+            open = false;
     }
 
     game_shutdown();
@@ -226,7 +229,7 @@ int main()
     if (!closed_by_wm) // May crash because display is already gone if we dont do this
     {
         XDestroyWindow(display, window);
-        XCloseDisplay(display);
+        //XCloseDisplay(display); // This always crashes?????
     }
 
     memory_check_leaks();

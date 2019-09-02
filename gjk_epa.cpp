@@ -111,13 +111,13 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
             Vec3 ACD = cross(AC, AD);
             Vec3 ADB = cross(AD, AB);
 
-            if (ABC == ACD || ABC == ADB || ACD == ADB)
+            if (almost_eql(ABC, ACD) || almost_eql(ABC, ADB) || almost_eql(ACD, ADB))
                 return GJK_STATUS_ABORT;
 
             float d1 = dot(ABC, AO);
             if (d1 >= 0)
             {
-                if (dot(AB, AO) == 0 || dot(AC, AO) == 0)
+                if (fabs(dot(AB, AO)) < SMALL_NUMBER || fabs(dot(AC, AO)) < SMALL_NUMBER)
                     return GJK_STATUS_ABORT; // Origin is on an edge, can result in loop.
 
                 s->size = 3;
@@ -131,7 +131,7 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
             float d2 = dot(ACD, AO);
             if (d2 >= 0)
             {
-                if (dot(AC, AO) == 0 || dot(AC, AO) == 0)
+                if (fabs(dot(AC, AO)) < SMALL_NUMBER || fabs(dot(AC, AO)) < SMALL_NUMBER)
                     return GJK_STATUS_ABORT; 
 
                 s->size = 3;
@@ -145,7 +145,7 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
             float d3 = dot(ADB, AO);
             if (d3 >= 0)
             {
-                if (dot(AD, AO) == 0 || dot(AB, AO) == 0)
+                if (fabs(dot(AD, AO)) < SMALL_NUMBER || fabs(dot(AB, AO)) < SMALL_NUMBER)
                     return GJK_STATUS_ABORT; 
 
                 s->size = 3;
@@ -207,7 +207,6 @@ struct EpaFace
     float distance;
     Vec3 normal;
     Vec3 vertices[3];
-    Color dbg_color;
 };
 
 static EpaFace* find_closest_face(EpaFace* faces)
@@ -242,7 +241,7 @@ static void add_face(EpaFace*& faces, const Vec3& A, const Vec3& B, const Vec3& 
     f.vertices[1] = A;
     f.vertices[2] = C;
 
-    if (ABC == vec3_zero)
+    if (almost_eql(ABC, vec3_zero))
     {
         da_push(faces, f);
         return;
@@ -359,7 +358,7 @@ static GjkEpaSolution run_epa(const GjkShape& s1, const GjkShape& s2, Simplex* s
         Vec3 d = support_diff(s1, s2, f->normal);
         float depth = dot(d, f->normal);
 
-        if (fabs(f->distance) < 0.0001f)
+        if (fabs(f->distance) < SMALL_NUMBER)
         {
             da_free(faces);
             // Origin is on face, so depth will be zero. Solution is zero vector.
@@ -369,7 +368,7 @@ static GjkEpaSolution run_epa(const GjkShape& s1, const GjkShape& s2, Simplex* s
             };
         }
 
-        if (fabs(depth - f->distance) < 0.0001f)
+        if (fabs(depth - f->distance) < SMALL_NUMBER)
         {
             Vec3 sol = -f->normal * depth;
             da_free(faces);

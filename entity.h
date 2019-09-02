@@ -8,6 +8,7 @@ EntityRef entity_create(
     const Quat& rot);
 
 void entity_move(EntityRef* er, const Vec3& d);
+void entity_rotate(EntityRef* er, const Vec3& axis, float rad);
 void entity_create_rigidbody(EntityRef* er, f32 mass);
 void entity_set_render_mesh(EntityRef* er, RenderResourceHandle mesh);
 void entity_set_physics_collider(EntityRef* er, PhysicsResourceHandle collider);

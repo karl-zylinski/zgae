@@ -1,5 +1,5 @@
 #pragma once
 
 void game_init();
-void game_update();
+bool game_update();
 void game_shutdown();
