@@ -63,7 +63,7 @@ void game_init()
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, 10}, quat_identity(), 75, true)
+        .entity = spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {-2, 0, 10}, quat_identity(), 75, true)
     };
 }
 
@@ -74,6 +74,7 @@ bool game_update()
     if (key_went_down(KC_ESCAPE))
         return false;
 
+    physics_update_world(gs.world->physics_world);
     time_until_spawn -= time_dt();
 
     if (time_until_spawn <= 0)
@@ -89,9 +90,8 @@ bool game_update()
         spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), 10, true);
     }
 
-
     player_update(&gs.player);
-    physics_update_world(gs.world->physics_world);
+    
     renderer_begin_frame(gs.pipeline);
     renderer_draw_world(gs.pipeline, gs.world->render_world, gs.player.camera.pos, gs.player.camera.rot);
     renderer_end_frame();
