@@ -1,12 +1,12 @@
 #pragma once
-#include "physics_types.h"
 #include "math_types.h"
+#include "renderer_types.h"
+#include "physics_types.h"
 
-fwd_handle(PhysicsResourceHandle);
-fwd_handle(WorldEntityHandle);
 fwd_struct(World);
+fwd_handle(WorldEntityHandle);
 
-struct Entity
+struct EntityInt
 {
     Vec3 pos;
     Quat rot;
@@ -14,11 +14,5 @@ struct Entity
     RenderWorldObjectHandle render_object;
     PhysicsWorldObjectHandle physics_object;
     PhysicsWorldRigidbodyHandle physics_rigidbody;
-    WorldEntityHandle handle;
-};
-
-struct EntityRef
-{
-    World* world;
     WorldEntityHandle handle;
 };

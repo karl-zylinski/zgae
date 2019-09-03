@@ -59,7 +59,7 @@ struct Rigidbody
     PhysicsWorldObjectHandle object;
     Vec3 velocity;
     f32 mass;
-    EntityRef entity;
+    Entity entity;
 };
 
 struct PhysicsResourceWorld
@@ -158,18 +158,18 @@ PhysicsResourceHandle physics_resource_load(const char* filename)
     return add_resource(name_hash, type, data);
 }
 
-PhysicsWorldRigidbodyHandle physics_add_rigidbody(EntityRef* er, f32 mass)
+PhysicsWorldRigidbodyHandle physics_add_rigidbody(Entity* e, f32 mass)
 {
-    let w = get_resource(PhysicsResourceWorld, er->world->physics_world);
-    let e = entity_deref(er);
+    let w = get_resource(PhysicsResourceWorld, e->world->physics_world);
+    let r = e->deref();
 
     if (da_num(w->free_rigidbody_indices) > 0)
     {
         u32 idx = da_pop(w->free_rigidbody_indices);
-        w->rigidbodies[idx].object = e->physics_object;
         w->rigidbodies[idx].velocity = vec3_zero;
         w->rigidbodies[idx].mass = mass;
-        w->rigidbodies[idx].entity = *er;
+        w->rigidbodies[idx].object = r->render_object;
+        w->rigidbodies[idx].entity = *e;
         w->rigidbodies[idx].used = true;
         return idx;
     }
@@ -177,9 +177,9 @@ PhysicsWorldRigidbodyHandle physics_add_rigidbody(EntityRef* er, f32 mass)
     let idx = da_num(w->rigidbodies);
 
     Rigidbody rb = {
-        .object = e->physics_object,
-        .entity = *er,
+        .entity = *e,
         .mass = mass,
+        .object = r->render_object,
         .used = true
     };
 
@@ -262,7 +262,7 @@ void physics_update_world(PhysicsResourceHandle world)
         rb->velocity += g*dt;
         let rb_world_object_index = rb->object;
         let wo = w->objects + rb_world_object_index;
-        entity_move(&rb->entity, rb->velocity);
+        rb->entity.move(rb->velocity);
 
         for (u32 world_object_index = 0; world_object_index < da_num(w->objects); ++world_object_index)
         {
@@ -306,7 +306,7 @@ void physics_update_world(PhysicsResourceHandle world)
                     rb->velocity *= 0.9f;
                 }
                 
-                entity_move(&rb->entity, coll.solution);
+                rb->entity.move(coll.solution);
             }
 
             memf(s1.vertices);

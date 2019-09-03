@@ -5,21 +5,22 @@
 #include "world.h"
 #include "physics.h"
 
-EntityRef entity_create(
+Entity entity_create(
     World* w,
     const Vec3& pos,
     const Quat& rot)
 {
-    let world_entity_handle = world_create_entity(w, pos, rot);
-    return {
+    return { 
         .world = w,
-        .handle = world_entity_handle
+        .handle = world_create_entity(w, pos, rot)
     };
 }
 
-void entity_move(EntityRef* er, const Vec3& d)
+#define get_internal() (world_lookup_entity(this->world, this->handle))
+
+void Entity::move(const Vec3& d)
 {
-    let e = world_lookup_entity(er->world, er->handle);
+    let e = get_internal();
     e->pos += d;
 
     if (e->physics_object)
@@ -30,9 +31,9 @@ void entity_move(EntityRef* er, const Vec3& d)
 }
 
 
-void entity_rotate(EntityRef* er, const Vec3& axis, float rad)
+void Entity::rotate(const Vec3& axis, float rad)
 {
-    let e = world_lookup_entity(er->world, er->handle);
+    let e = get_internal();
     let r = quat_from_axis_angle(axis, rad);
     e->rot *= r;
 
@@ -43,34 +44,34 @@ void entity_rotate(EntityRef* er, const Vec3& axis, float rad)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
-void entity_create_rigidbody(EntityRef* er, f32 mass)
+void Entity::create_rigidbody(f32 mass)
 {
-    let e = world_lookup_entity(er->world, er->handle);
+    let e = get_internal();
     check(e->physics_object, "Trying to create rigidbody on entity with no physics representation.");
     check(e->physics_rigidbody == NULL, "Trying to add rigidbody to entity twice");
-    e->physics_rigidbody = physics_add_rigidbody(er, mass);
+    e->physics_rigidbody = physics_add_rigidbody(this, mass);
 }
 
-Vec3 entity_get_position(const EntityRef& er)
+const Vec3& Entity::get_position() const
 {
-    return world_lookup_entity(er.world, er.handle)->pos;
+    return get_internal()->pos;
 }
 
-void entity_set_render_mesh(EntityRef* er, RenderResourceHandle mesh)
+void Entity::set_render_mesh(RenderResourceHandle mesh)
 {
-    let e = world_lookup_entity(er->world, er->handle);
-    e->render_object = renderer_world_add(er->world->render_world, mesh, e->pos, e->rot);
+    let e = get_internal();
+    e->render_object = renderer_world_add(e->world->render_world, mesh, e->pos, e->rot);
 }
 
-void entity_set_physics_collider(EntityRef* er, PhysicsResourceHandle collider)
+void Entity::set_physics_collider(PhysicsResourceHandle collider)
 {
-    let e = world_lookup_entity(er->world, er->handle);
-    e->physics_object = physics_world_add(er->world->physics_world, collider, e->render_object, e->pos, e->rot);
+    let e = get_internal();
+    e->physics_object = physics_world_add(e->world->physics_world, collider, e->render_object, e->pos, e->rot);
 }
 
-void entity_set_position(EntityRef* er, const Vec3& pos)
+void Entity::set_position(const Vec3& pos)
 {
-    let e = world_lookup_entity(er->world, er->handle);
+    let e = get_internal();
     e->pos = pos;
 
     if (e->physics_object)
@@ -80,9 +81,9 @@ void entity_set_position(EntityRef* er, const Vec3& pos)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
-void entity_set_rotation(EntityRef* er, const Quat& rot)
+void Entity::set_rotation(const Quat& rot)
 {
-    let e = world_lookup_entity(er->world, er->handle);
+    let e = get_internal();
     e->rot = rot;
 
     if (e->physics_object)
@@ -92,17 +93,17 @@ void entity_set_rotation(EntityRef* er, const Quat& rot)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
-void entity_add_force(EntityRef* er, const Vec3& f)
+void Entity::add_force(const Vec3& f)
 {
-    let e = world_lookup_entity(er->world, er->handle);
+    let e = get_internal();
 
     if (!e->physics_rigidbody)
         return;
 
-    physics_add_force(er->world->physics_world, e->physics_rigidbody, f);
+    physics_add_force(e->world->physics_world, e->physics_rigidbody, f);
 }
 
-Entity* entity_deref(EntityRef* er)
+EntityInt* Entity::deref()
 {
-    return world_lookup_entity(er->world, er->handle);
+    return get_internal();
 }

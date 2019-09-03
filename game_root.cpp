@@ -15,8 +15,8 @@
 
 struct GameState
 {
-    EntityRef floor1;
-    EntityRef floor2;
+    Entity floor1;
+    Entity floor2;
     Player player;
 
     RenderResourceHandle pipeline;
@@ -28,14 +28,14 @@ struct GameState
 static GameState gs = {};
 
 
-EntityRef spawn_entity_at(World* w, RenderResourceHandle mesh, PhysicsResourceHandle collider, const Vec3& p, const Quat& r, f32 mass, bool rigidbody)
+Entity spawn_entity_at(World* w, RenderResourceHandle mesh, PhysicsResourceHandle collider, const Vec3& p, const Quat& r, f32 mass, bool rigidbody)
 {
     let e = entity_create(w, p, r);
-    entity_set_render_mesh(&e, mesh);
-    entity_set_physics_collider(&e, collider);
+    e.set_render_mesh(mesh);
+    e.set_physics_collider(collider);
     
     if (rigidbody)
-        entity_create_rigidbody(&e, mass);
+        e.create_rigidbody(mass);
 
     return e;
 }
@@ -63,11 +63,12 @@ void game_init()
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {-2, 0, 10}, quat_identity(), 75, true)
+        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, 10}, quat_identity(), 75, true)
     };
 }
 
-static f32 time_until_spawn = 0;
+static f32 time_until_spawn = 2.0f;
+static u32 num_spawned = 0;
 
 bool game_update()
 {
@@ -77,12 +78,13 @@ bool game_update()
     physics_update_world(gs.world->physics_world);
     time_until_spawn -= time_dt();
 
-    if (time_until_spawn <= 0)
+    if (time_until_spawn <= 0 && num_spawned < 2)
     {
-        time_until_spawn = 2.0f;
-        f32 x = ((rand() % 10000)-5000)/1000.0f;
-        f32 y = ((rand() % 10000)-5000)/1000.0f;
-        f32 z = ((rand() % 10000)-5000)/1000.0f + 20.0f + (rand() % 10000)/10000.0f;
+        num_spawned++;
+        time_until_spawn = 0.5f;
+        f32 x = ((rand() % 10000)-5000)/10000.0f;
+        f32 y = ((rand() % 10000)-5000)/10000.0f + 10;
+        f32 z = ((rand() % 10000)-5000)/10000.0f + 20.0f + (rand() % 10000)/10000.0f;
         f32 rx = (rand() % 628)/100;
         f32 ry = (rand() % 628)/100;
         f32 rz = (rand() % 628)/100;

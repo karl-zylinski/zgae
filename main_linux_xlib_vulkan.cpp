@@ -239,7 +239,7 @@ int main()
 
 static Keycode x11_keycode_to_keycode(u32 code)
 {
-    static Keycode codes[] = {
+    static const Keycode codes[] = {
         KC_UNKNOWN, // 0
         KC_UNKNOWN, // 1
         KC_UNKNOWN, // 2

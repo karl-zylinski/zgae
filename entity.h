@@ -1,19 +1,27 @@
 #pragma once
 #include "entity_types.h"
 
+fwd_handle(PhysicsResourceHandle);
+fwd_handle(RenderResourceHandle);
 
-EntityRef entity_create(
+struct Entity
+{
+    void move(const Vec3& d);
+    void rotate(const Vec3& axis, float rad);
+    void create_rigidbody(f32 mass);
+    void set_render_mesh(RenderResourceHandle mesh);
+    void set_physics_collider(PhysicsResourceHandle collider);
+    const Vec3& get_position() const;
+    void set_position(const Vec3& pos);
+    void set_rotation(const Quat& rot);
+    void add_force(const Vec3& f);
+    EntityInt* deref();
+
+    World* world;
+    WorldEntityHandle handle;
+};
+
+Entity entity_create(
     World* w,
     const Vec3& pos,
     const Quat& rot);
-
-void entity_move(EntityRef* er, const Vec3& d);
-void entity_rotate(EntityRef* er, const Vec3& axis, float rad);
-void entity_create_rigidbody(EntityRef* er, f32 mass);
-void entity_set_render_mesh(EntityRef* er, RenderResourceHandle mesh);
-void entity_set_physics_collider(EntityRef* er, PhysicsResourceHandle collider);
-Vec3 entity_get_position(const EntityRef& er);
-void entity_set_position(EntityRef* er, const Vec3& pos);
-void entity_set_rotation(EntityRef* er, const Quat& rot);
-void entity_add_force(EntityRef* er, const Vec3& f);
-Entity* entity_deref(EntityRef* er);

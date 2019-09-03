@@ -2,7 +2,7 @@
 #include "handle_pool.h"
 #include "handle.h"
 #include "memory.h"
-#include "entity.h"
+#include "entity_types.h"
 
 static const u32 handle_type = 1;
 
@@ -21,7 +21,7 @@ void world_destroy(World* w)
 {
     for (u32 i = 0; i < w->entities_num; ++i)
     {
-        Entity* e = w->entities + i;
+        let e = w->entities + i;
 
         if (!e->handle)
             continue;
@@ -35,7 +35,7 @@ void world_destroy(World* w)
 
 void world_destroy_entity(World* w, WorldEntityHandle weh)
 {
-    memzero(w->entities + handle_index(weh), sizeof(Entity));
+    memzero(w->entities + handle_index(weh), sizeof(EntityInt));
     handle_pool_return(w->entity_handle_pool, weh);
 }
 
@@ -46,10 +46,11 @@ WorldEntityHandle world_create_entity(World* w, const Vec3& pos, const Quat& rot
     u32 num_needed_entities = handle_index(h) + 1;
     if (num_needed_entities > w->entities_num)
     {
-        w->entities = (Entity*)memra_zero_added(w->entities, num_needed_entities * sizeof(Entity), w->entities_num * sizeof(Entity));
+        w->entities = (EntityInt*)memra_zero_added(w->entities, num_needed_entities * sizeof(EntityInt), w->entities_num * sizeof(EntityInt));
         w->entities_num = num_needed_entities;
     }
-    Entity* e = w->entities + handle_index(h);
+    let e = w->entities + handle_index(h);
+    memzero(e, sizeof(EntityInt));
     e->pos = pos;
     e->rot = rot;
     e->world = w;
@@ -57,7 +58,7 @@ WorldEntityHandle world_create_entity(World* w, const Vec3& pos, const Quat& rot
     return h;
 }
 
-Entity* world_lookup_entity(World* w, WorldEntityHandle e)
+EntityInt* world_lookup_entity(World* w, WorldEntityHandle e)
 {
     return w->entities + handle_index(e);
 }

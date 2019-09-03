@@ -28,13 +28,13 @@ void player_update(Player* p)
         rotated_d.z = 0;
         let normalized_d = normalize(rotated_d);
         let final_d = normalized_d * walk_speed * dt;
-        entity_move(&p->entity, final_d);
+        p->entity.move(final_d);
     }
 
     if (key_went_down(KC_SPACE))
-        entity_add_force(&p->entity, {0, 0, 20});
+        p->entity.add_force({0, 0, 20});
 
-    p->camera.pos = entity_get_position(p->entity);
+    p->camera.pos = p->entity.get_position();
     let mouse_sens = dt * 0.01f;
     let diff = mouse_get_delta() * mouse_sens;
     p->yaw -= diff.x;
