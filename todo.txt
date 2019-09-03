@@ -4,6 +4,8 @@
 
 - fix the handle mess
 
+- find contact point in collions and add force at point (should rotate around center of mass then)
+
 ### LESS IMPORTANT ###
 
 - require that resoruce store tells us to specify type enum and type enum names for that store... or is that possible??? the resource constains the enum hummm or wait, just use the type in the handle!
