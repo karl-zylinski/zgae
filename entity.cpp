@@ -106,3 +106,13 @@ EntityInt* Entity::deref()
 {
     return get_internal();
 }
+
+RenderWorldObjectHandle Entity::get_render_object() const
+{
+    return get_internal()->render_object;
+}
+
+PhysicsObjectHandle Entity::get_physics_object() const
+{
+    return get_internal()->physics_object;
+}

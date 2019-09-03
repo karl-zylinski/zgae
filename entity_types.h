@@ -14,8 +14,8 @@ struct EntityInt
     Quat rot;
     World* world;
     RenderWorldObjectHandle render_object;
-    PhysicsWorldObjectHandle physics_object;
-    PhysicsWorldRigidbodyHandle physics_rigidbody;
+    PhysicsObjectHandle physics_object;
+    PhysicsRigidbodyHandle physics_rigidbody;
     WorldEntityHandle handle;
 };
 
@@ -30,6 +30,8 @@ struct Entity
     void set_position(const Vec3& pos);
     void set_rotation(const Quat& rot);
     void add_force(const Vec3& f);
+    RenderWorldObjectHandle get_render_object() const;
+    PhysicsObjectHandle get_physics_object() const;
     EntityInt* deref();
 
     World* world;

@@ -56,7 +56,7 @@ struct PhysicsWorldObject
 struct Rigidbody
 {
     bool used;
-    PhysicsWorldObjectHandle object;
+    PhysicsObjectHandle object_handle;
     Vec3 velocity;
     f32 mass;
     Entity entity;
@@ -64,10 +64,12 @@ struct Rigidbody
 
 struct PhysicsResourceWorld
 {
-    PhysicsWorldObject* objects; // dynamic
-    u32* free_object_indices; // dynamic, holes in objects
-    Rigidbody* rigidbodies; // dynamic
-    u32* free_rigidbody_indices; // dynamic, holes in rigidbodies
+    HandlePool* object_handle_pool;
+    HandlePool* rigidbody_handle_pool;
+    PhysicsWorldObject* objects;
+    Rigidbody* rigidbodies;
+    u32 objects_num;
+    u32 rigidbodies_num;
     RenderResourceHandle render_handle;
 };
 
@@ -79,20 +81,22 @@ static const char* physics_resoruce_type_names[] =
     "invalid", "mesh", "collider", "world"
 };
 
-static void* get_resource_data(RenderResourceHandle h)
+static u32 handle_index_checked(const HandlePool* hp, Handle h)
 {
-    check(handle_pool_is_valid(ps.resource_handle_pool, h), "Trying to get PhysicsResource data, but the passed Handle is invalid");
-    return ps.resources[handle_index(h)].data;
+    check(handle_pool_is_valid(hp, h), "Invalid Handle passed");
+    return handle_index(h);
 }
 
-#define get_resource(t, h) ((t*)get_resource_data(h))
+#define get_resource(t, h) ((t*)ps.resources[handle_index_checked(ps.resource_handle_pool,h)].data)
+#define get_object(w, h) ((PhysicsWorldObject*)(w->objects + handle_index_checked(w->object_handle_pool, h)))
+#define get_rigidbody(w, h) ((Rigidbody*)(w->rigidbodies + handle_index_checked(w->rigidbody_handle_pool, h)))
 
 void physics_init()
 {
     check(!inited, "Trying to init physics twice");
     inited = true;
 
-    ps.resource_handle_pool = handle_pool_create(1, "PhysicsResourceHandle");
+    ps.resource_handle_pool = handle_pool_create(HANDLE_POOL_TYPE_PHYSICS_RESOURCE);
     ps.resource_name_to_handle = handle_hash_map_create();
 
     for (u32 s = 1; s < PHYSICS_RESOURCE_TYPE_NUM; ++s)
@@ -167,36 +171,28 @@ PhysicsResourceHandle physics_load_resource(const char* filename)
     return add_resource(name_hash, type, data);
 }
 
-PhysicsWorldRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass)
+PhysicsRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass)
 {
     let w = get_resource(PhysicsResourceWorld, e->world->physics_world);
-    let r = e->deref();
-
-    if (da_num(w->free_rigidbody_indices) > 0)
+    let handle = handle_pool_borrow(w->rigidbody_handle_pool);
+    u32 num_needed_rigidbodies = handle_index(handle) + 1;
+    if (num_needed_rigidbodies > w->rigidbodies_num)
     {
-        u32 idx = da_pop(w->free_rigidbody_indices);
-        w->rigidbodies[idx].velocity = vec3_zero;
-        w->rigidbodies[idx].mass = mass;
-        w->rigidbodies[idx].object = r->render_object;
-        w->rigidbodies[idx].entity = *e;
-        w->rigidbodies[idx].used = true;
-        return idx;
+        let old_num = w->rigidbodies_num;
+        let new_num = num_needed_rigidbodies ? num_needed_rigidbodies * 2 : 1;
+        w->rigidbodies = (Rigidbody*)memra_zero_added(w->rigidbodies, new_num * sizeof(Rigidbody), old_num * sizeof(Rigidbody));
+        w->rigidbodies_num = new_num;
     }
-
-    let idx = da_num(w->rigidbodies);
-
-    Rigidbody rb = {
-        .entity = *e,
-        .mass = mass,
-        .object = r->render_object,
-        .used = true
-    };
-
-    da_push(w->rigidbodies, rb);
-    return idx;
+    Rigidbody* r = w->rigidbodies + handle_index(handle);
+    memzero(r, sizeof(Rigidbody));
+    r->mass = mass;
+    r->object_handle = e->get_physics_object();
+    r->entity = *e;
+    r->used = true;
+    return handle;
 }
 
-void physics_add_force(PhysicsResourceHandle world, PhysicsWorldRigidbodyHandle rbh, const Vec3& f)
+void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rbh, const Vec3& f)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     let rb = w->rigidbodies + rbh;
@@ -213,47 +209,40 @@ PhysicsResourceHandle physics_create_collider(PhysicsResourceHandle mesh)
 PhysicsResourceHandle physics_create_world(RenderResourceHandle render_handle)
 {
     let w = mema_zero_t(PhysicsResourceWorld);
-    PhysicsWorldObject dummy = {};
-    Rigidbody dummy2 = {};
-    da_push(w->objects, dummy);
-    da_push(w->rigidbodies, dummy2);
     w->render_handle = render_handle;
+    w->object_handle_pool = handle_pool_create(HANDLE_POOL_TYPE_PHYSICS_OBJECT);
+    w->rigidbody_handle_pool = handle_pool_create(HANDLE_POOL_TYPE_RIGIDBODY);
     return add_resource(0, PHYSICS_RESOURCE_TYPE_WORLD, w);
 }
 
-PhysicsWorldObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)
+PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
-
-   if (da_num(w->free_object_indices) > 0)
+    let h = handle_pool_borrow(w->object_handle_pool);
+    u32 num_needed_objects = handle_index(h) + 1;
+    if (num_needed_objects > w->objects_num)
     {
-        u32 idx = da_pop(w->free_object_indices);
-        w->objects[idx].collider = collider;
-        w->objects[idx].pos = pos;
-        w->objects[idx].rot = rot;
-        w->objects[idx].used = true;
-        return idx;
+        let old_num = w->objects_num;
+        let new_num = num_needed_objects ? num_needed_objects * 2 : 1;
+        w->objects = (PhysicsWorldObject*)memra_zero_added(w->objects, new_num * sizeof(PhysicsWorldObject), old_num * sizeof(PhysicsWorldObject));
+        w->objects_num = new_num;
     }
-
-    let h = da_num(w->objects);
-
-    PhysicsWorldObject wo = {
-        .collider = collider,
-        .pos = pos,
-        .rot = rot,
-        .render_handle = render_handle,
-        .used = true
-    };
-
-    da_push(w->objects, wo);
+    PhysicsWorldObject* o = w->objects + handle_index(h);
+    memzero(o, sizeof(PhysicsWorldObject));
+    o->collider = collider;
+    o->pos = pos;
+    o->rot = rot;
+    o->render_handle = render_handle;
+    o->used = true;
     return h;
 }
 
-void physics_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
+void physics_set_position(PhysicsResourceHandle world, PhysicsObjectHandle obj, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
-    w->objects[obj].pos = pos;
-    w->objects[obj].rot = rot;
+    let o = get_object(w, obj);
+    o->pos = pos;
+    o->rot = rot;
 }
 
 void physics_update_world(PhysicsResourceHandle world)
@@ -261,7 +250,7 @@ void physics_update_world(PhysicsResourceHandle world)
     let w = get_resource(PhysicsResourceWorld, world);
     float dt = time_dt();
 
-    for (u32 rigidbody_idx = 0; rigidbody_idx < da_num(w->rigidbodies); ++rigidbody_idx)
+    for (u32 rigidbody_idx = 0; rigidbody_idx < w->rigidbodies_num; ++rigidbody_idx)
     {
         let rb = w->rigidbodies + rigidbody_idx;
         if (!rb->used)
@@ -269,13 +258,12 @@ void physics_update_world(PhysicsResourceHandle world)
 
         Vec3 g = {0, 0, -0.82f};
         rb->velocity += g*dt;
-        let rb_world_object_index = rb->object;
-        let wo = w->objects + rb_world_object_index;
+        let wo = get_object(w, rb->object_handle);
         rb->entity.move(rb->velocity);
 
-        for (u32 world_object_index = 0; world_object_index < da_num(w->objects); ++world_object_index)
+        for (u32 world_object_index = 0; world_object_index < w->objects_num; ++world_object_index)
         {
-            if (world_object_index == rb_world_object_index || !w->objects[world_object_index].used)
+            if (world_object_index == handle_index(rb->object_handle) || !w->objects[world_object_index].used)
                 continue;
 
             let c1 = get_resource(PhysicsResourceCollider, wo->collider);
@@ -337,10 +325,10 @@ static void destroy_resource(PhysicsResourceHandle h)
 
         case PHYSICS_RESOURCE_TYPE_WORLD: {
             let w = get_resource(PhysicsResourceWorld, h);
-            da_free(w->objects);
-            da_free(w->free_object_indices);
-            da_free(w->rigidbodies);
-            da_free(w->free_rigidbody_indices);
+            memf(w->objects);
+            memf(w->rigidbodies);
+            handle_pool_destroy(w->object_handle_pool);
+            handle_pool_destroy(w->rigidbody_handle_pool);
         } break;
     }
 

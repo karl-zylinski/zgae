@@ -94,7 +94,7 @@ void renderer_init(WindowType window_type, const GenericWindowInfo& window_info)
 {
     check(!inited, "Trying to init renderer twice!");
     inited = true;
-    rs.resource_handle_pool = handle_pool_create(0, "RenderResourceHandle");
+    rs.resource_handle_pool = handle_pool_create(HANDLE_POOL_TYPE_RENDER_RESOURCE);
     rs.resource_name_to_handle = handle_hash_map_create();
 
     for (u32 s = 1; s < RENDER_RESOURCE_TYPE_NUM; ++s)

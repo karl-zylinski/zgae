@@ -2,9 +2,8 @@
 #include "renderer_types.h"
 
 fwd_handle(RenderResourceHandle);
-
-typedef u32 PhysicsWorldObjectHandle;
-typedef u32 PhysicsWorldRigidbodyHandle;
+fwd_handle(PhysicsObjectHandle);
+fwd_handle(PhysicsRigidbodyHandle);
 
 enum PhysicsResourceType
 {
