@@ -71,25 +71,32 @@ struct PhysicsResourceWorld
     RenderResourceHandle render_handle;
 };
 
-static PhysicsState* ps = NULL;
+static PhysicsState ps = {};
+static bool inited = false;
 
 static const char* physics_resoruce_type_names[] =
 {
     "invalid", "mesh", "collider", "world"
 };
 
-#define get_resource(t, h) ((t*)(ps->resources[handle_index(h)]).data)
+static void* get_resource_data(RenderResourceHandle h)
+{
+    check(handle_pool_is_valid(ps.resource_handle_pool, h), "Trying to get PhysicsResource data, but the passed Handle is invalid");
+    return ps.resources[handle_index(h)].data;
+}
+
+#define get_resource(t, h) ((t*)get_resource_data(h))
 
 void physics_init()
 {
-    check(ps == NULL, "Trying to init physics twice");
-    ps = mema_zero_t(PhysicsState);
+    check(!inited, "Trying to init physics twice");
+    inited = true;
 
-    ps->resource_handle_pool = handle_pool_create(1, "PhysicsResourceHandle");
-    ps->resource_name_to_handle = handle_hash_map_create();
+    ps.resource_handle_pool = handle_pool_create(1, "PhysicsResourceHandle");
+    ps.resource_name_to_handle = handle_hash_map_create();
 
     for (u32 s = 1; s < PHYSICS_RESOURCE_TYPE_NUM; ++s)
-        handle_pool_set_type(ps->resource_handle_pool, s, physics_resoruce_type_names[s]);
+        handle_pool_set_type(ps.resource_handle_pool, s, physics_resoruce_type_names[s]);
 }
 
 static PhysicsResourceType resource_type_from_str(const char* str)
@@ -101,14 +108,14 @@ static PhysicsResourceType resource_type_from_str(const char* str)
 
 static PhysicsResourceHandle add_resource(hash64 name_hash, PhysicsResourceType type, void* data)
 {
-    let handle = handle_pool_borrow(ps->resource_handle_pool, (u32)type);
+    let handle = handle_pool_borrow(ps.resource_handle_pool, (u32)type);
     u32 num_needed_resources = handle_index(handle) + 1;
-    if (num_needed_resources > ps->resources_num)
+    if (num_needed_resources > ps.resources_num)
     {
-        ps->resources = (PhysicsResource*)memra_zero_added(ps->resources, num_needed_resources * sizeof(PhysicsResource), ps->resources_num * sizeof(PhysicsResource));
-        ps->resources_num = num_needed_resources;
+        ps.resources = (PhysicsResource*)memra_zero_added(ps.resources, num_needed_resources * sizeof(PhysicsResource), ps.resources_num * sizeof(PhysicsResource));
+        ps.resources_num = num_needed_resources;
     }
-    PhysicsResource* r = ps->resources + handle_index(handle);
+    PhysicsResource* r = ps.resources + handle_index(handle);
     memzero_p(r);
     r->name_hash = name_hash;
     r->handle = handle;
@@ -119,7 +126,7 @@ static PhysicsResourceHandle add_resource(hash64 name_hash, PhysicsResourceType 
 PhysicsResourceHandle physics_load_resource(const char* filename)
 {
     let name_hash = str_hash(filename);
-    let existing = handle_hash_map_get(ps->resource_name_to_handle, name_hash);
+    let existing = handle_hash_map_get(ps.resource_name_to_handle, name_hash);
 
     if (existing != HANDLE_INVALID)
         return existing;
@@ -317,6 +324,8 @@ void physics_update_world(PhysicsResourceHandle world)
 
 static void destroy_resource(PhysicsResourceHandle h)
 {
+    check(handle_pool_is_valid(ps.resource_handle_pool, h), "When trying to destroy PhysicsResource; the passed Handle was invalid");
+
     switch(handle_type(h))
     {
         case PHYSICS_RESOURCE_TYPE_MESH: {
@@ -333,20 +342,19 @@ static void destroy_resource(PhysicsResourceHandle h)
         } break;
     }
 
-    memf(ps->resources[handle_index(h)].data);
-    handle_pool_return(ps->resource_handle_pool, h);
+    memf(ps.resources[handle_index(h)].data);
+    handle_pool_return(ps.resource_handle_pool, h);
 
-    if (ps->resources[handle_index(h)].name_hash)
-        handle_hash_map_remove(ps->resource_name_to_handle, ps->resources[handle_index(h)].name_hash);
+    if (ps.resources[handle_index(h)].name_hash)
+        handle_hash_map_remove(ps.resource_name_to_handle, ps.resources[handle_index(h)].name_hash);
 }
 
 void physics_shutdown()
 {
-    for (u32 i = 0; i < ps->resources_num; ++i)
-        destroy_resource(ps->resources[i].handle);
+    for (u32 i = 0; i < ps.resources_num; ++i)
+        destroy_resource(ps.resources[i].handle);
 
-    memf(ps->resources);
-    handle_hash_map_destroy(ps->resource_name_to_handle);
-    handle_pool_destroy(ps->resource_handle_pool);
-    memf(ps);
+    memf(ps.resources);
+    handle_hash_map_destroy(ps.resource_name_to_handle);
+    handle_pool_destroy(ps.resource_handle_pool);
 }

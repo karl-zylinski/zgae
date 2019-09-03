@@ -93,6 +93,7 @@ void handle_pool_return(HandlePool* hp, Handle h)
 bool handle_pool_is_valid(const HandlePool* hp, Handle h)
 {
     check(handle_index(h) < HANDLE_MAX_INDEX, "Handle out of bounds");
+    check(handle_pool(h) == hp->index, "Handle isn't from this pool");
     Handle hp_h = hp->handles[handle_index(h)];
     return handle_generation(h) == handle_generation(hp_h);
 }
