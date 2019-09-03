@@ -30,7 +30,6 @@ void Entity::move(const Vec3& d)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
-
 void Entity::rotate(const Vec3& axis, float rad)
 {
     let e = get_internal();
@@ -60,7 +59,7 @@ const Vec3& Entity::get_position() const
 void Entity::set_render_mesh(RenderResourceHandle mesh)
 {
     let e = get_internal();
-    e->render_object = renderer_world_add(e->world->render_world, mesh, e->pos, e->rot);
+    e->render_object = renderer_create_object(e->world->render_world, mesh, e->pos, e->rot);
 }
 
 void Entity::set_physics_collider(PhysicsResourceHandle collider)

@@ -48,9 +48,9 @@ void game_init()
     let physics_world = physics_create_world(render_world);
     gs.world = create_world(render_world, physics_world);
 
-    gs.pipeline = renderer_resource_load("pipeline_default.pipeline");
-    gs.box_mesh = renderer_resource_load("box.mesh");
-    let floor_render_mesh = renderer_resource_load("floor.mesh");
+    gs.pipeline = renderer_load_resource("pipeline_default.pipeline");
+    gs.box_mesh = renderer_load_resource("box.mesh");
+    let floor_render_mesh = renderer_load_resource("floor.mesh");
 
     gs.world->physics_world = physics_create_world(gs.world->render_world);
     let box_physics_mesh = physics_load_resource("box.mesh");
@@ -62,7 +62,7 @@ void game_init()
     gs.floor2 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {-0.5, 15, -5.5}, quat_identity(), 10000, false);
 
     gs.player = {
-        .camera = create_camera(),
+        .camera = camera_create(),
         .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, 10}, quat_identity(), 75, true)
     };
 }
@@ -92,7 +92,7 @@ bool game_update()
         spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), 10, true);
     }
 
-    player_update(&gs.player);
+    gs.player.update();
     
     renderer_begin_frame(gs.pipeline);
     renderer_draw_world(gs.pipeline, gs.world->render_world, gs.player.camera.pos, gs.player.camera.rot);

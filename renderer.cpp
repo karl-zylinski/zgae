@@ -353,7 +353,7 @@ static ConstantBufferField resource_load_parse_constant_buffer_field(const JzonV
     };
 }
 
-RenderResourceHandle renderer_resource_load(const char* filename)
+RenderResourceHandle renderer_load_resource(const char* filename)
 {
     hash64 name_hash = str_hash(filename);
     RenderResourceHandle existing = handle_hash_map_get(rs.resource_name_to_handle, name_hash);
@@ -426,7 +426,7 @@ RenderResourceHandle renderer_resource_load(const char* filename)
             {
                 let jz_shader_stage = jz_shader_stages->array_val + shdr_idx;
                 ensure(jz_shader_stage->is_string);
-                pr.shader_stages[shdr_idx] = renderer_resource_load(jz_shader_stage->string_val);
+                pr.shader_stages[shdr_idx] = renderer_load_resource(jz_shader_stage->string_val);
             }
 
             let jz_constant_buffers = jzon_get(jpr.output, "constant_buffers");
@@ -577,7 +577,7 @@ void renderer_destroy_world(RenderResourceHandle h)
     destroy_resource(h);
 }
 
-u32 renderer_world_add(RenderResourceHandle world, RenderResourceHandle mesh, const Vec3& pos, const Quat& rot)
+u32 renderer_create_object(RenderResourceHandle world, RenderResourceHandle mesh, const Vec3& pos, const Quat& rot)
 {
     WorldRenderResource* w = get_resource(rs.resources, WorldRenderResource, world);
     Mat4 model = mat4_from_rotation_and_translation(rot, pos);
@@ -601,7 +601,7 @@ u32 renderer_world_add(RenderResourceHandle world, RenderResourceHandle mesh, co
     return h;
 }
 
-void renderer_world_remove(RenderResourceHandle world, RenderWorldObjectHandle h)
+void renderer_destroy_object(RenderResourceHandle world, RenderWorldObjectHandle h)
 {
     WorldRenderResource* w = get_resource(rs.resources, WorldRenderResource, world);
     check(w->objects[h].mesh == HANDLE_INVALID, "Trying to remove from world twice");

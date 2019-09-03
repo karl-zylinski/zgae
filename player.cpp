@@ -7,7 +7,7 @@
 #include "mouse.h"
 #include "debug.h"
 
-void player_update(Player* p)
+void Player::update()
 {
     Vec3 d = {};
     float dt = time_dt();
@@ -24,25 +24,25 @@ void player_update(Player* p)
 
     if (len(d) != 0)
     {
-        let rotated_d = rotate_vec3(p->camera.rot, d);
+        let rotated_d = rotate_vec3(this->camera.rot, d);
         rotated_d.z = 0;
         let normalized_d = normalize(rotated_d);
         let final_d = normalized_d * walk_speed * dt;
-        p->entity.move(final_d);
+        this->entity.move(final_d);
     }
 
     if (key_went_down(KC_SPACE))
-        p->entity.add_force({0, 0, 20});
+        this->entity.add_force({0, 0, 20});
 
-    p->camera.pos = p->entity.get_position();
+    this->camera.pos = this->entity.get_position();
     let mouse_sens = dt * 0.01f;
     let diff = mouse_get_delta() * mouse_sens;
-    p->yaw -= diff.x;
-    p->pitch -= diff.y;
-    p->pitch = clamp(p->pitch, -PI/3, PI/3);
+    this->yaw -= diff.x;
+    this->pitch -= diff.y;
+    this->pitch = clamp(this->pitch, -PI/3, PI/3);
     
-    Quat yawq = quat_from_axis_angle(vec3_up, p->yaw);
+    Quat yawq = quat_from_axis_angle(vec3_up, this->yaw);
     Vec3 local_sideways = rotate_vec3(yawq, {1, 0, 0});
-    Quat pitchq = quat_from_axis_angle(local_sideways, p->pitch);
-    p->camera.rot = pitchq * yawq;
+    Quat pitchq = quat_from_axis_angle(local_sideways, this->pitch);
+    this->camera.rot = pitchq * yawq;
 }

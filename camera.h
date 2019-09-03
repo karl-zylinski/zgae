@@ -1,4 +1,4 @@
 #pragma once
 #include "camera_types.h"
 
-Camera create_camera();
+Camera camera_create();

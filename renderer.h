@@ -13,10 +13,10 @@ void renderer_init(WindowType window_type, const GenericWindowInfo& window_data)
 void renderer_shutdown();
 RenderResourceHandle renderer_create_world();
 void renderer_destroy_world(RenderResourceHandle h);
-RenderWorldObjectHandle renderer_world_add(RenderResourceHandle world, RenderResourceHandle mesh, const Vec3& position, const Quat& rot);
-void renderer_world_remove(RenderResourceHandle world, RenderWorldObjectHandle h);
+RenderWorldObjectHandle renderer_create_object(RenderResourceHandle world, RenderResourceHandle mesh, const Vec3& position, const Quat& rot);
+void renderer_destroy_object(RenderResourceHandle world, RenderWorldObjectHandle h);
 void renderer_world_set_position_and_rotation(RenderResourceHandle world, RenderWorldObjectHandle h, const Vec3& position, const Quat& rot);
-RenderResourceHandle renderer_resource_load(const char* filename);
+RenderResourceHandle renderer_load_resource(const char* filename);
 void renderer_begin_frame(RenderResourceHandle pipeline_handle);
 void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, const Vec3& cam_pos, const Quat& cam_rot);
 void renderer_end_frame();

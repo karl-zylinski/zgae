@@ -1,7 +1,7 @@
 #include "camera.h"
 #include "math.h"
 
-Camera create_camera()
+Camera camera_create()
 {
     return {
         .pos = vec3_zero,
