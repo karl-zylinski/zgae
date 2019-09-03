@@ -6,7 +6,7 @@
 
 static const u32 handle_type = 1;
 
-World* world_create(RenderResourceHandle render_world, PhysicsResourceHandle physics_world)
+World* create_world(RenderResourceHandle render_world, PhysicsResourceHandle physics_world)
 {
     let hp = handle_pool_create(2, "WorldEntityHandle");
     handle_pool_set_type(hp, handle_type, "Entity");
@@ -17,7 +17,7 @@ World* world_create(RenderResourceHandle render_world, PhysicsResourceHandle phy
     return w;
 }
 
-void world_destroy(World* w)
+void destroy_world(World* w)
 {
     for (u32 i = 0; i < w->entities_num; ++i)
     {
@@ -26,39 +26,40 @@ void world_destroy(World* w)
         if (!e->handle)
             continue;
 
-        world_destroy_entity(w, e->handle);
+        w->destroy_entity(e->handle);
     }
+
     handle_pool_destroy(w->entity_handle_pool);
     memf(w->entities);
     memf(w);
 }
 
-void world_destroy_entity(World* w, WorldEntityHandle weh)
+void World::destroy_entity(WorldEntityHandle weh)
 {
-    memzero(w->entities + handle_index(weh), sizeof(EntityInt));
-    handle_pool_return(w->entity_handle_pool, weh);
+    memzero(this->entities + handle_index(weh), sizeof(EntityInt));
+    handle_pool_return(this->entity_handle_pool, weh);
 }
 
-WorldEntityHandle world_create_entity(World* w, const Vec3& pos, const Quat& rot)
+WorldEntityHandle World::create_entity(const Vec3& pos, const Quat& rot)
 {
-    WorldEntityHandle h = handle_pool_borrow(w->entity_handle_pool, handle_type);
+    WorldEntityHandle h = handle_pool_borrow(this->entity_handle_pool, handle_type);
 
     u32 num_needed_entities = handle_index(h) + 1;
-    if (num_needed_entities > w->entities_num)
+    if (num_needed_entities > this->entities_num)
     {
-        w->entities = (EntityInt*)memra_zero_added(w->entities, num_needed_entities * sizeof(EntityInt), w->entities_num * sizeof(EntityInt));
-        w->entities_num = num_needed_entities;
+        this->entities = (EntityInt*)memra_zero_added(this->entities, num_needed_entities * sizeof(EntityInt), this->entities_num * sizeof(EntityInt));
+        this->entities_num = num_needed_entities;
     }
-    let e = w->entities + handle_index(h);
+    let e = this->entities + handle_index(h);
     memzero(e, sizeof(EntityInt));
     e->pos = pos;
     e->rot = rot;
-    e->world = w;
+    e->world = this;
     e->handle = h;
     return h;
 }
 
-EntityInt* world_lookup_entity(World* w, WorldEntityHandle e)
+EntityInt* World::lookup_entity(WorldEntityHandle e)
 {
-    return w->entities + handle_index(e);
+    return this->entities + handle_index(e);
 }

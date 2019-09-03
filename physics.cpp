@@ -15,7 +15,7 @@
 #include "obj_loader.h"
 #include "renderer.h"
 #include "entity_types.h"
-#include "world_types.h"
+#include "world.h"
 #include "entity.h"
 
 struct PhysicsResource
@@ -116,7 +116,7 @@ static PhysicsResourceHandle add_resource(hash64 name_hash, PhysicsResourceType 
     return handle;
 }
 
-PhysicsResourceHandle physics_resource_load(const char* filename)
+PhysicsResourceHandle physics_load_resource(const char* filename)
 {
     let name_hash = str_hash(filename);
     let existing = handle_hash_map_get(ps->resource_name_to_handle, name_hash);
@@ -158,7 +158,7 @@ PhysicsResourceHandle physics_resource_load(const char* filename)
     return add_resource(name_hash, type, data);
 }
 
-PhysicsWorldRigidbodyHandle physics_add_rigidbody(Entity* e, f32 mass)
+PhysicsWorldRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass)
 {
     let w = get_resource(PhysicsResourceWorld, e->world->physics_world);
     let r = e->deref();
@@ -194,14 +194,14 @@ void physics_add_force(PhysicsResourceHandle world, PhysicsWorldRigidbodyHandle 
     rb->velocity += f*(1/rb->mass);
 }
 
-PhysicsResourceHandle physics_collider_create(PhysicsResourceHandle mesh)
+PhysicsResourceHandle physics_create_collider(PhysicsResourceHandle mesh)
 {
     let c = mema_zero_t(PhysicsResourceCollider);
     c->mesh = mesh;
     return add_resource(0, PHYSICS_RESOURCE_TYPE_COLLIDER, c);
 }
 
-PhysicsResourceHandle physics_world_create(RenderResourceHandle render_handle)
+PhysicsResourceHandle physics_create_world(RenderResourceHandle render_handle)
 {
     let w = mema_zero_t(PhysicsResourceWorld);
     PhysicsWorldObject dummy = {};
@@ -212,7 +212,7 @@ PhysicsResourceHandle physics_world_create(RenderResourceHandle render_handle)
     return add_resource(0, PHYSICS_RESOURCE_TYPE_WORLD, w);
 }
 
-PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)
+PhysicsWorldObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
 
@@ -240,7 +240,7 @@ PhysicsWorldObjectHandle physics_world_add(PhysicsResourceHandle world, PhysicsR
     return h;
 }
 
-void physics_world_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
+void physics_set_position(PhysicsResourceHandle world, PhysicsWorldObjectHandle obj, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     w->objects[obj].pos = pos;

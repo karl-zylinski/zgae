@@ -45,24 +45,24 @@ void game_init()
     info("Entering game_init()");
     srand (time_since_start());
     let render_world = renderer_create_world();
-    let physics_world = physics_world_create(render_world);
-    gs.world = world_create(render_world, physics_world);
+    let physics_world = physics_create_world(render_world);
+    gs.world = create_world(render_world, physics_world);
 
     gs.pipeline = renderer_resource_load("pipeline_default.pipeline");
     gs.box_mesh = renderer_resource_load("box.mesh");
     let floor_render_mesh = renderer_resource_load("floor.mesh");
 
-    gs.world->physics_world = physics_world_create(gs.world->render_world);
-    let box_physics_mesh = physics_resource_load("box.mesh");
-    let floor_physics_mesh = physics_resource_load("floor.mesh");
-    gs.box_collider = physics_collider_create(box_physics_mesh);
-    let floor_collider = physics_collider_create(floor_physics_mesh);
+    gs.world->physics_world = physics_create_world(gs.world->render_world);
+    let box_physics_mesh = physics_load_resource("box.mesh");
+    let floor_physics_mesh = physics_load_resource("floor.mesh");
+    gs.box_collider = physics_create_collider(box_physics_mesh);
+    let floor_collider = physics_create_collider(floor_physics_mesh);
 
     gs.floor1 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {0, 0, -5}, quat_identity(), 10000, false);
     gs.floor2 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {-0.5, 15, -5.5}, quat_identity(), 10000, false);
 
     gs.player = {
-        .camera = camera_create(),
+        .camera = create_camera(),
         .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, 10}, quat_identity(), 75, true)
     };
 }
@@ -107,5 +107,5 @@ bool game_update()
 void game_shutdown()
 {
     info("Entering game_shutdown()");
-    world_destroy(gs.world);
+    destroy_world(gs.world);
 }

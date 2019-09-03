@@ -1,11 +1,25 @@
 #pragma once
-#include "world_types.h"
 
 fwd_struct(Vec3);
 fwd_struct(Quat);
+fwd_handle(RenderResourceHandle);
+fwd_handle(PhysicsResourceHandle);
+fwd_struct(EntityInt);
+fwd_struct(HandlePool);
+fwd_handle(WorldEntityHandle);
 
-World* world_create(RenderResourceHandle render_world, PhysicsResourceHandle physics_world);
-void world_destroy(World* w);
-void world_destroy_entity(World* w, WorldEntityHandle weh);
-WorldEntityHandle world_create_entity(World* w, const Vec3& pos, const Quat& rot);
-EntityInt* world_lookup_entity(World* w, WorldEntityHandle e);
+struct World
+{
+    void destroy_entity(WorldEntityHandle weh);
+    WorldEntityHandle create_entity(const Vec3& pos, const Quat& rot);
+    EntityInt* lookup_entity(WorldEntityHandle e);
+
+    RenderResourceHandle render_world;
+    PhysicsResourceHandle physics_world;
+    EntityInt* entities;
+    u32 entities_num;
+    HandlePool* entity_handle_pool;
+};
+
+World* create_world(RenderResourceHandle render_world, PhysicsResourceHandle physics_world);
+void destroy_world(World* w);
