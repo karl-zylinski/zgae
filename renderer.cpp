@@ -534,8 +534,10 @@ RenderResourceHandle renderer_load_resource(const char* filename)
     u32 num_needed_resources = handle_index(h) + 1;
     if (num_needed_resources > rs.resources_num)
     {
-        rs.resources = (RenderResource*)memra_zero_added(rs.resources, num_needed_resources * sizeof(RenderResource), rs.resources_num * sizeof(RenderResource));
-        rs.resources_num = num_needed_resources;
+        let old_num = rs.resources_num;
+        let new_num = num_needed_resources ? num_needed_resources * 2 : 1;
+        rs.resources = (RenderResource*)memra_zero_added(rs.resources, new_num * sizeof(RenderResource), old_num * sizeof(RenderResource));
+        rs.resources_num = new_num;
     }
     rs.resources[handle_index(h)] = r;
 
@@ -550,7 +552,14 @@ void renderer_shutdown()
     
     info("Destroying all render resources");
     for (u32 i = 0; i < rs.resources_num; ++i)
-        destroy_resource(rs.resources[i].handle);
+    {
+        let h = rs.resources[i].handle;
+
+        if (!h)
+            continue;
+
+        destroy_resource(h);
+    }
 
     memf(rs.resources);
     renderer_backend_shutdown();

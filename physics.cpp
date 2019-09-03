@@ -112,8 +112,10 @@ static PhysicsResourceHandle add_resource(hash64 name_hash, PhysicsResourceType 
     u32 num_needed_resources = handle_index(handle) + 1;
     if (num_needed_resources > ps.resources_num)
     {
-        ps.resources = (PhysicsResource*)memra_zero_added(ps.resources, num_needed_resources * sizeof(PhysicsResource), ps.resources_num * sizeof(PhysicsResource));
-        ps.resources_num = num_needed_resources;
+        let old_num = ps.resources_num;
+        let new_num = num_needed_resources ? num_needed_resources * 2 : 1;
+        ps.resources = (PhysicsResource*)memra_zero_added(ps.resources, new_num * sizeof(PhysicsResource), old_num * sizeof(PhysicsResource));
+        ps.resources_num = new_num;
     }
     PhysicsResource* r = ps.resources + handle_index(handle);
     memzero_p(r);
@@ -352,7 +354,14 @@ static void destroy_resource(PhysicsResourceHandle h)
 void physics_shutdown()
 {
     for (u32 i = 0; i < ps.resources_num; ++i)
-        destroy_resource(ps.resources[i].handle);
+    {
+        let h = ps.resources[i].handle;
+
+        if (!h)
+            continue;
+
+        destroy_resource(h);
+    }
 
     memf(ps.resources);
     handle_hash_map_destroy(ps.resource_name_to_handle);

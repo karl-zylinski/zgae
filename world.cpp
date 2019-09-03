@@ -3,6 +3,7 @@
 #include "handle.h"
 #include "memory.h"
 #include "entity_types.h"
+#include "debug.h"
 
 static const u32 handle_type = 1;
 
@@ -36,6 +37,7 @@ void destroy_world(World* w)
 
 void World::destroy_entity(WorldEntityHandle weh)
 {
+    check(handle_pool_is_valid(this->entity_handle_pool, weh), "Invalid Handle when trying to destroy entity");
     memzero(this->entities + handle_index(weh), sizeof(EntityInt));
     handle_pool_return(this->entity_handle_pool, weh);
 }
@@ -61,5 +63,6 @@ WorldEntityHandle World::create_entity(const Vec3& pos, const Quat& rot)
 
 EntityInt* World::lookup_entity(WorldEntityHandle e)
 {
+    check_slow(handle_pool_is_valid(this->entity_handle_pool, e), "Invalid Handle when trying to lookup entity");
     return this->entities + handle_index(e);
 }
