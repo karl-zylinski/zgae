@@ -218,9 +218,9 @@ PhysicsResourceHandle physics_create_world(RenderResourceHandle render_handle)
 PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
-    let h = handle_pool_borrow(w->object_handle_pool);
-    u32 num_needed_objects = handle_index(h) + 1;
-    if (num_needed_objects > w->objects_num)
+    let h = handle_pool_borrow(w->object_handle_pool);  // TODO: This pattern keeps repeating,
+    u32 num_needed_objects = handle_index(h) + 1;       // make it general and put in handle_pool.h?
+    if (num_needed_objects > w->objects_num)            // Perhaps with macro for type etc
     {
         let old_num = w->objects_num;
         let new_num = num_needed_objects ? num_needed_objects * 2 : 1;
