@@ -5,7 +5,6 @@
 fwd_struct(World);
 fwd_handle(WorldEntityHandle);
 
-
 struct EntityInt
 {
     Vec3 pos;
