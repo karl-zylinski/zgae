@@ -3,6 +3,8 @@
 
 fwd_handle(PhysicsObjectHandle);
 fwd_handle(PhysicsRigidbodyHandle);
+fwd_handle(PhysicsResourceHandle);
+fwd_struct(Entity);
 
 enum PhysicsResourceType
 {
@@ -12,9 +14,6 @@ enum PhysicsResourceType
     PHYSICS_RESOURCE_TYPE_WORLD,
     PHYSICS_RESOURCE_TYPE_NUM
 };
-
-fwd_handle(PhysicsResourceHandle);
-fwd_struct(Entity);
 
 void physics_init();
 void physics_shutdown();

@@ -4,7 +4,6 @@ fwd_handle(RenderResourceHandle);
 fwd_struct(Quat);
 fwd_struct(Vec3);
 fwd_struct(Mat4);
-
 typedef u32 RenderWorldObjectHandle;
 
 struct GenericWindowInfo

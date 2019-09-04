@@ -1,6 +1,5 @@
 #pragma once
 
-
 enum RenderResourceType
 {
     RENDER_RESOURCE_TYPE_INVALID,
