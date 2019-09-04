@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "math.h"
 
 Camera camera_create()
 {

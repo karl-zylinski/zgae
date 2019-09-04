@@ -1,13 +1,22 @@
 #pragma once
-#include "renderer_types.h"
 
-fwd_enum(WindowType);
 fwd_handle(RenderResourceHandle);
 fwd_struct(Quat);
-fwd_struct(Renderer);
 fwd_struct(Vec3);
 fwd_struct(Mat4);
-fwd_struct(GenericWindowInfo);
+
+typedef u32 RenderWorldObjectHandle;
+
+struct GenericWindowInfo
+{
+    void* display;
+    u64 handle;
+};
+
+enum WindowType : u32
+{
+    WINDOW_TYPE_X11
+};
 
 void renderer_init(WindowType window_type, const GenericWindowInfo& window_data);
 void renderer_shutdown();

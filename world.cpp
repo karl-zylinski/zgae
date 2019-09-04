@@ -2,7 +2,7 @@
 #include "handle_pool.h"
 #include "handle.h"
 #include "memory.h"
-#include "entity_types.h"
+#include "entity.h"
 #include "debug.h"
 
 static const u32 handle_type = 1;

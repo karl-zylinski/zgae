@@ -1,11 +1,7 @@
 #include "player.h"
-#include "entity.h"
 #include "keyboard.h"
-#include "keyboard_types.h"
 #include "time.h"
-#include "math.h"
 #include "mouse.h"
-#include "debug.h"
 
 void Player::update()
 {
@@ -13,13 +9,13 @@ void Player::update()
     float dt = time_dt();
     float walk_speed = 4.0f;
 
-    if (key_held(KC_A))
+    if (key_held(KEY_A))
         d.x -= 1;
-    if (key_held(KC_D))
+    if (key_held(KEY_D))
         d.x += 1;
-    if (key_held(KC_W))
+    if (key_held(KEY_W))
         d.y += 1;
-    if (key_held(KC_S))
+    if (key_held(KEY_S))
         d.y -= 1;
 
     if (len(d) != 0)
@@ -31,7 +27,7 @@ void Player::update()
         this->entity.move(final_d);
     }
 
-    if (key_went_down(KC_SPACE))
+    if (key_went_down(KEY_SPACE))
         this->entity.add_force({0, 0, 20});
 
     this->camera.pos = this->entity.get_position();

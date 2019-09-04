@@ -1,28 +1,27 @@
 #include "keyboard.h"
-#include "keyboard_types.h"
 #include "memory.h"
 
-static bool keys_held[(u32)KC_NUM];
-static bool keys_went_down[(u32)KC_NUM];
-static bool keys_went_up[(u32)KC_NUM];
+static bool keys_held[(u32)KEY_NUM];
+static bool keys_went_down[(u32)KEY_NUM];
+static bool keys_went_up[(u32)KEY_NUM];
 
 void keyboard_init()
 {
     keyboard_reset();
 }
 
-void keyboard_key_pressed(Keycode key)
+void keyboard_key_pressed(Key key)
 {
-    if (key == KC_UNKNOWN)
+    if (key == KEY_UNKNOWN)
         return;
 
     keys_went_down[(u32)key] = true;
     keys_held[(u32)key] = true;
 }
 
-void keyboard_key_released(Keycode key)
+void keyboard_key_released(Key key)
 {
-    if (key == KC_UNKNOWN)
+    if (key == KEY_UNKNOWN)
         return;
 
     keys_went_up[(u32)key] = true;
@@ -42,17 +41,17 @@ void keyboard_reset()
     memzero(keys_went_up, sizeof(keys_went_up));
 }
 
-bool key_held(Keycode key)
+bool key_held(Key key)
 {
     return keys_held[(u32)key];
 }
 
-bool key_went_down(Keycode key)
+bool key_went_down(Key key)
 {
     return keys_went_down[(u32)key];
 }
 
-bool key_went_up(Keycode key)
+bool key_went_up(Key key)
 {
     return keys_went_up[(u32)key];
 }

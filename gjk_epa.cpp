@@ -1,5 +1,4 @@
 #include "gjk_epa.h"
-#include "math.h"
 #include "dynamic_array.h"
 #include <math.h>
 #include "debug.h"

@@ -1,5 +1,12 @@
 #pragma once
-#include "debug_types.h"
+
+struct Backtrace
+{
+    char** function_calls;
+    u32 function_calls_num;
+};
+
+typedef Backtrace(*GetBacktraceCallback)(u32 num_frames);
 
 void debug_init(GetBacktraceCallback get_backtrace);
 [[ noreturn ]] void debug_error(const char* msg, ...);

@@ -1,13 +1,7 @@
 #include "game_root.h"
-#include "entity.h"
 #include "player.h"
-#include "physics.h"
 #include "time.h"
-#include "renderer.h"
-#include "math.h"
-#include "camera.h"
 #include "keyboard.h"
-#include "keyboard_types.h"
 #include "mouse.h"
 #include "debug.h"
 #include "world.h"
@@ -72,7 +66,7 @@ static u32 num_spawned = 0;
 
 bool game_update()
 {
-    if (key_went_down(KC_ESCAPE))
+    if (key_went_down(KEY_ESCAPE))
         return false;
 
     physics_update_world(gs.world->physics_world);

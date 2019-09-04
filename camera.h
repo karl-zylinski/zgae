@@ -1,4 +1,10 @@
 #pragma once
-#include "camera_types.h"
+#include "math.h"
+
+struct Camera
+{
+    Vec3 pos;
+    Quat rot;
+};
 
 Camera camera_create();

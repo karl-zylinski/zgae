@@ -2,7 +2,6 @@
 #include "dynamic_array.h"
 #include "file.h"
 #include "memory.h"
-#include "math.h"
 #include <stdlib.h>
 
 struct ParserState

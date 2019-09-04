@@ -1,5 +1,5 @@
 #pragma once
-#include "math_types.h"
+#include "math.h"
 
 fwd_enum(ShaderDataType);
 fwd_enum(ShaderType);

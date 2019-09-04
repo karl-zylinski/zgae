@@ -1,6 +1,4 @@
 #include <X11/Xlib.h>
-#include "renderer.h"
-#include "keyboard_types.h"
 #include "debug.h"
 #include "memory.h"
 #include "time.h"
@@ -47,7 +45,7 @@ static Backtrace get_backtrace(u32 backtrace_size)
     };
 }
 
-static Keycode x11_keycode_to_keycode(u32 code);
+static Key x11_keycode_to_keycode(u32 code);
 
 int main()
 {
@@ -129,7 +127,7 @@ int main()
                 case KeyPress: {
                     let xlib_code = evt.xkey.keycode;
                     let kc = x11_keycode_to_keycode(xlib_code);
-                    if (kc == KC_UNKNOWN)
+                    if (kc == KEY_UNKNOWN)
                         info("Unknown key pressed: %d", xlib_code);
                     keyboard_key_pressed(kc);
                 } break;
@@ -152,7 +150,7 @@ int main()
 
                     let xlib_code = evt.xkey.keycode;
                     let kc = x11_keycode_to_keycode(xlib_code);
-                    if (kc == KC_UNKNOWN)
+                    if (kc == KEY_UNKNOWN)
                         info("Unknown key pressed: %d", xlib_code);
                     keyboard_key_released(kc);
                 } break;
@@ -237,143 +235,143 @@ int main()
     return 0;
 }
 
-static Keycode x11_keycode_to_keycode(u32 code)
+static Key x11_keycode_to_keycode(u32 code)
 {
-    static const Keycode codes[] = {
-        KC_UNKNOWN, // 0
-        KC_UNKNOWN, // 1
-        KC_UNKNOWN, // 2
-        KC_UNKNOWN, // 3
-        KC_UNKNOWN, // 4
-        KC_UNKNOWN, // 5
-        KC_UNKNOWN, // 6
-        KC_UNKNOWN, // 7
-        KC_UNKNOWN, // 8
-        KC_ESCAPE, // 9
-        KC_UNKNOWN, // 10
-        KC_UNKNOWN, // 11
-        KC_UNKNOWN, // 12
-        KC_UNKNOWN, // 13
-        KC_UNKNOWN, // 14
-        KC_UNKNOWN, // 15
-        KC_UNKNOWN, // 16
-        KC_UNKNOWN, // 17
-        KC_UNKNOWN, // 18
-        KC_UNKNOWN, // 19
-        KC_UNKNOWN, // 20
-        KC_UNKNOWN, // 21
-        KC_UNKNOWN, // 22
-        KC_UNKNOWN, // 23
-        KC_Q, // 24
-        KC_W, // 25
-        KC_E, // 26
-        KC_R, // 27
-        KC_T, // 28
-        KC_Y, // 29
-        KC_U, // 30
-        KC_I, // 31
-        KC_O, // 32
-        KC_P, // 33
-        KC_LBRACKET, // 34
-        KC_RBRACKET, // 35
-        KC_UNKNOWN, // 36
-        KC_UNKNOWN, // 37
-        KC_A, // 38
-        KC_S, // 39
-        KC_D, // 40
-        KC_F, // 41
-        KC_G, // 42
-        KC_H, // 43
-        KC_J, // 44
-        KC_K, // 45
-        KC_L, // 46
-        KC_SEMICOLON, // 47
-        KC_SINGLEQUOTE, // 48
-        KC_UNKNOWN, // 49
-        KC_UNKNOWN, // 50
-        KC_BACKSLASH, // 51
-        KC_Z, // 52
-        KC_X, // 53
-        KC_C, // 54
-        KC_V, // 55
-        KC_B, // 56
-        KC_N, // 57
-        KC_M, // 58
-        KC_COMMA, // 59
-        KC_PERIOD, // 60
-        KC_SLASH, // 61
-        KC_UNKNOWN, // 62
-        KC_UNKNOWN, // 63
-        KC_UNKNOWN, // 64
-        KC_SPACE, // 65
-        KC_UNKNOWN, // 66
-        KC_UNKNOWN, // 67
-        KC_UNKNOWN, // 68
-        KC_UNKNOWN, // 69
-        KC_UNKNOWN, // 70
-        KC_UNKNOWN, // 71
-        KC_UNKNOWN, // 72
-        KC_UNKNOWN, // 73
-        KC_UNKNOWN, // 74
-        KC_UNKNOWN, // 75
-        KC_UNKNOWN, // 76
-        KC_UNKNOWN, // 77
-        KC_UNKNOWN, // 78
-        KC_UNKNOWN, // 79
-        KC_UNKNOWN, // 80
-        KC_UNKNOWN, // 81
-        KC_UNKNOWN, // 82
-        KC_UNKNOWN, // 83
-        KC_UNKNOWN, // 84
-        KC_UNKNOWN, // 85
-        KC_UNKNOWN, // 86
-        KC_UNKNOWN, // 87
-        KC_UNKNOWN, // 88
-        KC_UNKNOWN, // 89
-        KC_UNKNOWN, // 90
-        KC_UNKNOWN, // 91
-        KC_UNKNOWN, // 92
-        KC_UNKNOWN, // 93
-        KC_UNKNOWN, // 94
-        KC_UNKNOWN, // 95
-        KC_UNKNOWN, // 96
-        KC_UNKNOWN, // 97
-        KC_UNKNOWN, // 98
-        KC_UNKNOWN, // 99
-        KC_UNKNOWN, // 100
-        KC_UNKNOWN, // 101
-        KC_UNKNOWN, // 102
-        KC_UNKNOWN, // 103
-        KC_UNKNOWN, // 104
-        KC_UNKNOWN, // 105
-        KC_UNKNOWN, // 106
-        KC_UNKNOWN, // 107
-        KC_UNKNOWN, // 108
-        KC_UNKNOWN, // 109
-        KC_UNKNOWN, // 110
-        KC_UNKNOWN, // 111
-        KC_UNKNOWN, // 112
-        KC_UNKNOWN, // 113
-        KC_UNKNOWN, // 114
-        KC_UNKNOWN, // 115
-        KC_UNKNOWN, // 116
-        KC_UNKNOWN, // 117
-        KC_UNKNOWN, // 118
-        KC_UNKNOWN, // 119
-        KC_UNKNOWN, // 120
-        KC_UNKNOWN, // 121
-        KC_UNKNOWN, // 122
-        KC_UNKNOWN, // 123
-        KC_UNKNOWN, // 124
-        KC_UNKNOWN, // 125
-        KC_UNKNOWN, // 126
-        KC_UNKNOWN, // 127
+    static const Key codes[] = {
+        KEY_UNKNOWN, // 0
+        KEY_UNKNOWN, // 1
+        KEY_UNKNOWN, // 2
+        KEY_UNKNOWN, // 3
+        KEY_UNKNOWN, // 4
+        KEY_UNKNOWN, // 5
+        KEY_UNKNOWN, // 6
+        KEY_UNKNOWN, // 7
+        KEY_UNKNOWN, // 8
+        KEY_ESCAPE, // 9
+        KEY_UNKNOWN, // 10
+        KEY_UNKNOWN, // 11
+        KEY_UNKNOWN, // 12
+        KEY_UNKNOWN, // 13
+        KEY_UNKNOWN, // 14
+        KEY_UNKNOWN, // 15
+        KEY_UNKNOWN, // 16
+        KEY_UNKNOWN, // 17
+        KEY_UNKNOWN, // 18
+        KEY_UNKNOWN, // 19
+        KEY_UNKNOWN, // 20
+        KEY_UNKNOWN, // 21
+        KEY_UNKNOWN, // 22
+        KEY_UNKNOWN, // 23
+        KEY_Q, // 24
+        KEY_W, // 25
+        KEY_E, // 26
+        KEY_R, // 27
+        KEY_T, // 28
+        KEY_Y, // 29
+        KEY_U, // 30
+        KEY_I, // 31
+        KEY_O, // 32
+        KEY_P, // 33
+        KEY_LBRACKET, // 34
+        KEY_RBRACKET, // 35
+        KEY_UNKNOWN, // 36
+        KEY_UNKNOWN, // 37
+        KEY_A, // 38
+        KEY_S, // 39
+        KEY_D, // 40
+        KEY_F, // 41
+        KEY_G, // 42
+        KEY_H, // 43
+        KEY_J, // 44
+        KEY_K, // 45
+        KEY_L, // 46
+        KEY_SEMICOLON, // 47
+        KEY_SINGLEQUOTE, // 48
+        KEY_UNKNOWN, // 49
+        KEY_UNKNOWN, // 50
+        KEY_BACKSLASH, // 51
+        KEY_Z, // 52
+        KEY_X, // 53
+        KEY_C, // 54
+        KEY_V, // 55
+        KEY_B, // 56
+        KEY_N, // 57
+        KEY_M, // 58
+        KEY_COMMA, // 59
+        KEY_PERIOD, // 60
+        KEY_SLASH, // 61
+        KEY_UNKNOWN, // 62
+        KEY_UNKNOWN, // 63
+        KEY_UNKNOWN, // 64
+        KEY_SPACE, // 65
+        KEY_UNKNOWN, // 66
+        KEY_UNKNOWN, // 67
+        KEY_UNKNOWN, // 68
+        KEY_UNKNOWN, // 69
+        KEY_UNKNOWN, // 70
+        KEY_UNKNOWN, // 71
+        KEY_UNKNOWN, // 72
+        KEY_UNKNOWN, // 73
+        KEY_UNKNOWN, // 74
+        KEY_UNKNOWN, // 75
+        KEY_UNKNOWN, // 76
+        KEY_UNKNOWN, // 77
+        KEY_UNKNOWN, // 78
+        KEY_UNKNOWN, // 79
+        KEY_UNKNOWN, // 80
+        KEY_UNKNOWN, // 81
+        KEY_UNKNOWN, // 82
+        KEY_UNKNOWN, // 83
+        KEY_UNKNOWN, // 84
+        KEY_UNKNOWN, // 85
+        KEY_UNKNOWN, // 86
+        KEY_UNKNOWN, // 87
+        KEY_UNKNOWN, // 88
+        KEY_UNKNOWN, // 89
+        KEY_UNKNOWN, // 90
+        KEY_UNKNOWN, // 91
+        KEY_UNKNOWN, // 92
+        KEY_UNKNOWN, // 93
+        KEY_UNKNOWN, // 94
+        KEY_UNKNOWN, // 95
+        KEY_UNKNOWN, // 96
+        KEY_UNKNOWN, // 97
+        KEY_UNKNOWN, // 98
+        KEY_UNKNOWN, // 99
+        KEY_UNKNOWN, // 100
+        KEY_UNKNOWN, // 101
+        KEY_UNKNOWN, // 102
+        KEY_UNKNOWN, // 103
+        KEY_UNKNOWN, // 104
+        KEY_UNKNOWN, // 105
+        KEY_UNKNOWN, // 106
+        KEY_UNKNOWN, // 107
+        KEY_UNKNOWN, // 108
+        KEY_UNKNOWN, // 109
+        KEY_UNKNOWN, // 110
+        KEY_UNKNOWN, // 111
+        KEY_UNKNOWN, // 112
+        KEY_UNKNOWN, // 113
+        KEY_UNKNOWN, // 114
+        KEY_UNKNOWN, // 115
+        KEY_UNKNOWN, // 116
+        KEY_UNKNOWN, // 117
+        KEY_UNKNOWN, // 118
+        KEY_UNKNOWN, // 119
+        KEY_UNKNOWN, // 120
+        KEY_UNKNOWN, // 121
+        KEY_UNKNOWN, // 122
+        KEY_UNKNOWN, // 123
+        KEY_UNKNOWN, // 124
+        KEY_UNKNOWN, // 125
+        KEY_UNKNOWN, // 126
+        KEY_UNKNOWN, // 127
     };
 
-    u32 num_codes = sizeof(codes)/sizeof(Keycode);
+    u32 num_codes = sizeof(codes)/sizeof(Key);
 
     if ((u32)code > num_codes)
-        return KC_UNKNOWN;
+        return KEY_UNKNOWN;
 
     return codes[(u32)code];
 }
