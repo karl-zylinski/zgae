@@ -192,10 +192,10 @@ PhysicsRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass)
     return handle;
 }
 
-void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rbh, const Vec3& f)
+void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& f)
 {
     let w = get_resource(PhysicsResourceWorld, world);
-    let rb = w->rigidbodies + rbh;
+    let rb = get_rigidbody(w, rigidbody_handle);
     rb->velocity += f*(1/rb->mass);
 }
 
@@ -227,7 +227,7 @@ PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsRe
         w->objects = (PhysicsWorldObject*)memra_zero_added(w->objects, new_num * sizeof(PhysicsWorldObject), old_num * sizeof(PhysicsWorldObject));
         w->objects_num = new_num;
     }
-    PhysicsWorldObject* o = w->objects + handle_index(h);
+    let o = get_object(w, h);
     memzero(o, sizeof(PhysicsWorldObject));
     o->collider = collider;
     o->pos = pos;
@@ -237,10 +237,10 @@ PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsRe
     return h;
 }
 
-void physics_set_position(PhysicsResourceHandle world, PhysicsObjectHandle obj, const Vec3& pos, const Quat& rot)
+void physics_set_position(PhysicsResourceHandle world, PhysicsObjectHandle obj_handle, const Vec3& pos, const Quat& rot)
 {
     let w = get_resource(PhysicsResourceWorld, world);
-    let o = get_object(w, obj);
+    let o = get_object(w, obj_handle);
     o->pos = pos;
     o->rot = rot;
 }
