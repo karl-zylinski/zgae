@@ -1,0 +1,12 @@
+shader_stages = [
+    "shader_debug_draw_vertex.shader"
+    "shader_debug_draw_fragment.shader"
+]
+
+vertex_input = [
+    {
+        name = "position"
+        type = "vec3"
+        value = "position"
+    }
+]

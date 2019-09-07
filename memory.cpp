@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "debug.h"
+#include "log.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

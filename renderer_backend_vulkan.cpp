@@ -1,7 +1,7 @@
 #include "renderer_backend.h"
 #include <vulkan/vulkan.h>
 #include "memory.h"
-#include "debug.h"
+#include "log.h"
 #include <string.h>
 #include "mesh.h"
 #include "str.h"
@@ -86,6 +86,8 @@ struct RendererBackend
     VkCommandPool graphics_cmd_pool;
     VkCommandBuffer* graphics_cmd_buffers;
     u32 graphics_cmd_buffers_num;
+    VkCommandBuffer debug_cmd_buffer[MAX_FRAMES_IN_FLIGHT];
+    VkCommandBuffer* queued_command_buffers; // dynamic
     DepthBuffer depth_buffer;
     VkDescriptorPool descriptor_pool_uniform_buffer;
     VkRenderPass render_pass;
@@ -706,6 +708,14 @@ void renderer_backend_init(WindowType window_type, const GenericWindowInfo& wind
     res = vkAllocateCommandBuffers(device, &cbai, rbs.graphics_cmd_buffers);
     VERIFY_RES();
 
+    VkCommandBufferAllocateInfo debug_cbai = {};
+    debug_cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    debug_cbai.commandPool = rbs.graphics_cmd_pool;
+    debug_cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    debug_cbai.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
+    res = vkAllocateCommandBuffers(device, &debug_cbai, rbs.debug_cmd_buffer);
+    VERIFY_RES();
+
     info("Creating descriptor pools");
     VkDescriptorPoolSize dps[1];
     dps[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -960,7 +970,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
 
     for (u32 i = 0; i < push_constants_num; ++i)
     {
-        push_constants[i].stageFlags = vk_shader_stage_from_shader_type(push_constants_shader_types[i]);
+        push_constants[i].stageFlags =  vk_shader_stage_from_shader_type(push_constants_shader_types[i]);
         push_constants[i].offset = 0;
         push_constants[i].size = push_constants_sizes[i];
     }
@@ -974,8 +984,6 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
 
     res = vkCreatePipelineLayout(rbs.device, &plci, NULL, &pipeline->layout);
     VERIFY_RES();
-
-    memf(push_constants);
 
     // Set which topology we want
     VkPipelineInputAssemblyStateCreateInfo piasci = {};
@@ -1106,6 +1114,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
 
     memf(viad);
     memf(pssci);
+    memf(push_constants);
 
     return pipeline;
 }
@@ -1400,8 +1409,6 @@ void renderer_backend_wait_until_idle()
 
 void renderer_backend_surface_resized(u32 width, u32 height)
 {
-    (void)width;
-    (void)height;
     info("Render backend resizing to %d x %d", width, height);
     recreate_surface_size_dependent_resources();
 }
@@ -1409,4 +1416,107 @@ void renderer_backend_surface_resized(u32 width, u32 height)
 Vec2u renderer_backend_get_size()
 {
     return rbs.swapchain_size;
+}
+
+void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, const Vec3* vertices, u32 vertices_num, const Color& c, const Mat4& view_projection)
+{
+    error("SHIT");
+    (void)c;
+    VkResult res;
+    VkBuffer vertex_buffer;
+    VkDeviceMemory vertex_buffer_memory;
+
+    VkBufferCreateInfo vertex_bci = {};
+    vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    vertex_bci.size = sizeof(Vec3) * vertices_num;
+    vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    res = vkCreateBuffer(rbs.device, &vertex_bci, NULL, &vertex_buffer);
+    VERIFY_RES();
+
+    VkMemoryRequirements vertex_buffer_mr;
+    vkGetBufferMemoryRequirements(rbs.device, vertex_buffer, &vertex_buffer_mr);
+    VkMemoryAllocateInfo vertex_buffer_mai = {};
+    vertex_buffer_mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    vertex_buffer_mai.allocationSize = vertex_buffer_mr.size;
+    vertex_buffer_mai.memoryTypeIndex = memory_type_from_properties(vertex_buffer_mr.memoryTypeBits, &rbs.gpu_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    check(vertex_buffer_mai.memoryTypeIndex != (u32)-1, "Couldn't find memory of correct type.");
+
+    res = vkAllocateMemory(rbs.device, &vertex_buffer_mai, NULL, &vertex_buffer_memory);
+    VERIFY_RES();
+
+    u8* vertex_buffer_memory_data;
+    res = vkMapMemory(rbs.device, vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
+    VERIFY_RES();
+
+    memcpy(vertex_buffer_memory_data, vertices, sizeof(Vec3) * vertices_num);
+
+    vkUnmapMemory(rbs.device, vertex_buffer_memory);
+
+    res = vkBindBufferMemory(rbs.device, vertex_buffer, vertex_buffer_memory, 0);
+    VERIFY_RES();
+
+    
+    u32 cf = rbs.current_frame;
+    VkCommandBufferBeginInfo cbbi = {};
+    cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    VkCommandBuffer cmd = rbs.debug_cmd_buffer[cf];
+    res = vkBeginCommandBuffer(cmd, &cbbi);
+    VERIFY_RES();
+
+    SwapchainBuffer* scb = &rbs.swapchain_buffers[cf];
+
+    VkRenderPassBeginInfo rpbi = {};
+    rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    rpbi.renderPass = rbs.render_pass;
+    rpbi.framebuffer = scb->framebuffer;
+    rpbi.renderArea.extent.width = rbs.swapchain_size.x;
+    rpbi.renderArea.extent.height = rbs.swapchain_size.y;
+    rpbi.clearValueCount = 0;
+    vkCmdBeginRenderPass(cmd, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, debug_pipeline->vk_handle);
+
+    if (debug_pipeline->constant_buffers_num)
+    {
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, debug_pipeline->layout, 0, debug_pipeline->constant_buffers_num,
+                                debug_pipeline->constant_buffer_descriptor_sets[cf], 0, NULL);
+    }
+
+    
+    vkCmdPushConstants(
+        cmd,
+        debug_pipeline->layout,
+        VK_SHADER_STAGE_VERTEX_BIT,
+        0,
+        sizeof(view_projection),
+        &view_projection);
+
+    VkDeviceSize offsets[1] = {0};
+    vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
+
+
+    VkViewport viewport = {};
+    viewport.width = rbs.swapchain_size.x;
+    viewport.height = rbs.swapchain_size.y;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    viewport.x = 0;
+    viewport.y = 0;
+    vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+
+    VkRect2D scissor = {};
+    scissor.extent.width = rbs.swapchain_size.x;
+    scissor.extent.height = rbs.swapchain_size.y;
+    scissor.offset.x = 0;
+    scissor.offset.y = 0;
+    vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+    vkCmdDraw(cmd, vertices_num, 1, 0, 0);
+
+    vkCmdEndRenderPass(cmd);
+    res = vkEndCommandBuffer(cmd);
+    VERIFY_RES();
 }

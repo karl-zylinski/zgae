@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "handle_pool.h"
 #include "dynamic_array.h"
-#include "debug.h"
+#include "log.h"
 #include "render_resource.h"
 #include "str.h"
 #include "handle_hash_map.h"
@@ -83,6 +83,7 @@ struct Renderer
     u32 resources_num;
     HandleHashMap* resource_name_to_handle;
     HandlePool* resource_handle_pool;
+    RenderResourceHandle debug_draw_pipeline;
 };
 
 static Renderer rs = {};
@@ -99,6 +100,7 @@ void renderer_init(WindowType window_type, const GenericWindowInfo& window_info)
         handle_pool_set_type(rs.resource_handle_pool, s, render_resource_type_names[s]);
     
     renderer_backend_init(window_type, window_info);
+    rs.debug_draw_pipeline = renderer_load_resource("pipeline_debug_draw.pipeline");
 }
 
 static void* get_resource_data(RenderResourceHandle h)
@@ -728,4 +730,16 @@ void renderer_surface_resized(u32 w, u32 h)
             reinit_resource(rr->handle);
     }
     renderer_backend_wait_until_idle();
+}
+
+void renderer_debug_draw_mesh(const Vec3* vertices, u32 vertices_num, const Color& c, const Vec3& cam_pos, const Quat& cam_rot)
+{
+    Mat4 camera_matrix = mat4_from_rotation_and_translation(cam_rot, cam_pos);
+    Mat4 view_matrix = inverse(camera_matrix);
+
+    Vec2u size = renderer_backend_get_size();
+    Mat4 proj_matrix = mat4_create_projection_matrix(size.x, size.y);
+    Mat4 vp_matrix = view_matrix * proj_matrix;
+
+    renderer_backend_debug_draw_mesh(get_resource(PipelineRenderResource, rs.debug_draw_pipeline)->backend_state, vertices, vertices_num, c, vp_matrix);
 }

@@ -2,6 +2,7 @@
 #include "keyboard.h"
 #include "time.h"
 #include "mouse.h"
+#include "debug.h"
 
 void Player::update()
 {
@@ -41,4 +42,5 @@ void Player::update()
     Vec3 local_sideways = rotate_vec3(yawq, {1, 0, 0});
     Quat pitchq = quat_from_axis_angle(local_sideways, this->pitch);
     this->camera.rot = pitchq * yawq;
+    debug_set_camera(this->camera);
 }

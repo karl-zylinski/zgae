@@ -1,6 +1,6 @@
 #include "math.h"
 #include <math.h>
-#include "debug.h"
+#include "log.h"
 
 Mat4 mat4_create_projection_matrix(f32 bb_width, f32 bb_height)
 {

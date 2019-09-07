@@ -4,6 +4,7 @@ fwd_handle(RenderResourceHandle);
 fwd_struct(Quat);
 fwd_struct(Vec3);
 fwd_struct(Mat4);
+fwd_struct(Color);
 typedef u32 RenderWorldObjectHandle;
 
 struct GenericWindowInfo
@@ -33,3 +34,4 @@ void renderer_present();
 void renderer_update_constant_buffer(RenderResourceHandle pipeline_handle, u32 binding, void* data, u32 data_size);
 void renderer_wait_for_new_frame();
 void renderer_surface_resized(u32 w, u32 h);
+void renderer_debug_draw_mesh(const Vec3* vertices, u32 vertices_num, const Color& c, const Vec3& cam_pos, const Quat& cam_rot);

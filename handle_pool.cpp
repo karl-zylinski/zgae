@@ -1,5 +1,5 @@
 #include "handle_pool.h"
-#include "debug.h"
+#include "log.h"
 #include "dynamic_array.h"
 #include "str.h"
 #include "memory.h"

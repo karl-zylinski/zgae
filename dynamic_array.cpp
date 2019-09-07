@@ -1,6 +1,6 @@
 #include "dynamic_array.h"
 #include "memory.h"
-#include "debug.h"
+#include "log.h"
 #include <string.h>
 
 DynamicArrayHeader* da__header(void* a)

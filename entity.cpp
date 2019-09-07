@@ -1,5 +1,5 @@
 #include "entity.h"
-#include "debug.h"
+#include "log.h"
 #include "world.h"
 
 Entity entity_create(

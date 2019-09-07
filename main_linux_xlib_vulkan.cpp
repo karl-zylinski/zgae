@@ -1,5 +1,5 @@
 #include <X11/Xlib.h>
-#include "debug.h"
+#include "log.h"
 #include "memory.h"
 #include "time.h"
 #include <time.h>

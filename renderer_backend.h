@@ -37,3 +37,5 @@ void renderer_backend_wait_for_new_frame();
 void renderer_backend_wait_until_idle();
 void renderer_backend_surface_resized(u32 width, u32 height);
 Vec2u renderer_backend_get_size();
+
+void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, const Vec3* vertices, u32 vertices_num, const Color& c, const Mat4& view_projection);

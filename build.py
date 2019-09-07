@@ -6,6 +6,7 @@ from datetime import datetime
 
 all_files = os.listdir(".")
 to_compile = []
+shaders = []
 
 entry_files = ["main_linux_xlib_vulkan.cpp", "tests.cpp"]
 
@@ -15,6 +16,9 @@ for f in all_files:
 
     if f.endswith(".cpp") and f not in entry_files:
         to_compile.append(f)
+
+    if f.endswith(".glsl"):
+        shaders.append(f)
 
 output = "zgae"
 
@@ -81,15 +85,13 @@ print("Total dt: %f s" % (total_dt.seconds + total_dt.microseconds/1000000.0))
 if stop_on_error and linker_error != 0:
     exit("\nbuild.py exited: linker error")
 
-shader_error = os.WEXITSTATUS(os.system("glslc -fshader-stage=frag shader_default_fragment.glsl -o shader_default_fragment.spv"))
+for s in shaders:
+    t = "frag" if ("frag" in s) else "vertex"
+    name_in = s
+    name_out = s[0:-5] + ".spv"
+    shader_error = os.WEXITSTATUS(os.system("glslc -fshader-stage=%s %s -o %s" % (t, name_in, name_out)))
 
-if shader_error != 0:
-    exit("\nfragment shader didn't compile")
-
-shader_error = os.WEXITSTATUS(os.system("glslc -fshader-stage=vertex shader_default_vertex.glsl -o shader_default_vertex.spv"))
-
-if shader_error != 0:
-    exit("\nfragment shader didn't compile")
-
+    if shader_error != 0:
+        exit("\n%s didn't compile" % name_in)
 
 

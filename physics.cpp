@@ -3,7 +3,7 @@
 #include "handle_hash_map.h"
 #include "handle_pool.h"
 #include "str.h"
-#include "debug.h"
+#include "log.h"
 #include "handle.h"
 #include "path.h"
 #include "time.h"

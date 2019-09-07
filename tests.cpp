@@ -1,6 +1,6 @@
 #include <assert.h>
 #include "handle_pool.h"
-#include "debug.h"
+#include "log.h"
 #include "memory.h"
 #include "dynamic_array.h"
 #include <execinfo.h>

@@ -3,7 +3,7 @@
 #include "handle.h"
 #include "memory.h"
 #include "entity.h"
-#include "debug.h"
+#include "log.h"
 
 static const u32 handle_type = 1;
 

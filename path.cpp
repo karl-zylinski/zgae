@@ -1,5 +1,5 @@
 #include "path.h"
-#include "debug.h"
+#include "log.h"
 
 const char* path_ext(const char* p)
 {
