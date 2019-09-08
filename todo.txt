@@ -1,5 +1,9 @@
 ### IMPORTANT ###
 
+- make a cmd pool per frame in flight and round robin those, clear each pool at start of frame --- https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkFreeCommandBuffers.html
+
+- make a renderpass for clearing, and fire it as the frame begins, then use OP_LOAD on the other passes
+
 - stop using strings, keep only hashes!
 
 - fix the handle mess... kind of fixed... but if i dont use scripting, do i really need all these indrection? maybe only for renderer? hm. thinkaboutittt. what about entities in list that is re-created?

@@ -99,11 +99,6 @@ void Entity::add_force(const Vec3& f)
     physics_add_force(e->world->physics_world, e->physics_rigidbody, f);
 }
 
-EntityInt* Entity::deref()
-{
-    return get_internal();
-}
-
 RenderWorldObjectHandle Entity::get_render_object() const
 {
     return get_internal()->render_object;

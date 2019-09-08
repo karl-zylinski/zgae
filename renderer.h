@@ -28,10 +28,8 @@ void renderer_world_set_position_and_rotation(RenderResourceHandle world, Render
 RenderResourceHandle renderer_load_resource(const char* filename);
 void renderer_begin_frame(RenderResourceHandle pipeline_handle);
 void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, const Vec3& cam_pos, const Quat& cam_rot);
-void renderer_end_frame();
 void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, const Mat4& model, const Vec3& cam_pos, const Quat& cam_rot);
 void renderer_present();
 void renderer_update_constant_buffer(RenderResourceHandle pipeline_handle, u32 binding, void* data, u32 data_size);
-void renderer_wait_for_new_frame();
 void renderer_surface_resized(u32 w, u32 h);
 void renderer_debug_draw_mesh(const Vec3* vertices, u32 vertices_num, const Color& c, const Vec3& cam_pos, const Quat& cam_rot);

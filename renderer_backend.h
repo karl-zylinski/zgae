@@ -27,13 +27,11 @@ void renderer_backend_destroy_shader(RenderBackendShader* s);
 void renderer_backend_destroy_pipeline(RenderBackendPipeline* p);
 void renderer_backend_destroy_mesh(RenderBackendMesh* g);
 
-void renderer_backend_begin_frame(RenderBackendPipeline* pipeline);
+void renderer_backend_begin_frame();
 void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* mesh, const Mat4& mvp, const Mat4& model);
-void renderer_backend_end_frame();
 void renderer_backend_present();
 
 void renderer_backend_update_constant_buffer(const RenderBackendPipeline& pipeline, u32 binding, const void* data, u32 data_size, u32 offset);
-void renderer_backend_wait_for_new_frame();
 void renderer_backend_wait_until_idle();
 void renderer_backend_surface_resized(u32 width, u32 height);
 Vec2u renderer_backend_get_size();

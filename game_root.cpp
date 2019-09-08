@@ -91,16 +91,15 @@ bool game_update()
     gs.player.update();
 
 
-    Vec3 dbg_test[] = {
+/*    Vec3 dbg_test[] = {
         {-1, 4, 1},   {1, 4, -1}, {1, 4, 1}
     };
 
     Camera dbg_cam = debug_get_camera();
-    renderer_debug_draw_mesh(dbg_test, 3, {1,1,1,1}, dbg_cam.pos, dbg_cam.rot);
+    renderer_debug_draw_mesh(dbg_test, 3, {1,1,1,1}, dbg_cam.pos, dbg_cam.rot);*/
 
     renderer_begin_frame(gs.pipeline);
     renderer_draw_world(gs.pipeline, gs.world->render_world, gs.player.camera.pos, gs.player.camera.rot);
-    renderer_end_frame();
     renderer_present();
     keyboard_end_of_frame();
     mouse_end_of_frame();

@@ -117,8 +117,6 @@ int main()
         last_frame_time = cur_time;
         set_frame_timers(dt, since_start);
 
-        renderer_wait_for_new_frame();
-
         while (XPending(display) > 0) {
             XNextEvent(display, &evt);
 

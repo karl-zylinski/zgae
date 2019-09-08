@@ -669,7 +669,7 @@ void renderer_begin_frame(RenderResourceHandle pipeline_handle)
     //
     //populate_constant_buffers(*pipeline, model, mvp_matrix);
 
-    renderer_backend_begin_frame(pipeline->backend_state);
+    renderer_backend_begin_frame();
 }
 
 void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, const Mat4& model, const Vec3& cam_pos, const Quat& cam_rot)
@@ -686,10 +686,6 @@ void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle me
     renderer_backend_draw(pipeline->backend_state, get_resource(MeshRenderResource, mesh_handle)->backend_state, mvp_matrix, model);
 }
 
-void renderer_end_frame()
-{
-    renderer_backend_end_frame();
-}
 
 void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, const Vec3& cam_pos, const Quat& cam_rot)
 {
@@ -709,11 +705,6 @@ void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderResourceHan
 void renderer_present()
 {
     renderer_backend_present();
-}
-
-void renderer_wait_for_new_frame()
-{
-    renderer_backend_wait_for_new_frame();
 }
 
 void renderer_surface_resized(u32 w, u32 h)

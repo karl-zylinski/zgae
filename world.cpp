@@ -45,19 +45,18 @@ void World::destroy_entity(WorldEntityHandle weh)
 WorldEntityHandle World::create_entity(const Vec3& pos, const Quat& rot)
 {
     WorldEntityHandle h = handle_pool_borrow(this->entity_handle_pool, handle_type);
-
     u32 num_needed_entities = handle_index(h) + 1;
     if (num_needed_entities > this->entities_num)
     {
-        this->entities = (EntityInt*)memra_zero_added(this->entities, num_needed_entities * sizeof(EntityInt), this->entities_num * sizeof(EntityInt));
+        this->entities = (EntityInt*)memra(this->entities, num_needed_entities * sizeof(EntityInt));
         this->entities_num = num_needed_entities;
     }
-    let e = this->entities + handle_index(h);
-    memzero(e, sizeof(EntityInt));
-    e->pos = pos;
-    e->rot = rot;
-    e->world = this;
-    e->handle = h;
+    this->entities[handle_index(h)] = {
+        .pos = pos,
+        .rot = rot,
+        .world = this,
+        .handle = h
+    };
     return h;
 }
 

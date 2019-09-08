@@ -29,7 +29,6 @@ struct Entity
     void add_force(const Vec3& f);
     RenderWorldObjectHandle get_render_object() const;
     PhysicsObjectHandle get_physics_object() const;
-    EntityInt* deref();
 
     World* world;
     WorldEntityHandle handle;
