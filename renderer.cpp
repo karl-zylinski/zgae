@@ -686,7 +686,6 @@ void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle me
     renderer_backend_draw(pipeline->backend_state, get_resource(MeshRenderResource, mesh_handle)->backend_state, mvp_matrix, model);
 }
 
-
 void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, const Vec3& cam_pos, const Quat& cam_rot)
 {
     WorldRenderResource* w = get_resource(WorldRenderResource, world_handle);

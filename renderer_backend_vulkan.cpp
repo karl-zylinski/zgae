@@ -91,7 +91,6 @@ struct RendererBackend
     DepthBuffer depth_buffer;
     VkDescriptorPool descriptor_pool_uniform_buffer;
     VkRenderPass draw_render_pass;
-    VkRenderPass clear_render_pass;
 };
 
 static RendererBackend rbs = {};
@@ -194,7 +193,7 @@ static void create_swapchain(
     scci.oldSwapchain = *out_current_swapchain;
     scci.clipped = 1;
     scci.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-    scci.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    scci.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     scci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     u32 queue_family_indicies[] = {graphics_queue_family_idx, present_queue_family_idx};
@@ -302,7 +301,7 @@ static void create_depth_buffer(DepthBuffer* out_depth_buffer, VkDevice device, 
 
     depth_ici.samples = NUM_SAMPLES;
     depth_ici.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depth_ici.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    depth_ici.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |  VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     depth_ici.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     VkResult res;
@@ -362,9 +361,7 @@ static void destroy_surface_size_dependent_resources()
     destroy_swapchain();
 
     vkDestroyRenderPass(rbs.device, rbs.draw_render_pass, NULL);
-    vkDestroyRenderPass(rbs.device, rbs.clear_render_pass, NULL);
     rbs.draw_render_pass = NULL;
-    rbs.clear_render_pass = NULL;
 
     destroy_depth_buffer(rbs.device, &rbs.depth_buffer);
 }
@@ -386,7 +383,7 @@ static void create_surface_size_dependent_resources()
         memzero(attachments, sizeof(VkAttachmentDescription) * 2);
         attachments[0].format = rbs.surface_format;
         attachments[0].samples = NUM_SAMPLES;
-        attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -395,7 +392,7 @@ static void create_surface_size_dependent_resources()
 
         attachments[1].format = rbs.depth_buffer.format;
         attachments[1].samples = NUM_SAMPLES;
-        attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -424,53 +421,6 @@ static void create_surface_size_dependent_resources()
         rpci.pSubpasses = &subpass;
 
         res = vkCreateRenderPass(rbs.device, &rpci, NULL, &rbs.draw_render_pass);
-        VERIFY_RES();
-    }
-
-    {
-        info("Creating clear render pass");
-        VkAttachmentDescription attachments[2];
-        memzero(attachments, sizeof(VkAttachmentDescription) * 2);
-        attachments[0].format = rbs.surface_format;
-        attachments[0].samples = NUM_SAMPLES;
-        attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        attachments[1].format = rbs.depth_buffer.format;
-        attachments[1].samples = NUM_SAMPLES;
-        attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentReference color_reference = {};
-        color_reference.attachment = 0;
-        color_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentReference depth_reference = {};
-        depth_reference.attachment = 1;
-        depth_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpass = {};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &color_reference;
-        subpass.pDepthStencilAttachment = &depth_reference;
-
-        VkRenderPassCreateInfo rpci = {};
-        rpci.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        rpci.attachmentCount = 2;
-        rpci.pAttachments = attachments;
-        rpci.subpassCount = 1;
-        rpci.pSubpasses = &subpass;
-
-        res = vkCreateRenderPass(rbs.device, &rpci, NULL, &rbs.clear_render_pass);
         VERIFY_RES();
     }
 
@@ -1321,6 +1271,7 @@ void renderer_backend_begin_frame()
 
     {
         let cmd = get_new_command_buffer();
+
         VkCommandBufferBeginInfo cbbi = {};
         cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         res = vkBeginCommandBuffer(cmd, &cbbi);
@@ -1328,41 +1279,44 @@ void renderer_backend_begin_frame()
 
         SwapchainBuffer* scb = &rbs.swapchain_buffers[cf];
 
-        VkClearValue clear_values[2];
-        clear_values[0].color.float32[0] = 0.0f;
-        clear_values[0].color.float32[1] = 0.0f;
-        clear_values[0].color.float32[2] = 0.0f;
-        clear_values[0].color.float32[3] = 1.0f;
-        clear_values[1].depthStencil.depth = 1.0f;
-        clear_values[1].depthStencil.stencil = 0;
-
-        VkRenderPassBeginInfo rpbi = {};
-        rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        rpbi.renderPass = rbs.clear_render_pass;
-        rpbi.framebuffer = scb->framebuffer;
-        rpbi.renderArea.extent.width = rbs.swapchain_size.x;
-        rpbi.renderArea.extent.height = rbs.swapchain_size.y;
-        rpbi.clearValueCount = 2;
-        rpbi.pClearValues = clear_values;
-        vkCmdBeginRenderPass(cmd, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
-
-        VkImageSubresourceRange isr = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .layerCount = 1,
-            .levelCount = 1
+        VkImageMemoryBarrier clear_color_layout_barrier = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .srcQueueFamilyIndex = rbs.graphics_queue_family_idx,
+            .dstQueueFamilyIndex = rbs.graphics_queue_family_idx,
+            .image = scb->image,
+            .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .subresourceRange.layerCount = 1,
+            .subresourceRange.levelCount= 1
         };
 
-        VkImageSubresourceRange d_isr = {
-            .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT,
-            .layerCount = 1,
-            .levelCount = 1
+
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &clear_color_layout_barrier);
+
+        VkClearColorValue color_clear = { .float32[3] = 1.0f };
+        vkCmdClearColorImage(cmd, scb->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &color_clear, 1, &clear_color_layout_barrier.subresourceRange);
+
+        VkClearDepthStencilValue ds_clear = { .depth = 1.0f };
+
+        VkImageMemoryBarrier clear_ds_layout_barrier = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .srcQueueFamilyIndex = rbs.graphics_queue_family_idx,
+            .dstQueueFamilyIndex = rbs.graphics_queue_family_idx,
+            .image = rbs.depth_buffer.image,
+            .subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+            .subresourceRange.layerCount = 1,
+            .subresourceRange.levelCount= 1
         };
 
-        vkCmdClearColorImage(cmd, scb->image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, &clear_values[0].color, 1, &isr);
-        vkCmdClearDepthStencilImage(cmd, scb->image, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, &clear_values[1].depthStencil, 1, &d_isr);
-        vkCmdEndRenderPass(cmd);
-        res = vkEndCommandBuffer(cmd);
-        VERIFY_RES();
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &clear_ds_layout_barrier);
+        vkCmdClearDepthStencilImage(cmd, rbs.depth_buffer.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &ds_clear, 1, &clear_ds_layout_barrier.subresourceRange);
 
         VkSubmitInfo si = {}; // can be mupltiple!!
         si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1372,6 +1326,9 @@ void renderer_backend_begin_frame()
         si.pWaitDstStageMask = &psf;
         si.commandBufferCount = 1;
         si.pCommandBuffers = &cmd;
+
+        res = vkEndCommandBuffer(cmd);
+        VERIFY_RES();
 
         res = vkQueueSubmit(rbs.graphics_queue, 1, &si, VK_NULL_HANDLE);
         VERIFY_RES();
@@ -1460,14 +1417,10 @@ void renderer_backend_present()
     VkResult res;
     u32 cf = rbs.current_frame;
 
-    let cmd = get_new_command_buffer();
-
     VkSubmitInfo si = {}; // can be mupltiple!!
     si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     si.pSignalSemaphores = &rbs.render_finished_semaphores[cf];
     si.signalSemaphoreCount = 1;
-    si.commandBufferCount = 1;
-    si.pCommandBuffers = &cmd;
 
     vkResetFences(rbs.device, 1, &rbs.image_in_flight_fences[cf]);
     res = vkQueueSubmit(rbs.graphics_queue, 1, &si, rbs.image_in_flight_fences[cf]);
