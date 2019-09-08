@@ -232,19 +232,19 @@ bool almost_eql(f32 f1, f32 f2, f32 thres)
     return fabs(f2 - f1) < thres;
 }
 
-bool almost_eql(const Vec2& v1, const Vec2& v2)
+bool almost_eql(const Vec2& v1, const Vec2& v2, f32 thres)
 {
-    return almost_eql(v1.x, v2.x) && almost_eql(v1.y, v2.y);
+    return almost_eql(v1.x, v2.x, thres) && almost_eql(v1.y, v2.y, thres);
 }
 
-bool almost_eql(const Vec3& v1, const Vec3& v2)
+bool almost_eql(const Vec3& v1, const Vec3& v2, f32 thres)
 {
-    return almost_eql(v1.x, v2.x) && almost_eql(v1.y, v2.y) && almost_eql(v1.z, v2.z);
+    return almost_eql(v1.x, v2.x, thres) && almost_eql(v1.y, v2.y, thres) && almost_eql(v1.z, v2.z, thres);
 }
 
-bool almost_eql(const Vec4& v1, const Vec4& v2)
+bool almost_eql(const Vec4& v1, const Vec4& v2, f32 thres)
 {
-    return almost_eql(v1.x, v2.x) && almost_eql(v1.y, v2.y) && almost_eql(v1.z, v2.z) && almost_eql(v1.w, v2.w);
+    return almost_eql(v1.x, v2.x, thres) && almost_eql(v1.y, v2.y, thres) && almost_eql(v1.z, v2.z, thres) && almost_eql(v1.w, v2.w, thres);
 }
 
 Quat quat_identity()

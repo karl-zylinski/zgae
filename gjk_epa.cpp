@@ -224,12 +224,12 @@ static EpaFace* find_closest_face(EpaFace* faces)
 {
     EpaFace* closest = faces;
     closest->distance = dot(closest->normal, closest->vertices[0].val);
-    check(closest->distance >= 0, "EPA Face has wrong winding");
+    check(closest->distance > TINY_NUMBER, "EPA Face has wrong winding");
     for (unsigned i = 1; i < da_num(faces); ++i)
     {
         EpaFace* f = faces + i;
         float d = dot(f->normal, f->vertices[0].val);
-        check(d >= 0, "EPA Face has wrong winding");
+        check(d > TINY_NUMBER, "EPA Face has wrong winding");
         if (d < closest->distance)
         {
             f->distance = d;
@@ -251,7 +251,7 @@ static void add_face(EpaFace*& faces, const SupportDiffPoint& A, const SupportDi
     f.vertices[1] = A;
     f.vertices[2] = C;
 
-    if (almost_eql(ABC, vec3_zero))
+    if (almost_eql(ABC, vec3_zero, TINY_NUMBER))
     {
         f.vertices[0].val = vec3_zero;
         f.vertices[1].val = vec3_zero;

@@ -4,7 +4,7 @@
 
 - fix the handle mess... kind of fixed... but if i dont use scripting, do i really need all these indrection? maybe only for renderer? hm. thinkaboutittt. what about entities in list that is re-created?
 
-- find contact point in collions and add force at point (should rotate around center of mass then)
+- do... the physicsp properly
 
 ### LESS IMPORTANT ###
 

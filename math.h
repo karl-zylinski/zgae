@@ -73,9 +73,9 @@ Vec3 project(const Vec3& v, const Vec3& on);
 
 #define ALMOST_EQL_DEF_THRESHOLD 0.000001f
 bool almost_eql(f32 f1, f32 f2, f32 thres = ALMOST_EQL_DEF_THRESHOLD);
-bool almost_eql(const Vec2& v1, const Vec2& v2);
-bool almost_eql(const Vec3& v1, const Vec3& v2);
-bool almost_eql(const Vec4& v1, const Vec4& v2);
+bool almost_eql(const Vec2& v1, const Vec2& v2, f32 thres = ALMOST_EQL_DEF_THRESHOLD);
+bool almost_eql(const Vec3& v1, const Vec3& v2, f32 thres = ALMOST_EQL_DEF_THRESHOLD);
+bool almost_eql(const Vec4& v1, const Vec4& v2, f32 thres = ALMOST_EQL_DEF_THRESHOLD);
 
 Quat quat_identity();
 Quat operator*(const Quat& a, const Quat& b);

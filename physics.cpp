@@ -18,6 +18,7 @@
 #include "debug.h"
 #include "camera.h"
 #include <string.h>
+#include <math.h>
 
 struct PhysicsResource
 {
@@ -68,7 +69,7 @@ struct Rigidbody
     Vec3 angular_velocity;
     f32 mass;
     Entity entity;
-    #define RECENT_COLLISIONS_NUM 1
+    #define RECENT_COLLISIONS_NUM 2
     RecentCollision recent_collisions[RECENT_COLLISIONS_NUM];
 };
 
@@ -189,7 +190,7 @@ PhysicsRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass)
     if (num_needed_rigidbodies > w->rigidbodies_num)
     {
         let new_num = num_needed_rigidbodies ? num_needed_rigidbodies * 2 : 1;
-        w->rigidbodies = (Rigidbody*)memra(w->rigidbodies, new_num * sizeof(Rigidbody));
+        w->rigidbodies = (Rigidbody*)memra_zero_added(w->rigidbodies, new_num * sizeof(Rigidbody), w->rigidbodies_num * sizeof(Rigidbody));
         w->rigidbodies_num = new_num;
     }
     Rigidbody* r = w->rigidbodies + handle_index(handle);
@@ -217,7 +218,7 @@ void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigi
 
     let arm = point - pivot;
     let larm = len(arm);
-    rb->angular_velocity += cross(arm, force) * (1/(larm * larm * rb->mass)) * time_dt() * 50;
+    rb->angular_velocity += cross(arm, force) * (1/(larm * larm * rb->mass)) * time_dt() * 100;
 }
 
 PhysicsResourceHandle physics_create_collider(PhysicsResourceHandle mesh)
@@ -338,7 +339,6 @@ void physics_update_world(PhysicsResourceHandle world)
                     ++avg_num_points;
                 }
 
-
                 let n = normalize(coll.solution);
                 avg_contact_point *= (1.0f/avg_num_points);
                 memmove(rb->recent_collisions + 1, rb->recent_collisions, sizeof(RecentCollision) * (RECENT_COLLISIONS_NUM - 1));
@@ -348,8 +348,8 @@ void physics_update_world(PhysicsResourceHandle world)
                 rb->entity.move(coll.solution);
 
                 let tangetial_contact_speed = cross(rb->angular_velocity, (coll.contact_point - wo->pos));
-                let surface_rot_friction = dot(tangetial_contact_speed, n);
-                rb->angular_velocity += rb->angular_velocity * surface_rot_friction * dt;
+                let surface_rot_friction = fabs(dot(tangetial_contact_speed, n));
+                rb->angular_velocity -= rb->angular_velocity * surface_rot_friction * 0.5;
 
                 Vec3 dbg_pts[] = {avg_contact_point, wo->pos, wo->pos + rb->mass*g};
                 Vec4 dbg_colors[] = {vec4_red, vec4_green, vec4_red};
