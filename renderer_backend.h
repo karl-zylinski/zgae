@@ -27,7 +27,7 @@ void renderer_backend_destroy_shader(RenderBackendShader* s);
 void renderer_backend_destroy_pipeline(RenderBackendPipeline* p);
 void renderer_backend_destroy_mesh(RenderBackendMesh* g);
 
-void renderer_backend_begin_frame();
+void renderer_backend_begin_frame(RenderBackendPipeline* pipeline);
 void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* mesh, const Mat4& mvp, const Mat4& model);
 void renderer_backend_present();
 

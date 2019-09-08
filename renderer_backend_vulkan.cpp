@@ -88,6 +88,7 @@ struct RendererBackend
     VkCommandBuffer* command_buffers[MAX_FRAMES_IN_FLIGHT]; // MAX_FRAMES_IN_FLIGHT dynamic lists
     u32 command_buffers_recycled[MAX_FRAMES_IN_FLIGHT]; // for picking command buffesrs out of command_buffer[current_frame_idx]. Set to zero when new frame starts.
     u32 image_index[MAX_FRAMES_IN_FLIGHT]; // index of vulkan image, used in present etc
+    VkCommandBuffer current_frame_cmd;
     DepthBuffer depth_buffer;
     VkDescriptorPool descriptor_pool_uniform_buffer;
     VkRenderPass draw_render_pass;
@@ -383,20 +384,20 @@ static void create_surface_size_dependent_resources()
         memzero(attachments, sizeof(VkAttachmentDescription) * 2);
         attachments[0].format = rbs.surface_format;
         attachments[0].samples = NUM_SAMPLES;
-        attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
         attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachments[0].initialLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
         attachments[1].format = rbs.depth_buffer.format;
         attachments[1].samples = NUM_SAMPLES;
-        attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
         attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachments[1].initialLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentReference color_reference = {};
@@ -1252,7 +1253,7 @@ static VkCommandBuffer get_new_command_buffer()
     return b;
 }
 
-void renderer_backend_begin_frame()
+void renderer_backend_begin_frame(RenderBackendPipeline* pipeline)
 {
     VkResult res;
     let cf = rbs.current_frame;
@@ -1263,6 +1264,8 @@ void renderer_backend_begin_frame()
 
     if (res == VK_ERROR_OUT_OF_DATE_KHR)
         return; // Couldn't present due to out of date swapchain, waiting for window resize to propagate.
+
+    VERIFY_RES();
 
     // We are now sure that stuff for frame cf is not inuse, reset command buffers from that pool and put recycled counter to zero:
     res = vkResetCommandPool(rbs.device, rbs.graphics_cmd_pools[cf], VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
@@ -1293,10 +1296,10 @@ void renderer_backend_begin_frame()
             .subresourceRange.levelCount= 1
         };
 
-
         vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &clear_color_layout_barrier);
-
-        VkClearColorValue color_clear = { .float32[3] = 1.0f };
+        VkClearColorValue color_clear = {
+            { 0, 0, 0, 1.0f } // R, G, B, A
+        };
         vkCmdClearColorImage(cmd, scb->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &color_clear, 1, &clear_color_layout_barrier.subresourceRange);
 
         VkClearDepthStencilValue ds_clear = { .depth = 1.0f };
@@ -1322,7 +1325,7 @@ void renderer_backend_begin_frame()
         si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         si.pWaitSemaphores = &rbs.image_available_semaphores[cf];
         si.waitSemaphoreCount = 1;
-        VkPipelineStageFlags psf = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        VkPipelineStageFlags psf = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
         si.pWaitDstStageMask = &psf;
         si.commandBufferCount = 1;
         si.pCommandBuffers = &cmd;
@@ -1332,14 +1335,13 @@ void renderer_backend_begin_frame()
 
         res = vkQueueSubmit(rbs.graphics_queue, 1, &si, VK_NULL_HANDLE);
         VERIFY_RES();
-    }
-}
 
-void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* mesh, const Mat4& mvp, const Mat4& model)
-{
-    u32 cf = rbs.current_frame;
-    let cmd = get_new_command_buffer();
-    VkResult res;
+        renderer_backend_wait_until_idle();
+    }
+
+    check(rbs.current_frame_cmd == VK_NULL_HANDLE, "begin_frame called without previous frame having been presented");
+    rbs.current_frame_cmd = get_new_command_buffer();
+    let cmd = rbs.current_frame_cmd;
 
     VkCommandBufferBeginInfo cbbi = {};
     cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1363,6 +1365,12 @@ void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* m
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, 0, pipeline->constant_buffers_num,
                                 pipeline->constant_buffer_descriptor_sets[cf], 0, NULL);
     }
+}
+
+void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* mesh, const Mat4& mvp, const Mat4& model)
+{
+    check(rbs.current_frame_cmd != VK_NULL_HANDLE, "draw called without begin_frame having been called first");
+    let cmd = rbs.current_frame_cmd;
 
     Mat4 pc[2] = {mvp, model};
 
@@ -1379,7 +1387,6 @@ void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* m
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
     vkCmdBindIndexBuffer(cmd, mesh->index_buffer, 0, get_index_type(0));
 
-
     VkViewport viewport = {};
     viewport.width = rbs.swapchain_size.x;
     viewport.height = rbs.swapchain_size.y;
@@ -1389,7 +1396,6 @@ void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* m
     viewport.y = 0;
     vkCmdSetViewport(cmd, 0, 1, &viewport);
 
-
     VkRect2D scissor = {};
     scissor.extent.width = rbs.swapchain_size.x;
     scissor.extent.height = rbs.swapchain_size.y;
@@ -1398,6 +1404,15 @@ void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* m
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
     vkCmdDrawIndexed(cmd, mesh->indices_num, 1, 0, 0, 0);
+}
+
+void renderer_backend_present()
+{
+    VkResult res;
+    u32 cf = rbs.current_frame;
+
+    check(rbs.current_frame_cmd != VK_NULL_HANDLE, "present called without begin_frame having been called first");
+    let cmd = rbs.current_frame_cmd;
 
     vkCmdEndRenderPass(cmd);
     res = vkEndCommandBuffer(cmd);
@@ -1407,18 +1422,6 @@ void renderer_backend_draw(RenderBackendPipeline* pipeline, RenderBackendMesh* m
     si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     si.commandBufferCount = 1;
     si.pCommandBuffers = &cmd;
-
-    res = vkQueueSubmit(rbs.graphics_queue, 1, &si, VK_NULL_HANDLE);
-    VERIFY_RES();
-}
-
-void renderer_backend_present()
-{
-    VkResult res;
-    u32 cf = rbs.current_frame;
-
-    VkSubmitInfo si = {}; // can be mupltiple!!
-    si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     si.pSignalSemaphores = &rbs.render_finished_semaphores[cf];
     si.signalSemaphoreCount = 1;
 
@@ -1436,6 +1439,7 @@ void renderer_backend_present()
 
     vkQueuePresentKHR(rbs.present_queue, &pi);
     rbs.current_frame = (rbs.current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
+    rbs.current_frame_cmd = VK_NULL_HANDLE;
 }
 
 void renderer_backend_wait_until_idle()

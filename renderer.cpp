@@ -669,7 +669,7 @@ void renderer_begin_frame(RenderResourceHandle pipeline_handle)
     //
     //populate_constant_buffers(*pipeline, model, mvp_matrix);
 
-    renderer_backend_begin_frame();
+    renderer_backend_begin_frame(pipeline->backend_state);
 }
 
 void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle mesh_handle, const Mat4& model, const Vec3& cam_pos, const Quat& cam_rot)
