@@ -4,8 +4,10 @@
 fwd_enum(ShaderDataType);
 fwd_enum(ShaderType);
 fwd_enum(WindowType);
+fwd_enum(PrimitiveTopology);
 fwd_struct(GenericWindowInfo);
 fwd_struct(Mesh);
+fwd_struct(SimpleVertex);
 fwd_struct(RenderBackendMesh);
 fwd_struct(RenderBackendPipeline);
 fwd_struct(RenderBackendShader);
@@ -19,7 +21,8 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
     const RenderBackendShader* const* shader_stages, const ShaderType* shader_stages_types, u32 shader_stages_num,
     const ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
     const u32* constant_buffer_sizes, const u32* constant_buffer_binding_indices, u32 constant_buffers_num,
-    const u32* push_constant_sizes, const ShaderType* push_constant_shader_types, u32 push_contants_num);
+    const u32* push_constant_sizes, const ShaderType* push_constant_shader_types, u32 push_contants_num,
+    PrimitiveTopology pt);
 
 RenderBackendMesh* renderer_backend_create_mesh(Mesh* mesh);
 
@@ -36,4 +39,4 @@ void renderer_backend_wait_until_idle();
 void renderer_backend_surface_resized(u32 width, u32 height);
 Vec2u renderer_backend_get_size();
 
-void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, const Vec3* vertices, u32 vertices_num, const Color& c, const Mat4& view_projection);
+void renderer_backend_debug_draw_triangles(RenderBackendPipeline* debug_pipeline, const SimpleVertex* vertices, u32 vertices_num, const Mat4& view_projection);

@@ -1,6 +1,12 @@
 #pragma once
 #include "math.h"
 
+struct SimpleVertex
+{
+    Vec3 position;
+    Vec4 color;
+};
+
 struct MeshVertex
 {
     Vec3 position;

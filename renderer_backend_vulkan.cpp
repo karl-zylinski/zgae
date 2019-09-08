@@ -92,6 +92,8 @@ struct RendererBackend
     DepthBuffer depth_buffer;
     VkDescriptorPool descriptor_pool_uniform_buffer;
     VkRenderPass draw_render_pass;
+    VkBuffer* debug_vertex_buffers[MAX_FRAMES_IN_FLIGHT];
+    VkDeviceMemory* debug_vertex_buffers_memory[MAX_FRAMES_IN_FLIGHT];
 };
 
 static RendererBackend rbs = {};
@@ -388,7 +390,7 @@ static void create_surface_size_dependent_resources()
         attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[0].initialLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        attachments[0].initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
         attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
         attachments[1].format = rbs.depth_buffer.format;
@@ -397,7 +399,7 @@ static void create_surface_size_dependent_resources()
         attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[1].initialLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        attachments[1].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentReference color_reference = {};
@@ -761,6 +763,8 @@ void renderer_backend_destroy_mesh(RenderBackendMesh* g)
     memf(g);
 }
 
+static void destroy_debug_vertex_buffers(u32 frame_idx);
+
 void renderer_backend_shutdown()
 {
     info("Shutting down Vulkan render backend");
@@ -780,6 +784,8 @@ void renderer_backend_shutdown()
         vkFreeCommandBuffers(d, rbs.graphics_cmd_pools[i], da_num(rbs.command_buffers[i]), rbs.command_buffers[i]);
         da_free(rbs.command_buffers[i]);
         vkDestroyCommandPool(d, rbs.graphics_cmd_pools[i], NULL);
+
+        destroy_debug_vertex_buffers(i);
     }
 
     destroy_surface_size_dependent_resources();
@@ -833,11 +839,22 @@ static VkShaderStageFlagBits vk_shader_stage_from_shader_type(ShaderType t)
     error("Trying to get VkShaderStageFlagBits from ShaderType, but type isn't mapped.");
 }
 
+static VkPrimitiveTopology vk_primitive_topology_from_primitive_topology(PrimitiveTopology pt)
+{
+    switch(pt)
+    {
+        case PRIMITIVE_TOPOLOGY_TRIANGLE_LIST: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        case PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        default: error("Trying to get VkPrimitiveTopology from PrimitiveTopology, but type isn't mapped.");
+    }
+}
+
 RenderBackendPipeline* renderer_backend_create_pipeline(
     const RenderBackendShader* const* shader_stages, const ShaderType* shader_stages_types, u32 shader_stages_num,
     const ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
     const u32* constant_buffer_sizes, const u32* constant_buffer_binding_indices, u32 constant_buffers_num,
-    const u32* push_constants_sizes, const ShaderType* push_constants_shader_types, u32 push_constants_num)
+    const u32* push_constants_sizes, const ShaderType* push_constants_shader_types, u32 push_constants_num,
+    PrimitiveTopology pt)
 {
     RenderBackendPipeline* pipeline = mema_zero_t(RenderBackendPipeline);
     VkResult res;
@@ -963,7 +980,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
     VkPipelineInputAssemblyStateCreateInfo piasci = {};
     piasci.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     piasci.primitiveRestartEnable = VK_FALSE;
-    piasci.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    piasci.topology = vk_primitive_topology_from_primitive_topology(pt);
 
 
     // Rasteriser settings
@@ -1253,11 +1270,25 @@ static VkCommandBuffer get_new_command_buffer()
     return b;
 }
 
+static void destroy_debug_vertex_buffers(u32 frame_idx)
+{
+    check(da_num(rbs.debug_vertex_buffers[frame_idx]) == da_num(rbs.debug_vertex_buffers_memory[frame_idx]), "Mismatch between number of debug vertex buffers and their memory");
+    for (u32 i = 0; i < da_num(rbs.debug_vertex_buffers[frame_idx]); ++i)
+    {
+        vkDestroyBuffer(rbs.device, rbs.debug_vertex_buffers[frame_idx][i], NULL);
+        vkFreeMemory(rbs.device, rbs.debug_vertex_buffers_memory[frame_idx][i], NULL);
+    }
+    da_free(rbs.debug_vertex_buffers[frame_idx]);
+    da_free(rbs.debug_vertex_buffers_memory[frame_idx]);
+}
+
 void renderer_backend_begin_frame(RenderBackendPipeline* pipeline)
 {
     VkResult res;
     let cf = rbs.current_frame;
     vkWaitForFences(rbs.device, 1, &rbs.image_in_flight_fences[cf], VK_TRUE, UINT64_MAX);
+
+    destroy_debug_vertex_buffers(cf);
 
     u32 timeout = 100000000; // 0.1 s
     res = vkAcquireNextImageKHR(rbs.device, rbs.swapchain, timeout, rbs.image_available_semaphores[cf], VK_NULL_HANDLE, &rbs.image_index[cf]);
@@ -1302,6 +1333,21 @@ void renderer_backend_begin_frame(RenderBackendPipeline* pipeline)
         };
         vkCmdClearColorImage(cmd, scb->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &color_clear, 1, &clear_color_layout_barrier.subresourceRange);
 
+        VkImageMemoryBarrier clear_color_layout_barrier_to_optimal = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            .srcQueueFamilyIndex = rbs.graphics_queue_family_idx,
+            .dstQueueFamilyIndex = rbs.graphics_queue_family_idx,
+            .image = scb->image,
+            .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .subresourceRange.layerCount = 1,
+            .subresourceRange.levelCount= 1
+        };
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &clear_color_layout_barrier_to_optimal);
+
         VkClearDepthStencilValue ds_clear = { .depth = 1.0f };
 
         VkImageMemoryBarrier clear_ds_layout_barrier = {
@@ -1320,6 +1366,22 @@ void renderer_backend_begin_frame(RenderBackendPipeline* pipeline)
 
         vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &clear_ds_layout_barrier);
         vkCmdClearDepthStencilImage(cmd, rbs.depth_buffer.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &ds_clear, 1, &clear_ds_layout_barrier.subresourceRange);
+
+        VkImageMemoryBarrier clear_ds_layout_barrier_to_attachment = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+            .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+            .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            .srcQueueFamilyIndex = rbs.graphics_queue_family_idx,
+            .dstQueueFamilyIndex = rbs.graphics_queue_family_idx,
+            .image = rbs.depth_buffer.image,
+            .subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+            .subresourceRange.layerCount = 1,
+            .subresourceRange.levelCount= 1
+        };
+
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &clear_ds_layout_barrier_to_attachment);
 
         VkSubmitInfo si = {}; // can be mupltiple!!
         si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1420,8 +1482,8 @@ void renderer_backend_present()
 
     VkSubmitInfo si = {}; // can be mupltiple!!
     si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    si.commandBufferCount = 1;
-    si.pCommandBuffers = &cmd;
+    si.commandBufferCount = rbs.command_buffers_recycled[cf];
+    si.pCommandBuffers = rbs.command_buffers[cf];
     si.pSignalSemaphores = &rbs.render_finished_semaphores[cf];
     si.signalSemaphoreCount = 1;
 
@@ -1458,15 +1520,8 @@ Vec2u renderer_backend_get_size()
     return rbs.swapchain_size;
 }
 
-void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, const Vec3* vertices, u32 vertices_num, const Color& c, const Mat4& view_projection)
+void renderer_backend_debug_draw_triangles(RenderBackendPipeline* debug_pipeline, const SimpleVertex* vertices, u32 vertices_num, const Mat4& view_projection)
 {
-    (void)debug_pipeline;
-    (void)vertices;
-    (void)vertices_num;
-    (void)c;
-    (void)view_projection;
-    /*error("SHIT");
-    (void)c;
     VkResult res;
     VkBuffer vertex_buffer;
     VkDeviceMemory vertex_buffer_memory;
@@ -1474,7 +1529,7 @@ void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, con
     VkBufferCreateInfo vertex_bci = {};
     vertex_bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     vertex_bci.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    vertex_bci.size = sizeof(Vec3) * vertices_num;
+    vertex_bci.size = sizeof(SimpleVertex) * vertices_num;
     vertex_bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     res = vkCreateBuffer(rbs.device, &vertex_bci, NULL, &vertex_buffer);
@@ -1495,7 +1550,7 @@ void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, con
     res = vkMapMemory(rbs.device, vertex_buffer_memory, 0, vertex_buffer_mr.size, 0, (void**)&vertex_buffer_memory_data);
     VERIFY_RES();
 
-    memcpy(vertex_buffer_memory_data, vertices, sizeof(Vec3) * vertices_num);
+    memcpy(vertex_buffer_memory_data, vertices, sizeof(SimpleVertex) * vertices_num);
 
     vkUnmapMemory(rbs.device, vertex_buffer_memory);
 
@@ -1506,7 +1561,7 @@ void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, con
     u32 cf = rbs.current_frame;
     VkCommandBufferBeginInfo cbbi = {};
     cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    VkCommandBuffer cmd = rbs.debug_cmd_buffer[cf];
+    let cmd = get_new_command_buffer();
     res = vkBeginCommandBuffer(cmd, &cbbi);
     VERIFY_RES();
 
@@ -1514,7 +1569,7 @@ void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, con
 
     VkRenderPassBeginInfo rpbi = {};
     rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    rpbi.renderPass = rbs.render_pass;
+    rpbi.renderPass = rbs.draw_render_pass;
     rpbi.framebuffer = scb->framebuffer;
     rpbi.renderArea.extent.width = rbs.swapchain_size.x;
     rpbi.renderArea.extent.height = rbs.swapchain_size.y;
@@ -1563,5 +1618,8 @@ void renderer_backend_debug_draw_mesh(RenderBackendPipeline* debug_pipeline, con
 
     vkCmdEndRenderPass(cmd);
     res = vkEndCommandBuffer(cmd);
-    VERIFY_RES();*/
+    VERIFY_RES();
+
+    da_push(rbs.debug_vertex_buffers[cf], vertex_buffer);
+    da_push(rbs.debug_vertex_buffers_memory[cf], vertex_buffer_memory);
 }

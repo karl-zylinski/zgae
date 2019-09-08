@@ -27,12 +27,13 @@ void* da__grow_func(void* a, u32 min_num, u32 item_size)
     return ah + 1;
 }
 
-void da__destroy(void* a)
+void da__destroy(void** a)
 {
-    if (!a)
+    if (!(*a))
         return;
 
-    memf(da__header(a));
+    memf(da__header(*a));
+    *a = NULL;
 }
 
 void* da__copy_data(void* a, u32 num, u32 item_size)

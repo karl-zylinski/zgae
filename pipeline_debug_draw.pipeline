@@ -9,4 +9,11 @@ vertex_input = [
         type = "vec3"
         value = "position"
     }
+    {
+        name = "color"
+        type = "vec4"
+        value = "color"
+    }
 ]
+
+primitive_topology = "triangle_list"

@@ -25,3 +25,5 @@ vertex_input = [
         value = "texcoord"
     }
 ]
+
+primitive_topology = "triangle_list"

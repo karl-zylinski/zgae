@@ -65,4 +65,11 @@ struct ConstantBuffer
     u32 binding;
 };
 
+enum PrimitiveTopology : u32
+{
+    PRIMITIVE_TOPOLOGY_INVALID,
+    PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+    PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP
+};
+
 u32 shader_data_type_size(ShaderDataType t);
