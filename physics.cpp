@@ -17,6 +17,7 @@
 #include "render_resource.h"
 #include "debug.h"
 #include "camera.h"
+#include <string.h>
 
 struct PhysicsResource
 {
@@ -53,6 +54,12 @@ struct PhysicsWorldObject
     Quat rot;
 };
 
+struct RecentCollision
+{
+    f32 time;
+    Vec3 contact_point;
+};
+
 struct Rigidbody
 {
     bool used;
@@ -61,6 +68,8 @@ struct Rigidbody
     Vec3 angular_velocity;
     f32 mass;
     Entity entity;
+    #define RECENT_COLLISIONS_NUM 1
+    RecentCollision recent_collisions[RECENT_COLLISIONS_NUM];
 };
 
 struct PhysicsResourceWorld
@@ -179,9 +188,8 @@ PhysicsRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass)
     u32 num_needed_rigidbodies = handle_index(handle) + 1;
     if (num_needed_rigidbodies > w->rigidbodies_num)
     {
-        let old_num = w->rigidbodies_num;
         let new_num = num_needed_rigidbodies ? num_needed_rigidbodies * 2 : 1;
-        w->rigidbodies = (Rigidbody*)memra_zero_added(w->rigidbodies, new_num * sizeof(Rigidbody), old_num * sizeof(Rigidbody));
+        w->rigidbodies = (Rigidbody*)memra(w->rigidbodies, new_num * sizeof(Rigidbody));
         w->rigidbodies_num = new_num;
     }
     Rigidbody* r = w->rigidbodies + handle_index(handle);
@@ -197,17 +205,19 @@ void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigid
 {
     let w = get_resource(PhysicsResourceWorld, world);
     let rb = get_rigidbody(w, rigidbody_handle);
-    rb->velocity += f*(1/rb->mass);
+    rb->velocity += f*(1/rb->mass)*time_dt();
 }
 
-void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& point, const Vec3& dir, float mag)
+void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& pivot, const Vec3& point, const Vec3& force)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     let rb = get_rigidbody(w, rigidbody_handle);
-    let wo = get_object(w, rb->object_handle);
-    let center = wo->pos;
-    let dist = center - point;
-    rb->angular_velocity += cross(dist, dir * mag)* (1/rb->mass);
+
+    // add moment of inertia
+
+    let arm = point - pivot;
+    let larm = len(arm);
+    rb->angular_velocity += cross(arm, force) * (1/(larm * larm * rb->mass)) * time_dt() * 50;
 }
 
 PhysicsResourceHandle physics_create_collider(PhysicsResourceHandle mesh)
@@ -260,6 +270,7 @@ void physics_update_world(PhysicsResourceHandle world)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     float dt = time_dt();
+    float t = time_since_start();
 
     for (u32 rigidbody_idx = 0; rigidbody_idx < w->rigidbodies_num; ++rigidbody_idx)
     {
@@ -267,12 +278,12 @@ void physics_update_world(PhysicsResourceHandle world)
         if (!rb->used)
             continue;
 
-        Vec3 g = {0, 0, -0.82f};
+        Vec3 g = {0, 0, -9.82f};
         rb->velocity += g*dt;
+        let angular_speed = len(rb->angular_velocity);
         let speed = len(rb->velocity);
+        //rb->angular_velocity -= rb->angular_velocity * dt;
         let wo = get_object(w, rb->object_handle);
-        rb->entity.move(rb->velocity);
-        rb->entity.rotate(rb->angular_velocity, dt);
 
         for (u32 world_object_index = 0; world_object_index < w->objects_num; ++world_object_index)
         {
@@ -316,21 +327,43 @@ void physics_update_world(PhysicsResourceHandle world)
                     rb->velocity *= 0.9f;
                 }
                 
+                Vec3 avg_contact_point = coll.contact_point;
+                u32 avg_num_points = 1;
+                for (u32 rc_coll_idx = 0; rc_coll_idx < RECENT_COLLISIONS_NUM; ++rc_coll_idx)
+                {
+                    if (rb->recent_collisions[rc_coll_idx].time == 0 || (t - rb->recent_collisions[rc_coll_idx].time) > 0.5f)
+                        continue;
+
+                    avg_contact_point += rb->recent_collisions[rc_coll_idx].contact_point;
+                    ++avg_num_points;
+                }
+
+
                 let n = normalize(coll.solution);
-                rb->entity.add_torque(coll.contact_point, n, -speed * 1000 * dt);
+                avg_contact_point *= (1.0f/avg_num_points);
+                memmove(rb->recent_collisions + 1, rb->recent_collisions, sizeof(RecentCollision) * (RECENT_COLLISIONS_NUM - 1));
+                rb->recent_collisions[0].contact_point = coll.contact_point;
+                rb->recent_collisions[0].time = t;
+                rb->entity.add_torque(avg_contact_point, wo->pos, rb->mass*g*dt);
                 rb->entity.move(coll.solution);
 
-                Vec3 verts[] = {{0, 0, 0},  n*3};
-                Vec4 colors[] = {{1, 0, 0, 1}, {0, 1, 0, 1}};
+                let tangetial_contact_speed = cross(rb->angular_velocity, (coll.contact_point - wo->pos));
+                let surface_rot_friction = dot(tangetial_contact_speed, n);
+                rb->angular_velocity += rb->angular_velocity * surface_rot_friction * dt;
+
+                Vec3 dbg_pts[] = {avg_contact_point, wo->pos, wo->pos + rb->mass*g};
+                Vec4 dbg_colors[] = {vec4_red, vec4_green, vec4_red};
 
                 let c = debug_get_camera();
-
-                renderer_debug_draw(verts, 2, colors, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
+                renderer_debug_draw(dbg_pts, 3, dbg_colors, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
             }
 
             memf(s1.vertices);
             memf(s2.vertices);
         }
+
+        rb->entity.move(rb->velocity * dt);
+        rb->entity.rotate(rb->angular_velocity, dt);
     }
 }
 

@@ -772,6 +772,6 @@ void renderer_debug_draw(const Vec3* vertices, u32 vertices_num, const Vec4* col
         mesh[i].color = colors == NULL ? white : colors[i];
     }
 
-    renderer_backend_debug_draw_triangles(get_resource(PipelineRenderResource, get_pipeline_for_topology(pt))->backend_state, mesh, vertices_num, vp_matrix);
+    renderer_backend_debug_draw(get_resource(PipelineRenderResource, get_pipeline_for_topology(pt))->backend_state, mesh, vertices_num, vp_matrix);
     memf(mesh);
 }

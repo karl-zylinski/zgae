@@ -57,7 +57,7 @@ void game_init()
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, -3}, quat_identity(), 75, false)
+        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, -3}, quat_identity(), 75, true)
     };
 }
 
@@ -79,12 +79,12 @@ bool game_update()
         time_until_spawn = 0.5f;
         f32 x = ((rand() % 10000)-5000)/10000.0f;
         f32 y = ((rand() % 10000)-5000)/10000.0f + 10;
-        f32 z = ((rand() % 10000)-5000)/10000.0f + 20.0f + (rand() % 10000)/10000.0f;
+        f32 z = ((rand() % 10000)-5000)/10000.0f + 3.0f + (rand() % 10000)/10000.0f;
         f32 rx = (rand() % 628)/100;
         f32 ry = (rand() % 628)/100;
         f32 rz = (rand() % 628)/100;
         f32 rr = (rand() % 628)/100;
-        spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), 10, true);
+        spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), 100, true);
     }
 
     gs.player.update();

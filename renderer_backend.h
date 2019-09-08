@@ -39,4 +39,4 @@ void renderer_backend_wait_until_idle();
 void renderer_backend_surface_resized(u32 width, u32 height);
 Vec2u renderer_backend_get_size();
 
-void renderer_backend_debug_draw_triangles(RenderBackendPipeline* debug_pipeline, const SimpleVertex* vertices, u32 vertices_num, const Mat4& view_projection);
+void renderer_backend_debug_draw(RenderBackendPipeline* debug_pipeline, const SimpleVertex* vertices, u32 vertices_num, const Mat4& view_projection);

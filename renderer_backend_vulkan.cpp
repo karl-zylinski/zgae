@@ -1059,7 +1059,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
     pdssci.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     pdssci.depthBoundsTestEnable = VK_FALSE;
     pdssci.minDepthBounds = 0;
-    pdssci.maxDepthBounds = 0;
+    pdssci.maxDepthBounds = 1;
     pdssci.stencilTestEnable = VK_FALSE;
     pdssci.back.failOp = VK_STENCIL_OP_KEEP;
     pdssci.back.passOp = VK_STENCIL_OP_KEEP;
@@ -1521,7 +1521,7 @@ Vec2u renderer_backend_get_size()
     return rbs.swapchain_size;
 }
 
-void renderer_backend_debug_draw_triangles(RenderBackendPipeline* debug_pipeline, const SimpleVertex* vertices, u32 vertices_num, const Mat4& view_projection)
+void renderer_backend_debug_draw(RenderBackendPipeline* debug_pipeline, const SimpleVertex* vertices, u32 vertices_num, const Mat4& view_projection)
 {
     VkResult res;
     VkBuffer vertex_buffer;

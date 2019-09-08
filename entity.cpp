@@ -99,14 +99,14 @@ void Entity::add_force(const Vec3& f)
     physics_add_force(e->world->physics_world, e->physics_rigidbody, f);
 }
 
-void Entity::add_torque(const Vec3& point, const Vec3& dir, float mag)
+void Entity::add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force)
 {
     let e = get_internal();
 
     if (!e->physics_rigidbody)
         return;
 
-    physics_add_torque(e->world->physics_world, e->physics_rigidbody, point, dir, mag);
+    physics_add_torque(e->world->physics_world, e->physics_rigidbody, pivot, point, force);
 }
 
 RenderWorldObjectHandle Entity::get_render_object() const

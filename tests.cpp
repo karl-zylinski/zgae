@@ -4,7 +4,8 @@
 #include "memory.h"
 #include "dynamic_array.h"
 #include <execinfo.h>
-#include "handle.h"y
+#include "handle.h"
+#include "math.h"
 
 static Backtrace get_backtrace(u32 backtrace_size)
 {
@@ -47,25 +48,25 @@ int main()
     }
 
     {
-        HandlePool* hp = handle_pool_create(0, "hp");
-        handle_pool_set_type(hp, 0, "some type");
-        handle_pool_set_type(hp, 1, "other type");
-        Handle h1 = handle_pool_borrow(hp, 0);
-        Handle h2 = handle_pool_borrow(hp, 0);
+        HandlePool* hp = handle_pool_create(HANDLE_POOL_TYPE_RENDER_RESOURCE);
+        handle_pool_set_type(hp, 1, "some type");
+        handle_pool_set_type(hp, 2, "other type");
+        Handle h1 = handle_pool_borrow(hp, 1);
+        Handle h2 = handle_pool_borrow(hp, 1);
         handle_pool_return(hp, h2);
-        Handle h3 = handle_pool_borrow(hp, 1);
+        Handle h3 = handle_pool_borrow(hp, 2);
         assert(handle_generation(h1) == 0);
         assert(handle_generation(h2) == 0);
         assert(handle_generation(h3) == 1);
         assert(handle_index(h1) == 0);
         assert(handle_index(h2) == 1);
         assert(handle_index(h3) == 1);
-        assert(handle_pool(h1) == 0);
-        assert(handle_pool(h2) == 0);
-        assert(handle_pool(h3) == 0);
-        assert(handle_type(h1) == 0);
-        assert(handle_type(h2) == 0);
-        assert(handle_type(h3) == 1);
+        assert(handle_pool(h1) == HANDLE_POOL_TYPE_RENDER_RESOURCE);
+        assert(handle_pool(h2) == HANDLE_POOL_TYPE_RENDER_RESOURCE);
+        assert(handle_pool(h3) == HANDLE_POOL_TYPE_RENDER_RESOURCE);
+        assert(handle_type(h1) == 1);
+        assert(handle_type(h2) == 1);
+        assert(handle_type(h3) == 2);
     }
 
     {
@@ -88,6 +89,17 @@ int main()
         assert(a[0] == 5u);
         assert(a[1] == 10u);
         da_free(a);
+    }
+
+    {
+        Vec3 v1 = {1, 0, 0};
+        Vec3 v2 = {0, 1, 0};
+
+        f32 d = dot(v1, v2);
+        assert(d == 0.0f);
+
+        Vec3 v3 = cross(v1, v2);
+        assert(v3.x == 0 && v3.y == 0 && v3.z == 1);
     }
 
     info("All tests completed without errors");

@@ -3,9 +3,12 @@
 #include <math.h>
 #include "log.h"
 
+#define TINY_NUMBER 0.0000001f
+#define EPA_QUIT_THRESHOLD 0.01f
+
 struct SupportDiffPoint
 {
-    Vec3 diff;
+    Vec3 val;
     Vec3 point;
 };
 
@@ -30,8 +33,8 @@ static Vec3 support(const GjkShape& s, const Vec3& d)
 static SupportDiffPoint support_diff(const GjkShape& s1, const GjkShape& s2, const Vec3& d)
 {
     let point = support(s1, d);
-    let diff = point - support(s2, -d);
-    return {.diff = diff, .point = point};
+    let val = point - support(s2, -d);
+    return {.val = val, .point = point};
 }
 
 
@@ -56,8 +59,8 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
         {
             let B = s->vertices[0];
             let A = s->vertices[1];
-            Vec3 AB = B.diff - A.diff;
-            Vec3 AO = -A.diff;
+            Vec3 AB = B.val - A.val;
+            Vec3 AO = -A.val;
 
             if (dot(AB, AO) >= 0)
                 *search_dir = cross(AB, cross(AO, AB));
@@ -69,10 +72,10 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
             let C = s->vertices[0];
             let B = s->vertices[1];
             let A = s->vertices[2];
-            Vec3 AB = B.diff - A.diff;
-            Vec3 AC = C.diff - A.diff;
+            Vec3 AB = B.val - A.val;
+            Vec3 AC = C.val - A.val;
             Vec3 ABC = cross(AB, AC);
-            Vec3 AO = -A.diff;
+            Vec3 AO = -A.val;
 
             if (dot(cross(ABC, AC), AO) > 0)
             {
@@ -110,10 +113,10 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
             let C = s->vertices[1];
             let B = s->vertices[2];
             let A = s->vertices[3];
-            Vec3 AB = B.diff - A.diff;
-            Vec3 AC = C.diff - A.diff;
-            Vec3 AD = D.diff - A.diff;
-            Vec3 AO = -A.diff;
+            Vec3 AB = B.val - A.val;
+            Vec3 AC = C.val - A.val;
+            Vec3 AD = D.val - A.val;
+            Vec3 AO = -A.val;
 
             Vec3 ABC = cross(AB, AC);
             Vec3 ACD = cross(AC, AD);
@@ -125,7 +128,7 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
             float d1 = dot(ABC, AO);
             if (d1 >= 0)
             {
-                if (fabs(dot(AB, AO)) < SMALL_NUMBER || fabs(dot(AC, AO)) < SMALL_NUMBER)
+                if (fabs(dot(AB, AO)) < TINY_NUMBER || fabs(dot(AC, AO)) < TINY_NUMBER)
                     return GJK_STATUS_ABORT; // Origin is on an edge, can result in loop.
 
                 s->size = 3;
@@ -139,7 +142,7 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
             float d2 = dot(ACD, AO);
             if (d2 >= 0)
             {
-                if (fabs(dot(AC, AO)) < SMALL_NUMBER || fabs(dot(AC, AO)) < SMALL_NUMBER)
+                if (fabs(dot(AC, AO)) < TINY_NUMBER || fabs(dot(AC, AO)) < TINY_NUMBER)
                     return GJK_STATUS_ABORT; 
 
                 s->size = 3;
@@ -153,7 +156,7 @@ static GjkStatus do_simplex(Simplex* s, Vec3* search_dir)
             float d3 = dot(ADB, AO);
             if (d3 >= 0)
             {
-                if (fabs(dot(AD, AO)) < SMALL_NUMBER || fabs(dot(AB, AO)) < SMALL_NUMBER)
+                if (fabs(dot(AD, AO)) < TINY_NUMBER || fabs(dot(AB, AO)) < TINY_NUMBER)
                     return GJK_STATUS_ABORT; 
 
                 s->size = 3;
@@ -183,12 +186,12 @@ static GjkResult run_gjk(const GjkShape& s1, const GjkShape& s2)
     GjkStatus status = GJK_STATUS_CONTINUE;
     let first_point = support_diff(s1, s2, {0, 5, 0});
     s.vertices[s.size++] = first_point;
-    Vec3 search_dir = -first_point.diff;
+    Vec3 search_dir = -first_point.val;
 
     while (status != GJK_STATUS_ABORT)
     {
         let simplex_candidate = support_diff(s1, s2, search_dir);
-        if (dot(simplex_candidate.diff, search_dir) <= 0)
+        if (dot(simplex_candidate.val, search_dir) <= 0)
             return {.collision = false};
 
         s.vertices[s.size++] = simplex_candidate;
@@ -220,12 +223,13 @@ struct EpaFace
 static EpaFace* find_closest_face(EpaFace* faces)
 {
     EpaFace* closest = faces;
-    closest->distance = dot(closest->normal, closest->vertices[0].diff);
-
+    closest->distance = dot(closest->normal, closest->vertices[0].val);
+    check(closest->distance >= 0, "EPA Face has wrong winding");
     for (unsigned i = 1; i < da_num(faces); ++i)
     {
         EpaFace* f = faces + i;
-        float d = dot(f->normal, f->vertices[0].diff);
+        float d = dot(f->normal, f->vertices[0].val);
+        check(d >= 0, "EPA Face has wrong winding");
         if (d < closest->distance)
         {
             f->distance = d;
@@ -233,16 +237,13 @@ static EpaFace* find_closest_face(EpaFace* faces)
         }
     }
 
-    if (closest->distance <= 0)
-        return NULL;
-
     return closest;
 }
 
 static void add_face(EpaFace*& faces, const SupportDiffPoint& A, const SupportDiffPoint& B, const SupportDiffPoint& C)
 {
-    Vec3 AB = B.diff - A.diff;
-    Vec3 AC = C.diff - A.diff;
+    Vec3 AB = B.val - A.val;
+    Vec3 AC = C.val - A.val;
     Vec3 ABC = cross(AC, AB);
 
     EpaFace f = {};
@@ -252,16 +253,16 @@ static void add_face(EpaFace*& faces, const SupportDiffPoint& A, const SupportDi
 
     if (almost_eql(ABC, vec3_zero))
     {
-        f.vertices[0].diff = vec3_zero;
-        f.vertices[1].diff = vec3_zero;
-        f.vertices[2].diff = vec3_zero;
+        f.vertices[0].val = vec3_zero;
+        f.vertices[1].val = vec3_zero;
+        f.vertices[2].val = vec3_zero;
         f.normal = vec3_zero;
         da_push(faces, f);
         return;
     }
 
     f.normal = normalize(ABC);
-    float normal_dir = dot(f.normal, A.diff);
+    float normal_dir = dot(f.normal, A.val);
 
     if (normal_dir < 0)
     {
@@ -271,7 +272,7 @@ static void add_face(EpaFace*& faces, const SupportDiffPoint& A, const SupportDi
         f.normal = -f.normal;
     }
 
-    if (fabs(normal_dir) < SMALL_NUMBER)
+    if (fabs(normal_dir) < TINY_NUMBER)
     {
         /* Normal is zero or almsot zero, another case of zero-in-plane.
            Both this case and the ABC == vec3_zero case will cause algorithm
@@ -284,7 +285,7 @@ static void add_face(EpaFace*& faces, const SupportDiffPoint& A, const SupportDi
 
 static EpaFace* convert_simplex_to_epa_faces(Simplex& s)
 {
-    EpaFace* faces = nullptr;
+    EpaFace* faces = NULL;
     for (unsigned i = 0; i < s.size; ++i)
     {
         int j = ((i + 1) == s.size) ? 0 : i + 1;
@@ -307,8 +308,8 @@ static bool remove_edge_if_present(Edge*& edges, const Edge& e)
 {
     for (unsigned i = 0; i < da_num(edges); ++i)
     {
-        if ((edges[i].start.diff == e.end.diff && edges[i].end.diff == e.start.diff) ||
-            (edges[i].start.diff == e.start.diff && edges[i].end.diff == e.end.diff))
+        if ((edges[i].start.val == e.end.val && edges[i].end.val == e.start.val) ||
+            (edges[i].start.val == e.start.val && edges[i].end.val == e.end.val))
         {
             da_remove(edges, i);
             return true;
@@ -320,13 +321,13 @@ static bool remove_edge_if_present(Edge*& edges, const Edge& e)
 
 static void extend_polytope(EpaFace*& faces, const SupportDiffPoint& extend_to)
 {
-    Edge* edges = nullptr;
+    Edge* edges = NULL;
 
     for (unsigned i = 0; i < da_num(faces);)
     {
         EpaFace& f = faces[i];
 
-        if (dot(f.normal, extend_to.diff-f.vertices[0].diff) > 0)
+        if (dot(f.normal, extend_to.val-f.vertices[0].val) > 0)
         {
             Edge e1 = {f.vertices[0], f.vertices[1]};
             Edge e2 = {f.vertices[1], f.vertices[2]};
@@ -375,17 +376,10 @@ static EpaSolution run_epa(const GjkShape& s1, const GjkShape& s2, Simplex* s)
         }
 
         EpaFace* f = find_closest_face(faces);
-
-        if (f == NULL)
-        {
-            da_free(faces);
-            return {.solution_found = false};
-        }
-
         let dp = support_diff(s1, s2, f->normal);
-        float depth = dot(dp.diff, f->normal);
+        float depth = dot(dp.val, f->normal);
 
-        if (fabs(f->distance) < SMALL_NUMBER)
+        if (fabs(f->distance) < TINY_NUMBER)
         {
             da_free(faces);
             // Origin is on face, so depth will be zero. Solution is zero vector.
@@ -396,7 +390,7 @@ static EpaSolution run_epa(const GjkShape& s1, const GjkShape& s2, Simplex* s)
             };
         }
 
-        if (fabs(depth - f->distance) < SMALL_NUMBER)
+        if (fabs(depth - f->distance) < EPA_QUIT_THRESHOLD)
         {
             Vec3 sol = -f->normal * depth;
             da_free(faces);
@@ -444,9 +438,8 @@ GjkEpaSolution gjk_epa_intersect_and_solve(const GjkShape& s1, const GjkShape& s
     if (!epa_result.solution_found)
         return {.colliding = false};
 
-    let bary = barycentric(-epa_result.solution, epa_result.face.vertices[0].diff, epa_result.face.vertices[1].diff, epa_result.face.vertices[2].diff);
+    let bary = barycentric(-epa_result.solution, epa_result.face.vertices[0].val, epa_result.face.vertices[1].val, epa_result.face.vertices[2].val);
     Vec3 contact_point = bary.x * epa_result.face.vertices[0].point + bary.y * epa_result.face.vertices[1].point + bary.z * epa_result.face.vertices[2].point;
-    //info("%f %f %f", contact_point.x, contact_point.y, contact_point.z);
 
     return {
         .colliding = true,

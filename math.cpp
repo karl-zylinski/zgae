@@ -227,9 +227,9 @@ Vec2 operator*(const Vec2i& v, f32 s)
     return { v.x * s, v.y * s };
 }
 
-bool almost_eql(f32 f1, f32 f2)
+bool almost_eql(f32 f1, f32 f2, f32 thres)
 {
-    return fabs(f2 - f1) < SMALL_NUMBER;
+    return fabs(f2 - f1) < thres;
 }
 
 bool almost_eql(const Vec2& v1, const Vec2& v2)

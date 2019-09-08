@@ -42,9 +42,12 @@ struct Vec2i
 
 static Vec3 vec3_zero = {0, 0, 0};
 static Vec3 vec3_up = {0, 0, 1};
+static Vec3 vec3_down = {0, 0, -1};
+
+static Vec4 vec4_red = {1, 0, 0, 1};
+static Vec4 vec4_green = {0, 0, 1, 1};
 
 #define PI 3.14159265358979323846
-#define SMALL_NUMBER 0.0000001f
 
 Mat4 mat4_create_projection_matrix(f32 bb_width, f32 bb_height);
 Mat4 mat4_identity();
@@ -68,7 +71,8 @@ Vec3 cross(const Vec3& v1, const Vec3& v2);
 Vec2 operator*(const Vec2i& v, f32 s);
 Vec3 project(const Vec3& v, const Vec3& on);
 
-bool almost_eql(f32 f1, f32 f2);
+#define ALMOST_EQL_DEF_THRESHOLD 0.000001f
+bool almost_eql(f32 f1, f32 f2, f32 thres = ALMOST_EQL_DEF_THRESHOLD);
 bool almost_eql(const Vec2& v1, const Vec2& v2);
 bool almost_eql(const Vec3& v1, const Vec3& v2);
 bool almost_eql(const Vec4& v1, const Vec4& v2);
