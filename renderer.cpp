@@ -84,7 +84,8 @@ struct Renderer
     u32 resources_num;
     HandleHashMap* resource_name_to_handle;
     HandlePool* resource_handle_pool;
-    RenderResourceHandle debug_draw_pipeline;
+    RenderResourceHandle debug_draw_traingles_pipeline;
+    RenderResourceHandle debug_draw_line_pipeline;
 };
 
 static Renderer rs = {};
@@ -101,7 +102,8 @@ void renderer_init(WindowType window_type, const GenericWindowInfo& window_info)
         handle_pool_set_type(rs.resource_handle_pool, s, render_resource_type_names[s]);
     
     renderer_backend_init(window_type, window_info);
-    rs.debug_draw_pipeline = renderer_load_resource("pipeline_debug_draw.pipeline");
+    rs.debug_draw_traingles_pipeline = renderer_load_resource("pipeline_debug_draw_triangles.pipeline");
+    rs.debug_draw_line_pipeline = renderer_load_resource("pipeline_debug_draw_line.pipeline");
 }
 
 static void* get_resource_data(RenderResourceHandle h)
@@ -369,6 +371,9 @@ static PrimitiveTopology primitive_topology_str_to_enum(const char* str)
 
     if (str_eql(str, "triangle_strip"))
         return PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+
+    if (str_eql(str, "line_strip"))
+        return PRIMITIVE_TOPOLOGY_LINE_STRIP;
 
     error("Unknown primtive topology");
 }
@@ -739,7 +744,17 @@ void renderer_surface_resized(u32 w, u32 h)
     renderer_backend_wait_until_idle();
 }
 
-void renderer_debug_draw_triangles(const Vec3* vertices, u32 vertices_num, const Vec4* colors, const Vec3& cam_pos, const Quat& cam_rot)
+static RenderResourceHandle get_pipeline_for_topology(PrimitiveTopology pt)
+{
+    switch(pt)
+    {
+        case PRIMITIVE_TOPOLOGY_TRIANGLE_LIST: return rs.debug_draw_traingles_pipeline;
+        case PRIMITIVE_TOPOLOGY_LINE_STRIP: return rs.debug_draw_line_pipeline;
+        default: error("Debug drawing not implemented for given PrimitiveTopology");
+    }
+}
+
+void renderer_debug_draw(const Vec3* vertices, u32 vertices_num, const Vec4* colors, PrimitiveTopology pt, const Vec3& cam_pos, const Quat& cam_rot)
 {
     Mat4 camera_matrix = mat4_from_rotation_and_translation(cam_rot, cam_pos);
     Mat4 view_matrix = inverse(camera_matrix);
@@ -757,6 +772,6 @@ void renderer_debug_draw_triangles(const Vec3* vertices, u32 vertices_num, const
         mesh[i].color = colors == NULL ? white : colors[i];
     }
 
-    renderer_backend_debug_draw_triangles(get_resource(PipelineRenderResource, rs.debug_draw_pipeline)->backend_state, mesh, vertices_num, vp_matrix);
+    renderer_backend_debug_draw_triangles(get_resource(PipelineRenderResource, get_pipeline_for_topology(pt))->backend_state, mesh, vertices_num, vp_matrix);
     memf(mesh);
 }

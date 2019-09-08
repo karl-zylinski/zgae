@@ -845,6 +845,7 @@ static VkPrimitiveTopology vk_primitive_topology_from_primitive_topology(Primiti
     {
         case PRIMITIVE_TOPOLOGY_TRIANGLE_LIST: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         case PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        case PRIMITIVE_TOPOLOGY_LINE_STRIP: return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
         default: error("Trying to get VkPrimitiveTopology from PrimitiveTopology, but type isn't mapped.");
     }
 }

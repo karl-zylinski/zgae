@@ -5,7 +5,6 @@
 layout(push_constant) uniform VertexPushConstant
 {
     mat4 view_projection;
-    vec4 color;
 };
 
 layout (location = 0) in vec3 in_pos;

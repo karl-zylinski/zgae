@@ -3,6 +3,8 @@
 #include <math.h>
 #include "log.h"
 #include "renderer.h"
+#include "debug.h"
+#include "camera.h"
 
 static Vec3 support(const GjkShape& s, const Vec3& d)
 {
@@ -188,9 +190,7 @@ static GjkResult run_gjk(const GjkShape& s1, const GjkShape& s2)
 
         switch(status)
         {
-            case GJK_STATUS_COLLIDING: {
-                return {.collision = true, s};
-            }
+            case GJK_STATUS_COLLIDING: return {.collision = true, s};
             case GJK_STATUS_ABORT: return {.collision = false};
             default: break;
         }

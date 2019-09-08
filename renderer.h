@@ -6,6 +6,7 @@ fwd_struct(Vec3);
 fwd_struct(Vec4);
 fwd_struct(Mat4);
 fwd_struct(Color);
+fwd_enum(PrimitiveTopology);
 typedef u32 RenderWorldObjectHandle;
 
 struct GenericWindowInfo
@@ -33,4 +34,4 @@ void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle me
 void renderer_present();
 void renderer_update_constant_buffer(RenderResourceHandle pipeline_handle, u32 binding, void* data, u32 data_size);
 void renderer_surface_resized(u32 w, u32 h);
-void renderer_debug_draw_triangles(const Vec3* vertices, u32 vertices_num, const Vec4* colors, const Vec3& cam_pos, const Quat& cam_rot);
+void renderer_debug_draw(const Vec3* vertices, u32 vertices_num, const Vec4* colors, PrimitiveTopology topology, const Vec3& cam_pos, const Quat& cam_rot);

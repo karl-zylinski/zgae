@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "debug.h"
 #include "camera.h"
+#include "render_resource.h"
 
 struct GameState
 {
@@ -66,7 +67,6 @@ void game_init()
 static f32 time_until_spawn = 2.0f;
 static u32 num_spawned = 0;
 
-
 bool game_update()
 {
     if (key_went_down(KEY_ESCAPE))
@@ -91,24 +91,6 @@ bool game_update()
     }
 
     gs.player.update();
-
-    Vec3 dbg_test[] = {
-        {-1, 4, 1}, {1, 4, 1}, {1, 4, -1},
-        {-1, 4, 1}, {1, 4, -1}, {1, 3, 1},
-        {1, 4, 1}, {1, 3, 1}, {1, 4, -1},
-        {-1, 4, 1}, {1, 3, 1},{1, 4, 1}, 
-    };
-
-    Vec4 dbg_test_colors[] = {
-        {1, 0, 0, 1}, {0, 1, 0, 1}, {0, 0, 1, 1},
-        {1, 1, 0, 1}, {1, 1, 0, 1}, {0, 1, 1, 1},
-        {1, 0, 1, 1}, {1, 1, 1, 1}, {0, 0, 1, 1},
-        {1, 0, 0, 1}, {0, 1, 0, 1}, {0, 0, 1, 1},
-    };
-
-    Camera dbg_cam = debug_get_camera();
-    renderer_debug_draw_triangles(dbg_test, sizeof(dbg_test)/sizeof(Vec3), dbg_test_colors, dbg_cam.pos, dbg_cam.rot);
-
     renderer_draw_world(gs.pipeline, gs.world->render_world, gs.player.camera.pos, gs.player.camera.rot);
     renderer_present();
     keyboard_end_of_frame();

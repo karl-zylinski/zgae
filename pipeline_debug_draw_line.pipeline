@@ -1,6 +1,6 @@
 shader_stages = [
-    "shader_debug_draw_vertex.shader"
-    "shader_debug_draw_fragment.shader"
+    "shader_debug_draw_line_vertex.shader"
+    "shader_debug_draw_line_fragment.shader"
 ]
 
 vertex_input = [
@@ -16,4 +16,4 @@ vertex_input = [
     }
 ]
 
-primitive_topology = "triangle_list"
+primitive_topology = "line_strip"
