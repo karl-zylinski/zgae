@@ -27,6 +27,7 @@ struct Entity
     void set_position(const Vec3& pos);
     void set_rotation(const Quat& rot);
     void add_force(const Vec3& f);
+    void add_torque(const Vec3& point, const Vec3& dir, float mag);
     RenderWorldObjectHandle get_render_object() const;
     PhysicsObjectHandle get_physics_object() const;
 

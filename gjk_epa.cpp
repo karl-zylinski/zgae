@@ -221,19 +221,20 @@ static EpaFace* find_closest_face(EpaFace* faces)
 {
     EpaFace* closest = faces;
     closest->distance = dot(closest->normal, closest->vertices[0].diff);
-    check(closest->distance >= 0, "EpaFace in wrong direction.");
 
     for (unsigned i = 1; i < da_num(faces); ++i)
     {
         EpaFace* f = faces + i;
         float d = dot(f->normal, f->vertices[0].diff);
-        check(d >= 0, "EpaFace in wrong direction.");
         if (d < closest->distance)
         {
             f->distance = d;
             closest = f;
         }
     }
+
+    if (closest->distance <= 0)
+        return NULL;
 
     return closest;
 }
@@ -251,6 +252,10 @@ static void add_face(EpaFace*& faces, const SupportDiffPoint& A, const SupportDi
 
     if (almost_eql(ABC, vec3_zero))
     {
+        f.vertices[0].diff = vec3_zero;
+        f.vertices[1].diff = vec3_zero;
+        f.vertices[2].diff = vec3_zero;
+        f.normal = vec3_zero;
         da_push(faces, f);
         return;
     }
@@ -370,6 +375,13 @@ static EpaSolution run_epa(const GjkShape& s1, const GjkShape& s2, Simplex* s)
         }
 
         EpaFace* f = find_closest_face(faces);
+
+        if (f == NULL)
+        {
+            da_free(faces);
+            return {.solution_found = false};
+        }
+
         let dp = support_diff(s1, s2, f->normal);
         float depth = dot(dp.diff, f->normal);
 
@@ -428,10 +440,13 @@ GjkEpaSolution gjk_epa_intersect_and_solve(const GjkShape& s1, const GjkShape& s
         return {.colliding = false};
 
     let epa_result = run_epa(s1, s2, &res.simplex);
-    check(epa_result.solution_found, "Objects collided, but not solution vector was found.");
+
+    if (!epa_result.solution_found)
+        return {.colliding = false};
+
     let bary = barycentric(-epa_result.solution, epa_result.face.vertices[0].diff, epa_result.face.vertices[1].diff, epa_result.face.vertices[2].diff);
     Vec3 contact_point = bary.x * epa_result.face.vertices[0].point + bary.y * epa_result.face.vertices[1].point + bary.z * epa_result.face.vertices[2].point;
-    info("%f %f %f", contact_point.x, contact_point.y, contact_point.z);
+    //info("%f %f %f", contact_point.x, contact_point.y, contact_point.z);
 
     return {
         .colliding = true,

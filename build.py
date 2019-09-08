@@ -39,7 +39,7 @@ extra_flags = [
 ]
 
 if "nounusedwarning" in sys.argv:
-    extra_flags.append("-Wno-unused-variable")
+    extra_flags.append("-Wno-unused-variable -Wno-unused-parameter")
 
 compiler = os.environ["CC"] if ("CC" in os.environ) else "clang++"
 

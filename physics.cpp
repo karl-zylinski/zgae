@@ -13,6 +13,10 @@
 #include "obj_loader.h"
 #include "world.h"
 #include "entity.h"
+#include "renderer.h"
+#include "render_resource.h"
+#include "debug.h"
+#include "camera.h"
 
 struct PhysicsResource
 {
@@ -54,6 +58,7 @@ struct Rigidbody
     bool used;
     PhysicsObjectHandle object_handle;
     Vec3 velocity;
+    Vec3 angular_velocity;
     f32 mass;
     Entity entity;
 };
@@ -195,6 +200,16 @@ void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigid
     rb->velocity += f*(1/rb->mass);
 }
 
+void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& point, const Vec3& dir, float mag)
+{
+    let w = get_resource(PhysicsResourceWorld, world);
+    let rb = get_rigidbody(w, rigidbody_handle);
+    let wo = get_object(w, rb->object_handle);
+    let center = wo->pos;
+    let dist = center - point;
+    rb->angular_velocity += cross(dist, dir * mag)* (1/rb->mass);
+}
+
 PhysicsResourceHandle physics_create_collider(PhysicsResourceHandle mesh)
 {
     let c = mema_zero_t(PhysicsResourceCollider);
@@ -254,8 +269,10 @@ void physics_update_world(PhysicsResourceHandle world)
 
         Vec3 g = {0, 0, -0.82f};
         rb->velocity += g*dt;
+        let speed = len(rb->velocity);
         let wo = get_object(w, rb->object_handle);
         rb->entity.move(rb->velocity);
+        rb->entity.rotate(rb->angular_velocity, dt);
 
         for (u32 world_object_index = 0; world_object_index < w->objects_num; ++world_object_index)
         {
@@ -299,7 +316,16 @@ void physics_update_world(PhysicsResourceHandle world)
                     rb->velocity *= 0.9f;
                 }
                 
+                let n = normalize(coll.solution);
+                rb->entity.add_torque(coll.contact_point, n, -speed * 1000 * dt);
                 rb->entity.move(coll.solution);
+
+                Vec3 verts[] = {{0, 0, 0},  n*3};
+                Vec4 colors[] = {{1, 0, 0, 1}, {0, 1, 0, 1}};
+
+                let c = debug_get_camera();
+
+                renderer_debug_draw(verts, 2, colors, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
             }
 
             memf(s1.vertices);

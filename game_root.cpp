@@ -57,7 +57,7 @@ void game_init()
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, 10}, quat_identity(), 75, true)
+        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, -3}, quat_identity(), 75, false)
     };
 }
 
@@ -73,7 +73,7 @@ bool game_update()
     physics_update_world(gs.world->physics_world);
     time_until_spawn -= time_dt();
 
-    if (time_until_spawn <= 0 && num_spawned < 2)
+    if (time_until_spawn <= 0 && num_spawned < 1)
     {
         num_spawned++;
         time_until_spawn = 0.5f;
