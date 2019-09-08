@@ -3,8 +3,6 @@
 #include <math.h>
 #include "log.h"
 #include "renderer.h"
-#include "debug.h"
-#include "camera.h"
 
 static Vec3 support(const GjkShape& s, const Vec3& d)
 {

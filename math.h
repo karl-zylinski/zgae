@@ -44,7 +44,7 @@ static Vec3 vec3_zero = {0, 0, 0};
 static Vec3 vec3_up = {0, 0, 1};
 
 #define PI 3.14159265358979323846
-#define SMALL_NUMBER 0.00001f
+#define SMALL_NUMBER 0.0000001f
 
 Mat4 mat4_create_projection_matrix(f32 bb_width, f32 bb_height);
 Mat4 mat4_identity();

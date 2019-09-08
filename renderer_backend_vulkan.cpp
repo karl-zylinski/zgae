@@ -1558,7 +1558,6 @@ void renderer_backend_debug_draw_triangles(RenderBackendPipeline* debug_pipeline
     res = vkBindBufferMemory(rbs.device, vertex_buffer, vertex_buffer_memory, 0);
     VERIFY_RES();
 
-    
     u32 cf = rbs.current_frame;
     VkCommandBufferBeginInfo cbbi = {};
     cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1597,7 +1596,6 @@ void renderer_backend_debug_draw_triangles(RenderBackendPipeline* debug_pipeline
     VkDeviceSize offsets[1] = {0};
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertex_buffer, offsets);
 
-
     VkViewport viewport = {};
     viewport.width = rbs.swapchain_size.x;
     viewport.height = rbs.swapchain_size.y;
@@ -1606,7 +1604,6 @@ void renderer_backend_debug_draw_triangles(RenderBackendPipeline* debug_pipeline
     viewport.x = 0;
     viewport.y = 0;
     vkCmdSetViewport(cmd, 0, 1, &viewport);
-
 
     VkRect2D scissor = {};
     scissor.extent.width = rbs.swapchain_size.x;
