@@ -6,9 +6,6 @@
 #include "log.h"
 #include "world.h"
 #include <stdlib.h>
-#include "debug.h"
-#include "camera.h"
-#include "render_resource.h"
 
 struct GameState
 {

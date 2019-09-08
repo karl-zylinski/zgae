@@ -11,6 +11,7 @@ struct GjkEpaSolution
 {
     bool colliding;
     Vec3 solution;
+    Vec3 contact_point;
 };
 
 bool gjk_intersect(const GjkShape& s1, const GjkShape& s2);

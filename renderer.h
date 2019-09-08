@@ -5,7 +5,6 @@ fwd_struct(Quat);
 fwd_struct(Vec3);
 fwd_struct(Vec4);
 fwd_struct(Mat4);
-fwd_struct(Color);
 fwd_enum(PrimitiveTopology);
 typedef u32 RenderWorldObjectHandle;
 

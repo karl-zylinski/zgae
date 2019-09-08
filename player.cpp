@@ -3,6 +3,7 @@
 #include "time.h"
 #include "mouse.h"
 #include "debug.h"
+#include "log.h"
 
 void Player::update()
 {
