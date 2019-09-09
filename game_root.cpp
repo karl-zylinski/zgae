@@ -73,7 +73,7 @@ bool game_update()
     physics_update_world(gs.world->physics_world);
     time_until_spawn -= time_dt();
 
-    if (time_until_spawn <= 0.0f && num_spawned < 100)
+    if (time_until_spawn <= 0.0f && num_spawned < 2)
     {
         num_spawned++;
         time_until_spawn = 2.0f;
