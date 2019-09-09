@@ -22,7 +22,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
     const ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
     const u32* constant_buffer_sizes, const u32* constant_buffer_binding_indices, u32 constant_buffers_num,
     const u32* push_constant_sizes, const ShaderType* push_constant_shader_types, u32 push_contants_num,
-    PrimitiveTopology pt);
+    PrimitiveTopology pt, bool depth_test);
 
 RenderBackendMesh* renderer_backend_create_mesh(Mesh* mesh);
 

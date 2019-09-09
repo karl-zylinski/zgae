@@ -17,3 +17,4 @@ vertex_input = [
 ]
 
 primitive_topology = "line_strip"
+depth_test = false

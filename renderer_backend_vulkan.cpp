@@ -855,7 +855,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
     const ShaderDataType* vertex_input_types, u32 vertex_input_types_num,
     const u32* constant_buffer_sizes, const u32* constant_buffer_binding_indices, u32 constant_buffers_num,
     const u32* push_constants_sizes, const ShaderType* push_constants_shader_types, u32 push_constants_num,
-    PrimitiveTopology pt)
+    PrimitiveTopology pt, bool depth_test)
 {
     RenderBackendPipeline* pipeline = mema_zero_t(RenderBackendPipeline);
     VkResult res;
@@ -1054,7 +1054,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
     // Depth-stencil settings
     VkPipelineDepthStencilStateCreateInfo pdssci = {};
     pdssci.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    pdssci.depthTestEnable = VK_FALSE;
+    pdssci.depthTestEnable = depth_test;
     pdssci.depthWriteEnable = VK_TRUE;
     pdssci.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     pdssci.depthBoundsTestEnable = VK_FALSE;

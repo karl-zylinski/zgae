@@ -332,6 +332,7 @@ static bool parse_true(char** input, JzonValue* output)
     {
         output->is_bool = true;
         output->bool_val = true;
+        *input += 4;
         return true;
     }
 

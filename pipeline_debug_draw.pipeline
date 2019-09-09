@@ -17,3 +17,4 @@ vertex_input = [
 ]
 
 primitive_topology = "triangle_list"
+depth_test = false

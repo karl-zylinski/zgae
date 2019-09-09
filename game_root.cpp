@@ -46,12 +46,12 @@ void game_init()
 
     gs.pipeline = renderer_load_resource("pipeline_default.pipeline");
     gs.box_mesh = renderer_load_resource("box.mesh");
-    gs.big_box_mesh = renderer_load_resource("big_box.mesh");
+    gs.big_box_mesh = renderer_load_resource("box.mesh");
     let floor_render_mesh = renderer_load_resource("floor.mesh");
 
     gs.world->physics_world = physics_create_world(gs.world->render_world);
     let box_physics_mesh = physics_load_resource("box.mesh");
-    let big_box_physics_mesh = physics_load_resource("big_box.mesh");
+    let big_box_physics_mesh = physics_load_resource("box.mesh");
     let floor_physics_mesh = physics_load_resource("floor.mesh");
     gs.box_collider = physics_create_collider(box_physics_mesh);
     gs.big_box_collider = physics_create_collider(big_box_physics_mesh);
@@ -76,7 +76,7 @@ void game_init()
     };
 }
 
-static f32 time_until_spawn = 2.0f;
+static f32 time_until_spawn = 1.0f;
 static u32 num_spawned = 0;
 
 bool game_update()
@@ -86,11 +86,11 @@ bool game_update()
 
     renderer_begin_frame(gs.pipeline);
     gs.world->update();
-    
+
     time_until_spawn -= time_dt();
 
     PhysicsMaterial box_material = {
-        .elasticity = 0.0,
+        .elasticity = 0.0f,
         .friction = 0.8f
     };
 
@@ -101,7 +101,7 @@ bool game_update()
         f32 x = ((rand() % 10000)-5000)/10000.0f;
         //f32 y = ((rand() % 10000)-5000)/10000.0f + 10;
         f32 y = 10;
-        f32 z = ((rand() % 10000)-5000)/10000.0f + 3.0f + (rand() % 10000)/10000.0f;
+        f32 z = 1.0f;
         /*f32 rx = (rand() % 628)/100;
         f32 ry = (rand() % 628)/100;
         f32 rz = (rand() % 628)/100;

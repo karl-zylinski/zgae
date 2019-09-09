@@ -33,6 +33,7 @@ struct PipelineRenderResource
     u32 constant_buffers_num;
     RenderBackendPipeline* backend_state;
     PrimitiveTopology primitive_topology;
+    bool depth_test;
 };
 
 struct MeshRenderResource
@@ -196,7 +197,7 @@ static void init_resource(RenderResourceHandle h)
                 vertex_input_types, pr->vertex_input_num,
                 constant_buffer_sizes, constant_buffer_binding_indices, pr->constant_buffers_num,
                 push_constants_sizes, push_constants_shader_types, push_constants_num,
-                pr->primitive_topology);
+                pr->primitive_topology, pr->depth_test);
 
             da_free(push_constants_sizes);
             da_free(push_constants_shader_types);
@@ -516,6 +517,10 @@ RenderResourceHandle renderer_load_resource(const char* filename)
             let jz_prim_topo = jzon_get(jpr.output, "primitive_topology");
             check(jz_prim_topo && jz_prim_topo->is_string, "primitive_topology missing or not string");
             pr.primitive_topology = primitive_topology_str_to_enum(jz_prim_topo->string_val);
+
+            let jz_depth_test = jzon_get(jpr.output, "depth_test");
+            check(jz_depth_test == NULL || jz_depth_test->is_bool, "depth_test must be a bool");
+            pr.depth_test = jz_depth_test == NULL || jz_depth_test->bool_val;
 
             jzon_free(&jpr.output);
 

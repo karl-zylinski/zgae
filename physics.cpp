@@ -303,6 +303,11 @@ void physics_update_world(PhysicsResourceHandle world)
         physics_add_linear_impulse(world, rb->handle, g * rb->mass, dt);
         let wo = get_object(w, rb->object_handle);
 
+        // Move rigidbody according to velocties
+        wo->pos += rb->velocity * dt;
+        wo->rot *= quat_from_axis_angle(rb->angular_velocity, dt);
+
+
         for (u32 world_object_index = 0; world_object_index < w->objects_num; ++world_object_index)
         {
             if (world_object_index == handle_index(rb->object_handle) || !w->objects[world_object_index].used)
@@ -354,7 +359,7 @@ void physics_update_world(PhysicsResourceHandle world)
                 {
                     Vec3 vel_in_sol_dir = project(rb->velocity, coll.solution);
                     let vel_in_surface_dir = rb->velocity - vel_in_sol_dir;
-                    rb->velocity += -vel_in_sol_dir * (1 + wo->material.elasticity); // bounce
+                    rb->velocity += -vel_in_sol_dir * (1 + wo->material.elasticity); // cancel velocty + bounce
                     let friction = fmin(wo->material.friction + w->objects[world_object_index].material.friction, 1);
                     rb->velocity -= vel_in_surface_dir * friction * dt; // friction
                     rb->angular_velocity -= rb->angular_velocity * friction * dt; // angular friction
@@ -382,10 +387,6 @@ void physics_update_world(PhysicsResourceHandle world)
             memf(s1.vertices);
             memf(s2.vertices);
         }
-
-        // Move rigidbody according to velocties
-        wo->pos += rb->velocity * dt;
-        wo->rot *= quat_from_axis_angle(rb->angular_velocity, dt);
     }
 }
 
