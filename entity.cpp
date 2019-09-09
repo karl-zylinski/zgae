@@ -57,7 +57,7 @@ void Entity::create_rigidbody(f32 mass, const Vec3& velocity)
     let e = get_internal();
     check(e->physics_object, "Trying to create rigidbody on entity with no physics representation.");
     check(e->physics_rigidbody == NULL, "Trying to add rigidbody to entity twice");
-    e->physics_rigidbody = physics_create_rigidbody(this, mass, velocity);
+    e->physics_rigidbody = physics_create_rigidbody(e->world->physics_world, e->physics_object, mass, velocity);
 }
 
 const Vec3& Entity::get_position() const

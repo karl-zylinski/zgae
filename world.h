@@ -13,11 +13,11 @@ struct World
     void destroy_entity(WorldEntityHandle weh);
     WorldEntityHandle create_entity(const Vec3& pos, const Quat& rot);
     EntityInt* lookup_entity(WorldEntityHandle e);
+    void update();
 
     RenderResourceHandle render_world;
     PhysicsResourceHandle physics_world;
-    EntityInt* entities;
-    u32 entities_num;
+    EntityInt* entities; // dynamic
     HandlePool* entity_handle_pool;
 };
 

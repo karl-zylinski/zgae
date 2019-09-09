@@ -17,6 +17,8 @@ struct GameState
     World* world;
     PhysicsResourceHandle box_collider;
     RenderResourceHandle box_mesh;
+    PhysicsResourceHandle big_box_collider;
+    RenderResourceHandle big_box_mesh;
 };
 
 static GameState gs = {};
@@ -44,12 +46,15 @@ void game_init()
 
     gs.pipeline = renderer_load_resource("pipeline_default.pipeline");
     gs.box_mesh = renderer_load_resource("box.mesh");
+    gs.big_box_mesh = renderer_load_resource("big_box.mesh");
     let floor_render_mesh = renderer_load_resource("floor.mesh");
 
     gs.world->physics_world = physics_create_world(gs.world->render_world);
     let box_physics_mesh = physics_load_resource("box.mesh");
+    let big_box_physics_mesh = physics_load_resource("big_box.mesh");
     let floor_physics_mesh = physics_load_resource("floor.mesh");
     gs.box_collider = physics_create_collider(box_physics_mesh);
+    gs.big_box_collider = physics_create_collider(big_box_physics_mesh);
     let floor_collider = physics_create_collider(floor_physics_mesh);
 
     PhysicsMaterial floor_material = {
@@ -58,7 +63,7 @@ void game_init()
     };
 
     gs.floor1 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {0, 0, -5}, quat_identity(), vec3_zero, 10000, floor_material, false);
-    gs.floor2 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {-0.5, 15, -5.5}, quat_identity(), vec3_zero, 10000, floor_material, false);
+    gs.floor2 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {-0.5, 15, -10}, quat_identity(), vec3_zero, 10000, floor_material, false);
 
     PhysicsMaterial player_material = {
         .elasticity = 0.3f,
@@ -67,7 +72,7 @@ void game_init()
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, -3}, quat_identity(), vec3_zero,  75, player_material, false)
+        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-0, 15, -8}, quat_identity(), vec3_zero,  75, player_material, false)
     };
 }
 
@@ -80,7 +85,8 @@ bool game_update()
         return false;
 
     renderer_begin_frame(gs.pipeline);
-    physics_update_world(gs.world->physics_world);
+    gs.world->update();
+    
     time_until_spawn -= time_dt();
 
     PhysicsMaterial box_material = {
@@ -100,11 +106,11 @@ bool game_update()
         f32 ry = (rand() % 628)/100;
         f32 rz = (rand() % 628)/100;
         f32 rr = (rand() % 628)/100;*/
-        f32 rx = 1 ;
+        f32 rx = 0 ;
         f32 ry = 0 ;
         f32 rz = 0 ;
-        f32 rr = 0.2 ;
-        spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), {0, 0, 0},  100, box_material, true);
+        f32 rr = 0 ;
+        spawn_entity_at(gs.world, gs.big_box_mesh, gs.big_box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), {0, 0, 0},  100, box_material, true);
     }
 
     gs.player.update();

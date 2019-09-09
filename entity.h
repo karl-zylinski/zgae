@@ -31,6 +31,7 @@ struct Entity
     void set_velocity(const Vec3& vel);
     void add_linear_impulse(const Vec3& force, f32 time);
     void add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force);
+    void update_from_rigidbody();
     RenderWorldObjectHandle get_render_object() const;
     PhysicsObjectHandle get_physics_object() const;
 
