@@ -63,6 +63,7 @@ Vec3 operator-(const Vec3& v1, const Vec3& v2);
 Vec3 operator*(const Vec3& v, f32 s);
 Vec3 operator*(f32 s, const Vec3& v);
 Vec3 operator+(const Vec3& v1, const Vec3& v2);
+Vec3 operator/(const Vec3& v, f32 s);
 void operator+=(Vec3& v1, const Vec3& v2);
 void operator*=(Vec3& v1, f32 s);
 void operator-=(Vec3& v1, const Vec3& v2);

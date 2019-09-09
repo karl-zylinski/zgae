@@ -30,7 +30,7 @@ void Player::update()
     }
 
     if (key_went_down(KEY_SPACE))
-        this->entity.add_force({0, 0, 20});
+        this->entity.add_linear_impulse({0, 0, 1000.0f}, 0.4f);
 
     this->camera.pos = this->entity.get_position();
     let mouse_sens = dt * 0.01f;

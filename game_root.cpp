@@ -22,14 +22,14 @@ struct GameState
 static GameState gs = {};
 
 
-Entity spawn_entity_at(World* w, RenderResourceHandle mesh, PhysicsResourceHandle collider, const Vec3& p, const Quat& r, f32 mass, bool rigidbody)
+Entity spawn_entity_at(World* w, RenderResourceHandle mesh, PhysicsResourceHandle collider, const Vec3& p, const Quat& r, const Vec3& vel, f32 mass, const PhysicsMaterial& pm, bool rigidbody)
 {
     let e = entity_create(w, p, r);
     e.set_render_mesh(mesh);
-    e.set_physics_collider(collider);
+    e.set_physics_collider(collider, pm);
     
     if (rigidbody)
-        e.create_rigidbody(mass);
+        e.create_rigidbody(mass, vel);
 
     return e;
 }
@@ -52,12 +52,22 @@ void game_init()
     gs.box_collider = physics_create_collider(box_physics_mesh);
     let floor_collider = physics_create_collider(floor_physics_mesh);
 
-    gs.floor1 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {0, 0, -5}, quat_identity(), 10000, false);
-    gs.floor2 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {-0.5, 15, -5.5}, quat_identity(), 10000, false);
+    PhysicsMaterial floor_material = {
+        .elasticity = 0,
+        .friction = 0.2f
+    };
+
+    gs.floor1 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {0, 0, -5}, quat_identity(), vec3_zero, 10000, floor_material, false);
+    gs.floor2 = spawn_entity_at(gs.world, floor_render_mesh, floor_collider, {-0.5, 15, -5.5}, quat_identity(), vec3_zero, 10000, floor_material, false);
+
+    PhysicsMaterial player_material = {
+        .elasticity = 0.3f,
+        .friction = 0.3f
+    };
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, -3}, quat_identity(), 75, false)
+        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, -3}, quat_identity(), vec3_zero,  75, player_material, true)
     };
 }
 
@@ -73,7 +83,12 @@ bool game_update()
     physics_update_world(gs.world->physics_world);
     time_until_spawn -= time_dt();
 
-    if (time_until_spawn <= 0.0f && num_spawned < 2)
+    PhysicsMaterial box_material = {
+        .elasticity = 0.6f,
+        .friction = 0.8f
+    };
+
+    if (time_until_spawn <= 0.0f && num_spawned < 1)
     {
         num_spawned++;
         time_until_spawn = 2.0f;
@@ -84,7 +99,7 @@ bool game_update()
         f32 ry = (rand() % 628)/100;
         f32 rz = (rand() % 628)/100;
         f32 rr = (rand() % 628)/100;
-        spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), 100, true);
+        spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), {-1, 0, 0},  100, box_material, true);
     }
 
     gs.player.update();

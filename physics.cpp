@@ -46,11 +46,13 @@ struct PhysicsResourceCollider
     PhysicsResourceHandle mesh;
 };
 
+
 struct PhysicsWorldObject
 {
     bool used;
     PhysicsResourceHandle collider;
     RenderWorldObjectHandle render_handle;
+    PhysicsMaterial material;
     Vec3 pos;
     Quat rot;
 };
@@ -182,8 +184,9 @@ PhysicsResourceHandle physics_load_resource(const char* filename)
     return add_resource(name_hash, type, data);
 }
 
-PhysicsRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass)
+PhysicsRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass, const Vec3& velocity)
 {
+    check(mass > 0, "Mass must be in range (0, inf)");
     let w = get_resource(PhysicsResourceWorld, e->world->physics_world);
     let handle = handle_pool_borrow(w->rigidbody_handle_pool);
     u32 num_needed_rigidbodies = handle_index(handle) + 1;
@@ -199,14 +202,25 @@ PhysicsRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass)
     r->object_handle = e->get_physics_object();
     r->entity = *e;
     r->used = true;
+    r->velocity = velocity;
     return handle;
 }
 
-void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& f)
+void physics_set_velocity(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& vel)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     let rb = get_rigidbody(w, rigidbody_handle);
-    rb->velocity += f*(1/rb->mass)*time_dt();
+    rb->velocity = vel;
+}
+
+
+void physics_add_linear_impulse(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& force, f32 time)
+{
+    let w = get_resource(PhysicsResourceWorld, world);
+    let rb = get_rigidbody(w, rigidbody_handle);
+    check(rb->mass != 0, "OH NO");
+    let acc = (force*time)/rb->mass;
+    rb->velocity += acc;
 }
 
 void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& pivot, const Vec3& point, const Vec3& force)
@@ -237,7 +251,7 @@ PhysicsResourceHandle physics_create_world(RenderResourceHandle render_handle)
     return add_resource(0, PHYSICS_RESOURCE_TYPE_WORLD, w);
 }
 
-PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot)
+PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot, const PhysicsMaterial& pm)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     let h = handle_pool_borrow(w->object_handle_pool);  // TODO: This pattern keeps repeating,
@@ -256,6 +270,7 @@ PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsRe
     o->rot = rot;
     o->render_handle = render_handle;
     o->used = true;
+    o->material = pm;
     return h;
 }
 
@@ -263,6 +278,7 @@ void physics_set_position(PhysicsResourceHandle world, PhysicsObjectHandle obj_h
 {
     let w = get_resource(PhysicsResourceWorld, world);
     let o = get_object(w, obj_handle);
+    check(pos.x == pos.x, "NAN");
     o->pos = pos;
     o->rot = rot;
 }
@@ -281,8 +297,8 @@ void physics_update_world(PhysicsResourceHandle world)
 
         // Update rigidbody state.
         Vec3 g = {0, 0, -9.82f};
-        rb->velocity += g*dt;
 
+        rb->entity.add_linear_impulse(g * rb->mass, dt);
         let wo = get_object(w, rb->object_handle);
 
         for (u32 world_object_index = 0; world_object_index < w->objects_num; ++world_object_index)
@@ -325,11 +341,16 @@ void physics_update_world(PhysicsResourceHandle world)
                 if (dot(rb->velocity, coll.solution) < 0)
                 {
                     Vec3 vel_in_sol_dir = project(rb->velocity, coll.solution);
-                    rb->velocity -= vel_in_sol_dir;
-                    rb->velocity *= 0.9f;
+                    let vel_in_surface_dir = rb->velocity - vel_in_sol_dir;
+                    rb->velocity += -vel_in_sol_dir * (1 + wo->material.elasticity);
+                    rb->velocity -= vel_in_surface_dir * fmin(wo->material.friction + w->objects[world_object_index].material.friction, 1) * dt;
                 }
 
                 rb->entity.move(coll.solution);
+
+                /*rb->velocity -= vel_in_sol_dir;
+                rb->velocity *= 0.9f;
+*/
 
                 /*Vec3 avg_contact_point = coll.contact_point;
                 u32 avg_num_points = 1;

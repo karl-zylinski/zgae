@@ -2,8 +2,9 @@
 #include "math.h"
 #include "physics.h"
 
-fwd_struct(World);
 fwd_handle(WorldEntityHandle);
+fwd_struct(PhysicsMaterial);
+fwd_struct(World);
 
 struct EntityInt
 {
@@ -19,14 +20,15 @@ struct EntityInt
 struct Entity
 {
     void move(const Vec3& d);
-    void rotate(const Vec3& axis, float rad);
-    void create_rigidbody(f32 mass);
+    void rotate(const Vec3& axis, f32 rad);
+    void create_rigidbody(f32 mass, const Vec3& velocity);
     void set_render_mesh(RenderResourceHandle mesh);
-    void set_physics_collider(PhysicsResourceHandle collider);
+    void set_physics_collider(PhysicsResourceHandle collider, const PhysicsMaterial& pm);
     const Vec3& get_position() const;
     void set_position(const Vec3& pos);
     void set_rotation(const Quat& rot);
-    void add_force(const Vec3& f);
+    void set_velocity(const Vec3& vel);
+    void add_linear_impulse(const Vec3& force, f32 time);
     void add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force);
     RenderWorldObjectHandle get_render_object() const;
     PhysicsObjectHandle get_physics_object() const;

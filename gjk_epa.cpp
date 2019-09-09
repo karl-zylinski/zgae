@@ -34,6 +34,7 @@ static SupportDiffPoint support_diff(const GjkShape& s1, const GjkShape& s2, con
 {
     let point = support(s1, d);
     let val = point - support(s2, -d);
+    check(val.x == val.x, "NAN!");
     return {.val = val, .point = point};
 }
 
@@ -414,6 +415,7 @@ static Vec3 barycentric(const Vec3& p, const Vec3& a, const Vec3& b, const Vec3&
     f32 d20 = dot(v2, v0);
     f32 d21 = dot(v2, v1);
     f32 denom = d00 * d11 - d01 * d01;
+    check(denom != 0, "Denominator in barycentric coord calc is zero");
     f32 v = (d11 * d20 - d01 * d21) / denom;
     f32 w = (d00 * d21 - d01 * d20) / denom;
     return {

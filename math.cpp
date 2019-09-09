@@ -216,6 +216,12 @@ void operator-=(Vec3& v1, const Vec3& v2)
     v1 = v1 - v2;
 }
 
+Vec3 operator/(const Vec3& v, f32 s)
+{
+    check(s != 0, "Trying to divide by zero");
+    return {v.x / s, v.y / s, v.z / s};
+}
+
 Vec3 project(const Vec3& v, const Vec3& on)
 {
     let unit_dir = on*(1/len(on));

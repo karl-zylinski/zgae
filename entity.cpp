@@ -27,7 +27,7 @@ void Entity::move(const Vec3& d)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
-void Entity::rotate(const Vec3& axis, float rad)
+void Entity::rotate(const Vec3& axis, f32 rad)
 {
     let e = get_internal();
     let r = quat_from_axis_angle(axis, rad);
@@ -40,12 +40,12 @@ void Entity::rotate(const Vec3& axis, float rad)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
-void Entity::create_rigidbody(f32 mass)
+void Entity::create_rigidbody(f32 mass, const Vec3& velocity)
 {
     let e = get_internal();
     check(e->physics_object, "Trying to create rigidbody on entity with no physics representation.");
     check(e->physics_rigidbody == NULL, "Trying to add rigidbody to entity twice");
-    e->physics_rigidbody = physics_create_rigidbody(this, mass);
+    e->physics_rigidbody = physics_create_rigidbody(this, mass, velocity);
 }
 
 const Vec3& Entity::get_position() const
@@ -59,10 +59,10 @@ void Entity::set_render_mesh(RenderResourceHandle mesh)
     e->render_object = renderer_create_object(e->world->render_world, mesh, e->pos, e->rot);
 }
 
-void Entity::set_physics_collider(PhysicsResourceHandle collider)
+void Entity::set_physics_collider(PhysicsResourceHandle collider, const PhysicsMaterial& pm)
 {
     let e = get_internal();
-    e->physics_object = physics_create_object(e->world->physics_world, collider, e->render_object, e->pos, e->rot);
+    e->physics_object = physics_create_object(e->world->physics_world, collider, e->render_object, e->pos, e->rot, pm);
 }
 
 void Entity::set_position(const Vec3& pos)
@@ -89,14 +89,30 @@ void Entity::set_rotation(const Quat& rot)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
-void Entity::add_force(const Vec3& f)
+void Entity::set_velocity(const Vec3& vel)
 {
     let e = get_internal();
 
     if (!e->physics_rigidbody)
+    {
+        info("Using set_velocity: Entity has no rigidbody");
         return;
+    }
 
-    physics_add_force(e->world->physics_world, e->physics_rigidbody, f);
+    physics_set_velocity(e->world->physics_world, e->physics_rigidbody, vel);
+}
+
+void Entity::add_linear_impulse(const Vec3& force, f32 time)
+{
+    let e = get_internal();
+
+    if (!e->physics_rigidbody)
+    {
+        info("Trying to run add_linear_impulse on Entity that has no rigidbody");
+        return;
+    }
+
+    physics_add_linear_impulse(e->world->physics_world, e->physics_rigidbody, force, time);
 }
 
 void Entity::add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force)
