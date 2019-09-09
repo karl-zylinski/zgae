@@ -60,7 +60,9 @@ struct PhysicsWorldObject
 struct RecentCollision
 {
     f32 time;
+    u32 object_idx;
     Vec3 contact_point;
+    Vec3 solution;
 };
 
 struct Rigidbody
@@ -71,7 +73,7 @@ struct Rigidbody
     Vec3 angular_velocity;
     f32 mass;
     Entity entity;
-    #define RECENT_COLLISIONS_NUM 2
+    #define RECENT_COLLISIONS_NUM 4
     RecentCollision recent_collisions[RECENT_COLLISIONS_NUM];
 };
 
@@ -287,7 +289,7 @@ void physics_update_world(PhysicsResourceHandle world)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     float dt = time_dt();
-    //float t = time_since_start();
+    float t = time_since_start();
 
     for (u32 rigidbody_idx = 0; rigidbody_idx < w->rigidbodies_num; ++rigidbody_idx)
     {
@@ -338,49 +340,65 @@ void physics_update_world(PhysicsResourceHandle world)
 
             if (coll.colliding)
             {
-                if (dot(rb->velocity, coll.solution) < 0)
-                {
-                    Vec3 vel_in_sol_dir = project(rb->velocity, coll.solution);
-                    let vel_in_surface_dir = rb->velocity - vel_in_sol_dir;
-                    rb->velocity += -vel_in_sol_dir * (1 + wo->material.elasticity);
-                    rb->velocity -= vel_in_surface_dir * fmin(wo->material.friction + w->objects[world_object_index].material.friction, 1) * dt;
-                }
+                // Cache contact point
 
-                rb->entity.move(coll.solution);
-
-                /*rb->velocity -= vel_in_sol_dir;
-                rb->velocity *= 0.9f;
-*/
-
-                /*Vec3 avg_contact_point = coll.contact_point;
-                u32 avg_num_points = 1;
-                for (u32 rc_coll_idx = 0; rc_coll_idx < RECENT_COLLISIONS_NUM; ++rc_coll_idx)
-                {
-                    if (rb->recent_collisions[rc_coll_idx].time == 0 || (t - rb->recent_collisions[rc_coll_idx].time) > 0.5f)
-                        continue;
-
-                    avg_contact_point += rb->recent_collisions[rc_coll_idx].contact_point;
-                    ++avg_num_points;
-                }
-
-                let n = normalize(coll.solution);
-                avg_contact_point *= (1.0f/avg_num_points);
                 memmove(rb->recent_collisions + 1, rb->recent_collisions, sizeof(RecentCollision) * (RECENT_COLLISIONS_NUM - 1));
                 rb->recent_collisions[0].contact_point = coll.contact_point;
+                rb->recent_collisions[0].object_idx = world_object_index;
+                rb->recent_collisions[0].solution = coll.solution;
                 rb->recent_collisions[0].time = t;
-                rb->entity.add_torque(avg_contact_point, wo->pos, rb->mass*g*dt);
-                
+                rb->entity.move(coll.solution);
+            }
 
-                let tangetial_contact_speed = cross(rb->angular_velocity, (coll.contact_point - wo->pos));
-                let surface_rot_friction = fabs(dot(tangetial_contact_speed, n));
-                rb->angular_velocity -= rb->angular_velocity * surface_rot_friction * 0.5;
+            // Now we look at all recent contacts points to see how it should be rotated.
 
-                Vec3 dbg_pts[] = {avg_contact_point, wo->pos, wo->pos + rb->mass*g};
+            RecentCollision recent[RECENT_COLLISIONS_NUM];
+            u32 recent_num = 0;
+            for (u32 rc_coll_idx = 0; rc_coll_idx < RECENT_COLLISIONS_NUM; ++rc_coll_idx)
+            {
+                if (rb->recent_collisions[rc_coll_idx].object_idx != world_object_index || rb->recent_collisions[rc_coll_idx].time == 0 || (t - rb->recent_collisions[rc_coll_idx].time) > 0.05f)
+                    continue;
+
+                recent[rc_coll_idx] = rb->recent_collisions[rc_coll_idx];
+                ++recent_num;
+            }
+
+            Vec3 rot = {};
+            for (u32 ri = 0; ri < recent_num; ++ri)
+            {
+                let sol = recent[ri].solution;
+                let cp = recent[ri].contact_point;
+
+                // The first part here is just getting out of collision and using friction etc.
+                #define SOLUTION_THRES 0.0001f
+                if (dot(rb->velocity, sol) < 0 && len(sol) > SOLUTION_THRES)
+                {
+                    Vec3 vel_in_sol_dir = project(rb->velocity, sol);
+                    check(vel_in_sol_dir.x == vel_in_sol_dir.x, "NAN");
+                    let vel_in_surface_dir = rb->velocity - vel_in_sol_dir;
+                    rb->velocity += -vel_in_sol_dir * (1 + wo->material.elasticity); // bounce
+                    let friction = fmax(wo->material.friction + w->objects[world_object_index].material.friction, 1);
+                    rb->velocity -= vel_in_surface_dir * friction * dt; // friction
+                    rb->angular_velocity -= rb->angular_velocity * friction * dt; // angular friction
+                }
+
+                // Rotation
+
+                let arm = wo->pos - cp;
+                let larm = len(arm);
+                let torque = cross(arm, rb->mass*g);
+                let inertia = (larm * larm * rb->mass);
+                rot += (torque * dt) / inertia ;
+                check(rot.x == rot.x, "NAN");
+
+                Vec3 dbg_pts[] = {cp, wo->pos, wo->pos + rb->mass*g};
                 Vec4 dbg_colors[] = {vec4_red, vec4_green, vec4_red};
 
                 let c = debug_get_camera();
-                renderer_debug_draw(dbg_pts, 3, dbg_colors, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);*/
+                renderer_debug_draw(dbg_pts, 3, dbg_colors, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
             }
+
+            rb->angular_velocity += rot;
 
             memf(s1.vertices);
             memf(s2.vertices);
@@ -388,7 +406,7 @@ void physics_update_world(PhysicsResourceHandle world)
 
         // Move rigidbody according to velocties
         rb->entity.move(rb->velocity * dt);
-        //rb->entity.rotate(rb->angular_velocity, dt);
+        rb->entity.rotate(rb->angular_velocity, dt);
     }
 }
 

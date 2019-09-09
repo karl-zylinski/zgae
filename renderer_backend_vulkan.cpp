@@ -1054,7 +1054,7 @@ RenderBackendPipeline* renderer_backend_create_pipeline(
     // Depth-stencil settings
     VkPipelineDepthStencilStateCreateInfo pdssci = {};
     pdssci.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    pdssci.depthTestEnable = VK_TRUE;
+    pdssci.depthTestEnable = VK_FALSE;
     pdssci.depthWriteEnable = VK_TRUE;
     pdssci.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     pdssci.depthBoundsTestEnable = VK_FALSE;

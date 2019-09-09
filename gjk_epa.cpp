@@ -439,6 +439,7 @@ GjkEpaSolution gjk_epa_intersect_and_solve(const GjkShape& s1, const GjkShape& s
 
     let bary = barycentric(-epa_result.solution, epa_result.face.vertices[0].val, epa_result.face.vertices[1].val, epa_result.face.vertices[2].val);
     Vec3 contact_point = bary.x * epa_result.face.vertices[0].point + bary.y * epa_result.face.vertices[1].point + bary.z * epa_result.face.vertices[2].point;
+    check(contact_point.z == contact_point.z, "NAN");
 
     return {
         .colliding = true,

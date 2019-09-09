@@ -67,7 +67,7 @@ void game_init()
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, -3}, quat_identity(), vec3_zero,  75, player_material, true)
+        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-2, 0, -3}, quat_identity(), vec3_zero,  75, player_material, false)
     };
 }
 
@@ -84,7 +84,7 @@ bool game_update()
     time_until_spawn -= time_dt();
 
     PhysicsMaterial box_material = {
-        .elasticity = 0.6f,
+        .elasticity = 0.0,
         .friction = 0.8f
     };
 
@@ -93,13 +93,18 @@ bool game_update()
         num_spawned++;
         time_until_spawn = 2.0f;
         f32 x = ((rand() % 10000)-5000)/10000.0f;
-        f32 y = ((rand() % 10000)-5000)/10000.0f + 10;
+        //f32 y = ((rand() % 10000)-5000)/10000.0f + 10;
+        f32 y = 10;
         f32 z = ((rand() % 10000)-5000)/10000.0f + 3.0f + (rand() % 10000)/10000.0f;
-        f32 rx = (rand() % 628)/100;
+        /*f32 rx = (rand() % 628)/100;
         f32 ry = (rand() % 628)/100;
         f32 rz = (rand() % 628)/100;
-        f32 rr = (rand() % 628)/100;
-        spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), {-1, 0, 0},  100, box_material, true);
+        f32 rr = (rand() % 628)/100;*/
+        f32 rx = 1 ;
+        f32 ry = 0 ;
+        f32 rz = 0 ;
+        f32 rr = 0.2 ;
+        spawn_entity_at(gs.world, gs.box_mesh, gs.box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), {0, 0, 0},  100, box_material, true);
     }
 
     gs.player.update();
