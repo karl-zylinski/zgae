@@ -100,6 +100,9 @@ int main()
 
         Vec3 v3 = cross(v1, v2);
         assert(v3.x == 0 && v3.y == 0 && v3.z == 1);
+
+        Vec3 v4 = cross(v1, v1);
+        assert(v4.x == 0 && v4.y == 0 && v4.z == 0);
     }
 
     info("All tests completed without errors");

@@ -19,6 +19,7 @@
 #include "camera.h"
 #include <string.h>
 #include <math.h>
+#include "dynamic_array.h"
 
 struct PhysicsResource
 {
@@ -63,6 +64,7 @@ struct RecentCollision
     u32 object_idx;
     Vec3 contact_point;
     Vec3 solution;
+    Vec3 rigidbody_pos;
 };
 
 struct Rigidbody
@@ -73,7 +75,7 @@ struct Rigidbody
     Vec3 angular_velocity;
     f32 mass;
     Entity entity;
-    #define RECENT_COLLISIONS_NUM 4
+    #define RECENT_COLLISIONS_NUM 1
     RecentCollision recent_collisions[RECENT_COLLISIONS_NUM];
 };
 
@@ -82,9 +84,8 @@ struct PhysicsResourceWorld
     HandlePool* object_handle_pool;
     HandlePool* rigidbody_handle_pool;
     PhysicsWorldObject* objects;
-    Rigidbody* rigidbodies;
+    Rigidbody* rigidbodies; // dynamic
     u32 objects_num;
-    u32 rigidbodies_num;
     RenderResourceHandle render_handle;
 };
 
@@ -191,20 +192,24 @@ PhysicsRigidbodyHandle physics_create_rigidbody(Entity* e, f32 mass, const Vec3&
     check(mass > 0, "Mass must be in range (0, inf)");
     let w = get_resource(PhysicsResourceWorld, e->world->physics_world);
     let handle = handle_pool_borrow(w->rigidbody_handle_pool);
-    u32 num_needed_rigidbodies = handle_index(handle) + 1;
-    if (num_needed_rigidbodies > w->rigidbodies_num)
+    let idx = handle_index(handle);
+
+    Rigidbody r = {
+        .mass = mass,
+        .object_handle = e->get_physics_object(),
+        .entity = *e,
+        .used = true,
+        .velocity = velocity
+    };
+
+    if (idx < da_num(w->rigidbodies))
     {
-        let new_num = num_needed_rigidbodies ? num_needed_rigidbodies * 2 : 1;
-        w->rigidbodies = (Rigidbody*)memra_zero_added(w->rigidbodies, new_num * sizeof(Rigidbody), w->rigidbodies_num * sizeof(Rigidbody));
-        w->rigidbodies_num = new_num;
+        w->rigidbodies[idx] = r;
+        return handle;
     }
-    Rigidbody* r = w->rigidbodies + handle_index(handle);
-    memzero(r, sizeof(Rigidbody));
-    r->mass = mass;
-    r->object_handle = e->get_physics_object();
-    r->entity = *e;
-    r->used = true;
-    r->velocity = velocity;
+
+    check(idx == da_num(w->rigidbodies), "Mismatch between handle index and num rigidbodies");
+    da_push(w->rigidbodies, r);
     return handle;
 }
 
@@ -291,7 +296,7 @@ void physics_update_world(PhysicsResourceHandle world)
     float dt = time_dt();
     float t = time_since_start();
 
-    for (u32 rigidbody_idx = 0; rigidbody_idx < w->rigidbodies_num; ++rigidbody_idx)
+    for (u32 rigidbody_idx = 0; rigidbody_idx < da_num(w->rigidbodies); ++rigidbody_idx)
     {
         let rb = w->rigidbodies + rigidbody_idx;
         if (!rb->used)
@@ -340,6 +345,17 @@ void physics_update_world(PhysicsResourceHandle world)
 
             if (coll.colliding)
             {
+                // The first part here is just getting out of collision and using friction etc.
+                #define SOLUTION_THRES 0.0001f
+                if (dot(rb->velocity, coll.solution) < 0 && len(coll.solution) > SOLUTION_THRES)
+                {
+                    Vec3 vel_in_sol_dir = project(rb->velocity, coll.solution);
+                    let vel_in_surface_dir = rb->velocity - vel_in_sol_dir;
+                    rb->velocity += -vel_in_sol_dir * (1 + wo->material.elasticity); // bounce
+                    let friction = fmax(wo->material.friction + w->objects[world_object_index].material.friction, 1);
+                    rb->velocity -= vel_in_surface_dir * friction * dt; // friction
+                    //rb->angular_velocity -= rb->angular_velocity * friction * dt; // angular friction
+                }
                 // Cache contact point
 
                 memmove(rb->recent_collisions + 1, rb->recent_collisions, sizeof(RecentCollision) * (RECENT_COLLISIONS_NUM - 1));
@@ -347,6 +363,7 @@ void physics_update_world(PhysicsResourceHandle world)
                 rb->recent_collisions[0].object_idx = world_object_index;
                 rb->recent_collisions[0].solution = coll.solution;
                 rb->recent_collisions[0].time = t;
+                rb->recent_collisions[0].rigidbody_pos = wo->pos;
                 rb->entity.move(coll.solution);
             }
 
@@ -354,9 +371,10 @@ void physics_update_world(PhysicsResourceHandle world)
 
             RecentCollision recent[RECENT_COLLISIONS_NUM];
             u32 recent_num = 0;
+            #define TIME_THRESHOLD 0.1f
             for (u32 rc_coll_idx = 0; rc_coll_idx < RECENT_COLLISIONS_NUM; ++rc_coll_idx)
             {
-                if (rb->recent_collisions[rc_coll_idx].object_idx != world_object_index || rb->recent_collisions[rc_coll_idx].time == 0 || (t - rb->recent_collisions[rc_coll_idx].time) > 0.05f)
+                if (rb->recent_collisions[rc_coll_idx].object_idx != world_object_index || rb->recent_collisions[rc_coll_idx].time == 0 || (t - rb->recent_collisions[rc_coll_idx].time) > TIME_THRESHOLD)
                     continue;
 
                 recent[rc_coll_idx] = rb->recent_collisions[rc_coll_idx];
@@ -366,39 +384,31 @@ void physics_update_world(PhysicsResourceHandle world)
             Vec3 rot = {};
             for (u32 ri = 0; ri < recent_num; ++ri)
             {
-                let sol = recent[ri].solution;
                 let cp = recent[ri].contact_point;
-
-                // The first part here is just getting out of collision and using friction etc.
-                #define SOLUTION_THRES 0.0001f
-                if (dot(rb->velocity, sol) < 0 && len(sol) > SOLUTION_THRES)
-                {
-                    Vec3 vel_in_sol_dir = project(rb->velocity, sol);
-                    check(vel_in_sol_dir.x == vel_in_sol_dir.x, "NAN");
-                    let vel_in_surface_dir = rb->velocity - vel_in_sol_dir;
-                    rb->velocity += -vel_in_sol_dir * (1 + wo->material.elasticity); // bounce
-                    let friction = fmax(wo->material.friction + w->objects[world_object_index].material.friction, 1);
-                    rb->velocity -= vel_in_surface_dir * friction * dt; // friction
-                    rb->angular_velocity -= rb->angular_velocity * friction * dt; // angular friction
-                }
+                let p = recent[ri].rigidbody_pos;
 
                 // Rotation
 
-                let arm = wo->pos - cp;
+                let arm = p - cp;
+                info("%f %f %f", p.x, p.y, p.z);
                 let larm = len(arm);
                 let torque = cross(arm, rb->mass*g);
-                let inertia = (larm * larm * rb->mass);
-                rot += (torque * dt) / inertia ;
-                check(rot.x == rot.x, "NAN");
+                //info("%f %f %f", torque.x, torque.y, torque.z);
+                let inertia = (larm * larm * rb->mass * 100);
+                rot += (torque) / inertia ;
 
-                Vec3 dbg_pts[] = {cp, wo->pos, wo->pos + rb->mass*g};
+                Vec3 dbg_pts[] = {cp, p, p + rb->mass*g};
                 Vec4 dbg_colors[] = {vec4_red, vec4_green, vec4_red};
 
                 let c = debug_get_camera();
                 renderer_debug_draw(dbg_pts, 3, dbg_colors, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
             }
 
-            rb->angular_velocity += rot;
+            if (recent_num > 0)
+            {
+                rb->angular_velocity += rot;
+                info("%f", len(rb->angular_velocity));
+            }
 
             memf(s1.vertices);
             memf(s2.vertices);
@@ -424,7 +434,7 @@ static void destroy_resource(PhysicsResourceHandle h)
         case PHYSICS_RESOURCE_TYPE_WORLD: {
             let w = get_resource(PhysicsResourceWorld, h);
             memf(w->objects);
-            memf(w->rigidbodies);
+            da_free(w->rigidbodies);
             handle_pool_destroy(w->object_handle_pool);
             handle_pool_destroy(w->rigidbody_handle_pool);
         } break;

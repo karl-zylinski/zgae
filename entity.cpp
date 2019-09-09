@@ -40,6 +40,18 @@ void Entity::rotate(const Vec3& axis, f32 rad)
         renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
 }
 
+void Entity::rotate(const Quat& q)
+{
+    let e = get_internal();
+    e->rot *= q;
+
+    if (e->physics_object)
+        physics_set_position(e->world->physics_world, e->physics_object, e->pos, e->rot);
+
+    if (e->render_object)
+        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
+}
+
 void Entity::create_rigidbody(f32 mass, const Vec3& velocity)
 {
     let e = get_internal();

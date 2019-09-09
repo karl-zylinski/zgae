@@ -21,6 +21,7 @@ struct Entity
 {
     void move(const Vec3& d);
     void rotate(const Vec3& axis, f32 rad);
+    void rotate(const Quat& q);
     void create_rigidbody(f32 mass, const Vec3& velocity);
     void set_render_mesh(RenderResourceHandle mesh);
     void set_physics_collider(PhysicsResourceHandle collider, const PhysicsMaterial& pm);
