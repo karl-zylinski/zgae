@@ -23,8 +23,8 @@ void Entity::move(const Vec3& d)
     if (e->physics_object)
         physics_set_position(e->world->physics_world, e->physics_object, e->pos, e->rot);
 
-    if (e->render_object)
-        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
+    if (e->render_object_idx)
+        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object_idx, e->pos, e->rot);
 }
 
 void Entity::rotate(const Vec3& axis, f32 rad)
@@ -36,8 +36,8 @@ void Entity::rotate(const Vec3& axis, f32 rad)
     if (e->physics_object)
         physics_set_position(e->world->physics_world, e->physics_object, e->pos, e->rot);
 
-    if (e->render_object)
-        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
+    if (e->render_object_idx)
+        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object_idx, e->pos, e->rot);
 }
 
 void Entity::rotate(const Quat& q)
@@ -48,8 +48,8 @@ void Entity::rotate(const Quat& q)
     if (e->physics_object)
         physics_set_position(e->world->physics_world, e->physics_object, e->pos, e->rot);
 
-    if (e->render_object)
-        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
+    if (e->render_object_idx)
+        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object_idx, e->pos, e->rot);
 }
 
 void Entity::create_rigidbody(f32 mass, const Vec3& velocity)
@@ -68,13 +68,13 @@ const Vec3& Entity::get_position() const
 void Entity::set_render_mesh(RenderResourceHandle mesh)
 {
     let e = get_internal();
-    e->render_object = renderer_create_object(e->world->render_world, mesh, e->pos, e->rot);
+    e->render_object_idx = renderer_create_object(e->world->render_world, mesh, e->pos, e->rot);
 }
 
 void Entity::set_physics_collider(const PhysicsCollider& collider, const PhysicsMaterial& pm)
 {
     let e = get_internal();
-    e->physics_object = physics_create_object(e->world->physics_world, collider, e->render_object, e->pos, e->rot, pm);
+    e->physics_object = physics_create_object(e->world->physics_world, collider, e->render_object_idx, e->pos, e->rot, pm);
 }
 
 void Entity::set_position(const Vec3& pos)
@@ -85,8 +85,8 @@ void Entity::set_position(const Vec3& pos)
     if (e->physics_object)
         physics_set_position(e->world->physics_world, e->physics_object, e->pos, e->rot);
 
-    if (e->render_object)
-        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
+    if (e->render_object_idx)
+        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object_idx, e->pos, e->rot);
 }
 
 void Entity::set_rotation(const Quat& rot)
@@ -97,8 +97,8 @@ void Entity::set_rotation(const Quat& rot)
     if (e->physics_object)
         physics_set_position(e->world->physics_world, e->physics_object, e->pos, e->rot);
     
-    if (e->render_object)
-        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
+    if (e->render_object_idx)
+        renderer_world_set_position_and_rotation(e->world->render_world, e->render_object_idx, e->pos, e->rot);
 }
 
 void Entity::set_velocity(const Vec3& vel)
@@ -137,9 +137,9 @@ void Entity::add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force)
     physics_add_torque(e->world->physics_world, e->physics_rigidbody, pivot, point, force);
 }
 
-RenderWorldObjectHandle Entity::get_render_object() const
+u32 Entity::get_render_object_idx() const
 {
-    return get_internal()->render_object;
+    return get_internal()->render_object_idx;
 }
 
 PhysicsObjectHandle Entity::get_physics_object() const

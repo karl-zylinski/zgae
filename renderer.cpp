@@ -613,7 +613,7 @@ u32 renderer_create_object(RenderWorld* w, RenderResourceHandle mesh, const Vec3
         return idx;
     }
 
-    RenderWorldObjectHandle h = da_num(w->objects);
+    u32 h = da_num(w->objects);
 
     WorldObject wo = {
         .mesh = mesh,
@@ -624,16 +624,16 @@ u32 renderer_create_object(RenderWorld* w, RenderResourceHandle mesh, const Vec3
     return h;
 }
 
-void renderer_destroy_object(RenderWorld* w, RenderWorldObjectHandle h)
+void renderer_destroy_object(RenderWorld* w, u32 object_idx)
 {
-    check(w->objects[h].mesh == HANDLE_INVALID, "Trying to remove from world twice");
-    w->objects[h].mesh = HANDLE_INVALID;
-    da_push(w->free_object_indices, h);
+    check(w->objects[object_idx].mesh == HANDLE_INVALID, "Trying to remove from world twice");
+    w->objects[object_idx].mesh = HANDLE_INVALID;
+    da_push(w->free_object_indices, object_idx);
 }
 
-void renderer_world_set_position_and_rotation(RenderWorld* w, RenderWorldObjectHandle h, const Vec3& pos, const Quat& rot)
+void renderer_world_set_position_and_rotation(RenderWorld* w, u32 object_idx, const Vec3& pos, const Quat& rot)
 {
-    w->objects[h].model = mat4_from_rotation_and_translation(rot, pos);
+    w->objects[object_idx].model = mat4_from_rotation_and_translation(rot, pos);
 }
 
 static void populate_constant_buffers(const PipelineRenderResource& pr, const Mat4& model_matrix, const Mat4& mvp_matrix)

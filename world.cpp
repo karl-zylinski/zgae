@@ -87,8 +87,8 @@ void World::update()
             e->pos = pos;
             e->rot = rot;
 
-            if (e->render_object)
-                renderer_world_set_position_and_rotation(e->world->render_world, e->render_object, e->pos, e->rot);
+            if (e->render_object_idx)
+                renderer_world_set_position_and_rotation(e->world->render_world, e->render_object_idx, e->pos, e->rot);
         }
     }
 }

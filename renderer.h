@@ -7,7 +7,6 @@ fwd_struct(Vec4);
 fwd_struct(Mat4);
 fwd_enum(PrimitiveTopology);
 fwd_struct(RenderWorld);
-typedef u32 RenderWorldObjectHandle;
 
 struct GenericWindowInfo
 {
@@ -24,9 +23,9 @@ void renderer_init(WindowType window_type, const GenericWindowInfo& window_data)
 void renderer_shutdown();
 RenderWorld* renderer_create_world();
 void renderer_destroy_world(RenderWorld* w);
-RenderWorldObjectHandle renderer_create_object(RenderWorld* w, RenderResourceHandle mesh, const Vec3& position, const Quat& rot);
-void renderer_destroy_object(RenderWorld* w, RenderWorldObjectHandle h);
-void renderer_world_set_position_and_rotation(RenderWorld* w, RenderWorldObjectHandle h, const Vec3& position, const Quat& rot);
+u32 renderer_create_object(RenderWorld* w, RenderResourceHandle mesh, const Vec3& position, const Quat& rot);
+void renderer_destroy_object(RenderWorld* w, u32 object_idx);
+void renderer_world_set_position_and_rotation(RenderWorld* w, u32 object_idx, const Vec3& position, const Quat& rot);
 RenderResourceHandle renderer_load_resource(const char* filename);
 void renderer_begin_frame(RenderResourceHandle pipeline_handle);
 void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderWorld* w, const Vec3& cam_pos, const Quat& cam_rot);

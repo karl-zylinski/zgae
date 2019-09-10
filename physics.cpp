@@ -43,7 +43,7 @@ struct PhysicsWorldObject
     bool used;
     PhysicsCollider collider;
     PhysicsRigidbodyHandle rigidbody_handle;
-    RenderWorldObjectHandle render_handle;
+    u32 render_object_idx;
     PhysicsMaterial material;
     Vec3 pos;
     Quat rot;
@@ -242,7 +242,7 @@ PhysicsWorld* physics_create_world()
     return w;
 }
 
-PhysicsObjectHandle physics_create_object(PhysicsWorld* w, const PhysicsCollider& collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot, const PhysicsMaterial& pm)
+PhysicsObjectHandle physics_create_object(PhysicsWorld* w, const PhysicsCollider& collider, u32 render_object_idx, const Vec3& pos, const Quat& rot, const PhysicsMaterial& pm)
 {
     let h = handle_pool_borrow(w->object_handle_pool);  // TODO: This pattern keeps repeating,
     u32 num_needed_objects = handle_index(h) + 1;       // make it general and put in handle_pool.h?
@@ -258,7 +258,7 @@ PhysicsObjectHandle physics_create_object(PhysicsWorld* w, const PhysicsCollider
     o->collider = collider;
     o->pos = pos;
     o->rot = rot;
-    o->render_handle = render_handle;
+    o->render_object_idx = render_object_idx;
     o->used = true;
     o->material = pm;
     return h;

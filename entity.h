@@ -10,7 +10,7 @@ struct EntityInt
     Vec3 pos;
     Quat rot;
     World* world;
-    RenderWorldObjectHandle render_object;
+    u32 render_object_idx;
     PhysicsObjectHandle physics_object;
     PhysicsRigidbodyHandle physics_rigidbody;
     WorldEntityHandle handle;
@@ -31,7 +31,7 @@ struct Entity
     void add_force(const Vec3& f);
     void add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force);
     void update_from_rigidbody();
-    RenderWorldObjectHandle get_render_object() const;
+    u32 get_render_object_idx() const;
     PhysicsObjectHandle get_physics_object() const;
 
     World* world;

@@ -31,7 +31,7 @@ PhysicsCollider physics_create_collider(PhysicsResourceHandle mesh);
 PhysicsWorld* physics_create_world();
 void physics_destroy_world(PhysicsWorld* w);
 PhysicsResourceHandle physics_load_resource(const char* filename);
-PhysicsObjectHandle physics_create_object(PhysicsWorld* w, const PhysicsCollider& collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot, const PhysicsMaterial& = {});
+PhysicsObjectHandle physics_create_object(PhysicsWorld* w, const PhysicsCollider& collider, u32 render_object_idx, const Vec3& pos, const Quat& rot, const PhysicsMaterial& = {});
 PhysicsRigidbodyHandle physics_create_rigidbody(PhysicsWorld* w, PhysicsObjectHandle object_handle,  f32 mass, const Vec3& velocity);
 void physics_set_velocity(PhysicsWorld* w, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& vel);
 void physics_add_force(PhysicsWorld* w, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& f);
