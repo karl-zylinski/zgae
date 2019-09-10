@@ -48,7 +48,7 @@ struct WorldObject
     RenderResourceHandle mesh;
 };
 
-struct WorldRenderResource
+struct RenderWorld
 {
     WorldObject* objects; // dynamic
     u32* free_object_indices; // dynamic, holes in objects
@@ -56,7 +56,7 @@ struct WorldRenderResource
 
 static const char* render_resource_type_names[] =
 {
-    "invalid", "shader", "pipeline", "mesh", "world"
+    "invalid", "shader", "pipeline", "mesh"
 };
 
 static RenderResourceType resource_type_from_str(const char* str)
@@ -130,8 +130,6 @@ static void deinit_resource(RenderResourceHandle h)
         case RENDER_RESOURCE_TYPE_MESH: {
             renderer_backend_destroy_mesh(get_resource(MeshRenderResource, h)->backend_state);
         } break;
-
-        case RENDER_RESOURCE_TYPE_WORLD: {} break;
 
         default: error("Implement me!");
     }
@@ -259,11 +257,6 @@ static void destroy_resource(RenderResourceHandle h)
             MeshRenderResource* g = get_resource(MeshRenderResource, h);
             memf(g->mesh.vertices);
             memf(g->mesh.indices);
-        } break;
-
-        case RENDER_RESOURCE_TYPE_WORLD: {
-            WorldRenderResource* w = get_resource(WorldRenderResource, h);
-            da_free(w->objects);
         } break;
 
         default: error("Invalid resource in render resource list");
@@ -594,35 +587,22 @@ void renderer_shutdown()
     handle_pool_destroy(rs.resource_handle_pool);
 }
 
-RenderResourceHandle renderer_create_world()
+RenderWorld* renderer_create_world()
 {
-    RenderResourceHandle h = handle_pool_borrow(rs.resource_handle_pool, (u32)RENDER_RESOURCE_TYPE_WORLD);
-    let wrr = mema_zero_t(WorldRenderResource);
+    let w = mema_zero_t(RenderWorld);
     WorldObject dummy = {};
-    da_push(wrr->objects, dummy);
-    RenderResource r = {
-        .handle = h,
-        .data = wrr
-    };
-
-    u32 num_needed_resources = handle_index(h) + 1;
-    if (num_needed_resources > rs.resources_num)
-    {
-        rs.resources = (RenderResource*)memra_zero_added(rs.resources, num_needed_resources * sizeof(RenderResource), rs.resources_num * sizeof(RenderResource));
-        rs.resources_num = num_needed_resources;
-    }
-    rs.resources[handle_index(h)] = r;
-    return h;
+    da_push(w->objects, dummy);
+    return w;
 }
 
-void renderer_destroy_world(RenderResourceHandle h)
+void renderer_destroy_world(RenderWorld* w)
 {
-    destroy_resource(h);
+    da_free(w->objects);
+    memf(w);
 }
 
-u32 renderer_create_object(RenderResourceHandle world, RenderResourceHandle mesh, const Vec3& pos, const Quat& rot)
+u32 renderer_create_object(RenderWorld* w, RenderResourceHandle mesh, const Vec3& pos, const Quat& rot)
 {
-    WorldRenderResource* w = get_resource(WorldRenderResource, world);
     Mat4 model = mat4_from_rotation_and_translation(rot, pos);
 
     if (da_num(w->free_object_indices) > 0)
@@ -644,17 +624,15 @@ u32 renderer_create_object(RenderResourceHandle world, RenderResourceHandle mesh
     return h;
 }
 
-void renderer_destroy_object(RenderResourceHandle world, RenderWorldObjectHandle h)
+void renderer_destroy_object(RenderWorld* w, RenderWorldObjectHandle h)
 {
-    WorldRenderResource* w = get_resource(WorldRenderResource, world);
     check(w->objects[h].mesh == HANDLE_INVALID, "Trying to remove from world twice");
     w->objects[h].mesh = HANDLE_INVALID;
     da_push(w->free_object_indices, h);
 }
 
-void renderer_world_set_position_and_rotation(RenderResourceHandle world, RenderWorldObjectHandle h, const Vec3& pos, const Quat& rot)
+void renderer_world_set_position_and_rotation(RenderWorld* w, RenderWorldObjectHandle h, const Vec3& pos, const Quat& rot)
 {
-    WorldRenderResource* w = get_resource(WorldRenderResource, world);
     w->objects[h].model = mat4_from_rotation_and_translation(rot, pos);
 }
 
@@ -713,10 +691,8 @@ void renderer_draw(RenderResourceHandle pipeline_handle, RenderResourceHandle me
     renderer_backend_draw(pipeline->backend_state, get_resource(MeshRenderResource, mesh_handle)->backend_state, mvp_matrix, model);
 }
 
-void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderResourceHandle world_handle, const Vec3& cam_pos, const Quat& cam_rot)
+void renderer_draw_world(RenderResourceHandle pipeline_handle, RenderWorld* w, const Vec3& cam_pos, const Quat& cam_rot)
 {
-    WorldRenderResource* w = get_resource(WorldRenderResource, world_handle);
-
     for (u32 i = 0; i < da_num(w->objects); ++i)
     {
         WorldObject* obj = w->objects + i;

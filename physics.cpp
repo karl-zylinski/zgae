@@ -75,7 +75,6 @@ struct PhysicsWorld
     PhysicsWorldObject* objects;
     Rigidbody* rigidbodies; // dynamic
     u32 objects_num;
-    RenderResourceHandle render_handle;
 };
 
 static PhysicsState ps = {};
@@ -235,10 +234,9 @@ PhysicsCollider physics_create_collider(PhysicsResourceHandle mesh)
     return { .mesh = mesh };
 }
 
-PhysicsWorld* physics_create_world(RenderResourceHandle render_handle)
+PhysicsWorld* physics_create_world()
 {
     let w = mema_zero_t(PhysicsWorld);
-    w->render_handle = render_handle;
     w->object_handle_pool = handle_pool_create(HANDLE_POOL_TYPE_PHYSICS_OBJECT);
     w->rigidbody_handle_pool = handle_pool_create(HANDLE_POOL_TYPE_RIGIDBODY);
     return w;

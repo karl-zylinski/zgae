@@ -8,7 +8,7 @@
 
 static const u32 handle_type = 1;
 
-World* create_world(RenderResourceHandle render_world, PhysicsWorld* physics_world)
+World* create_world(RenderWorld* render_world, PhysicsWorld* physics_world)
 {
     let hp = handle_pool_create(HANDLE_POOL_TYPE_WORLD_ENTITY);
     handle_pool_set_type(hp, handle_type, "Entity");
@@ -32,7 +32,7 @@ void destroy_world(World* w)
     }
 
     handle_pool_destroy(w->entity_handle_pool);
-    memf(w->entities);
+    da_free(w->entities);
     memf(w);
 }
 

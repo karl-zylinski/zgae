@@ -41,7 +41,7 @@ void game_init()
     info("Entering game_init()");
     srand (time_since_start());
     let render_world = renderer_create_world();
-    let physics_world = physics_create_world(render_world);
+    let physics_world = physics_create_world();
     gs.world = create_world(render_world, physics_world);
 
     gs.pipeline = renderer_load_resource("pipeline_default.pipeline");
@@ -49,7 +49,6 @@ void game_init()
     gs.big_box_mesh = renderer_load_resource("box.mesh");
     let floor_render_mesh = renderer_load_resource("floor.mesh");
 
-    gs.world->physics_world = physics_create_world(gs.world->render_world);
     let box_physics_mesh = physics_load_resource("box.mesh");
     let big_box_physics_mesh = physics_load_resource("box.mesh");
     let floor_physics_mesh = physics_load_resource("floor.mesh");
@@ -125,5 +124,7 @@ bool game_update()
 void game_shutdown()
 {
     info("Entering game_shutdown()");
+    renderer_destroy_world(gs.world->render_world);
+    physics_destroy_world(gs.world->physics_world);
     destroy_world(gs.world);
 }

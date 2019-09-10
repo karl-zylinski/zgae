@@ -28,7 +28,7 @@ void physics_init();
 void physics_shutdown();
 
 PhysicsCollider physics_create_collider(PhysicsResourceHandle mesh);
-PhysicsWorld* physics_create_world(RenderResourceHandle render_handle);
+PhysicsWorld* physics_create_world();
 void physics_destroy_world(PhysicsWorld* w);
 PhysicsResourceHandle physics_load_resource(const char* filename);
 PhysicsObjectHandle physics_create_object(PhysicsWorld* w, const PhysicsCollider& collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot, const PhysicsMaterial& = {});
