@@ -47,6 +47,7 @@ struct PhysicsWorldObject
 {
     bool used;
     PhysicsResourceHandle collider;
+    PhysicsRigidbodyHandle rigidbody_handle;
     RenderWorldObjectHandle render_handle;
     PhysicsMaterial material;
     Vec3 pos;
@@ -184,6 +185,8 @@ PhysicsRigidbodyHandle physics_create_rigidbody(PhysicsResourceHandle world, Phy
 {
     check(mass > 0, "Mass must be in range (0, inf)");
     let w = get_resource(PhysicsResourceWorld, world);
+    let o = get_object(w, object_handle);
+    check(!o->rigidbody_handle, "Trying to create rigidbody for physics object that already has one");
     let handle = handle_pool_borrow(w->rigidbody_handle_pool);
     let idx = handle_index(handle);
 
@@ -194,6 +197,8 @@ PhysicsRigidbodyHandle physics_create_rigidbody(PhysicsResourceHandle world, Phy
         .handle = handle,
         .velocity = velocity
     };
+
+    o->rigidbody_handle = handle;
 
     if (idx < da_num(w->rigidbodies))
     {
@@ -320,8 +325,6 @@ void physics_update_world(PhysicsResourceHandle world)
                 s1.vertices[vi] = rotate_vec3(r1, m1->vertices[vi]) + p1;
 
             let wo_colliding_with = w->objects + world_object_index;
-            let c = debug_get_camera();
-            renderer_debug_draw(s1.vertices, s1.vertices_num, NULL, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
 
             let c2 = get_resource(PhysicsResourceCollider, wo_colliding_with->collider);
             let p2 = wo_colliding_with->pos;
@@ -336,12 +339,11 @@ void physics_update_world(PhysicsResourceHandle world)
             for (u32 vi = 0; vi < s2.vertices_num; ++vi)
                 s2.vertices[vi] = rotate_vec3(r2, m2->vertices[vi]) + p2;
 
-            renderer_debug_draw(s2.vertices, s2.vertices_num, NULL, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
-
             let coll = gjk_epa_intersect_and_solve(s1, s2);
 
             if (coll.colliding)
             {
+                let collding_with_rigidbody = wo_colliding_with->rigidbody_handle != 0;
                 let sol = coll.solution;
                 //wo->pos += sol;
                 let m = rb->mass;
@@ -351,25 +353,32 @@ void physics_update_world(PhysicsResourceHandle world)
                 let vel_cp = vel + cross(avel, r);
 
                 #define SOLUTION_THRES 0.0001f
-                if (dot(vel_cp, sol) < 0 && len(sol) > SOLUTION_THRES)
+                if (!collding_with_rigidbody)
                 {
-                    let n = normalize(sol);
-                    let vel_cp_normal = project(vel_cp, n);
-                    let vel_in_surface_dir = vel_cp - vel_cp_normal;
-                    let friction = fmin(wo->material.friction + wo_colliding_with->material.friction, 1);
+                    if (dot(vel_cp, sol) < 0 && len(sol) > SOLUTION_THRES)
+                    {
+                        let n = normalize(sol);
+                        let vel_cp_normal = project(vel_cp, n);
+                        let vel_in_surface_dir = vel_cp - vel_cp_normal;
+                        let friction = fmin(wo->material.friction + wo_colliding_with->material.friction, 1);
 
-                    let normal_f = -m*vel_cp_normal;
-                    let friction_f = -(len(m*g*dt)*friction*vel_in_surface_dir);
+                        let normal_f = -m*vel_cp_normal;
+                        let friction_f = -(len(m*g*dt)*friction*vel_in_surface_dir);
 
-                    let f = normal_f + friction_f;
-                    let t = cross(vel_cp_normal, f);
+                        let f = normal_f + friction_f;
+                        let t = cross(vel_cp_normal, f);
 
-                    physics_add_force(world, rb->handle, f);
-                    //physics_add_torque(world, rb->handle, wo->pos, coll.contact_point, f/10);
-                    (void)t;
+                        physics_add_force(world, rb->handle, f);
+                        //physics_add_torque(world, rb->handle, wo->pos, coll.contact_point, f/10);
+                        (void)t;
+                    }
+                    else
+                        wo->pos += sol;
                 }
                 else
+                {
                     wo->pos += sol;
+                }
             }
 
             memf(s1.vertices);

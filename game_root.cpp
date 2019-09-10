@@ -94,7 +94,7 @@ bool game_update()
         .friction = 0.4f
     };
 
-    if (time_until_spawn <= 0.0f && num_spawned < 10)
+    if (time_until_spawn <= 0.0f && num_spawned < 2)
     {
         num_spawned++;
         time_until_spawn = 2.0f;
