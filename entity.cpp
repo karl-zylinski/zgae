@@ -71,7 +71,7 @@ void Entity::set_render_mesh(RenderResourceHandle mesh)
     e->render_object = renderer_create_object(e->world->render_world, mesh, e->pos, e->rot);
 }
 
-void Entity::set_physics_collider(PhysicsResourceHandle collider, const PhysicsMaterial& pm)
+void Entity::set_physics_collider(const PhysicsCollider& collider, const PhysicsMaterial& pm)
 {
     let e = get_internal();
     e->physics_object = physics_create_object(e->world->physics_world, collider, e->render_object, e->pos, e->rot, pm);

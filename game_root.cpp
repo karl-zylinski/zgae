@@ -15,16 +15,16 @@ struct GameState
 
     RenderResourceHandle pipeline;
     World* world;
-    PhysicsResourceHandle box_collider;
+    PhysicsCollider box_collider;
     RenderResourceHandle box_mesh;
-    PhysicsResourceHandle big_box_collider;
+    PhysicsCollider big_box_collider;
     RenderResourceHandle big_box_mesh;
 };
 
 static GameState gs = {};
 
 
-Entity spawn_entity_at(World* w, RenderResourceHandle mesh, PhysicsResourceHandle collider, const Vec3& p, const Quat& r, const Vec3& vel, f32 mass, const PhysicsMaterial& pm, bool rigidbody)
+Entity spawn_entity_at(World* w, RenderResourceHandle mesh, const PhysicsCollider& collider, const Vec3& p, const Quat& r, const Vec3& vel, f32 mass, const PhysicsMaterial& pm, bool rigidbody)
 {
     let e = entity_create(w, p, r);
     e.set_render_mesh(mesh);

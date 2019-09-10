@@ -8,7 +8,7 @@
 
 static const u32 handle_type = 1;
 
-World* create_world(RenderResourceHandle render_world, PhysicsResourceHandle physics_world)
+World* create_world(RenderResourceHandle render_world, PhysicsWorld* physics_world)
 {
     let hp = handle_pool_create(HANDLE_POOL_TYPE_WORLD_ENTITY);
     handle_pool_set_type(hp, handle_type, "Entity");

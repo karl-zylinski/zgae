@@ -38,15 +38,10 @@ struct PhysicsResourceMesh
     u32 vertices_num;
 };
 
-struct PhysicsResourceCollider
-{
-    PhysicsResourceHandle mesh;
-};
-
 struct PhysicsWorldObject
 {
     bool used;
-    PhysicsResourceHandle collider;
+    PhysicsCollider collider;
     PhysicsRigidbodyHandle rigidbody_handle;
     RenderWorldObjectHandle render_handle;
     PhysicsMaterial material;
@@ -73,7 +68,7 @@ struct Rigidbody
     f32 mass;
 };
 
-struct PhysicsResourceWorld
+struct PhysicsWorld
 {
     HandlePool* object_handle_pool;
     HandlePool* rigidbody_handle_pool;
@@ -86,9 +81,9 @@ struct PhysicsResourceWorld
 static PhysicsState ps = {};
 static bool inited = false;
 
-static const char* physics_resoruce_type_names[] =
+static const char* physics_resource_type_names[] =
 {
-    "invalid", "mesh", "collider", "world"
+    "invalid", "mesh"
 };
 
 static u32 handle_index_checked(const HandlePool* hp, Handle h)
@@ -110,12 +105,12 @@ void physics_init()
     ps.resource_name_to_handle = handle_hash_map_create();
 
     for (u32 s = 1; s < PHYSICS_RESOURCE_TYPE_NUM; ++s)
-        handle_pool_set_type(ps.resource_handle_pool, s, physics_resoruce_type_names[s]);
+        handle_pool_set_type(ps.resource_handle_pool, s, physics_resource_type_names[s]);
 }
 
 static PhysicsResourceType resource_type_from_str(const char* str)
 {
-    i32 idx = str_eql_arr(str, physics_resoruce_type_names, sizeof(physics_resoruce_type_names)/sizeof(physics_resoruce_type_names[0]));
+    i32 idx = str_eql_arr(str, physics_resource_type_names, sizeof(physics_resource_type_names)/sizeof(physics_resource_type_names[0]));
     check(idx > 0 && idx < PHYSICS_RESOURCE_TYPE_NUM, "Invalid physics resource type");
     return (PhysicsResourceType)idx;
 }
@@ -181,10 +176,9 @@ PhysicsResourceHandle physics_load_resource(const char* filename)
     return add_resource(name_hash, type, data);
 }
 
-PhysicsRigidbodyHandle physics_create_rigidbody(PhysicsResourceHandle world, PhysicsObjectHandle object_handle,  f32 mass, const Vec3& velocity)
+PhysicsRigidbodyHandle physics_create_rigidbody(PhysicsWorld* w, PhysicsObjectHandle object_handle,  f32 mass, const Vec3& velocity)
 {
     check(mass > 0, "Mass must be in range (0, inf)");
-    let w = get_resource(PhysicsResourceWorld, world);
     let o = get_object(w, object_handle);
     check(!o->rigidbody_handle, "Trying to create rigidbody for physics object that already has one");
     let handle = handle_pool_borrow(w->rigidbody_handle_pool);
@@ -211,25 +205,22 @@ PhysicsRigidbodyHandle physics_create_rigidbody(PhysicsResourceHandle world, Phy
     return handle;
 }
 
-void physics_set_velocity(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& vel)
+void physics_set_velocity(PhysicsWorld* w, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& vel)
 {
-    let w = get_resource(PhysicsResourceWorld, world);
     let rb = get_rigidbody(w, rigidbody_handle);
     rb->velocity = vel;
 }
 
 
-void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& f)
+void physics_add_force(PhysicsWorld* w, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& f)
 {
-    let w = get_resource(PhysicsResourceWorld, world);
     let rb = get_rigidbody(w, rigidbody_handle);
     let acc = f/rb->mass;
     rb->velocity += acc;
 }
 
-void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& pivot, const Vec3& point, const Vec3& force)
+void physics_add_torque(PhysicsWorld* w, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& pivot, const Vec3& point, const Vec3& force)
 {
-    let w = get_resource(PhysicsResourceWorld, world);
     let rb = get_rigidbody(w, rigidbody_handle);
 
     // add moment of inertia
@@ -239,25 +230,22 @@ void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigi
     rb->angular_velocity += cross(arm, force) * (1/(larm * larm * rb->mass));
 }
 
-PhysicsResourceHandle physics_create_collider(PhysicsResourceHandle mesh)
+PhysicsCollider physics_create_collider(PhysicsResourceHandle mesh)
 {
-    let c = mema_zero_t(PhysicsResourceCollider);
-    c->mesh = mesh;
-    return add_resource(0, PHYSICS_RESOURCE_TYPE_COLLIDER, c);
+    return { .mesh = mesh };
 }
 
-PhysicsResourceHandle physics_create_world(RenderResourceHandle render_handle)
+PhysicsWorld* physics_create_world(RenderResourceHandle render_handle)
 {
-    let w = mema_zero_t(PhysicsResourceWorld);
+    let w = mema_zero_t(PhysicsWorld);
     w->render_handle = render_handle;
     w->object_handle_pool = handle_pool_create(HANDLE_POOL_TYPE_PHYSICS_OBJECT);
     w->rigidbody_handle_pool = handle_pool_create(HANDLE_POOL_TYPE_RIGIDBODY);
-    return add_resource(0, PHYSICS_RESOURCE_TYPE_WORLD, w);
+    return w;
 }
 
-PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot, const PhysicsMaterial& pm)
+PhysicsObjectHandle physics_create_object(PhysicsWorld* w, const PhysicsCollider& collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot, const PhysicsMaterial& pm)
 {
-    let w = get_resource(PhysicsResourceWorld, world);
     let h = handle_pool_borrow(w->object_handle_pool);  // TODO: This pattern keeps repeating,
     u32 num_needed_objects = handle_index(h) + 1;       // make it general and put in handle_pool.h?
     if (num_needed_objects > w->objects_num)            // Perhaps with macro for type etc
@@ -278,17 +266,15 @@ PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsRe
     return h;
 }
 
-void physics_set_position(PhysicsResourceHandle world, PhysicsObjectHandle obj_handle, const Vec3& pos, const Quat& rot)
+void physics_set_position(PhysicsWorld* w, PhysicsObjectHandle obj_handle, const Vec3& pos, const Quat& rot)
 {
-    let w = get_resource(PhysicsResourceWorld, world);
     let o = get_object(w, obj_handle);
     o->pos = pos;
     o->rot = rot;
 }
 
-void physics_update_world(PhysicsResourceHandle world)
+void physics_update_world(PhysicsWorld* w)
 {
-    let w = get_resource(PhysicsResourceWorld, world);
     float dt = time_dt();
     //float t = time_since_start();
 
@@ -301,7 +287,7 @@ void physics_update_world(PhysicsResourceHandle world)
         // Update rigidbody state.
         Vec3 g = {0, 0, -9.82f};
 
-        physics_add_force(world, rb->handle, g * rb->mass * dt);
+        physics_add_force(w, rb->handle, g * rb->mass * dt);
         let wo = get_object(w, rb->object_handle);
 
         for (u32 world_object_index = 0; world_object_index < w->objects_num; ++world_object_index)
@@ -311,10 +297,10 @@ void physics_update_world(PhysicsResourceHandle world)
 
             // TODO: cache the shapes etc
 
-            let c1 = get_resource(PhysicsResourceCollider, wo->collider);
+            let c1 = wo->collider;
             let p1 = wo->pos;
             let r1 = wo->rot;
-            let m1 = get_resource(PhysicsResourceMesh, c1->mesh);
+            let m1 = get_resource(PhysicsResourceMesh, c1.mesh);
 
             GjkShape s1 = {
                 .vertices = mema_tn(Vec3, m1->vertices_num),
@@ -326,10 +312,10 @@ void physics_update_world(PhysicsResourceHandle world)
 
             let wo_colliding_with = w->objects + world_object_index;
 
-            let c2 = get_resource(PhysicsResourceCollider, wo_colliding_with->collider);
+            let c2 = wo_colliding_with->collider;
             let p2 = wo_colliding_with->pos;
             let r2 = wo_colliding_with->rot;
-            let m2 = get_resource(PhysicsResourceMesh, c2->mesh);
+            let m2 = get_resource(PhysicsResourceMesh, c2.mesh);
 
             GjkShape s2 = {
                 .vertices = mema_tn(Vec3, m2->vertices_num),
@@ -368,7 +354,7 @@ void physics_update_world(PhysicsResourceHandle world)
                         let f = normal_f + friction_f;
                         let t = cross(vel_cp_normal, f);
 
-                        physics_add_force(world, rb->handle, f);
+                        physics_add_force(w, rb->handle, f);
                         //physics_add_torque(world, rb->handle, wo->pos, coll.contact_point, f/10);
                         (void)t;
                     }
@@ -391,6 +377,15 @@ void physics_update_world(PhysicsResourceHandle world)
     }
 }
 
+void physics_destroy_world(PhysicsWorld* w)
+{
+    memf(w->objects);
+    da_free(w->rigidbodies);
+    handle_pool_destroy(w->object_handle_pool);
+    handle_pool_destroy(w->rigidbody_handle_pool);
+    memf(w);
+}
+
 static void destroy_resource(PhysicsResourceHandle h)
 {
     check(handle_pool_is_valid(ps.resource_handle_pool, h), "When trying to destroy PhysicsResource; the passed Handle was invalid");
@@ -400,14 +395,6 @@ static void destroy_resource(PhysicsResourceHandle h)
         case PHYSICS_RESOURCE_TYPE_MESH: {
             let m = get_resource(PhysicsResourceMesh, h);
             memf(m->vertices);
-        } break;
-
-        case PHYSICS_RESOURCE_TYPE_WORLD: {
-            let w = get_resource(PhysicsResourceWorld, h);
-            memf(w->objects);
-            da_free(w->rigidbodies);
-            handle_pool_destroy(w->object_handle_pool);
-            handle_pool_destroy(w->rigidbody_handle_pool);
         } break;
     }
 
@@ -435,16 +422,14 @@ void physics_shutdown()
     handle_pool_destroy(ps.resource_handle_pool);
 }
 
-const Vec3& physics_get_position(PhysicsResourceHandle world, PhysicsObjectHandle obj)
+const Vec3& physics_get_position(PhysicsWorld* w, PhysicsObjectHandle obj)
 {
-    let w = get_resource(PhysicsResourceWorld, world);
     let o = get_object(w, obj);
     return o->pos;
 }
 
-const Quat& physics_get_rotation(PhysicsResourceHandle world, PhysicsObjectHandle obj)
+const Quat& physics_get_rotation(PhysicsWorld* w, PhysicsObjectHandle obj)
 {
-    let w = get_resource(PhysicsResourceWorld, world);
     let o = get_object(w, obj);
     return o->rot;
 }

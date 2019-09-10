@@ -23,7 +23,7 @@ struct Entity
     void rotate(const Quat& q);
     void create_rigidbody(f32 mass, const Vec3& velocity);
     void set_render_mesh(RenderResourceHandle mesh);
-    void set_physics_collider(PhysicsResourceHandle collider, const PhysicsMaterial& pm);
+    void set_physics_collider(const PhysicsCollider& collider, const PhysicsMaterial& pm);
     const Vec3& get_position() const;
     void set_position(const Vec3& pos);
     void set_rotation(const Quat& rot);

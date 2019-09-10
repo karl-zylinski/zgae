@@ -6,6 +6,7 @@ fwd_handle(RenderResourceHandle);
 fwd_handle(PhysicsResourceHandle);
 fwd_struct(EntityInt);
 fwd_struct(HandlePool);
+fwd_struct(PhysicsWorld);
 fwd_handle(WorldEntityHandle);
 
 struct World
@@ -16,10 +17,10 @@ struct World
     void update();
 
     RenderResourceHandle render_world;
-    PhysicsResourceHandle physics_world;
+    PhysicsWorld* physics_world;
     EntityInt* entities; // dynamic
     HandlePool* entity_handle_pool;
 };
 
-World* create_world(RenderResourceHandle render_world, PhysicsResourceHandle physics_world);
+World* create_world(RenderResourceHandle render_world, PhysicsWorld* physics_world);
 void destroy_world(World* w);
