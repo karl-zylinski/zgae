@@ -114,17 +114,17 @@ void Entity::set_velocity(const Vec3& vel)
     physics_set_velocity(e->world->physics_world, e->physics_rigidbody, vel);
 }
 
-void Entity::add_linear_impulse(const Vec3& force, f32 time)
+void Entity::add_force(const Vec3& f)
 {
     let e = get_internal();
 
     if (!e->physics_rigidbody)
     {
-        info("Trying to run add_linear_impulse on Entity that has no rigidbody");
+        info("Trying to run add_force on Entity that has no rigidbody");
         return;
     }
 
-    physics_add_linear_impulse(e->world->physics_world, e->physics_rigidbody, force, time);
+    physics_add_force(e->world->physics_world, e->physics_rigidbody, f);
 }
 
 void Entity::add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force)

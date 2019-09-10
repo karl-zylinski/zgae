@@ -3,7 +3,6 @@
 #include "physics.h"
 
 fwd_handle(WorldEntityHandle);
-fwd_struct(PhysicsMaterial);
 fwd_struct(World);
 
 struct EntityInt
@@ -29,7 +28,7 @@ struct Entity
     void set_position(const Vec3& pos);
     void set_rotation(const Quat& rot);
     void set_velocity(const Vec3& vel);
-    void add_linear_impulse(const Vec3& force, f32 time);
+    void add_force(const Vec3& f);
     void add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force);
     void update_from_rigidbody();
     RenderWorldObjectHandle get_render_object() const;

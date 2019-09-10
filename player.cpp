@@ -3,7 +3,6 @@
 #include "time.h"
 #include "mouse.h"
 #include "debug.h"
-#include "log.h"
 
 void Player::update()
 {
@@ -30,7 +29,7 @@ void Player::update()
     }
 
     if (key_went_down(KEY_SPACE))
-        this->entity.add_linear_impulse({0, 0, 1000.0f}, 0.4f);
+        this->entity.add_force({0, 0, 600.0f});
 
     this->camera.pos = this->entity.get_position();
     let mouse_sens = dt * 0.01f;

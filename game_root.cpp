@@ -72,7 +72,7 @@ void game_init()
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-0, 15, -8}, quat_identity(), vec3_zero,  75, player_material, false)
+        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-0, 1, -2}, quat_identity(), vec3_zero,  75, player_material, false)
     };
 }
 
@@ -91,16 +91,16 @@ bool game_update()
 
     PhysicsMaterial box_material = {
         .elasticity = 0.0f,
-        .friction = 0.8f
+        .friction = 0.4f
     };
 
-    if (time_until_spawn <= 0.0f && num_spawned < 1)
+    if (time_until_spawn <= 0.0f && num_spawned < 10)
     {
         num_spawned++;
         time_until_spawn = 2.0f;
         f32 x = ((rand() % 10000)-5000)/10000.0f;
         //f32 y = ((rand() % 10000)-5000)/10000.0f + 10;
-        f32 y = 10;
+        f32 y = 9.5;
         f32 z = 1.0f;
         /*f32 rx = (rand() % 628)/100;
         f32 ry = (rand() % 628)/100;

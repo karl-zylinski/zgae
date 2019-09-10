@@ -11,12 +11,9 @@
 #include "file.h"
 #include "jzon.h"
 #include "obj_loader.h"
-#include "world.h"
-#include "renderer.h"
 #include "render_resource.h"
 #include "debug.h"
 #include "camera.h"
-#include <string.h>
 #include <math.h>
 #include "dynamic_array.h"
 
@@ -217,12 +214,11 @@ void physics_set_velocity(PhysicsResourceHandle world, PhysicsRigidbodyHandle ri
 }
 
 
-void physics_add_linear_impulse(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& force, f32 time)
+void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& f)
 {
     let w = get_resource(PhysicsResourceWorld, world);
     let rb = get_rigidbody(w, rigidbody_handle);
-    check(rb->mass != 0, "OH NO");
-    let acc = (force*time)/rb->mass;
+    let acc = f/rb->mass;
     rb->velocity += acc;
 }
 
@@ -235,7 +231,7 @@ void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigi
 
     let arm = point - pivot;
     let larm = len(arm);
-    rb->angular_velocity += cross(arm, force) * (1/(larm * larm * rb->mass)) * time_dt() * 100;
+    rb->angular_velocity += cross(arm, force) * (1/(larm * larm * rb->mass));
 }
 
 PhysicsResourceHandle physics_create_collider(PhysicsResourceHandle mesh)
@@ -300,13 +296,8 @@ void physics_update_world(PhysicsResourceHandle world)
         // Update rigidbody state.
         Vec3 g = {0, 0, -9.82f};
 
-        physics_add_linear_impulse(world, rb->handle, g * rb->mass, dt);
+        physics_add_force(world, rb->handle, g * rb->mass * dt);
         let wo = get_object(w, rb->object_handle);
-
-        // Move rigidbody according to velocties
-        wo->pos += rb->velocity * dt;
-        wo->rot *= quat_from_axis_angle(rb->angular_velocity, dt);
-
 
         for (u32 world_object_index = 0; world_object_index < w->objects_num; ++world_object_index)
         {
@@ -328,12 +319,13 @@ void physics_update_world(PhysicsResourceHandle world)
             for (u32 vi = 0; vi < s1.vertices_num; ++vi)
                 s1.vertices[vi] = rotate_vec3(r1, m1->vertices[vi]) + p1;
 
+            let wo_colliding_with = w->objects + world_object_index;
             let c = debug_get_camera();
             renderer_debug_draw(s1.vertices, s1.vertices_num, NULL, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
 
-            let c2 = get_resource(PhysicsResourceCollider, w->objects[world_object_index].collider);
-            let p2 = w->objects[world_object_index].pos;
-            let r2 = w->objects[world_object_index].rot;
+            let c2 = get_resource(PhysicsResourceCollider, wo_colliding_with->collider);
+            let p2 = wo_colliding_with->pos;
+            let r2 = wo_colliding_with->rot;
             let m2 = get_resource(PhysicsResourceMesh, c2->mesh);
 
             GjkShape s2 = {
@@ -346,47 +338,47 @@ void physics_update_world(PhysicsResourceHandle world)
 
             renderer_debug_draw(s2.vertices, s2.vertices_num, NULL, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
 
-
             let coll = gjk_epa_intersect_and_solve(s1, s2);
 
             if (coll.colliding)
             {
-                wo->pos += coll.solution;
+                let sol = coll.solution;
+                //wo->pos += sol;
+                let m = rb->mass;
+                let vel = rb->velocity;
+                let avel = rb->angular_velocity;
+                let r = wo->pos - coll.contact_point;
+                let vel_cp = vel + cross(avel, r);
 
-                // The first part here is just getting out of collision and using friction etc.
                 #define SOLUTION_THRES 0.0001f
-                if (dot(rb->velocity, coll.solution) < 0 && len(coll.solution) > SOLUTION_THRES)
+                if (dot(vel_cp, sol) < 0 && len(sol) > SOLUTION_THRES)
                 {
-                    Vec3 vel_in_sol_dir = project(rb->velocity, coll.solution);
-                    let vel_in_surface_dir = rb->velocity - vel_in_sol_dir;
-                    rb->velocity += -vel_in_sol_dir * (1 + wo->material.elasticity); // cancel velocty + bounce
-                    let friction = fmin(wo->material.friction + w->objects[world_object_index].material.friction, 1);
-                    rb->velocity -= vel_in_surface_dir * friction * dt; // friction
-                    rb->angular_velocity -= rb->angular_velocity * friction * dt; // angular friction
+                    let n = normalize(sol);
+                    let vel_cp_normal = project(vel_cp, n);
+                    let vel_in_surface_dir = vel_cp - vel_cp_normal;
+                    let friction = fmin(wo->material.friction + wo_colliding_with->material.friction, 1);
+
+                    let normal_f = -m*vel_cp_normal;
+                    let friction_f = -(len(m*g*dt)*friction*vel_in_surface_dir);
+
+                    let f = normal_f + friction_f;
+                    let t = cross(vel_cp_normal, f);
+
+                    physics_add_force(world, rb->handle, f);
+                    //physics_add_torque(world, rb->handle, wo->pos, coll.contact_point, f/10);
+                    (void)t;
                 }
-
-                let cp = coll.contact_point + coll.solution;
-                let p = wo->pos;
-
-                // Rotation
-
-                let arm = p - cp;
-                let larm = len(arm);
-                let torque = cross(arm, rb->mass*g);
-                info("%f %f %f", torque.x, torque.y, torque.z);
-                let inertia = (larm * larm * rb->mass);
-                rb->angular_velocity += (torque * dt) / inertia;
-
-                Vec3 dbg_pts[] = {cp, p, p + rb->mass*g};
-                Vec4 dbg_colors[] = {vec4_red, vec4_green, vec4_red};
-
-                let c = debug_get_camera();
-                renderer_debug_draw(dbg_pts, 3, dbg_colors, PRIMITIVE_TOPOLOGY_LINE_STRIP, c.pos, c.rot);
+                else
+                    wo->pos += sol;
             }
 
             memf(s1.vertices);
             memf(s2.vertices);
         }
+
+        // Move rigidbody according to velocties
+        wo->pos += rb->velocity * dt;
+        wo->rot *= quat_from_axis_angle(rb->angular_velocity, dt);
     }
 }
 

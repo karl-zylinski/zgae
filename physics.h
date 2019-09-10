@@ -4,7 +4,6 @@
 fwd_handle(PhysicsObjectHandle);
 fwd_handle(PhysicsRigidbodyHandle);
 fwd_handle(PhysicsResourceHandle);
-fwd_struct(Entity);
 
 enum PhysicsResourceType
 {
@@ -30,7 +29,7 @@ PhysicsResourceHandle physics_load_resource(const char* filename);
 PhysicsObjectHandle physics_create_object(PhysicsResourceHandle world, PhysicsResourceHandle collider, RenderWorldObjectHandle render_handle, const Vec3& pos, const Quat& rot, const PhysicsMaterial& = {});
 PhysicsRigidbodyHandle physics_create_rigidbody(PhysicsResourceHandle world, PhysicsObjectHandle object_handle,  f32 mass, const Vec3& velocity);
 void physics_set_velocity(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& vel);
-void physics_add_linear_impulse(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& force, f32 time);
+void physics_add_force(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& f);
 void physics_add_torque(PhysicsResourceHandle world, PhysicsRigidbodyHandle rigidbody_handle, const Vec3& pivot, const Vec3& point, const Vec3& force);
 void physics_set_position(PhysicsResourceHandle world, PhysicsObjectHandle obj, const Vec3& pos, const Quat& rot);
 const Vec3& physics_get_position(PhysicsResourceHandle world, PhysicsObjectHandle obj);

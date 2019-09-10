@@ -5,7 +5,6 @@
 #include "entity.h"
 #include "log.h"
 #include "dynamic_array.h"
-#include "physics.h"
 
 static const u32 handle_type = 1;
 
