@@ -1,30 +1,20 @@
 ### IMPORTANT ###
 
-- make dynamic array always push a dummy object if empty on first push... maybe? is it bad?
+- make dynamic array always push a dummy object if empty on first push... maybe? is it bad? yes, probably, when you count manually added objects everything will be off
 
 - stop using strings, keep only hashes!
 
-- fix the handle mess... kind of fixed... but if i dont use scripting, do i really need all these indrection? maybe only for renderer? hm. thinkaboutittt. what about entities in list that is re-created? https://ourmachinery.com/post/localization-in-the-machinerys-ui/
-
-- do... the physicsp properly
+- do... the physics properly
 
 ### LESS IMPORTANT ###
 
-- require that resoruce store tells us to specify type enum and type enum names for that store... or is that possible??? the resource constains the enum hummm or wait, just use the type in the handle!
-
 - make da_insert prettier
-
-- magical central place where handle pools are registered with names and stuff and then we can give it a handle and it will tell us type and subtype information (with string names!!) from it. wow such types (fix resource_store.c create func)
 
 - put renderer on own thread
 
 - alpha support (something else than VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
 
 - rewrite obj loader, its ugly
-
-- make first-person flying camera (see avatar.lua)
-
-- combine linux_main and linux_xcb_window into main_linux_xcb_vulkan
 
 - make renderer askable about source type, i.e. have shader_default_fragment as source string, and append whatever renderer tells us to do... or maybe just have a source_spirv field and ask renderer which field to pull, like with a SHADER_LANGAUGE_TYPE enum in the renderer
 
