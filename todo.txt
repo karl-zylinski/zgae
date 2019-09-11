@@ -6,6 +6,9 @@
 
 - do... the physics properly
 
+- fix vulkan backend having a hardcoded pushconstant in renderer_backend_draw,
+    maybe look into having all the data written as constant buffer and then index through push constant?
+
 ### LESS IMPORTANT ###
 
 - make da_insert prettier

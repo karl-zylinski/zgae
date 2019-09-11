@@ -74,7 +74,7 @@ void game_init()
 
     gs.player = {
         .camera = camera_create(),
-        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-0, 1, -2}, quat_identity(), vec3_zero,  75, player_material, false)
+        .entity = spawn_entity_at(gs.world, 0, gs.box_collider, {-0, 1, -2}, quat_identity(), vec3_zero, 75, player_material, false)
     };
 }
 
