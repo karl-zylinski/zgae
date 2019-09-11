@@ -1,5 +1,4 @@
 #include <assert.h>
-#include "handle_pool.h"
 #include "log.h"
 #include "memory.h"
 #include "dynamic_array.h"
@@ -45,28 +44,6 @@ int main()
         assert(handle_pool(h) == p);
         assert(handle_type(h) == t);
         assert(handle_generation(h) == g);
-    }
-
-    {
-        HandlePool* hp = handle_pool_create(HANDLE_POOL_TYPE_RENDER_RESOURCE);
-        handle_pool_set_type(hp, 1, "some type");
-        handle_pool_set_type(hp, 2, "other type");
-        Handle h1 = handle_pool_borrow(hp, 1);
-        Handle h2 = handle_pool_borrow(hp, 1);
-        handle_pool_return(hp, h2);
-        Handle h3 = handle_pool_borrow(hp, 2);
-        assert(handle_generation(h1) == 0);
-        assert(handle_generation(h2) == 0);
-        assert(handle_generation(h3) == 1);
-        assert(handle_index(h1) == 0);
-        assert(handle_index(h2) == 1);
-        assert(handle_index(h3) == 1);
-        assert(handle_pool(h1) == HANDLE_POOL_TYPE_RENDER_RESOURCE);
-        assert(handle_pool(h2) == HANDLE_POOL_TYPE_RENDER_RESOURCE);
-        assert(handle_pool(h3) == HANDLE_POOL_TYPE_RENDER_RESOURCE);
-        assert(handle_type(h1) == 1);
-        assert(handle_type(h2) == 1);
-        assert(handle_type(h3) == 2);
     }
 
     {

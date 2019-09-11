@@ -24,10 +24,13 @@ struct GameState
 static GameState gs = {};
 
 
-Entity spawn_entity_at(World* w, u32 mesh, const PhysicsCollider& collider, const Vec3& p, const Quat& r, const Vec3& vel, f32 mass, const PhysicsMaterial& pm, bool rigidbody)
+Entity spawn_entity_at(World* w, u32 mesh_idx, const PhysicsCollider& collider, const Vec3& p, const Quat& r, const Vec3& vel, f32 mass, const PhysicsMaterial& pm, bool rigidbody)
 {
     let e = entity_create(w, p, r);
-    e.set_render_mesh(mesh);
+
+    if (mesh_idx)
+        e.set_render_mesh(mesh_idx);
+
     e.set_physics_collider(collider, pm);
     
     if (rigidbody)
@@ -49,9 +52,9 @@ void game_init()
     gs.big_box_render_mesh_idx = renderer_load_mesh("box.mesh");
     let floor_render_mesh = renderer_load_mesh("floor.mesh");
 
-    let box_physics_mesh = physics_load_resource("box.mesh");
-    let big_box_physics_mesh = physics_load_resource("box.mesh");
-    let floor_physics_mesh = physics_load_resource("floor.mesh");
+    let box_physics_mesh = physics_load_mesh("box.mesh");
+    let big_box_physics_mesh = physics_load_mesh("box.mesh");
+    let floor_physics_mesh = physics_load_mesh("floor.mesh");
     gs.box_collider = physics_create_collider(box_physics_mesh);
     gs.big_box_collider = physics_create_collider(big_box_physics_mesh);
     let floor_collider = physics_create_collider(floor_physics_mesh);

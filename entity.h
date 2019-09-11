@@ -3,18 +3,17 @@
 #include "physics.h"
 #include "renderer.h"
 
-fwd_handle(WorldEntityHandle);
 fwd_struct(World);
 
 struct EntityInt
 {
+    u32 idx;
     Vec3 pos;
     Quat rot;
     World* world;
     u32 render_object_idx;
-    PhysicsObjectHandle physics_object;
-    PhysicsRigidbodyHandle physics_rigidbody;
-    WorldEntityHandle handle;
+    u32 physics_object_idx;
+    u32 physics_rigidbody_idx;
 };
 
 struct Entity
@@ -33,10 +32,10 @@ struct Entity
     void add_torque(const Vec3& pivot, const Vec3& point, const Vec3& force);
     void update_from_rigidbody();
     u32 get_render_object_idx() const;
-    PhysicsObjectHandle get_physics_object() const;
+    u32 get_physics_object_idx() const;
 
     World* world;
-    WorldEntityHandle handle;
+    u32 idx;
 };
 
 Entity entity_create(

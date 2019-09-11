@@ -1,7 +1,6 @@
 #include "renderer.h"
 #include "renderer_backend.h"
 #include "memory.h"
-#include "handle_pool.h"
 #include "dynamic_array.h"
 #include "log.h"
 #include "render_resource.h"
@@ -47,6 +46,7 @@ struct RenderMesh
 
 struct RenderObject
 {
+    u32 idx;
     Mat4 model;
     u32 mesh_idx;
 };
@@ -54,12 +54,7 @@ struct RenderObject
 struct RenderWorld
 {
     RenderObject* objects; // dynamic
-    u32* free_object_indices; // dynamic, holes in objects
-};
-
-static const char* render_resource_type_names[] =
-{
-    "invalid", "shader", "pipeline", "mesh"
+    u32* objects_free_idx; // dynamic
 };
 
 struct Renderer
@@ -292,6 +287,7 @@ void renderer_destroy_mesh(u32 mesh_idx)
     renderer_backend_destroy_mesh(m->backend_state);
     memf(m->mesh.vertices);
     memf(m->mesh.indices);
+    memzero(m, sizeof(RenderMesh));
     da_push(rs.meshes_free_idx, mesh_idx);
 }
 
@@ -347,6 +343,7 @@ static void destroy_shader(u32 shader_idx)
             memf(s->push_constant_fields[i].name);
     memf(s->push_constant_fields);
     memf(s->source);
+    memzero(s, sizeof(Shader));
     da_push(rs.shaders_free_idx, shader_idx);
 }
 
@@ -468,6 +465,7 @@ void renderer_destroy_pipeline(u32 pipeline_idx)
         memf(p->vertex_input[i].name);
     
     memf(p->vertex_input);
+    memzero(p, sizeof(Pipeline));
     da_push(rs.pipelines_free_idx, pipeline_idx);
 }
 
@@ -503,8 +501,7 @@ void renderer_shutdown()
 RenderWorld* renderer_create_world()
 {
     let w = mema_zero_t(RenderWorld);
-    RenderObject dummy = {};
-    da_push(w->objects, dummy);
+    da_push(w->objects, RenderObject{}); // zero pos dummy
     return w;
 }
 
@@ -517,31 +514,24 @@ void renderer_destroy_world(RenderWorld* w)
 u32 renderer_create_object(RenderWorld* w, u32 mesh_idx, const Vec3& pos, const Quat& rot)
 {
     Mat4 model = mat4_from_rotation_and_translation(rot, pos);
-
-    if (da_num(w->free_object_indices) > 0)
-    {
-        u32 idx = da_pop(w->free_object_indices);
-        w->objects[idx].mesh_idx = mesh_idx;
-        w->objects[idx].model = model;
-        return idx;
-    }
-
-    u32 h = da_num(w->objects);
+    let idx = da_num(w->objects_free_idx) > 0 ? da_pop(w->objects_free_idx) : da_num(w->objects);
 
     RenderObject wo = {
+        .idx = idx,
         .mesh_idx = mesh_idx,
         .model = model
     };
 
-    da_push(w->objects, wo);
-    return h;
+    da_insert(w->objects, wo, idx);
+    return idx;
 }
 
 void renderer_destroy_object(RenderWorld* w, u32 object_idx)
 {
-    check(w->objects[object_idx].mesh_idx, "Trying to remove from world twice");
-    w->objects[object_idx].mesh_idx = 0;
-    da_push(w->free_object_indices, object_idx);
+    let o = w->objects + object_idx;
+    check(o->idx, "Trying to remove from world twice");
+    memzero(o, sizeof(RenderObject));
+    da_push(w->objects_free_idx, object_idx);
 }
 
 void renderer_world_set_position_and_rotation(RenderWorld* w, u32 object_idx, const Vec3& pos, const Quat& rot)
@@ -609,7 +599,7 @@ void renderer_draw_world(u32 pipeline_idx, RenderWorld* w, const Vec3& cam_pos, 
     {
         let obj = w->objects + i;
 
-        if (obj->mesh_idx == 0)
+        if (!obj->idx)
             continue;
 
         renderer_draw(pipeline_idx, obj->mesh_idx, obj->model, cam_pos, cam_rot);
@@ -630,7 +620,7 @@ void renderer_surface_resized(u32 w, u32 h)
     // Pipelines are usually size-dependent.
     for (u32 i = 0; i < da_num(rs.pipelines); ++i)
     {
-        if (rs.pipelines[i].idx != i)
+        if (!rs.pipelines[i].idx)
             continue;
 
         deinit_pipeline(i);

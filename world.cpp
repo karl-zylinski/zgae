@@ -1,21 +1,16 @@
 #include "world.h"
-#include "handle_pool.h"
 #include "handle.h"
 #include "memory.h"
 #include "entity.h"
 #include "log.h"
 #include "dynamic_array.h"
 
-static const u32 handle_type = 1;
-
 World* create_world(RenderWorld* render_world, PhysicsWorld* physics_world)
 {
-    let hp = handle_pool_create(HANDLE_POOL_TYPE_WORLD_ENTITY);
-    handle_pool_set_type(hp, handle_type, "Entity");
     let w = mema_zero_t(World);
     w->render_world = render_world;
     w->physics_world = physics_world;
-    w->entity_handle_pool = hp;
+    da_push(w->entities, EntityInt{});
     return w;
 }
 
@@ -25,51 +20,41 @@ void destroy_world(World* w)
     {
         let e = w->entities + i;
 
-        if (!e->handle)
+        if (!e->idx)
             continue;
 
-        w->destroy_entity(e->handle);
+        w->destroy_entity(i);
     }
 
-    handle_pool_destroy(w->entity_handle_pool);
     da_free(w->entities);
+    da_free(w->entities_free_idx);
     memf(w);
 }
 
-void World::destroy_entity(WorldEntityHandle weh)
+void World::destroy_entity(u32 entity_idx)
 {
-    check(handle_pool_is_valid(this->entity_handle_pool, weh), "Invalid Handle when trying to destroy entity");
-    memzero(this->entities + handle_index(weh), sizeof(EntityInt));
-    handle_pool_return(this->entity_handle_pool, weh);
+    memzero(this->entities + entity_idx, sizeof(EntityInt));
+    da_push(this->entities_free_idx, entity_idx);
 }
 
-WorldEntityHandle World::create_entity(const Vec3& pos, const Quat& rot)
+u32 World::create_entity(const Vec3& pos, const Quat& rot)
 {
-    let handle = handle_pool_borrow(this->entity_handle_pool, handle_type);
-    let idx = handle_index(handle);
+    let idx = da_num(this->entities_free_idx) > 0 ? da_pop(this->entities_free_idx) : da_num(this->entities);
 
     EntityInt ei = {
+        .idx = idx,
         .pos = pos,
         .rot = rot,
-        .world = this,
-        .handle = handle
+        .world = this
     };
 
-    if (idx < da_num(this->entities))
-    {
-        this->entities[idx] = ei;
-        return handle;
-    }
-
-    check(idx == da_num(this->entities), "Mismatch between entity index and num entities");
-    da_push(this->entities, ei);
-    return handle;
+    da_insert(this->entities, ei, idx);
+    return idx;
 }
 
-EntityInt* World::lookup_entity(WorldEntityHandle e)
+EntityInt* World::lookup_entity(u32 entity_idx)
 {
-    check_slow(handle_pool_is_valid(this->entity_handle_pool, e), "Invalid Handle when trying to lookup entity");
-    return this->entities + handle_index(e);
+    return this->entities + entity_idx;
 }
 
 void World::update()
@@ -79,10 +64,10 @@ void World::update()
     for (u32 i = 0; i < da_num(this->entities); ++i)
     {
         let e = this->entities + i;
-        if (e->physics_rigidbody)
+        if (e->physics_rigidbody_idx)
         {
-            let pos = physics_get_position(e->world->physics_world, e->physics_object);
-            let rot = physics_get_rotation(e->world->physics_world, e->physics_object);
+            let pos = physics_get_position(e->world->physics_world, e->physics_object_idx);
+            let rot = physics_get_rotation(e->world->physics_world, e->physics_object_idx);
 
             e->pos = pos;
             e->rot = rot;
