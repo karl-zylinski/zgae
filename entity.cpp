@@ -1,6 +1,8 @@
 #include "entity.h"
 #include "log.h"
 #include "world.h"
+#include "physics.h"
+#include "renderer.h"
 
 Entity entity_create(
     World* w,

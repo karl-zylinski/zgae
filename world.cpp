@@ -2,6 +2,8 @@
 #include "memory.h"
 #include "entity.h"
 #include "dynamic_array.h"
+#include "physics.h"
+#include "renderer.h"
 
 World* create_world(RenderWorld* render_world, PhysicsWorld* physics_world)
 {

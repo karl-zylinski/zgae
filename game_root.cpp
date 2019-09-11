@@ -6,6 +6,8 @@
 #include "log.h"
 #include "world.h"
 #include <stdlib.h>
+#include "renderer.h"
+#include "physics.h"
 
 struct GameState
 {

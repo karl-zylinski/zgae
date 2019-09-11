@@ -1,9 +1,9 @@
 #pragma once
 #include "math.h"
-#include "physics.h"
-#include "renderer.h"
 
 fwd_struct(World);
+fwd_struct(PhysicsCollider);
+fwd_struct(PhysicsMaterial);
 
 struct EntityInt
 {
