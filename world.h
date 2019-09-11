@@ -2,7 +2,6 @@
 
 fwd_struct(Vec3);
 fwd_struct(Quat);
-fwd_handle(PhysicsResourceHandle);
 fwd_struct(EntityInt);
 fwd_struct(PhysicsWorld);
 fwd_struct(RenderWorld);

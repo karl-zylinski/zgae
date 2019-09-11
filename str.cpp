@@ -45,7 +45,7 @@ i32 str_eql_arr(const char* s, const char** comp_arr, u32 comp_arr_num)
     return -1;
 }
 
-hash64 str_hash(const char* s)
+i64 str_hash(const char* s)
 {
     u32 len = strlen(s);
     i64 seed = 0;

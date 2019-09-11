@@ -19,27 +19,11 @@ typedef int64_t i64;
 typedef float f32;
 typedef double f64;
 
-typedef i64 hash64;
-typedef i8 byte;
-
-
-// Handles
-
-// each handle is of this format (bits):
-// iiiiiiii iiiiiiii iiiiiiii iiiiiiii ppppssss ssssssss gggggggg gggggggg
-// i = index
-// p = pool (ex ResoruceHandle, RenderResourceHandle, etc!)
-// s = subtype (ex RenderResourcShader etc)
-// g = generation, bumped every time the slot changes in the pool (for checking if the handle is dead etc)
-
-typedef u64 Handle;
-
 
 // Forward declaration helpers
 
 #define fwd_struct(t) struct t
 #define fwd_enum(e) enum e : u32
-#define fwd_handle(h) typedef Handle h
 
 
 // Misc

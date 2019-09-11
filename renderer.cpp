@@ -5,16 +5,16 @@
 #include "log.h"
 #include "render_resource.h"
 #include "str.h"
-#include "handle_hash_map.h"
+#include "idx_hash_map.h"
 #include "path.h"
 #include "file.h"
 #include "jzon.h"
 #include "obj_loader.h"
-#include "handle.h"
 
 struct Shader
 {
     u32 idx;
+    i64 namehash;
     char* source;
     u64 source_size;
     ShaderType type;
@@ -26,6 +26,7 @@ struct Shader
 struct Pipeline
 {
     u32 idx;
+    i64 namehash;
     u32* shader_stages;
     ConstantBuffer* constant_buffers;
     VertexInputField* vertex_input;
@@ -40,6 +41,7 @@ struct Pipeline
 struct RenderMesh
 {
     u32 idx;
+    i64 namehash;
     Mesh mesh;
     RenderBackendMesh* backend_state;
 };
@@ -61,10 +63,13 @@ struct Renderer
 {
     RenderMesh* meshes; // dynamic
     u32* meshes_free_idx; // dynamic
+    IdxHashMap* meshes_lut;
     Pipeline* pipelines; // dynamic
     u32* pipelines_free_idx; // dynamic
+    IdxHashMap* pipelines_lut;
     Shader* shaders; // dynamic
     u32* shaders_free_idx; // dynamic
+    IdxHashMap* shaders_lut;
     u32 debug_draw_traingles_pipeline_idx;
     u32 debug_draw_line_pipeline_idx;
 };
@@ -79,6 +84,9 @@ void renderer_init(WindowType window_type, const GenericWindowInfo& window_info)
     da_push(rs.meshes, RenderMesh{}); // reserve zero
     da_push(rs.pipelines, Pipeline{}); // reserve zero
     da_push(rs.shaders, Shader{}); // reserve zero
+    rs.meshes_lut = idx_hash_map_create();
+    rs.pipelines_lut = idx_hash_map_create();
+    rs.shaders_lut = idx_hash_map_create();
     renderer_backend_init(window_type, window_info);
     rs.debug_draw_traingles_pipeline_idx = renderer_load_pipeline("pipeline_debug_draw_triangles.pipeline");
     rs.debug_draw_line_pipeline_idx = renderer_load_pipeline("pipeline_debug_draw_line.pipeline");
@@ -254,6 +262,12 @@ static PrimitiveTopology primitive_topology_str_to_enum(const char* str)
 
 u32 renderer_load_mesh(const char* filename)
 {
+    let filename_hash = str_hash(filename);
+    let existing = idx_hash_map_get(rs.meshes_lut, filename_hash);
+
+    if (existing)
+        return existing;
+
     FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
     check(flr.ok, "Failed loading mesh from %s", filename);
     JzonParseResult jpr = jzon_parse((char*)flr.data);
@@ -273,11 +287,13 @@ u32 renderer_load_mesh(const char* filename)
 
     RenderMesh m = {
         .idx = idx,
+        .namehash = filename_hash,
         .mesh = olr.mesh,
         .backend_state = renderer_backend_create_mesh(&olr.mesh),
     };
 
     da_insert(rs.meshes, m, idx);
+    idx_hash_map_add(rs.meshes_lut, filename_hash, idx);
     return idx;
 }
 
@@ -287,12 +303,19 @@ void renderer_destroy_mesh(u32 mesh_idx)
     renderer_backend_destroy_mesh(m->backend_state);
     memf(m->mesh.vertices);
     memf(m->mesh.indices);
+    idx_hash_map_remove(rs.meshes_lut, m->namehash);
     memzero(m, sizeof(RenderMesh));
     da_push(rs.meshes_free_idx, mesh_idx);
 }
 
 static u32 load_shader(const char* filename)
 {
+    let filename_hash = str_hash(filename);
+    let existing = idx_hash_map_get(rs.shaders_lut, filename_hash);
+
+    if (existing)
+        return existing;
+
     Shader s = {};
     FileLoadResult shader_flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
     check(shader_flr.ok, "File missing");
@@ -330,8 +353,10 @@ static u32 load_shader(const char* filename)
 
     let idx = da_num(rs.shaders_free_idx) > 0 ? da_pop(rs.shaders_free_idx) : da_num(rs.shaders);
     s.idx = idx;
+    s.namehash = filename_hash;
     s.backend_state = renderer_backend_create_shader(s.source, s.source_size);
     da_insert(rs.shaders, s, idx);
+    idx_hash_map_add(rs.shaders_lut, filename_hash, idx);
     return idx;
 }
 
@@ -343,12 +368,19 @@ static void destroy_shader(u32 shader_idx)
             memf(s->push_constant_fields[i].name);
     memf(s->push_constant_fields);
     memf(s->source);
+    idx_hash_map_remove(rs.shaders_lut, s->namehash);
     memzero(s, sizeof(Shader));
     da_push(rs.shaders_free_idx, shader_idx);
 }
 
 u32 renderer_load_pipeline(const char* filename)
 {
+    let filename_hash = str_hash(filename);
+    let existing = idx_hash_map_get(rs.pipelines_lut, filename_hash);
+
+    if (existing)
+        return existing;
+
     Pipeline p = {};
     #define ensure(expr) if (!(expr)) error("Error in pipeline resource load");
     FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
@@ -440,7 +472,9 @@ u32 renderer_load_pipeline(const char* filename)
 
     let idx = da_num(rs.pipelines_free_idx) > 0 ? da_pop(rs.pipelines_free_idx) : da_num(rs.pipelines);
     p.idx = idx;
+    p.namehash = filename_hash;
     da_insert(rs.pipelines, p, idx);
+    idx_hash_map_add(rs.pipelines_lut, filename_hash, idx);
     init_pipeline(idx);
     return idx;
 }
@@ -466,6 +500,7 @@ void renderer_destroy_pipeline(u32 pipeline_idx)
     
     memf(p->vertex_input);
     memzero(p, sizeof(Pipeline));
+    idx_hash_map_remove(rs.pipelines_lut, p->namehash);
     da_push(rs.pipelines_free_idx, pipeline_idx);
 }
 
@@ -494,6 +529,10 @@ void renderer_shutdown()
 
     da_free(rs.pipelines);
     da_free(rs.pipelines_free_idx);
+
+    idx_hash_map_destroy(rs.meshes_lut);
+    idx_hash_map_destroy(rs.pipelines_lut);
+    idx_hash_map_destroy(rs.shaders_lut);
 
     renderer_backend_shutdown();
 }

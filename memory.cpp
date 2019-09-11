@@ -105,7 +105,7 @@ void* memra(void* cur, u64 s)
 void* memra_zero_added(void* cur, u64 new_size, u64 old_size)
 {
     void* p = memra(cur, new_size);
-    memzero(((byte*)p) + old_size, new_size - old_size);
+    memzero(((i8*)p) + old_size, new_size - old_size);
     return p;
 }
 

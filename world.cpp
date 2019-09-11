@@ -1,5 +1,4 @@
 #include "world.h"
-#include "handle.h"
 #include "memory.h"
 #include "entity.h"
 #include "log.h"

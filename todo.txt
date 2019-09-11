@@ -1,5 +1,7 @@
 ### IMPORTANT ###
 
+- make dynamic array always push a dummy object if empty on first push... maybe? is it bad?
+
 - stop using strings, keep only hashes!
 
 - fix the handle mess... kind of fixed... but if i dont use scripting, do i really need all these indrection? maybe only for renderer? hm. thinkaboutittt. what about entities in list that is re-created? https://ourmachinery.com/post/localization-in-the-machinerys-ui/

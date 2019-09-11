@@ -32,7 +32,7 @@ struct JzonValue
 struct JzonKeyValuePair
 {
     char* key;
-    hash64 key_hash;
+    i64 key_hash;
     JzonValue val;
 };
 
