@@ -6,7 +6,6 @@
 #include "render_resource.h"
 #include "str.h"
 #include "idx_hash_map.h"
-#include "path.h"
 #include "file.h"
 #include "jzon.h"
 #include "obj_loader.h"

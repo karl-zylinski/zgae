@@ -25,7 +25,7 @@ for f in to_optimize:
 
     for idx, line in enumerate(org_filelines):
         sl = line.strip()
-        if sl.startswith("#include") or sl.startswith("fwd_struct") or sl.startswith("fwd_enum") or sl.startswith("fwd_handle"):
+        if sl.startswith("#include") or sl.startswith("fwd_struct") or sl.startswith("fwd_enum"):
             lines_to_skip.append(idx)
 
     removed_idx = []

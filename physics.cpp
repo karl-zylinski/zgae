@@ -3,15 +3,11 @@
 #include "idx_hash_map.h"
 #include "str.h"
 #include "log.h"
-#include "path.h"
 #include "time.h"
 #include "gjk_epa.h"
 #include "file.h"
 #include "jzon.h"
 #include "obj_loader.h"
-#include "render_resource.h"
-#include "debug.h"
-#include "camera.h"
 #include <math.h>
 #include "dynamic_array.h"
 

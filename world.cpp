@@ -1,7 +1,6 @@
 #include "world.h"
 #include "memory.h"
 #include "entity.h"
-#include "log.h"
 #include "dynamic_array.h"
 
 World* create_world(RenderWorld* render_world, PhysicsWorld* physics_world)
