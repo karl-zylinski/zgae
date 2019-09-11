@@ -18,6 +18,7 @@
 struct PhysicsMesh
 {
     u32 idx;
+    i64 namehash;
     Vec3* vertices;
     u32 vertices_num;
 };
@@ -26,6 +27,7 @@ struct PhysicsState
 {
     PhysicsMesh* meshes; // dynamic
     u32* meshes_free_idx; // dynamic
+    IdxHashMap* meshes_lut;
 };
 
 struct PhysicsObject
@@ -72,12 +74,18 @@ void physics_init()
 {
     check(!inited, "Trying to init physics twice");
     inited = true;
-
+    ps.meshes_lut = idx_hash_map_create();
     da_push(ps.meshes, PhysicsMesh{}); // dummy
 }
 
 u32 physics_load_mesh(const char* filename)
 {
+    let filename_hash = str_hash(filename);
+    let existing = idx_hash_map_get(ps.meshes_lut, filename_hash);
+
+    if (existing)
+        return existing;
+
     FileLoadResult flr = file_load(filename, FILE_LOAD_MODE_NULL_TERMINATED);
     check(flr.ok, "Failed loading mesh from %s", filename);
     JzonParseResult jpr = jzon_parse((char*)flr.data);
@@ -96,10 +104,12 @@ u32 physics_load_mesh(const char* filename)
     let idx = da_num(ps.meshes_free_idx) > 0 ? da_pop(ps.meshes_free_idx) : da_num(ps.meshes);
     PhysicsMesh m  = {
         .idx = idx,
+        .namehash = filename_hash,
         .vertices = obj_vertices.vertices,
         .vertices_num = obj_vertices.vertices_num
     };
     da_insert(ps.meshes, m, idx);
+    idx_hash_map_add(ps.meshes_lut, filename_hash, idx);
     return idx;
 }
 
@@ -107,6 +117,7 @@ void physics_destroy_mesh(u32 mesh_idx)
 {
     let m = ps.meshes + mesh_idx;
     memf(m->vertices);
+    idx_hash_map_remove(ps.meshes_lut, m->namehash);
     memzero(m, sizeof(PhysicsMesh));
 }
 
@@ -311,6 +322,7 @@ void physics_shutdown()
 
     da_free(ps.meshes);
     da_free(ps.meshes_free_idx);
+    idx_hash_map_destroy(ps.meshes_lut);
 }
 
 const Vec3& physics_get_position(PhysicsWorld* w, u32 object_idx)
