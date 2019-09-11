@@ -65,10 +65,10 @@ const Vec3& Entity::get_position() const
     return get_internal()->pos;
 }
 
-void Entity::set_render_mesh(RenderResourceHandle mesh)
+void Entity::set_render_mesh(u32 mesh_idx)
 {
     let e = get_internal();
-    e->render_object_idx = renderer_create_object(e->world->render_world, mesh, e->pos, e->rot);
+    e->render_object_idx = renderer_create_object(e->world->render_world, mesh_idx, e->pos, e->rot);
 }
 
 void Entity::set_physics_collider(const PhysicsCollider& collider, const PhysicsMaterial& pm)

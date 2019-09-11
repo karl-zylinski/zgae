@@ -6,6 +6,7 @@
 #include "keyboard.h"
 #include <execinfo.h>
 #include "physics.h"
+#include "renderer.h"
 #include "mouse.h"
 #include "game_root.h"
 

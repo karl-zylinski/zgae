@@ -13,18 +13,18 @@ struct GameState
     Entity floor2;
     Player player;
 
-    RenderResourceHandle pipeline;
+    u32 pipeline_idx;
     World* world;
     PhysicsCollider box_collider;
-    RenderResourceHandle box_mesh;
+    u32 box_render_mesh_idx;
     PhysicsCollider big_box_collider;
-    RenderResourceHandle big_box_mesh;
+    u32 big_box_render_mesh_idx;
 };
 
 static GameState gs = {};
 
 
-Entity spawn_entity_at(World* w, RenderResourceHandle mesh, const PhysicsCollider& collider, const Vec3& p, const Quat& r, const Vec3& vel, f32 mass, const PhysicsMaterial& pm, bool rigidbody)
+Entity spawn_entity_at(World* w, u32 mesh, const PhysicsCollider& collider, const Vec3& p, const Quat& r, const Vec3& vel, f32 mass, const PhysicsMaterial& pm, bool rigidbody)
 {
     let e = entity_create(w, p, r);
     e.set_render_mesh(mesh);
@@ -44,10 +44,10 @@ void game_init()
     let physics_world = physics_create_world();
     gs.world = create_world(render_world, physics_world);
 
-    gs.pipeline = renderer_load_resource("pipeline_default.pipeline");
-    gs.box_mesh = renderer_load_resource("box.mesh");
-    gs.big_box_mesh = renderer_load_resource("box.mesh");
-    let floor_render_mesh = renderer_load_resource("floor.mesh");
+    gs.pipeline_idx = renderer_load_pipeline("pipeline_default.pipeline");
+    gs.box_render_mesh_idx = renderer_load_mesh("box.mesh");
+    gs.big_box_render_mesh_idx = renderer_load_mesh("box.mesh");
+    let floor_render_mesh = renderer_load_mesh("floor.mesh");
 
     let box_physics_mesh = physics_load_resource("box.mesh");
     let big_box_physics_mesh = physics_load_resource("box.mesh");
@@ -83,7 +83,7 @@ bool game_update()
     if (key_went_down(KEY_ESCAPE))
         return false;
 
-    renderer_begin_frame(gs.pipeline);
+    renderer_begin_frame(gs.pipeline_idx);
     gs.world->update();
 
     time_until_spawn -= time_dt();
@@ -109,11 +109,11 @@ bool game_update()
         f32 ry = 0 ;
         f32 rz = 0 ;
         f32 rr = 0 ;
-        spawn_entity_at(gs.world, gs.big_box_mesh, gs.big_box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), {0, 0, 0},  100, box_material, true);
+        spawn_entity_at(gs.world, gs.big_box_render_mesh_idx, gs.big_box_collider, {x, y, z}, quat_from_axis_angle({rx, ry, rz}, rr), {0, 0, 0},  100, box_material, true);
     }
 
     gs.player.update();
-    renderer_draw_world(gs.pipeline, gs.world->render_world, gs.player.camera.pos, gs.player.camera.rot);
+    renderer_draw_world(gs.pipeline_idx, gs.world->render_world, gs.player.camera.pos, gs.player.camera.rot);
     renderer_present();
     keyboard_end_of_frame();
     mouse_end_of_frame();

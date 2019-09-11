@@ -1,9 +1,10 @@
 #pragma once
-#include "renderer.h"
 
 fwd_handle(PhysicsObjectHandle);
 fwd_handle(PhysicsRigidbodyHandle);
 fwd_handle(PhysicsResourceHandle);
+fwd_struct(Vec3);
+fwd_struct(Quat);
 fwd_struct(PhysicsWorld);
 
 enum PhysicsResourceType

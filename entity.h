@@ -1,6 +1,7 @@
 #pragma once
 #include "math.h"
 #include "physics.h"
+#include "renderer.h"
 
 fwd_handle(WorldEntityHandle);
 fwd_struct(World);
@@ -22,7 +23,7 @@ struct Entity
     void rotate(const Vec3& axis, f32 rad);
     void rotate(const Quat& q);
     void create_rigidbody(f32 mass, const Vec3& velocity);
-    void set_render_mesh(RenderResourceHandle mesh);
+    void set_render_mesh(u32 mesh_idx);
     void set_physics_collider(const PhysicsCollider& collider, const PhysicsMaterial& pm);
     const Vec3& get_position() const;
     void set_position(const Vec3& pos);
