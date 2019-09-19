@@ -1,5 +1,5 @@
 #pragma once
-// This file is (the only) foracbly included by the compiler!
+// This file is foracbly included by the compiler!
 
 #include <stdint.h>
 
@@ -28,11 +28,30 @@ typedef double f64;
 
 // Misc
 
-#define STRINGIFY(x) #x
-#define TO_STRING(x) STRINGIFY(x)
-
 #ifndef NULL
     #define NULL 0
 #endif
 
 #define let auto
+
+#define arr_foreach(var, arr, num) for(let var = arr; var < (arr + num); ++var)
+#define arr_idx(var, arr) (((u32)(((i8*)var)-((i8*)arr)))/(sizeof(*var)))
+
+
+// Defer
+
+template <typename F>
+struct ScopeGuard {
+    ScopeGuard(F f) : f(f) {}
+    ~ScopeGuard() { f(); }
+    F f;
+};
+
+template <typename F>
+ScopeGuard<F> make_scope_guard(F f) {
+    return ScopeGuard<F>(f);
+};
+
+#define CONCAT_(arg1, arg2) arg1 ## arg2
+#define CONCAT(arg1, arg2) CONCAT_(arg1, arg2)
+#define defer(code) let CONCAT(scope_exit_, __LINE__) = make_scope_guard([=](){code;})

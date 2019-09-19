@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "renderer.h"
 #include "physics.h"
+#include "memory.h"
 
 struct GameState
 {
@@ -98,13 +99,13 @@ bool game_update()
         .friction = 0.4f
     };
 
-    if (time_until_spawn <= 0.0f && num_spawned < 2)
+    if (time_until_spawn <= 0.0f && num_spawned < 1)
     {
         num_spawned++;
         time_until_spawn = 2.0f;
         f32 x = ((rand() % 10000)-5000)/10000.0f;
         //f32 y = ((rand() % 10000)-5000)/10000.0f + 10;
-        f32 y = 9.5;
+        f32 y = 6;
         f32 z = 1.0f;
         /*f32 rx = (rand() % 628)/100;
         f32 ry = (rand() % 628)/100;

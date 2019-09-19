@@ -226,9 +226,8 @@ static EpaFace* find_closest_face(EpaFace* faces)
     EpaFace* closest = faces;
     closest->distance = dot(closest->normal, closest->vertices[0].val);
     check(closest->distance >= 0, "EPA Face has wrong winding"); // zero is ok, see comment in add_face
-    for (unsigned i = 1; i < da_num(faces); ++i)
+    da_foreach(f, faces)
     {
-        EpaFace* f = faces + i;
         float d = dot(f->normal, f->vertices[0].val);
         check(d >= 0, "EPA Face has wrong winding");
         if (d < closest->distance)
@@ -302,14 +301,14 @@ struct Edge
     SupportDiffPoint end;
 };
 
-static bool remove_edge_if_present(Edge*& edges, const Edge& e)
+static bool remove_edge_if_present(Edge*& edges, const Edge& to_remove)
 {
-    for (unsigned i = 0; i < da_num(edges); ++i)
+    da_foreach(e, edges)
     {
-        if ((edges[i].start.val == e.end.val && edges[i].end.val == e.start.val) ||
-            (edges[i].start.val == e.start.val && edges[i].end.val == e.end.val))
+        if ((e->start.val == to_remove.end.val && e->end.val == to_remove.start.val) ||
+            (e->start.val == to_remove.start.val && e->end.val == to_remove.end.val))
         {
-            da_remove(edges, i);
+            da_remove(edges, arr_idx(e, edges));
             return true;
         }
     }
@@ -346,8 +345,8 @@ static void extend_polytope(EpaFace*& faces, const SupportDiffPoint& extend_to)
             ++i;
     }
 
-    for (unsigned i = 0; i < da_num(edges); ++i)
-        add_face(faces, extend_to, edges[i].start, edges[i].end);
+    da_foreach(e, edges)
+        add_face(faces, extend_to, e->start, e->end);
 
     da_free(edges);
 }

@@ -21,7 +21,11 @@ struct DynamicArrayHeader
 #define da_copy_data(a) ((a) ? da__copy_data(a, da__num(a), sizeof(*(a))) : NULL)
 #define da_pop(a) ((a)[--da__num(a)])
 #define da_last(a) ((a)[da__num(a) - 1])
+#define da_last_ptr(a) ((a) + (da__num(a) - 1))
 #define da_ensure_min_cap(a, n) (da__maybe_grow(a, n))
+#define da_end(a) ((a) ? (a) + da__num(a) : (a))
+#define da_foreach(v, a) for (let v = (a); v < da_end(a); ++v)
+#define da_foreach_rev(v, a) for (let v = da_last_ptr(a); v > (a); --v)
 
 #define da_insert(a, v, i) (\
     da__maybe_grow(a, da_num(a) + 1), \

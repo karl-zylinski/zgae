@@ -147,16 +147,14 @@ static ParsedData parse(char* data, unsigned data_size, ParseMode mode)
 
 static int get_existing_vertex(MeshVertex* vertices, MeshVertex* v1)
 {
-    for (unsigned i = 0; i < da_num(vertices); ++i)
+    da_foreach(v2, vertices)
     {
-        MeshVertex* v2 = vertices + i;
-
         if (almost_eql(v1->position, v2->position)
             && almost_eql(v1->normal, v2->normal)
             && almost_eql(v1->texcoord, v2->texcoord)
             && almost_eql(v1->color, v2->color))
         {
-            return i;
+            return arr_idx(v2, vertices);
         }
     }
 
@@ -201,13 +199,12 @@ ObjLoadResult obj_load(char* filename)
     MeshVertex* vertices = NULL;
     MeshIndex* indices = NULL;
 
-    for (u32 i = 0; i < da_num(pd.faces); ++i)
+    da_foreach(f, pd.faces)
     {
-        ParsedFace& f = pd.faces[i];
         Vec4 white = {1,1,1,1};
-        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f.v1], &pd.normals[f.n1], &pd.uvs[f.u1], &white);
-        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f.v2], &pd.normals[f.n2], &pd.uvs[f.u2], &white);
-        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f.v3], &pd.normals[f.n3], &pd.uvs[f.u3], &white);
+        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f->v1], &pd.normals[f->n1], &pd.uvs[f->u1], &white);
+        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f->v2], &pd.normals[f->n2], &pd.uvs[f->u2], &white);
+        add_vertex_to_mesh(&vertices, &indices, &pd.vertices[f->v3], &pd.normals[f->n3], &pd.uvs[f->u3], &white);
     }
 
     da_free(pd.vertices);

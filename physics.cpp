@@ -10,6 +10,8 @@
 #include "obj_loader.h"
 #include <math.h>
 #include "dynamic_array.h"
+#include "debug.h"
+#include "render_resource.h"
 
 struct PhysicsMesh
 {
@@ -202,21 +204,24 @@ void physics_update_world(PhysicsWorld* w)
     float dt = time_dt();
     //float t = time_since_start();
 
-    for (u32 rigidbody_idx = 0; rigidbody_idx < da_num(w->rigidbodies); ++rigidbody_idx)
+    da_foreach(rb, w->rigidbodies)
     {
-        let rb = w->rigidbodies + rigidbody_idx;
         if (!rb->idx)
             continue;
+
+        let rb_idx = arr_idx(rb, w->rigidbodies);
 
         // Update rigidbody state.
         Vec3 g = {0, 0, -9.82f};
 
-        physics_add_force(w, rigidbody_idx, g * rb->mass * dt);
+        physics_add_force(w, rb_idx, g * rb->mass * dt);
         let wo = w->objects + rb->object_idx;
 
-        for (u32 world_object_index = 0; world_object_index < da_num(w->objects); ++world_object_index)
+        da_foreach(wo_colliding_with, w->objects)
         {
-            if (world_object_index == rb->object_idx || !w->objects[world_object_index].idx)
+            let wo_colliding_with_idx = arr_idx(wo_colliding_with, w->objects);
+
+            if (wo_colliding_with_idx == rb->object_idx || !wo_colliding_with->idx)
                 continue;
 
             // TODO: cache the shapes etc
@@ -233,8 +238,6 @@ void physics_update_world(PhysicsWorld* w)
 
             for (u32 vi = 0; vi < s1.vertices_num; ++vi)
                 s1.vertices[vi] = rotate_vec3(r1, m1->vertices[vi]) + p1;
-
-            let wo_colliding_with = w->objects + world_object_index;
 
             let c2 = wo_colliding_with->collider;
             let p2 = wo_colliding_with->pos;
@@ -253,9 +256,8 @@ void physics_update_world(PhysicsWorld* w)
 
             if (coll.colliding)
             {
-                let collding_with_rigidbody = wo_colliding_with->rigidbody_idx != 0;
                 let sol = coll.solution;
-                //wo->pos += sol;
+                wo->pos += sol;
                 let m = rb->mass;
                 let vel = rb->velocity;
                 let avel = rb->angular_velocity;
@@ -263,31 +265,31 @@ void physics_update_world(PhysicsWorld* w)
                 let vel_cp = vel + cross(avel, r);
 
                 #define SOLUTION_THRES 0.0001f
-                if (!collding_with_rigidbody)
+                if (dot(vel_cp, sol) < 0 && len(sol) > SOLUTION_THRES)
                 {
-                    if (dot(vel_cp, sol) < 0 && len(sol) > SOLUTION_THRES)
-                    {
-                        let n = normalize(sol);
-                        let vel_cp_normal = project(vel_cp, n);
-                        let vel_in_surface_dir = vel_cp - vel_cp_normal;
-                        let friction = fmin(wo->material.friction + wo_colliding_with->material.friction, 1);
+                    let n = normalize(sol);
+                    let vel_cp_normal = project(vel_cp, n);
+                    let vel_in_surface_dir = vel_cp - vel_cp_normal;
+                    let friction = fmin(wo->material.friction + wo_colliding_with->material.friction, 1);
 
-                        let normal_f = -m*vel_cp_normal;
-                        let friction_f = -(len(m*g*dt)*friction*vel_in_surface_dir);
+                    let normal_f = -m*vel_cp_normal;
+                    let friction_f = -(len(m*g*dt)*friction*vel_in_surface_dir);
 
-                        let f = normal_f + friction_f;
-                        let t = cross(vel_cp_normal, f);
+                    let f = normal_f + friction_f;
 
-                        physics_add_force(w, rigidbody_idx, f);
-                        //physics_add_torque(world, rb->handle, wo->pos, coll.contact_point, f/10);
-                        (void)t;
-                    }
-                    else
-                        wo->pos += sol;
-                }
-                else
-                {
-                    wo->pos += sol;
+                    Vec3 verts[] = {coll.contact_point, wo->pos, wo->pos - f};
+                    Vec4 colors[] = {vec4_red, vec4_green, vec4_green};
+                    debug_draw(verts, 3, colors, PRIMITIVE_TOPOLOGY_LINE_STRIP);
+
+
+                    physics_add_force(w, rb_idx, f);
+                    let lr = len(r);
+                    let t = -cross(r, normal_f) / (lr * lr * rb->mass);
+                    //let t_friction = project(cross(rb->angular_velocity, r), cross(normal_f, r));
+                    //rb->angular_velocity = rb->angular_velocity*0.1 + t;
+                    //physics_add_torque(w, rigidbody_idx, wo->pos, coll.contact_point, t);
+                    //rb->angular_velocity = t;
+                    (void)t;
                 }
             }
 

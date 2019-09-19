@@ -2,13 +2,13 @@
 #include "log.h"
 #include "memory.h"
 #include "time.h"
-#include <time.h>
 #include "keyboard.h"
 #include <execinfo.h>
 #include "physics.h"
 #include "renderer.h"
 #include "mouse.h"
 #include "game_root.h"
+#include <time.h>
 
 static f32 get_cur_time_seconds()
 {

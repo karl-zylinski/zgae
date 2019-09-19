@@ -633,10 +633,8 @@ void renderer_draw(u32 pipeline_idx, u32 mesh_idx, const Mat4& model, const Vec3
 
 void renderer_draw_world(u32 pipeline_idx, RenderWorld* w, const Vec3& cam_pos, const Quat& cam_rot)
 {
-    for (u32 i = 0; i < da_num(w->objects); ++i)
+    da_foreach(obj, w->objects)
     {
-        let obj = w->objects + i;
-
         if (!obj->idx)
             continue;
 
